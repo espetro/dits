@@ -33,7 +33,18 @@ those semantic classes (`bg-popover`, `text-muted-foreground`,
   vendored primitives, in their own module (e.g. `locale-switcher.tsx`
   wraps `Button variant="outline"` + `dropdown-menu`).
 - Add new primitives with `bunx shadcn@latest add <name>` from `web/`,
-  then commit them as a separate vendor commit.
+  then commit them as a separate vendor commit. Run `bunx oxfmt` on new
+  vendor files (CLI output fails `oxfmt --check` as generated).
+
+## Responsive
+
+Mobile-first: base styles target small viewports; `sm:`/`md:`/`lg:`
+progressively enhance. Every route must be usable at 375px and 1440px.
+Mobile may need different components than desktop (e.g. Sheet instead of
+a static rail, full-screen instead of centered dialog) — build both from
+shadcn primitives (`sheet`, `drawer`), never bespoke markup. Update the
+matching `.agents/docs/screens/*.md` spec in the same commit whenever a
+screen's responsive behavior changes.
 
 ## Icons
 
