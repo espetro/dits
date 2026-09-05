@@ -348,9 +348,28 @@ function AiProviderPane() {
           </Label>
         </RadioGroup>
         {tab === "llm" && !draft.enabled && (
-          <p className="text-xs text-muted-foreground">
-            <FormattedMessage id="settings.llmRequired" />
-          </p>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            <p>
+              <FormattedMessage id="settings.llmRequired" />
+            </p>
+            <p>
+              <FormattedMessage
+                id="settings.freeProviders"
+                values={{
+                  openrouter: (chunks: React.ReactNode) => (
+                    <a
+                      href="https://openrouter.ai/keys"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2 hover:text-persimmon"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          </div>
         )}
 
         {draft.enabled && (

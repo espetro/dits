@@ -121,8 +121,9 @@
   "settings.test.inBrowser": "浏览器内置模式,无需测试",
   "settings.saved": "已保存。",
   "settings.save": "保存",
-  "settings.llmRequired": "必须配置 LLM 端点;浏览器内没有 LLM。",
+  "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "部分端点字段无效(请检查 URL、密钥或模型)。",
   "setup.needsProvider": "尚未配置 AI 提供方。请在设置中添加 LLM 端点,以便在没有 di 服务器时进行会话。",
-  "setup.openProviderSettings": "打开提供方设置"
+  "setup.openProviderSettings": "打开提供方设置",
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
 }

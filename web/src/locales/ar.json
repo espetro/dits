@@ -121,8 +121,9 @@
   "settings.test.inBrowser": "وضع المتصفح، لا شيء لاختباره",
   "settings.saved": "تم الحفظ.",
   "settings.save": "حفظ",
-  "settings.llmRequired": "نقطة نهاية النموذج اللغوي مطلوبة؛ لا يوجد نموذج داخل المتصفح.",
+  "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "بعض حقول نقطة النهاية غير صالحة (تحقق من العنوان أو المفتاح أو النموذج).",
   "setup.needsProvider": "لم يتم تكوين مزود الذكاء الاصطناعي بعد. أضف نقطة نهاية للنموذج اللغوي في الإعدادات لإجراء جلسة بدون خادم di.",
-  "setup.openProviderSettings": "افتح إعدادات المزود"
+  "setup.openProviderSettings": "افتح إعدادات المزود",
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
 }

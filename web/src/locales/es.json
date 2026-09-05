@@ -121,8 +121,9 @@
   "settings.test.inBrowser": "modo en el navegador, nada que probar",
   "settings.saved": "Guardado.",
   "settings.save": "Guardar",
-  "settings.llmRequired": "Se requiere un endpoint de LLM; no hay LLM en el navegador.",
+  "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "Algunos campos del endpoint no son válidos (falta URL, clave o modelo).",
   "setup.needsProvider": "Todavía no hay proveedor de IA configurado. Añade un endpoint de LLM en ajustes para una sesión sin el servidor de.",
-  "setup.openProviderSettings": "Abrir ajustes del proveedor"
+  "setup.openProviderSettings": "Abrir ajustes del proveedor",
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
 }

@@ -121,8 +121,9 @@
   "settings.test.inBrowser": "mode navigateur, rien à tester",
   "settings.saved": "Enregistré.",
   "settings.save": "Enregistrer",
-  "settings.llmRequired": "Un point de terminaison LLM est requis ; il n'y a pas de LLM dans le navigateur.",
+  "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "Certains champs du point de terminaison sont invalides (URL, clé ou modèle manquant).",
   "setup.needsProvider": "Aucun fournisseur IA configuré. Ajoutez un point de terminaison LLM dans les réglages pour une session sans serveur di.",
-  "setup.openProviderSettings": "Ouvrir les réglages du fournisseur"
+  "setup.openProviderSettings": "Ouvrir les réglages du fournisseur",
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
 }
