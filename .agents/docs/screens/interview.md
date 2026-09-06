@@ -4,7 +4,7 @@
 
 ```
 +------------------------------------------------------------------+
-|  {session title (fixed)}        27:41            ((o)) voice orb |
+|  {session title (fixed)}        27:41    ((o)) voice orb (rail) |
 +------------------------------------------------------------------+
 |                                                     | T transcri.+|
 |  +----------------------------------------------+  | agent: so,  |
@@ -32,9 +32,10 @@
 
 ## Behavior
 
-- Top bar: fixed session title, countdown timer (T-2min triggers agent wrap-up; 0 hard-stops to `/finish/[id]`), agent voice orb (animated while speaking) top-right.
+- Top bar: fixed session title, countdown timer (T-2min triggers agent wrap-up; 0 hard-stops to `/finish/[id]`), voice status label. The voice orb lives in the desktop transcript rail (see below), not the top bar.
+- **Voice orb** (desktop): ElevenLabs UI Orb (`web/src/components/voice-orb.tsx` wrapping the vendored `components/vendor/orb.tsx`, three.js/WebGL) sits above the transcript rail, `size-20 md:size-24`. Driven by live mic/agent loudness taps (`web/src/lib/voice/levels.ts`: `$micAttack`/`$agentAttack` nanostores fed by `MicCapture` RMS and `PcmPlayer.write`) with a synthetic oscillation fallback when taps are silent (e.g. browser STT driver). Phase mapping: speaking→talking, listening→listening, thinking→thinking, else null. The vendor file carries three di-local fixes, each marked with a `di fix`/`di:` comment: (1) `flat` Canvas + own rAF `advance()` loop because r3f's global loop deadlocks under React StrictMode's double-mount (`internal.active` stays false after `unmountComponentAtNode`'s delayed teardown reuses the root); (2) `uInverted` flips on the LIGHT theme since the shader ramp is dark-first and washes out on di's cream background; (3) context-restored kick via `forceContextRestore`.
 - **Question block**: agent-editable tool. The agent rewrites the current question + hints live (tool call). User tools (editor, whiteboard) are never rewritten by the agent, but the agent can READ them.
-- **Tabbed tools**: full-width below the question block. Tabs: `Editor | Whiteboard`. Editor = CodeMirror 6 with syntax highlighting. Whiteboard = tldraw canvas for diagrams.
+- **Tabbed tools**: full-width below the question block. Tabs: `Editor | Whiteboard`. Editor = Milkdown (Crepe) WYSIWYG markdown (`web/src/components/milkdown-editor.tsx` + `milkdown-editor-impl.tsx`, lazy-loaded; three.js-free chunk) with a language bar (`python javascript typescript java go rust sql`) that inserts a fenced code block with the chosen language tag; code blocks render via CodeMirror 6 with syntax highlighting inside the document. External buffer sync via `replaceAll`; changes propagate through `markdownUpdated`. Whiteboard = tldraw canvas for diagrams.
   - **Agent read tools**: `read_editor` (returns current editor buffer text) and `read_whiteboard` (returns serialized shape/snapshot summary). Both feed the same LLM turn path as the transcript, so the agent can reason over code and diagrams the candidate produces.
   - This is part of the test contract: unit tests for the read-tool serializers, evals asserting the agent incorporates editor/whiteboard content in its turns (mock provider scripted with tool-call fixtures), and e2e assertions via `/v1/test/events` that `read_editor` / `read_whiteboard` tool calls land in the session event log.
 - **Transcript panel**: right side, translucent (10-20% alpha, iOS-26 style so background shows through), 10-20% collapsed-to-expanded width range.
@@ -58,6 +59,28 @@
   `POST /v1/sessions/:id/turns`. The `pushToolState` REST call (editor/
   whiteboard mirroring) is skipped entirely in this mode — client-only's tool
   executors read the nanostores in-process, so there is nothing to push.
+
+## Responsive
+
+Mobile-first: base styles target 375px; `sm:`/`md:`/`lg:` enhance toward the
+desktop layout above. The `md` breakpoint (768px) is the rail/Sheet switch.
+
+- **Layout**: single column below `md` (header, question block, tabbed tools,
+  controls stacked); the two-column main + transcript rail arrangement applies
+  from `md` up. No horizontal overflow at 375px.
+- **Transcript**: two presentations of the same data:
+  - **Desktop (`>= md`)**: the static translucent aside rail (peek/collapse via
+    `transcriptOpen`), unchanged. Text input lives at its bottom.
+  - **Mobile (`< md`)**: the aside is not rendered. A floating round button
+    (fixed, bottom-right, `PanelRight` icon, `aria-label="transcript"`) opens a
+    vendored `Sheet` (side right) holding the same turn list and text input.
+    The Sheet is controlled by the same turns/text state; the peek rail and
+    `$transcriptOpen` are desktop-only concepts.
+- **Top bar**: title truncates (`min-w-0 truncate`), the voice status label
+  hides below `sm`. The app navbar (logo + settings trigger, see
+  `navbar.md`) renders above the session header on all routes.
+- **Controls**: mute / end-early stretch to full width below `sm`
+  (`flex-1`, `truncate` on the end label), restore fixed widths from `sm` up.
 
 ## URL / state
 

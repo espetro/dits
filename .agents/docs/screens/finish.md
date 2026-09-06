@@ -36,3 +36,9 @@
 ## URL / state
 
 - `id` path param: session id. Session summary fetched via TanStack Query.
+
+## Responsive
+
+- Mobile-first: centered column capped at `max-w-md`, usable at 375px.
+- Session title scales `text-3xl` base -> `sm:text-4xl` and breaks long words so long titles do not overflow.
+- Button stack is full-width base; transcript dropdown stays anchored inside the button container.

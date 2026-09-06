@@ -72,6 +72,13 @@
   `resetClientSession()` first so a new session never inherits turns/question
   state left over from a previous client-only interview in the same tab.
 
+## Responsive
+
+- Mobile-first: base styles fit 375px. Preset chips, duration pills and mode
+  pills wrap (`flex-wrap`); the file dropzone reduces padding on mobile
+  (`p-6 md:p-8`); file rows use `min-w-0` + `truncate` so long names never
+  overflow. Desktop layout is unchanged.
+
 ## URL / state
 
 - Optional locale prefix: `/setup` (en) or `/es/setup`, ... — the prefix is the i18n source of truth.

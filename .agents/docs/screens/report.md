@@ -56,3 +56,9 @@
 
 - `id` path param: session id. Report via TanStack Query (GET /v1/sessions/[id]/report,
   or the client-only path above when there is no server).
+
+## Responsive
+
+- Mobile-first: score bento stacks to one column below `md` (`grid-cols-1` -> `md:grid-cols-3`).
+- Competency rows wrap name/score with `flex-wrap`; verdict badges and quotes already wrap via `flex-wrap`.
+- Practice CTA is `max-w-full` so long labels never overflow 375px; container paddings are `px-4` base, `md:px-8`.

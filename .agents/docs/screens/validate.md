@@ -38,3 +38,9 @@
 ## URL / state
 
 - `id` path param: session id. Session loaded via TanStack Query (GET /v1/sessions/:id).
+
+## Responsive
+
+- Mobile-first: two cards stack to one column below `md` (`md:grid-cols-[1.2fr_1fr]`).
+- Plan rows wrap label/value with `flex-wrap` so long titles do not clip at 375px.
+- Start CTA is full-width on mobile (`w-full` base, `sm:w-auto`).
