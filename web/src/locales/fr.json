@@ -123,7 +123,7 @@
   "settings.invalid": "Certains champs du point de terminaison sont invalides (URL, clé ou modèle manquant).",
   "setup.needsProvider": "Aucun fournisseur IA configuré. Ajoutez un point de terminaison LLM dans les réglages pour une session sans serveur di.",
   "setup.openProviderSettings": "Ouvrir les réglages du fournisseur",
-  "settings.history": "sessions précédentes",
+  "settings.history": "Sessions précédentes",
   "interview.voiceError": "erreur vocale",
   "interview.voiceConnected": "voix connectée",
   "interview.voiceConnecting": "connexion…",

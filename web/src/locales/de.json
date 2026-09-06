@@ -123,7 +123,7 @@
   "settings.invalid": "Einige Endpunktfelder sind ungültig (URL, Schlüssel oder Modell fehlt).",
   "setup.needsProvider": "Noch kein KI-Anbieter konfiguriert. Fügen Sie in den Einstellungen einen LLM-Endpunkt hinzu, um ohne di-Server eine Sitzung zu starten.",
   "setup.openProviderSettings": "Anbietereinstellungen öffnen",
-  "settings.history": "frühere sessions",
+  "settings.history": "Frühere Sitzungen",
   "interview.voiceError": "sprachfehler",
   "interview.voiceConnected": "sprache verbunden",
   "interview.voiceConnecting": "verbinde…",

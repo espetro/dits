@@ -647,7 +647,8 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           <FormattedMessage id="settings.title" />
         </DialogTitle>
         <DialogDescription className="sr-only">
-          <FormattedMessage id="settings.title" />
+          <FormattedMessage id="settings.history" /> and{" "}
+          <FormattedMessage id="settings.aiProvider" />
         </DialogDescription>
         {isMobile ? (
           <div className="shrink-0 border-b border-border p-2">

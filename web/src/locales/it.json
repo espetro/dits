@@ -123,7 +123,7 @@
   "settings.invalid": "Alcuni campi dell'endpoint non sono validi (URL, chiave o modello mancanti).",
   "setup.needsProvider": "Nessun provider AI configurato. Aggiungi un endpoint LLM nelle impostazioni per una sessione senza il server di.",
   "setup.openProviderSettings": "Apri impostazioni provider",
-  "settings.history": "sessioni precedenti",
+  "settings.history": "Sessioni precedenti",
   "interview.voiceError": "errore vocale",
   "interview.voiceConnected": "voce connessa",
   "interview.voiceConnecting": "connessione…",

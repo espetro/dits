@@ -123,7 +123,7 @@
   "settings.invalid": "Some endpoint fields are invalid (URL, key or model missing).",
   "setup.needsProvider": "No AI provider is configured yet. Add an LLM endpoint in settings to run a session without the di server.",
   "setup.openProviderSettings": "Open provider settings",
-  "settings.history": "previous sessions",
+  "settings.history": "Previous sessions",
   "interview.voiceError": "voice error",
   "interview.voiceConnected": "voice connected",
   "interview.voiceConnecting": "connecting…",

@@ -123,7 +123,7 @@
   "settings.invalid": "Alguns campos do endpoint são inválidos (URL, chave ou modelo ausente).",
   "setup.needsProvider": "Nenhum provedor de IA configurado. Adicione um endpoint de LLM nas configurações para sessões sem o servidor di.",
   "setup.openProviderSettings": "Abrir configurações do provedor",
-  "settings.history": "sessões anteriores",
+  "settings.history": "Sessões anteriores",
   "interview.voiceError": "erro de voz",
   "interview.voiceConnected": "voz conectada",
   "interview.voiceConnecting": "conectando…",
