@@ -173,3 +173,42 @@ html {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Milkdown (Crepe, frame theme) mapped onto the di palette. The editor lives
+ * inside the interview tools tab; keep typography compact and code blocks on
+ * the dark editor surface the old textarea used.
+ * ------------------------------------------------------------------------- */
+.di-milkdown {
+  --crepe-color-background: var(--color-cream);
+  --crepe-color-on-background: var(--color-espresso);
+  --crepe-color-primary: var(--color-persimmon);
+  --crepe-color-on-primary: var(--color-cream);
+  --crepe-color-secondary: var(--color-persimmon-faint);
+  --crepe-color-on-secondary: var(--color-persimmon-deep);
+  --crepe-color-outline: var(--color-hairline);
+  --crepe-color-surface: var(--color-paper);
+  --crepe-color-on-surface: var(--color-espresso);
+  --crepe-color-secondary-variant: var(--color-cream-deep);
+  --crepe-color-on-secondary-variant: var(--color-espresso-soft);
+  --crepe-color-on-outline: var(--color-espresso-soft);
+  --crepe-font: var(--font-body);
+  --crepe-radius: 0.75rem;
+}
+
+.di-milkdown .ProseMirror {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  padding: 1rem;
+}
+
+.di-milkdown .ProseMirror code,
+.di-milkdown .ProseMirror pre {
+  font-family: var(--font-mono);
+}
+
+.di-milkdown .ProseMirror pre {
+  background: #1a1512;
+  color: #e8e0d8;
+  border-radius: 1rem;
+}
