@@ -290,32 +290,16 @@ function AiProviderPane() {
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
 
-  // Auto-clear transient test/save feedback; the timer is reset whenever the
-  // state it clears changes, and cleaned up on unmount.
-  const feedbackTimers = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // Test results persist until the user edits an input (see `update`) or
+  // re-tests. Only the "Saved." confirmation auto-clears; the timer resets
+  // whenever it is scheduled again and is cleaned up on unmount.
+  const savedTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   React.useEffect(() => {
-    const timers = feedbackTimers.current;
+    const timer = savedTimer.current;
     return () => {
-      for (const t of timers.values()) clearTimeout(t);
-      timers.clear();
+      if (timer) clearTimeout(timer);
     };
   }, []);
-
-  function scheduleFeedbackClear(key: string, delayMs: number) {
-    const prev = feedbackTimers.current.get(key);
-    if (prev) clearTimeout(prev);
-    feedbackTimers.current.set(
-      key,
-      setTimeout(() => {
-        feedbackTimers.current.delete(key);
-        if (key === "saved") {
-          setSaved(false);
-        } else {
-          setTestState((prev2) => ({ ...prev2, [key]: undefined }));
-        }
-      }, delayMs),
-    );
-  }
 
   const draft = drafts[tab];
   const llmComplete =
@@ -327,6 +311,7 @@ function AiProviderPane() {
     setDrafts((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
     setSaved(false);
     setError(null);
+    setTestState((prev) => ({ ...prev, [tab]: undefined }));
   }
 
   function buildProfile(): ProviderSections {
@@ -363,7 +348,8 @@ function AiProviderPane() {
     setError(null);
     $providerProfile.set(parsed.output);
     setSaved(true);
-    scheduleFeedbackClear("saved", 3000);
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setSaved(false), 3000);
   }
 
   async function runTest() {
@@ -374,7 +360,6 @@ function AiProviderPane() {
         ...prev,
         [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
       }));
-      scheduleFeedbackClear(tab, 4000);
       return;
     }
     setTesting(tab);
@@ -396,7 +381,6 @@ function AiProviderPane() {
         });
         for await (const delta of textStream) reply += delta;
         setTestState((prev) => ({ ...prev, llm: { status: "ok", message: reply.slice(0, 40) } }));
-        scheduleFeedbackClear("llm", 4000);
       } else if (tab === "tts") {
         const d = draft;
         if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
@@ -411,12 +395,10 @@ function AiProviderPane() {
         );
         if (pcm.length === 0) throw new Error("empty audio");
         setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
-        scheduleFeedbackClear("tts", 4000);
       } else {
         if (!draft.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
         await probeModels(draft);
         setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
-        scheduleFeedbackClear("stt", 4000);
       }
     } catch (err) {
       setTestState((prev) => ({
