@@ -43,12 +43,17 @@ async function loadOrGenerateClientReport(id: string): Promise<ReportDto> {
   const session = await getClientSession(id);
   if (!profile?.llm || !session) throw new Error("no provider profile or session");
   const turns = await getClientTurns(id);
-  const report = await generateReport(profile.llm, {
-    sessionId: id,
-    title: session.title,
-    mode: session.mode,
-    turns,
-  });
+  const report = await generateReport(
+    profile.llm,
+    {
+      sessionId: id,
+      title: session.title,
+      mode: session.mode,
+      turns,
+    },
+    undefined,
+    { signal: AbortSignal.timeout(90_000) },
+  );
   await saveClientReport(id, report);
   return report;
 }
@@ -82,6 +87,15 @@ function Report() {
     retry: 2,
     retryDelay: 1500,
   });
+  const [slowLoad, setSlowLoad] = React.useState(false);
+  React.useEffect(() => {
+    if (!isLoading) {
+      setSlowLoad(false);
+      return;
+    }
+    const t = setTimeout(() => setSlowLoad(true), 15_000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -94,6 +108,11 @@ function Report() {
           <p className="rise-in mt-6 font-display text-lg text-espresso-soft">
             <FormattedMessage id="report.scoring" />
           </p>
+          {slowLoad ? (
+            <p className="mt-2 text-sm text-espresso-soft">
+              <FormattedMessage id="report.scoringSlow" />
+            </p>
+          ) : null}
         </div>
       </div>
     );
@@ -107,10 +126,10 @@ function Report() {
             <FormattedMessage id="report.noReportYet" />
           </p>
           <h1 className="mt-3 font-display text-2xl font-extrabold tracking-tight">
-            <FormattedMessage id="report.notScored" />
+            <FormattedMessage id="report.failed" />
           </h1>
           <p className="mt-3 text-sm text-espresso-soft">
-            <FormattedMessage id="report.notScoredBody" />
+            <FormattedMessage id="report.failedBody" />
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <Button

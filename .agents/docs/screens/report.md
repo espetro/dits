@@ -42,6 +42,14 @@
 - **Export**: downloads the report JSON (GET /v1/sessions/[id]/report).
 - **Practice weak areas ->** coach CTA seeds a coach session (M5; rendered disabled with tooltip in M1).
 - Scoring is async (ScoringPoll pattern): if report not ready, show pending state and poll.
+- **Loading state**: spinner with `report.scoring` copy; after 15s swap in
+  `report.scoringSlow` ("this can take a minute on free models") so slow
+  providers don't look stuck.
+- **Failure state**: if scoring fails (provider error, abort) show
+  `report.failed` / `report.failedBody` ("the agent failed to score this
+  session — check your AI provider settings") with a `report.tryAgain`
+  retry button and a link back to the transcript. No "not wired yet" copy —
+  that was dishonest about the failure mode.
 
 - **Client-only runtime** (ADR-0003, `$effectiveRuntime === "client-only"`):
   no server-side scoring exists to poll. This screen first checks
@@ -50,7 +58,9 @@
   (one `generateObject` call against the BYO provider, constrained to
   `ReportSchema` from `shared/src/report.ts`) and persists the result with
   `saveClientReport` before rendering — same "pending -> scored" UI either
-  way, just a different producer.
+  way, just a different producer. The call is bounded by a 90s
+  `AbortSignal.timeout`; on timeout/abort the failure state above renders
+  instead of spinning forever.
 
 ## URL / state
 
