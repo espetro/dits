@@ -20,7 +20,7 @@ export default defineConfig({
         ...LOCALES.filter((l) => l !== "en").map((l) => `/${l}`),
         // belt-and-suspenders: prefixed in-app pages (crawlLinks should find these
         // from the landing nav, but they are cheap to list explicitly).
-        ...LOCALES.filter((l) => l !== "en").flatMap((l) => [`/${l}/setup`, `/${l}/history`]),
+        ...LOCALES.filter((l) => l !== "en").map((l) => `/${l}/setup`),
       ].map((path) => ({
         path,
       })),
