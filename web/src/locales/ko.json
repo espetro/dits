@@ -138,5 +138,9 @@
   "settings.testOk": "Working",
   "settings.testFailed": "Failed: {message}",
   "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
-  "settings.freeProvidersLabel": "No key yet? Free providers:"
+  "settings.freeProvidersLabel": "No key yet? Free providers:",
+  "settings.baseUrlHelp": "OpenAI 호환 API의 URL입니다(예: https://api.openai.com/v1).",
+  "settings.apiKeyHelp": "Bearer 토큰으로 전송되며 이 브라우저에만 저장됩니다.",
+  "settings.modelHelp": "엔드포인트가 노출하는 모델 ID 그대로 입력하세요(예: gpt-4o-mini).",
+  "settings.voiceHelp": "엔드포인트가 지원하는 음성 이름입니다(예: alloy)."
 }

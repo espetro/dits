@@ -138,5 +138,9 @@
   "settings.testOk": "Working",
   "settings.testFailed": "Failed: {message}",
   "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
-  "settings.freeProvidersLabel": "No key yet? Free providers:"
+  "settings.freeProvidersLabel": "No key yet? Free providers:",
+  "settings.baseUrlHelp": "La URL de la API compatible con OpenAI, p. ej. https://api.openai.com/v1",
+  "settings.apiKeyHelp": "Se envía como token Bearer; solo se guarda en este navegador.",
+  "settings.modelHelp": "Identificador del modelo tal como lo expone el endpoint, p. ej. gpt-4o-mini.",
+  "settings.voiceHelp": "Nombre de voz admitido por el endpoint, p. ej. alloy."
 }

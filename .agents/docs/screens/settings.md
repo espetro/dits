@@ -7,26 +7,34 @@ full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`.
 
 ## ASCII mockup (desktop, default)
 
+ElevenMusic-style geometry: wide dialog, w-60 sidebar with the close
+button in its own block, inset card with a centered max-w-xl column.
+
 ```
-                 +------------------------------------------------+
-                 |                                    x           |
-                 |  +----------------+  +-----------------------+ |
-                 |  | (no border)    |  |  AI PROVIDER  (card)  | |
-                 |  | o previous     |  |                       | |
-                 |  |   sessions     |  |  [STT] [TTS] [LLM]    | |
-                 |  |                |  |  +-----------------+  | |
-                 |  | o AI provider  |  |  | (o) in-browser  |  | |  <- LLM: built-in
-                 |  |   (active)     |  |  | (*) custom      |  | |     radio disabled;
-                 |  |                |  |  |                 |  | |     defaults to custom
-                 |  |  hover pill    |  |  | helper text     |  | |
-                 |  |  contains      |  |  | base url [____] |  | |
-                 |  |  truncated     |  |  | api key  [____] |  | |
-                 |  |  label         |  |  | model    [____] |  | |
-                 |  |                |  |  | free providers  |  | |  <- clickable links
-                 |  |                |  |  | (openrouter...) |  | |
-                 |  |                |  |  | [Test] [Save]   |  | |  <- spinner/ok/fail
-                 |  +----------------+  +-----------------------+ |     + saved indicator
-                 +------------------------------------------------+
+                 +------------------------------------------------------------------+
+                 |                                             [x]                  |
+                 |  +------------------+  +---------------------------------+       |
+                 |  |  (w-60, p-5)     |  |  AI PROVIDER        (card)      |       |
+                 |  |                  |  |  ---------------------------------      |
+                 |  |  [x] close       |  |   large title + hairline rule   |       |
+                 |  |  (own block,     |  |                                 |       |
+                 |  |   p-5 breathing  |  |  [STT] [TTS] [LLM]              |       |
+                 |  |   room above     |  |  +---------------------------+  |       |
+                 |  |   nav)           |  |  | (o) in-browser            |  |       |
+                 |  |                  |  |  | (*) custom                |  |       |
+                 |  | o previous       |  |  +---------------------------+  |       |
+                 |  |   sessions       |  |   <- centered max-w-xl column -> |       |
+                 |  |                  |  |  base url [_________]           |       |
+                 |  | o AI provider    |  |    one-line muted helper        |       |
+                 |  |   (active)       |  |  api key  [_________]           |       |
+                 |  |                  |  |    one-line muted helper        |       |
+                 |  |  rows py-2.5     |  |  model    [_________]           |       |
+                 |  |  px-3 (~44px)    |  |    one-line muted helper        |       |
+                 |  |  gap-y-1         |  |  free providers (links)         |       |
+                 |  |                  |  |  [Test]          [Save]         |       |
+                 |  +------------------+  +---------------------------------+       |
+                 +------------------------------------------------------------------+
+                    sm:max-w-4xl lg:max-w-5xl, h-[min(40rem,100vh-6rem)];
                     sidebar has NO border; card has border + shadow,
                     inset my-3 mr-3 so the borders never touch
 ```
@@ -40,25 +48,39 @@ full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`.
         |  [STT]  [TTS]  [LLM]      |   <- sub-tabs (pill list)
         |  (o) in-browser           |
         |  (*) custom endpoint      |
-        |  helper text (muted)      |
         |  base url [___________]   |
+        |    one-line muted helper  |
         |  api key  [___________]   |
+        |    one-line muted helper  |
         |  model    [___________]   |
+        |    one-line muted helper  |
         |  free provider links      |
         |  [Test]      [Save]       |   <- footer stacks vertically
         |                           |
         +---------------------------+
-        full-screen: no rounding, no card chrome, content scrolls
+        full-screen: no rounding, no card chrome, no centered column,
+        content scrolls; fields stretch full width as before
 ```
 
 ## Behavior
 
-- Desktop: max-w-3xl flex-row panel (rounded-2xl, p-0, shadow-2xl).
-  Left sidebar (w-48, p-3): History + AI Provider ghost buttons, no
-  border; active row bg-accent, hover bg-muted/60; label span is
+- Desktop: sm:max-w-4xl lg:max-w-5xl flex-row panel, height
+  h-[min(40rem,calc(100vh-6rem))] (rounded-2xl, p-0, shadow-2xl).
+  Left sidebar (w-60, p-5): close button in its own top block (pb-5)
+  with breathing room, then the nav rows in a gap-y-1 column; each row
+  is a History / AI Provider ghost button at py-2.5 px-3 (~44px tall),
+  no border; active row bg-accent, hover bg-muted/60; label span is
   truncate + min-w-0 so the hover pill always contains it.
   Right pane: inset card (my-3 mr-3, rounded-xl, border, bg-card,
   shadow-sm), overflow-y-auto — sidebar and card borders never touch.
+  Inside the card the pane content is wrapped in a centered column:
+  max-w-xl mx-auto for AI provider, max-w-2xl mx-auto for history;
+  each pane opens with a large display heading over a full-width
+  border-b hairline, and section groups sit in space-y-10.
+  Endpoint fields render through the SettingsField helper (label +
+  input + one-line muted helper, settings.baseUrlHelp / apiKeyHelp /
+  modelHelp / voiceHelp). Mobile keeps the pre-existing full-screen
+  layout with no centered column.
 - Mobile: full-screen override (inset-0 h-svh w-screen, no rounding,
   close button hidden) via useIsMobile media-query hook. The sidebar is
   replaced by a top tab bar (shadcn Tabs, flex-1 triggers, icon +

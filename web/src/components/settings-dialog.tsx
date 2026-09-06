@@ -12,9 +12,16 @@ import type { ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared
 import { $providerProfile, redactKey } from "../lib/runtime";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
+import { hasBrowserStt, probeModels, testBrowserStt, testBrowserTts } from "../lib/settings-tests";
 import { useStore } from "@nanostores/react";
 import { Button } from "./vendor/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./vendor/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "./vendor/dialog";
 import { Input } from "./vendor/input";
 import { Label } from "./vendor/label";
 import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
@@ -227,6 +234,31 @@ type TestState = { status: "idle" | "running" | "ok" | "err"; message?: string }
 
 const fieldClass = "block text-xs text-muted-foreground";
 
+const helperClass = "mt-1 text-xs text-muted-foreground";
+
+/**
+ * Label + input + one-line muted helper. Extracted so each endpoint
+ * field stays a single declarative row inside the centered column.
+ */
+function SettingsField(props: { label: string; helper?: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className={fieldClass}>{props.label}</span>
+      <span className="mt-1 block">{props.children}</span>
+      {props.helper && <span className={helperClass}>{props.helper}</span>}
+    </label>
+  );
+}
+
+/** Pane heading: large display title over a full-width hairline rule. */
+function PaneHeading(props: { title: string }) {
+  return (
+    <div className="border-b border-border pb-4">
+      <h2 className="text-xl font-semibold tracking-tight">{props.title}</h2>
+    </div>
+  );
+}
+
 /** Clickable free-provider links shared by the LLM/STT/TTS helper notes. */
 const FREE_PROVIDERS = [
   { name: "OpenRouter", href: "https://openrouter.ai/" },
@@ -254,80 +286,6 @@ function FreeProviderLinks() {
       {"."}
     </>
   );
-}
-
-/** True when the browser exposes the Web Speech recognition constructor. */
-export function hasBrowserStt(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    Boolean(
-      (window as unknown as Record<string, unknown>).SpeechRecognition ||
-      (window as unknown as Record<string, unknown>).webkitSpeechRecognition,
-    )
-  );
-}
-
-/**
- * In-browser STT test: start recognition briefly and resolve only if the
- * engine reports actual audio events; any error (not-allowed, no-speech,
- * network, ...) rejects.
- */
-function testBrowserStt(): Promise<void> {
-  const Ctor =
-    (window as unknown as Record<string, unknown>).SpeechRecognition ??
-    (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
-  if (typeof Ctor !== "function") return Promise.reject(new Error("unsupported"));
-  const recognition = new (Ctor as new () => {
-    start(): void;
-    stop(): void;
-    onresult: (() => void) | null;
-    onerror: ((event: { error: string }) => void) | null;
-  })();
-  return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      recognition.stop();
-      resolve();
-    }, 3000);
-    recognition.onresult = () => {
-      clearTimeout(timer);
-      recognition.stop();
-      resolve();
-    };
-    recognition.onerror = (event) => {
-      clearTimeout(timer);
-      reject(new Error(event.error));
-    };
-    recognition.start();
-  });
-}
-
-/** In-browser TTS test: resolve on `end`, reject on `error` or 5s timeout. */
-function testBrowserTts(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const utterance = new SpeechSynthesisUtterance("hello");
-    const timer = setTimeout(() => {
-      speechSynthesis.cancel();
-      resolve();
-    }, 5000);
-    utterance.onend = () => {
-      clearTimeout(timer);
-      resolve();
-    };
-    utterance.onerror = (event) => {
-      clearTimeout(timer);
-      reject(new Error(event.error));
-    };
-    speechSynthesis.speak(utterance);
-  });
-}
-
-/** /models probe shared by all sections: the endpoint class is the same. */
-async function probeModels(draft: SectionDraft): Promise<void> {
-  const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-  const res = await fetch(`${base}/v1/models`, {
-    headers: { authorization: `Bearer ${draft.apiKey}` },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
 function AiProviderPane() {
@@ -509,7 +467,7 @@ function AiProviderPane() {
         {tabs.map((t) => (
           <TabsContent key={t.key} value={t.key} forceMount>
             {tab === t.key && (
-              <div className="space-y-4 rounded-xl border border-border p-4">
+              <div className="space-y-5 rounded-xl border border-border p-4">
                 <RadioGroup
                   value={draft.enabled ? "custom" : "browser"}
                   onValueChange={(value) => update({ enabled: value === "custom" })}
@@ -531,22 +489,21 @@ function AiProviderPane() {
                 )}
 
                 {draft.enabled && (
-                  <div className="space-y-2">
-                    <label className="block">
-                      <span className={fieldClass}>
-                        <FormattedMessage id="settings.baseUrl" />
-                      </span>
+                  <div className="space-y-4">
+                    <SettingsField
+                      label={intl.formatMessage({ id: "settings.baseUrl" })}
+                      helper={intl.formatMessage({ id: "settings.baseUrlHelp" })}
+                    >
                       <Input
                         value={draft.baseUrl}
                         onChange={(e) => update({ baseUrl: e.target.value })}
                         placeholder="https://api.openai.com/v1"
-                        className="mt-1"
                       />
-                    </label>
-                    <label className="block">
-                      <span className={fieldClass}>
-                        <FormattedMessage id="settings.apiKey" />
-                      </span>
+                    </SettingsField>
+                    <SettingsField
+                      label={intl.formatMessage({ id: "settings.apiKey" })}
+                      helper={intl.formatMessage({ id: "settings.apiKeyHelp" })}
+                    >
                       <Input
                         type="password"
                         value={draft.apiKey}
@@ -559,30 +516,27 @@ function AiProviderPane() {
                               )
                             : ""
                         }
-                        className="mt-1"
                       />
-                    </label>
-                    <label className="block">
-                      <span className={fieldClass}>
-                        <FormattedMessage id="settings.model" />
-                      </span>
+                    </SettingsField>
+                    <SettingsField
+                      label={intl.formatMessage({ id: "settings.model" })}
+                      helper={intl.formatMessage({ id: "settings.modelHelp" })}
+                    >
                       <Input
                         value={draft.model}
                         onChange={(e) => update({ model: e.target.value })}
-                        className="mt-1"
                       />
-                    </label>
+                    </SettingsField>
                     {tab === "tts" && (
-                      <label className="block">
-                        <span className={fieldClass}>
-                          <FormattedMessage id="settings.voice" />
-                        </span>
+                      <SettingsField
+                        label={intl.formatMessage({ id: "settings.voice" })}
+                        helper={intl.formatMessage({ id: "settings.voiceHelp" })}
+                      >
                         <Input
                           value={draft.voice}
                           onChange={(e) => update({ voice: e.target.value })}
-                          className="mt-1"
                         />
-                      </label>
+                      </SettingsField>
                     )}
                     <p className="text-xs text-muted-foreground">
                       <FormattedMessage id="settings.customProviders" />
@@ -696,7 +650,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           key={tab.id}
           variant="ghost"
           className={
-            "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 text-sm font-normal " +
+            "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 py-2.5 text-sm font-normal " +
             (pane === tab.id
               ? "bg-accent font-medium text-accent-foreground"
               : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")
@@ -716,7 +670,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
         className={
           isMobile
             ? "inset-0 flex h-svh w-screen max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 bg-background p-0 [&>button]:hidden"
-            : "flex h-[min(34rem,calc(100vh-4rem))] w-[calc(100vw-2rem)] max-w-3xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl"
+            : "flex h-[min(40rem,calc(100vh-6rem))] w-[calc(100vw-2rem)] max-w-4xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl lg:max-w-5xl"
         }
       >
         <DialogTitle className="sr-only">
@@ -740,7 +694,20 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
             </Tabs>
           </div>
         ) : (
-          <nav className="flex w-48 shrink-0 flex-col gap-1 p-3 pt-4">{nav}</nav>
+          <nav className="flex w-60 shrink-0 flex-col p-5">
+            <div className="pb-5">
+              <DialogClose
+                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                onClick={clearSettings}
+              >
+                <X className="size-4" aria-hidden="true" />
+                <span className="sr-only">
+                  <FormattedMessage id="settings.close" />
+                </span>
+              </DialogClose>
+            </div>
+            <div className="flex flex-col gap-y-1">{nav}</div>
+          </nav>
         )}
         <div
           className={
@@ -749,7 +716,26 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
               : "my-3 mr-3 flex-1 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-sm"
           }
         >
-          {pane === "history" ? <HistoryPane /> : <AiProviderPane />}
+          {isMobile ? (
+            pane === "history" ? (
+              <HistoryPane />
+            ) : (
+              <AiProviderPane />
+            )
+          ) : (
+            <div
+              className={
+                pane === "history" ? "mx-auto max-w-2xl space-y-10" : "mx-auto max-w-xl space-y-10"
+              }
+            >
+              <PaneHeading
+                title={intl.formatMessage({
+                  id: pane === "history" ? "settings.history" : "settings.aiProvider",
+                })}
+              />
+              {pane === "history" ? <HistoryPane /> : <AiProviderPane />}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
