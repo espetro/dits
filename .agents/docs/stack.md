@@ -111,5 +111,5 @@ mode a static deploy can offer (there is no `di` binary to reach, so
 - Deploys run through the Cloudflare Pages dashboard's Git integration
   (push to `main` = build + publish). There is deliberately no
   `deploy-web.yml` workflow: it never worked (`Script not found
-  "wrangler"` — no `CLOUDFLARE_API_TOKEN` secret) and was removed as
+"wrangler"` — no `CLOUDFLARE_API_TOKEN` secret) and was removed as
   redundant with the Git integration.
