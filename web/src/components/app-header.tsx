@@ -8,7 +8,9 @@ import { UserDropdown } from "./user-dropdown";
 /**
  * Shared app header mounted in __root for every route. Logo links home (en is
  * canonical for the bare root); center slot carries a localized page title;
- * right slot has the GitHub link and the account dropdown (B3).
+ * right slot has the GitHub link and the account dropdown (B3). The language
+ * selector is not in the header: it lives in the account dropdown and, on the
+ * landing hero, as a floating bottom-right pill.
  */
 export function AppHeader({ title }: { title?: ReactNode }) {
   const locale = useLocale();
@@ -20,8 +22,10 @@ export function AppHeader({ title }: { title?: ReactNode }) {
       >
         di<span className="text-persimmon">.</span>
       </Link>
-      <div className="flex-1 px-4 text-center text-sm font-normal text-espresso-soft">{title}</div>
-      <div className="flex items-center gap-3">
+      <div className="hidden flex-1 px-4 text-center text-sm font-normal text-espresso-soft sm:block">
+        {title}
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3">
         <a
           href="https://github.com/espetro/dits"
           target="_blank"

@@ -11,8 +11,11 @@ import {
 } from "@tanstack/react-router";
 import { FormattedMessage } from "react-intl";
 import { AlertTriangle } from "lucide-react";
+
 import { AppIntlProvider, useIsRtl } from "../locales/i18n";
+import { Button } from "../components/vendor/button";
 import { AppHeader } from "../components/app-header";
+import { SettingsDialogHost, type SettingsPane } from "../components/settings-dialog";
 import { localeFromPathname, withLocale } from "../lib/locale-href";
 import { maybeSeedFixtures } from "../lib/dev-fixtures";
 import "../theme.css";
@@ -45,6 +48,7 @@ function RootDocument() {
         <AppIntlProvider>
           <AppHeaderSlot />
           <Outlet />
+          <SettingsDialogHost />
         </AppIntlProvider>
         <Scripts />
       </body>
@@ -75,13 +79,13 @@ function RouteError({ error, reset }: { error: unknown; reset?: () => void }) {
           {message}
         </p>
         <div className="mt-2 flex items-center gap-3">
-          <button
+          <Button
             type="button"
             onClick={retry}
-            className="rounded-full bg-gradient-to-br from-persimmon to-persimmon-deep px-5 py-2 text-sm font-medium text-white ring-1 ring-hairline transition-fluid hover:brightness-110 active:scale-[0.98]"
+            className="rounded-full bg-gradient-to-br from-persimmon to-persimmon-deep px-5 py-2 h-auto text-white ring-hairline transition-fluid hover:brightness-110 active:scale-[0.98]"
           >
             <FormattedMessage id="error.retry" />
-          </button>
+          </Button>
           <ErrorHomeLink />
         </div>
       </div>
@@ -130,17 +134,10 @@ function ErrorShell({ children }: { children: ReactNode }) {
   );
 }
 
-// interview/finish are full-screen flows that carry their own session header.
-const HEADER_HIDDEN = /\/(interview|finish)\/[^/]+$/;
-
-const TITLES: Array<[RegExp, string]> = [
-  [/\/setup$/, "setup.title"],
-  [/\/history$/, "history.title"],
-];
+const TITLES: Array<[RegExp, string]> = [[/\/setup$/, "setup.title"]];
 
 function AppHeaderSlot() {
   const pathname = useLocation({ select: (l) => l.pathname });
-  if (HEADER_HIDDEN.test(pathname)) return null;
   const titleKey = TITLES.find(([re]) => re.test(pathname))?.[1];
   return (
     <AppHeader

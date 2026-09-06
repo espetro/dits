@@ -18,6 +18,12 @@ LocaleSwitcher, GitHub link, and the account dropdown (B3).
                                                         +----------------+
 ```
 
+## Responsive
+
+- Below `sm`: the centered page title is hidden (`hidden sm:block`); only logo,
+  GitHub link, and account dropdown render, with reduced gaps (`gap-2`).
+- At `sm` and up the full row (title centered, `gap-3`) matches desktop.
+
 ## Behavior
 
 - Account trigger: ghost icon Button wrapping an Avatar with fallback "G" (no auth; guest).

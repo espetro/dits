@@ -59,7 +59,10 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
           <ChevronDown className="size-3.5 text-espresso-soft" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-52 rounded-xl p-1.5">
+      <DropdownMenuContent
+        align="end"
+        className="min-w-52 rounded-xl border-border/70 bg-popover shadow-2xl p-1.5"
+      >
         {LOCALES.map((l) => {
           const isActive = l === locale;
           const label = LOCALE_LABELS[l];
