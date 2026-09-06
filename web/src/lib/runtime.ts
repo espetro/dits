@@ -62,6 +62,12 @@ export async function probeServer(): Promise<boolean> {
     $serverReachable.set(false);
     return false;
   }
+  const mode = $runtimeMode.get();
+  const hasCustomBase = (import.meta.env.VITE_DI_API_BASE as string | undefined) !== undefined;
+  if ((mode === "in-browser" || mode === "custom") && !hasCustomBase) {
+    $serverReachable.set(false);
+    return false;
+  }
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 2000);
