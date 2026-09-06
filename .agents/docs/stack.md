@@ -108,9 +108,8 @@ mode a static deploy can offer (there is no `di` binary to reach, so
 - **No secrets to configure**: BYO provider `baseUrl`/`apiKey` are entered by
   the end user at runtime (`$providerProfile`, persisted client-side) and
   never touch the deploy pipeline.
-- There is no `deploy-web.yml` workflow on this branch (`.github/workflows/`
-  has only `ci.yml`, `intl.yml`, `release.yml`). `origin/main` has a
-  `deploy-web.yml` gated on `CLOUDFLARE_API_TOKEN`; the branch's handoff plan
-  flagged it as redundant with the dashboard's own Git integration and
-  recommended deleting rather than configuring the secret — that decision
-  applies on `main`, not here.
+- Deploys run through the Cloudflare Pages dashboard's Git integration
+  (push to `main` = build + publish). There is deliberately no
+  `deploy-web.yml` workflow: it never worked (`Script not found
+  "wrangler"` — no `CLOUDFLARE_API_TOKEN` secret) and was removed as
+  redundant with the Git integration.
