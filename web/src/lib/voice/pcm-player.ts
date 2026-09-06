@@ -1,5 +1,7 @@
 import { TTS_SAMPLE_RATE } from "@di/shared/voice";
 
+import { pushAgentLevel } from "./levels";
+
 /** Minimal structural types so tests can pass a fake without a real AudioContext. */
 export interface AudioBufferLike {
   readonly duration: number;
@@ -84,6 +86,13 @@ export function createPcmPlayer(opts: { createContext?: () => AudioContextLike }
     write(pcm16: Uint8Array) {
       const samples = pcm16ToFloat(pcm16);
       if (samples.length === 0) return;
+      // loudness tap for the voice orb (attack envelope, see lib/voice/levels)
+      let sum = 0;
+      for (let i = 0; i < samples.length; i++) {
+        const s = samples[i];
+        if (s !== undefined) sum += s * s;
+      }
+      pushAgentLevel(Math.sqrt(sum / (samples.length || 1)));
       const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
       buffer.getChannelData(0).set(samples);
       const source = ctx.createBufferSource();

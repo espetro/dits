@@ -63,6 +63,8 @@ export interface AudioContextLike {
 
 export interface MicCapture {
   onFrame(cb: (pcm16: Uint8Array) => void): void;
+  /** optional loudness tap (rms per worklet frame) for UI visualizers */
+  onLevel?(cb: ((rms: number) => void) | null): void;
   setMuted(muted: boolean): void;
   stop(): Promise<void>;
 }
@@ -89,6 +91,7 @@ export interface CaptureDeps {
  */
 export class MicCaptureImpl implements MicCapture {
   private frameCb: ((pcm16: Uint8Array) => void) | null = null;
+  private levelCb: ((rms: number) => void) | null = null;
   private muted = false;
   private ctx: AudioContextLike | null = null;
   private source: { disconnect(): void } | null = null;
@@ -137,6 +140,15 @@ export class MicCaptureImpl implements MicCapture {
     node.port.onmessage = (ev: { data: unknown }) => {
       const samples = ev.data as Float32Array;
       if (!(samples instanceof Float32Array)) return;
+      // loudness tap for the voice orb (attack envelope, see lib/voice/levels)
+      let sum = 0;
+      const n = samples.length;
+      for (let i = 0; i < n; i++) {
+        const s = samples[i];
+        if (s !== undefined) sum += s * s;
+      }
+      const count = n > 0 ? n : 1;
+      this.levelCb?.(Math.sqrt(sum / count));
       if (this.muted || !this.frameCb) return;
       this.frameCb(floatToPcm16(samples));
     };

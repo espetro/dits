@@ -4,12 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@nanostores/react";
 import * as React from "react";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { PanelRight } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../../components/vendor/sheet";
 import { useVoice } from "../../lib/voice/use-voice";
 import { FormattedMessage, useIntl } from "react-intl";
 import { getSession, getTurns, postTextTurn, pushToolState } from "../../lib/api";
 import { getClientSession } from "../../lib/opfs-store";
 import { $clientTurns } from "../../lib/agent/session-store";
 import { $effectiveRuntime } from "../../lib/runtime";
+import { Button } from "../../components/vendor/button";
+import { Input } from "../../components/vendor/input";
+import { Tabs, TabsList, TabsTrigger } from "../../components/vendor/tabs";
 import {
   $editorBuffer,
   $muted,
@@ -23,6 +28,26 @@ const WhiteboardPanel = lazy(() =>
     default: m.WhiteboardPanel,
   })),
 );
+
+const MilkdownEditor = lazy(() =>
+  import("../../components/milkdown-editor").then((m) => ({
+    default: m.MilkdownEditor,
+  })),
+);
+
+const CodeLanguageBar = lazy(() =>
+  import("../../components/milkdown-editor").then((m) => ({
+    default: m.CodeLanguageBar,
+  })),
+);
+
+const VoiceOrb = lazy(() =>
+  import("../../components/voice-orb").then((m) => ({
+    default: m.VoiceOrb,
+  })),
+);
+
+type EditorApi = import("../../components/milkdown-editor").MilkdownApi;
 
 export const Route = createFileRoute("/{-$locale}/interview/$id")({
   component: Interview,
@@ -40,6 +65,18 @@ function useCountdown(durationMin: number) {
     return () => clearInterval(t);
   }, [durationMin]);
   return secsLeft;
+}
+
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isMobile;
 }
 
 const phaseKeys: Record<string, string> = {
@@ -76,10 +113,10 @@ function Interview() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const [text, setText] = useState("");
+  const isMobile = useIsMobile();
   const editor = useStore($editorBuffer);
   const whiteboard = useStore($whiteboard);
   const voice = useVoice(id, muted);
-  const orbLive = voice.agentSpeaking || (voice.status === "connected" && !muted);
   const statusKey =
     voice.status === "error"
       ? "interview.voiceError"
@@ -134,15 +171,17 @@ function Interview() {
     <div className="ambient grain flex h-[100dvh] flex-col overflow-hidden bg-cream">
       {/* top bar */}
       <header className="flex items-center justify-between px-4 py-3 md:px-8">
-        <h1 className="font-display text-base font-semibold">{session?.title ?? "…"}</h1>
-        <div className="flex items-center gap-4">
+        <h1 className="min-w-0 truncate font-display text-base font-semibold">
+          {session?.title ?? "…"}
+        </h1>
+        <div className="flex shrink-0 items-center gap-2 md:gap-4">
           <span
             className={`font-mono text-sm tabular-nums ${wrapping ? "text-persimmon" : "text-espresso-soft"}`}
           >
             {mm}:{ss}
           </span>
           <span
-            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-espresso-soft"
+            className="hidden min-w-0 items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-espresso-soft sm:flex md:hidden lg:flex"
             title={
               voice.status === "error"
                 ? intl.formatMessage({ id: "interview.voiceError" }, { message: voice.error ?? "" })
@@ -160,19 +199,10 @@ function Interview() {
             />
             {intl.formatMessage({ id: statusKey })}
           </span>
-          <div
-            className={`h-10 w-10 rounded-full bg-gradient-to-br from-persimmon to-persimmon-deep transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-              muted ? "opacity-30 saturate-0" : orbLive ? "orb-live" : "opacity-60"
-            }`}
-            role="img"
-            aria-label={intl.formatMessage({
-              id: muted ? "interview.voiceMuted" : "interview.voiceActive",
-            })}
-          />
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 gap-3 px-4 pb-4 md:px-8">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-3 pb-3 sm:px-4 md:flex-row md:px-8 md:pb-4">
         {/* main column */}
         <main className="flex min-w-0 flex-1 flex-col gap-4">
           {/* question block — agent-editable */}
@@ -183,7 +213,7 @@ function Interview() {
               </p>
               <p
                 key={question.text}
-                className="rise-in mt-2 font-display text-xl font-semibold leading-snug md:text-2xl"
+                className="rise-in mt-2 font-display text-lg font-semibold leading-snug md:text-2xl"
               >
                 {question.text || intl.formatMessage({ id: "interview.preparing" })}
               </p>
@@ -205,21 +235,25 @@ function Interview() {
 
           {/* tabbed tools */}
           <section className="flex min-h-0 flex-1 flex-col rounded-card bg-paper p-2 ring-1 ring-hairline">
-            <div className="flex gap-1 p-1">
-              {(["editor", "whiteboard"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                    tab === t ? "bg-espresso text-cream" : "text-espresso-soft hover:bg-cream-deep"
-                  }`}
-                >
-                  <FormattedMessage
-                    id={t === "editor" ? "interview.tab.editor" : "interview.tab.whiteboard"}
-                  />
-                </button>
-              ))}
-            </div>
+            <Tabs value={tab} onValueChange={(v) => setTab(v as "editor" | "whiteboard")}>
+              <TabsList className="flex gap-1 rounded-full bg-transparent p-1">
+                {(["editor", "whiteboard"] as const).map((t) => (
+                  <TabsTrigger
+                    key={t}
+                    value={t}
+                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] after:hidden ${
+                      tab === t
+                        ? "bg-espresso text-cream"
+                        : "text-espresso-soft hover:bg-cream-deep"
+                    }`}
+                  >
+                    <FormattedMessage
+                      id={t === "editor" ? "interview.tab.editor" : "interview.tab.whiteboard"}
+                    />
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
             <div className="min-h-0 flex-1 rounded-[calc(1.5rem-0.375rem)] bg-cream p-4">
               {tab === "editor" ? (
                 <EditorPanel />
@@ -248,65 +282,116 @@ function Interview() {
           </section>
 
           {/* controls */}
-          <div className="flex gap-3">
-            <button
+          <div className="flex flex-wrap gap-3">
+            <Button
               onClick={() => $muted.set(!muted)}
-              className="rounded-full bg-white px-5 py-2.5 text-sm font-medium ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/50 active:scale-[0.97]"
+              className="min-w-0 flex-1 rounded-full bg-white px-4 py-2.5 text-espresso ring-1 ring-hairline shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white hover:ring-persimmon/50 active:scale-[0.97] sm:flex-none sm:px-5"
             >
               <FormattedMessage id={muted ? "interview.unmute" : "interview.mute"} />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => navigate({ href: withLocale(locale, `/finish/${id}`) })}
-              className="rounded-full bg-espresso px-5 py-2.5 text-sm font-medium text-cream transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.97]"
+              className="min-w-0 flex-1 truncate rounded-full bg-espresso px-4 py-2.5 text-cream shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.97] sm:flex-none sm:px-5"
             >
               <FormattedMessage id="interview.endEarly" />
-            </button>
+            </Button>
           </div>
         </main>
 
-        {/* transcript panel — translucent, collapsible to peek rail, never hidden */}
-        <aside
-          className={`flex flex-col rounded-card ring-1 ring-hairline bg-paper/15 backdrop-blur-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-            transcriptOpen ? "w-80" : "w-14"
-          }`}
-        >
-          <button
-            onClick={() => $transcriptOpen.set(!transcriptOpen)}
-            className="flex items-center justify-center py-3 text-xs font-medium uppercase tracking-[0.15em] text-espresso-soft"
-            aria-expanded={transcriptOpen}
-          >
-            {transcriptOpen ? "transcript —" : "T +"}
-          </button>
-          {transcriptOpen && (
-            <>
-              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-3">
-                {(turns ?? []).map((t) => (
-                  <div
-                    key={t.id}
-                    className={`rise-in rounded-2xl px-3 py-2 text-sm ${t.speaker === "agent" ? "bg-persimmon-faint" : "bg-white/70"}`}
-                  >
-                    <span className="block text-[10px] uppercase tracking-wider text-espresso-soft">
-                      {t.speaker} · {t.source}
-                    </span>
-                    {t.text}
+        {/* transcript rail — desktop only; mobile uses the Sheet below */}
+        {!isMobile && (
+          <div className="flex flex-col items-end gap-3">
+            <VoiceOrb
+              phase={voice.phase}
+              muted={muted || voice.status !== "connected"}
+              className="size-20 shrink-0 md:size-24"
+            />
+            <aside
+              className={`flex min-h-0 flex-col rounded-card ring-1 ring-hairline bg-paper/15 backdrop-blur-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                transcriptOpen ? "h-64 w-80" : "h-14 w-14"
+              }`}
+            >
+              <button
+                onClick={() => $transcriptOpen.set(!transcriptOpen)}
+                className="flex items-center justify-center py-3 text-xs font-medium uppercase tracking-[0.15em] text-espresso-soft"
+                aria-expanded={transcriptOpen}
+              >
+                {transcriptOpen ? "transcript —" : "T +"}
+              </button>
+              {transcriptOpen && (
+                <>
+                  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-3">
+                    {(turns ?? []).map((t) => (
+                      <div
+                        key={t.id}
+                        className={`rise-in rounded-2xl px-3 py-2 text-sm ${t.speaker === "agent" ? "bg-persimmon-faint" : "bg-white/70"}`}
+                      >
+                        <span className="block text-[10px] uppercase tracking-wider text-espresso-soft">
+                          {t.speaker} · {t.source}
+                        </span>
+                        {t.text}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="p-3">
-                <input
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && void sendText()}
-                  placeholder={intl.formatMessage({
-                    id: "interview.typeInstead",
-                  })}
-                  className="w-full rounded-full bg-white px-4 py-2.5 text-sm ring-1 ring-hairline outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus:ring-2 focus:ring-persimmon/50"
-                />
-              </div>
-            </>
-          )}
-        </aside>
+                  <div className="p-3">
+                    <Input
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && void sendText()}
+                      placeholder={intl.formatMessage({
+                        id: "interview.typeInstead",
+                      })}
+                      className="h-auto rounded-full border-0 bg-white px-4 py-2.5 text-sm ring-1 ring-hairline shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus-visible:ring-2 focus-visible:ring-persimmon/50"
+                    />
+                  </div>
+                </>
+              )}
+            </aside>
+          </div>
+        )}
       </div>
+      {isMobile && (
+        <Sheet>
+          <SheetTrigger
+            className="fixed right-4 bottom-24 z-40 flex size-11 items-center justify-center rounded-full bg-espresso text-cream shadow-lg transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97]"
+            aria-label="transcript"
+          >
+            <PanelRight className="size-5" aria-hidden="true" />
+          </SheetTrigger>
+          <SheetContent
+            side="right"
+            className="w-84 max-w-[85vw] gap-0 border-l bg-paper/95 backdrop-blur-sm"
+          >
+            <SheetTitle className="px-4 pt-4 text-xs font-medium uppercase tracking-[0.15em] text-espresso-soft">
+              transcript
+            </SheetTitle>
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
+              {(turns ?? []).map((t) => (
+                <div
+                  key={t.id}
+                  className={`rise-in rounded-2xl px-3 py-2 text-sm ${t.speaker === "agent" ? "bg-persimmon-faint" : "bg-white/70"}`}
+                >
+                  <span className="block text-[10px] uppercase tracking-wider text-espresso-soft">
+                    {t.speaker} · {t.source}
+                  </span>
+                  {t.text}
+                </div>
+              ))}
+            </div>
+            <div className="p-3">
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && void sendText()}
+                placeholder={intl.formatMessage({
+                  id: "interview.typeInstead",
+                })}
+                className="h-auto min-w-0 rounded-full border-0 bg-white px-4 py-2.5 text-sm ring-1 ring-hairline shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus-visible:ring-2 focus-visible:ring-persimmon/50"
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
@@ -314,14 +399,19 @@ function Interview() {
 function EditorPanel() {
   const intl = useIntl();
   const buffer = useStore($editorBuffer);
+  const editorApi = useRef<EditorApi | null>(null);
   return (
     <div className="flex h-full flex-col gap-2">
-      <textarea
+      <CodeLanguageBar
+        className="px-1"
+        onInsert={(lang) => editorApi.current?.insertCodeBlock(lang)}
+      />
+      <MilkdownEditor
         value={buffer}
-        onChange={(e) => $editorBuffer.set(e.target.value)}
+        onChange={(markdown) => $editorBuffer.set(markdown)}
         placeholder={intl.formatMessage({ id: "interview.editorPlaceholder" })}
-        spellCheck={false}
-        className="w-full flex-1 resize-none rounded-2xl bg-[#1a1512] p-4 font-mono text-sm leading-relaxed text-[#e8e0d8] outline-none placeholder:text-[#6b5d4f]"
+        className="min-h-0 w-full flex-1"
+        onReady={(api) => (editorApi.current = api)}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import type { Turn } from "@di/shared/session";
 import { startCapture } from "./capture";
 import type { MicCapture } from "./capture";
 import { createPcmPlayer } from "./pcm-player";
+import { pushMicLevel } from "./levels";
 import type { PcmPlayer } from "./pcm-player";
 import { createVadGate } from "./vad";
 import type { VadGate } from "./vad";
@@ -143,6 +144,7 @@ export class ServerVoiceDriver implements SpeechDriver {
 
     const captureFactory = this.deps.capture ?? (() => startCapture());
     this.capture = await captureFactory();
+    this.capture.onLevel?.((rms) => pushMicLevel(rms));
     this.capture.onFrame((pcm16) => {
       this.vad?.processFrame(pcm16);
       if (!this.speaking || this.muted) return; // only stream during an utterance
