@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./vendor/
 import { Input } from "./vendor/input";
 import { Label } from "./vendor/label";
 import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
-import { Tabs, TabsList, TabsTrigger } from "./vendor/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./vendor/tabs";
 
 /**
  * Centered settings dialog, ChatGPT-style: borderless left nav
@@ -427,147 +427,156 @@ function AiProviderPane() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        {/* forceMount keeps every content node in the DOM (Radix hides
+            inactive ones with the hidden attribute) so each trigger's
+            aria-controls always resolves to a real id. */}
+        {tabs.map((t) => (
+          <TabsContent key={t.key} value={t.key} forceMount>
+            {tab === t.key && (
+              <div className="space-y-4 rounded-xl border border-border p-4">
+                <RadioGroup
+                  value={draft.enabled ? "custom" : "browser"}
+                  onValueChange={(value) => update({ enabled: value === "custom" })}
+                  className="flex flex-wrap gap-4"
+                >
+                  <Label className="flex items-center gap-1.5 text-sm font-normal">
+                    <RadioGroupItem value="browser" disabled={tab === "llm"} />
+                    <FormattedMessage id="settings.inBrowser" />
+                  </Label>
+                  <Label className="flex items-center gap-1.5 text-sm font-normal">
+                    <RadioGroupItem value="custom" />
+                    <FormattedMessage id="settings.customEndpoint" />
+                  </Label>
+                </RadioGroup>
+                {tab === "llm" && (
+                  <p className="text-xs text-muted-foreground">
+                    <FormattedMessage id="settings.llmRequired" />
+                  </p>
+                )}
+
+                {draft.enabled && (
+                  <div className="space-y-2">
+                    <label className="block">
+                      <span className={fieldClass}>
+                        <FormattedMessage id="settings.baseUrl" />
+                      </span>
+                      <Input
+                        value={draft.baseUrl}
+                        onChange={(e) => update({ baseUrl: e.target.value })}
+                        placeholder="https://api.openai.com/v1"
+                        className="mt-1"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className={fieldClass}>
+                        <FormattedMessage id="settings.apiKey" />
+                      </span>
+                      <Input
+                        type="password"
+                        value={draft.apiKey}
+                        onChange={(e) => update({ apiKey: e.target.value })}
+                        placeholder={
+                          profile?.[tab]
+                            ? intl.formatMessage(
+                                { id: "settings.apiKeySaved" },
+                                { key: redactKey(profile[tab]!.apiKey) },
+                              )
+                            : ""
+                        }
+                        className="mt-1"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className={fieldClass}>
+                        <FormattedMessage id="settings.model" />
+                      </span>
+                      <Input
+                        value={draft.model}
+                        onChange={(e) => update({ model: e.target.value })}
+                        className="mt-1"
+                      />
+                    </label>
+                    {tab === "tts" && (
+                      <label className="block">
+                        <span className={fieldClass}>
+                          <FormattedMessage id="settings.voice" />
+                        </span>
+                        <Input
+                          value={draft.voice}
+                          onChange={(e) => update({ voice: e.target.value })}
+                          className="mt-1"
+                        />
+                      </label>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      <FormattedMessage id="settings.customProviders" />
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      <FormattedMessage id="settings.freeProvidersLabel" /> <FreeProviderLinks />
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void runTest()}
+                      disabled={!draft.enabled || testing === tab}
+                      aria-busy={testing === tab}
+                    >
+                      {testing === tab ? (
+                        <>
+                          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                          <FormattedMessage id="settings.testing" />
+                        </>
+                      ) : (
+                        <FormattedMessage id="settings.test" />
+                      )}
+                    </Button>
+                    {state?.status === "ok" && (
+                      <span
+                        role="status"
+                        className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
+                      >
+                        <Check className="size-3.5" aria-hidden="true" />
+                        <FormattedMessage id="settings.testOk" />
+                        {state.message ? `: ${state.message}` : ""}
+                      </span>
+                    )}
+                    {state?.status === "err" && (
+                      <span role="status" className="flex items-center gap-1 text-xs text-red-600">
+                        <X className="size-3.5" aria-hidden="true" />
+                        <FormattedMessage
+                          id="settings.testFailed"
+                          values={{ message: state.message ?? "" }}
+                        />
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {saved && (
+                      <span
+                        role="status"
+                        className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
+                      >
+                        <Check className="size-3.5" aria-hidden="true" />
+                        <FormattedMessage id="settings.saved" />
+                      </span>
+                    )}
+                    <Button type="button" size="sm" onClick={save} disabled={!canSave}>
+                      <FormattedMessage id="settings.save" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        ))}
       </Tabs>
-
-      <div className="space-y-4 rounded-xl border border-border p-4">
-        <RadioGroup
-          value={draft.enabled ? "custom" : "browser"}
-          onValueChange={(value) => update({ enabled: value === "custom" })}
-          className="flex flex-wrap gap-4"
-        >
-          <Label className="flex items-center gap-1.5 text-sm font-normal">
-            <RadioGroupItem value="browser" disabled={tab === "llm"} />
-            <FormattedMessage id="settings.inBrowser" />
-          </Label>
-          <Label className="flex items-center gap-1.5 text-sm font-normal">
-            <RadioGroupItem value="custom" />
-            <FormattedMessage id="settings.customEndpoint" />
-          </Label>
-        </RadioGroup>
-        {tab === "llm" && (
-          <p className="text-xs text-muted-foreground">
-            <FormattedMessage id="settings.llmRequired" />
-          </p>
-        )}
-
-        {draft.enabled && (
-          <div className="space-y-2">
-            <label className="block">
-              <span className={fieldClass}>
-                <FormattedMessage id="settings.baseUrl" />
-              </span>
-              <Input
-                value={draft.baseUrl}
-                onChange={(e) => update({ baseUrl: e.target.value })}
-                placeholder="https://api.openai.com/v1"
-                className="mt-1"
-              />
-            </label>
-            <label className="block">
-              <span className={fieldClass}>
-                <FormattedMessage id="settings.apiKey" />
-              </span>
-              <Input
-                type="password"
-                value={draft.apiKey}
-                onChange={(e) => update({ apiKey: e.target.value })}
-                placeholder={
-                  profile?.[tab]
-                    ? intl.formatMessage(
-                        { id: "settings.apiKeySaved" },
-                        { key: redactKey(profile[tab]!.apiKey) },
-                      )
-                    : ""
-                }
-                className="mt-1"
-              />
-            </label>
-            <label className="block">
-              <span className={fieldClass}>
-                <FormattedMessage id="settings.model" />
-              </span>
-              <Input
-                value={draft.model}
-                onChange={(e) => update({ model: e.target.value })}
-                className="mt-1"
-              />
-            </label>
-            {tab === "tts" && (
-              <label className="block">
-                <span className={fieldClass}>
-                  <FormattedMessage id="settings.voice" />
-                </span>
-                <Input
-                  value={draft.voice}
-                  onChange={(e) => update({ voice: e.target.value })}
-                  className="mt-1"
-                />
-              </label>
-            )}
-            <p className="text-xs text-muted-foreground">
-              <FormattedMessage id="settings.customProviders" />
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <FormattedMessage id="settings.freeProvidersLabel" /> <FreeProviderLinks />
-            </p>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void runTest()}
-              disabled={!draft.enabled || testing === tab}
-              aria-busy={testing === tab}
-            >
-              {testing === tab ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                  <FormattedMessage id="settings.testing" />
-                </>
-              ) : (
-                <FormattedMessage id="settings.test" />
-              )}
-            </Button>
-            {state?.status === "ok" && (
-              <span
-                role="status"
-                className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
-              >
-                <Check className="size-3.5" aria-hidden="true" />
-                <FormattedMessage id="settings.testOk" />
-                {state.message ? `: ${state.message}` : ""}
-              </span>
-            )}
-            {state?.status === "err" && (
-              <span role="status" className="flex items-center gap-1 text-xs text-red-600">
-                <X className="size-3.5" aria-hidden="true" />
-                <FormattedMessage
-                  id="settings.testFailed"
-                  values={{ message: state.message ?? "" }}
-                />
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {saved && (
-              <span
-                role="status"
-                className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
-              >
-                <Check className="size-3.5" aria-hidden="true" />
-                <FormattedMessage id="settings.saved" />
-              </span>
-            )}
-            <Button type="button" size="sm" onClick={save} disabled={!canSave}>
-              <FormattedMessage id="settings.save" />
-            </Button>
-          </div>
-        </div>
-      </div>
 
       {error && (
         <p role="alert" className="text-sm text-red-600">
