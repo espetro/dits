@@ -36,7 +36,10 @@ export interface RecognitionLike {
 }
 interface SpeechRecognitionEventLike {
   resultIndex: number;
-  results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+  results: ArrayLike<{
+    isFinal: boolean;
+    0: { transcript: string; confidence?: number };
+  }>;
 }
 type RecognitionCtor = new () => RecognitionLike;
 
@@ -63,6 +66,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private pending = "";
   private abort: AbortController | null = null;
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
+  /** set when interim results arrive during the current utterance */
+  private speechSeen = false;
 
   /**
    * Sent as a user turn when the candidate is silent after connect, so the
@@ -73,6 +78,10 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private static readonly KICKOFF =
     "(candidate has joined — begin the interview now: greet them briefly and ask your first question)";
   private static readonly KICKOFF_MS = 5_000;
+  /** confidence at which an unconfirmed final is trusted without interim evidence */
+  private static readonly MIN_CONFIDENCE = 0.6;
+  /** recognition errors that must never trigger an onend restart loop */
+  private static readonly FATAL_ERRORS = new Set(["not-allowed", "audio-capture"]);
 
   constructor(
     private readonly sessionId: string,
@@ -108,14 +117,22 @@ export class BrowserVoiceDriver implements SpeechDriver {
       return;
     }
     const rec = new Ctor();
+    this.speechSeen = false;
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = navigator.language ?? "en-US";
     rec.onresult = (ev) => this.handleResult(ev);
     rec.onerror = (ev) => {
-      if (ev.error === "not-allowed") {
+      const kind = ev.error ?? "";
+      // not-allowed/audio-capture are unrecoverable (permission/mic gone):
+      // stop cleanly and report once. Setting status away from "connected"
+      // also keeps the onend handler from restarting recognition in a loop.
+      if (BrowserVoiceDriver.FATAL_ERRORS.has(kind)) {
         this.status = "error";
-        this.onError("microphone permission denied");
+        this.cancelKickoff();
+        this.onError(
+          kind === "not-allowed" ? "microphone permission denied" : "microphone unavailable",
+        );
       }
     };
     // continuous mode ends on silence in some builds; restart while active
@@ -163,8 +180,20 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private handleResult(ev: SpeechRecognitionEventLike) {
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
       const result = ev.results[i];
-      if (!result || !result.isFinal) continue;
-      const text = result[0].transcript.trim();
+      if (!result) continue;
+      if (!result.isFinal) {
+        // interim results only appear when the recognizer actually heard
+        // audio: record it as speech evidence for the next final
+        this.speechSeen = true;
+        continue;
+      }
+      const alt = result[0];
+      const text = alt.transcript.trim();
+      const confident = (alt.confidence ?? 0) >= BrowserVoiceDriver.MIN_CONFIDENCE;
+      const hadSpeech = this.speechSeen;
+      this.speechSeen = false;
+      // phantom final: transcript with no observed speech (noise/hallucination)
+      if (!hadSpeech && !confident) continue;
       if (!text || this.muted) continue;
       this.cancelKickoff();
       this.events.onSpeechStart?.();

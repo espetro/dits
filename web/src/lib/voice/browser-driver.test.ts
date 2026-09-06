@@ -76,14 +76,17 @@ describe("BrowserVoiceDriver barge-in", () => {
   });
 });
 
-/**
- * Speech recognition stub whose results can be emitted from tests.
- */
 function fakeRecognitionCtor(): {
   ctor: new () => any;
   emit: (transcript: string) => void;
+  emitFinal: (transcript: string, confidence?: number) => void;
+  emitInterim: (transcript: string) => void;
+  emitError: (error: string) => void;
 } {
-  const listeners: { onresult?: (ev: any) => void } = {};
+  const listeners: {
+    onresult?: (ev: any) => void;
+    onerror?: (ev: any) => void;
+  } = {};
   class Rec implements RecognitionLike {
     continuous = false;
     interimResults = false;
@@ -94,16 +97,25 @@ function fakeRecognitionCtor(): {
     start() {
       const cb = this.onresult;
       if (cb) listeners.onresult = cb;
+      if (this.onerror) listeners.onerror = this.onerror;
     }
     stop() {}
   }
+  const emitFinal = (transcript: string, confidence?: number) =>
+    listeners.onresult?.({
+      resultIndex: 0,
+      results: [{ isFinal: true, 0: { transcript, confidence } }],
+    });
   return {
     ctor: Rec as unknown as new () => any,
-    emit: (transcript: string) =>
+    emit: (transcript: string) => emitFinal(transcript, 0.9),
+    emitFinal,
+    emitInterim: (transcript: string) =>
       listeners.onresult?.({
         resultIndex: 0,
-        results: [{ isFinal: true, 0: { transcript } }],
+        results: [{ isFinal: false, 0: { transcript } }],
       }),
+    emitError: (error: string) => listeners.onerror?.({ error }),
   };
 }
 
@@ -167,6 +179,120 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
       await driver.stop();
       await vi.advanceTimersByTimeAsync(10_000);
       expect(respond).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("BrowserVoiceDriver phantom final gating", () => {
+  function setupDriver() {
+    const rec = fakeRecognitionCtor();
+    const driver = new BrowserVoiceDriver("s1", {
+      player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      recognitionCtor: rec.ctor,
+    });
+    const respond = vi.fn(async () => "ok");
+    driver.onError = vi.fn();
+    driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      () => ({ mode: "interview" }),
+    );
+    const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+    agent.respond = respond as unknown as (...args: any[]) => Promise<string>;
+    return { driver, respond, ...rec };
+  }
+
+  it("drops a final transcript with no speech evidence", async () => {
+    const { driver, respond, emitFinal } = setupDriver();
+    await driver.start();
+    emitFinal("the weather is nice");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).not.toHaveBeenCalled();
+  });
+
+  it("accepts a final transcript after interim speech evidence", async () => {
+    const { driver, respond, emitInterim, emitFinal } = setupDriver();
+    await driver.start();
+    emitInterim("hel");
+    emitFinal("hello");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).toHaveBeenCalledTimes(1);
+    expect((respond.mock.calls as unknown[][])[0]![0]).toBe("hello");
+  });
+
+  it("accepts a high-confidence final without interim evidence", async () => {
+    const { driver, respond, emitFinal } = setupDriver();
+    await driver.start();
+    emitFinal("hello", 0.9);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).toHaveBeenCalledTimes(1);
+  });
+
+  it("recovers: evidence is per-utterance, next phantom final is also dropped", async () => {
+    const { driver, respond, emitInterim, emitFinal } = setupDriver();
+    await driver.start();
+    emitInterim("real");
+    emitFinal("real words");
+    emitFinal("phantom");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).toHaveBeenCalledTimes(1);
+    expect((respond.mock.calls as unknown[][])[0]![0]).toBe("real words");
+  });
+});
+
+describe("BrowserVoiceDriver recognition errors", () => {
+  function setupDriver() {
+    const rec = fakeRecognitionCtor();
+    const driver = new BrowserVoiceDriver("s1", {
+      player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      recognitionCtor: rec.ctor,
+    });
+    driver.onError = vi.fn();
+    driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      () => ({ mode: "interview" }),
+    );
+    const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+    agent.respond = vi.fn(async () => "ok") as unknown as (...args: any[]) => Promise<string>;
+    return { driver, ...rec };
+  }
+
+  it("stops cleanly on not-allowed and reports once without restarting", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, emitError } = setupDriver();
+      await driver.start();
+      emitError("not-allowed");
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(driver.status).toBe("error");
+      expect(driver.onError).toHaveBeenCalledTimes(1);
+      expect(driver.onError).toHaveBeenCalledWith("microphone permission denied");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops cleanly on audio-capture", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, emitError } = setupDriver();
+      await driver.start();
+      emitError("audio-capture");
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(driver.status).toBe("error");
+      expect(driver.onError).toHaveBeenCalledTimes(1);
+      expect(driver.onError).toHaveBeenCalledWith("microphone unavailable");
     } finally {
       vi.useRealTimers();
     }
