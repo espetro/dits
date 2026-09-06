@@ -14,16 +14,10 @@ import type {
   TtsEndpoint,
 } from "@di/shared";
 import { $providerProfile, redactKey } from "../lib/runtime";
-import {
-  DEFAULT_TRANSFORMERS_MODEL_ID,
-  TRANSFORMERS_CATALOG,
-  deleteAllTransformersModels,
-  deleteTransformersModel,
-  smokeTestModel,
-  transformersModelInstalled,
-  type BrowserModelStatus,
-} from "../lib/agent/browser-provider";
+import { smokeTestModel } from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
+import { BrowserLlmManager } from "./browser-llm-manager";
+import { EndpointFields } from "./endpoint-fields";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
@@ -203,252 +197,11 @@ const fieldClass = "block text-xs text-muted-foreground";
 
 const helperClass = "mt-1 text-xs text-muted-foreground";
 
-/**
- * Label + input + one-line muted helper. Extracted so each endpoint
- * field stays a single declarative row inside the centered column.
- */
-function SettingsField(props: { label: string; helper?: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className={fieldClass}>{props.label}</span>
-      <span className="mt-1 block">{props.children}</span>
-      {props.helper && <span className={helperClass}>{props.helper}</span>}
-    </label>
-  );
-}
-
 /** Pane heading: large display title over a full-width hairline rule. */
 function PaneHeading(props: { title: string }) {
   return (
     <div className="border-b border-border pb-4">
       <h2 className="text-xl font-semibold tracking-tight">{props.title}</h2>
-    </div>
-  );
-}
-
-/** Clickable free-provider links shared by the LLM/STT/TTS helper notes. */
-const FREE_PROVIDERS = [
-  { name: "OpenRouter", href: "https://openrouter.ai/" },
-  { name: "Groq", href: "https://console.groq.com/home" },
-  { name: "Cerebras", href: "https://inference.cerebras.ai/" },
-  { name: "Google AI Studio", href: "https://aistudio.google.com/" },
-];
-
-function FreeProviderLinks() {
-  return (
-    <>
-      {FREE_PROVIDERS.map((p, i) => (
-        <React.Fragment key={p.name}>
-          {i > 0 && ", "}
-          <a
-            href={p.href}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-2 hover:text-persimmon-text"
-          >
-            {p.name}
-          </a>
-        </React.Fragment>
-      ))}
-      {"."}
-    </>
-  );
-}
-
-/** Status dot color for a browser model status. */
-function statusDotClass(state: BrowserModelStatus["state"]): string {
-  switch (state) {
-    case "available":
-      return "bg-emerald-500";
-    case "installed":
-      return "bg-sky-500";
-    case "downloadable":
-      return "bg-amber-500";
-    case "unsupported":
-      return "bg-red-500";
-  }
-}
-
-/**
- * In-browser LLM manager: engine picker, Gemini Nano availability row, and
- * the transformers.js model list (size, installed state, download progress,
- * delete / remove-all). Kept as its own component so the endpoint pane stays
- * under the file-size ratchet.
- */
-function BrowserLlmManager(props: {
-  engine: BrowserLlmSection["engine"];
-  modelId: string;
-  onEngineChange: (engine: BrowserLlmSection["engine"]) => void;
-  onModelIdChange: (modelId: string) => void;
-}) {
-  const intl = useIntl();
-  const [geminiStatus, setGeminiStatus] = React.useState<BrowserModelStatus | null>(null);
-  const [installed, setInstalled] = React.useState<Record<string, boolean>>({});
-  const [progress, setProgress] = React.useState<number | null>(null);
-  const [busy, setBusy] = React.useState(false);
-
-  const refresh = React.useCallback(async () => {
-    const gemini = "LanguageModel" in globalThis;
-    setGeminiStatus(
-      gemini ? { state: "installed", detail: "prompt-api" } : { state: "unsupported" },
-    );
-    const next: Record<string, boolean> = {};
-    for (const entry of TRANSFORMERS_CATALOG) {
-      next[entry.id] = await transformersModelInstalled(entry.id);
-    }
-    setInstalled(next);
-  }, []);
-
-  React.useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  async function download(modelId: string) {
-    setBusy(true);
-    setProgress(0);
-    try {
-      const engine = props.engine === "gemini-nano" ? "gemini-nano" : "transformers";
-      const section: BrowserLlmSection =
-        engine === "transformers"
-          ? { mode: "browser", engine, modelId }
-          : { mode: "browser", engine };
-      await smokeTestModel(section);
-      await refresh();
-    } finally {
-      setBusy(false);
-      setProgress(null);
-    }
-  }
-
-  const geminiUnsupported = geminiStatus?.state === "unsupported";
-  const selectedId = props.modelId || DEFAULT_TRANSFORMERS_MODEL_ID;
-
-  return (
-    <div className="space-y-4 rounded-lg bg-muted/40 p-3">
-      <div className="space-y-1.5">
-        <span className={fieldClass}>
-          <FormattedMessage id="settings.llm.browserEngine" />
-        </span>
-        <select
-          value={props.engine}
-          onChange={(e) => props.onEngineChange(e.target.value as BrowserLlmSection["engine"])}
-          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-persimmon/50"
-        >
-          <option value="gemini-nano">
-            {intl.formatMessage({ id: "settings.llm.engineGemini" })}
-          </option>
-          <option value="transformers">
-            {intl.formatMessage({ id: "settings.llm.engineTransformers" })}
-          </option>
-        </select>
-      </div>
-
-      {props.engine === "gemini-nano" ? (
-        <div className="flex items-center gap-2 text-xs">
-          <span
-            role="img"
-            aria-label={intl.formatMessage({ id: "settings.llm.statusDot" })}
-            className={`inline-block size-2 rounded-full ${statusDotClass(geminiStatus?.state ?? "downloadable")}`}
-          />
-          {geminiUnsupported ? (
-            <span className="text-muted-foreground">
-              <FormattedMessage id="settings.llm.geminiUnavailable" />
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              <FormattedMessage id="settings.llm.geminiReady" />
-            </span>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <span className={fieldClass}>
-            <FormattedMessage id="settings.llm.browserModel" />
-          </span>
-          <div className="space-y-1.5">
-            {TRANSFORMERS_CATALOG.map((entry) => {
-              const isInstalled = installed[entry.id] ?? false;
-              const isSelected = selectedId === entry.id;
-              return (
-                <label
-                  key={entry.id}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2 text-xs ${
-                    isSelected ? "border-persimmon/60 bg-background" : "border-border bg-background"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="browser-llm-model"
-                    className="accent-persimmon"
-                    checked={isSelected}
-                    onChange={() => props.onModelIdChange(entry.id)}
-                  />
-                  <span className="flex-1">
-                    <span className="font-medium">{entry.label}</span>
-                    <span className="ml-2 text-muted-foreground">~{entry.sizeMb} MB</span>
-                    {isInstalled && (
-                      <span className="ml-2 text-emerald-600 dark:text-emerald-400">
-                        <FormattedMessage id="settings.llm.installed" />
-                      </span>
-                    )}
-                  </span>
-                  {isSelected && isInstalled && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={busy}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        void deleteTransformersModel(entry.id).then(refresh);
-                      }}
-                    >
-                      <FormattedMessage id="settings.llm.delete" />
-                    </Button>
-                  )}
-                </label>
-              );
-            })}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {progress !== null ? (
-              <span className="text-xs text-muted-foreground">
-                <FormattedMessage
-                  id="settings.llm.downloading"
-                  values={{ percent: Math.round(progress * 100) }}
-                />
-              </span>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={busy || installed[selectedId]}
-                onClick={() => void download(selectedId)}
-              >
-                {installed[selectedId] ? (
-                  <FormattedMessage id="settings.llm.reDownload" />
-                ) : (
-                  <FormattedMessage id="settings.llm.download" />
-                )}
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={busy}
-              onClick={() =>
-                void deleteAllTransformersModels()
-                  .then(refresh)
-                  .catch(() => undefined)
-              }
-            >
-              <FormattedMessage id="settings.llm.removeAll" />
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -835,94 +588,18 @@ function AiProviderPane() {
 
                 {tab === "stt" && <SttTestPanel inBrowser={!draft.enabled} output={sttOutput} />}
                 {draft.enabled && (
-                  <div className="space-y-4">
-                    <SettingsField
-                      label={intl.formatMessage({ id: "settings.baseUrl" })}
-                      helper={intl.formatMessage({
-                        id:
-                          tab === "llm" && draft.flavor === "anthropic"
-                            ? "settings.baseUrlHelpAnthropic"
-                            : "settings.baseUrlHelp",
-                      })}
-                    >
-                      <Input
-                        value={draft.baseUrl}
-                        onChange={(e) => update({ baseUrl: e.target.value })}
-                        placeholder="https://api.openai.com/v1"
-                      />
-                    </SettingsField>
-                    <SettingsField
-                      label={intl.formatMessage({ id: "settings.apiKey" })}
-                      helper={intl.formatMessage({ id: "settings.apiKeyHelp" })}
-                    >
-                      <Input
-                        type="password"
-                        value={draft.apiKey}
-                        onChange={(e) => update({ apiKey: e.target.value })}
-                        placeholder={
-                          profile?.[tab]
-                            ? intl.formatMessage(
-                                { id: "settings.apiKeySaved" },
-                                {
-                                  key: redactKey(
-                                    ("apiKey" in profile[tab] ? profile[tab].apiKey : "") as string,
-                                  ),
-                                },
-                              )
-                            : ""
-                        }
-                      />
-                    </SettingsField>
-                    <SettingsField
-                      label={intl.formatMessage({ id: "settings.modelId" })}
-                      helper={intl.formatMessage({ id: "settings.modelHelp" })}
-                    >
-                      <>
-                        <Input
-                          value={draft.model}
-                          onChange={(e) => update({ model: e.target.value })}
-                          list={`${tab}-models`}
-                          placeholder={
-                            modelOptions.length === 0
-                              ? intl.formatMessage({ id: "settings.modelPlaceholder" })
-                              : undefined
-                          }
-                        />
-                        <datalist id={`${tab}-models`}>
-                          {modelOptions.map((id) => (
-                            <option key={id} value={id} />
-                          ))}
-                        </datalist>
-                      </>
-                    </SettingsField>
-                    {tab === "tts" && (
-                      <SettingsField
-                        label={intl.formatMessage({ id: "settings.voice" })}
-                        helper={intl.formatMessage({ id: "settings.voiceHelp" })}
-                      >
-                        <Input
-                          value={draft.voice}
-                          onChange={(e) => update({ voice: e.target.value })}
-                        />
-                      </SettingsField>
-                    )}
-                    <div className="space-y-1.5 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-                      <p className="font-medium text-foreground">
-                        <FormattedMessage id={`settings.section.${tab}.title`} />
-                      </p>
-                      <p>
-                        <FormattedMessage id={`settings.section.${tab}.providers`} />
-                      </p>
-                      {tab === "llm" && (
-                        <p>
-                          <FormattedMessage id="settings.freeProvidersLabel" />{" "}
-                          <FreeProviderLinks />
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <EndpointFields
+                    tab={tab}
+                    draft={draft}
+                    savedApiKey={
+                      profile?.[tab]
+                        ? redactKey(("apiKey" in profile[tab] ? profile[tab].apiKey : "") as string)
+                        : null
+                    }
+                    modelOptions={modelOptions}
+                    onChange={(patch) => update(patch)}
+                  />
                 )}
-
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
