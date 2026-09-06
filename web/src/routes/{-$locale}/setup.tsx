@@ -378,11 +378,11 @@ function Setup() {
                 onClick={() => void start(true)}
                 disabled={busy}
                 aria-busy={busy}
-                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-espresso px-7 py-3.5 font-body text-base font-semibold text-cream shadow-lg shadow-espresso/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon hover:shadow-persimmon/30 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-70"
+                className="group relative inline-flex items-center gap-2.5 rounded-full bg-espresso px-7 py-3.5 font-body text-base font-semibold text-cream ring-persimmon/0 shadow-lg shadow-espresso/20 transition-all duration-300 ease-out hover:bg-espresso hover:shadow-md hover:ring-2 hover:ring-persimmon/40 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.validate" />
                 <ArrowRight
-                  className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1"
+                  className="size-4 transition-all duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-persimmon"
                   aria-hidden="true"
                 />
               </Button>
