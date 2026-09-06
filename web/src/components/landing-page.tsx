@@ -133,9 +133,12 @@ export function LandingPage() {
           <h1 className="mt-8 max-w-3xl font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-7xl">
             <FormattedMessage
               id="landing.heading"
+              key="landing.heading"
               values={{
                 em: (chunks: React.ReactNode) => (
-                  <span className="text-persimmon-text">{chunks}</span>
+                  <span key="em" className="text-persimmon-text">
+                    {chunks}
+                  </span>
                 ),
               }}
             />

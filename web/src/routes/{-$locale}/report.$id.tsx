@@ -128,7 +128,7 @@ function Report() {
 
   if (isError || !report) {
     return (
-      <div className="ambient grain flex min-h-[100dvh] items-center justify-center bg-cream">
+      <div className="ambient grain flex min-h-[100dvh] items-center justify-center bg-cream px-4 py-16 lg:py-32">
         <main className="rise-in w-full max-w-md text-center">
           <p className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
             <FormattedMessage id="report.noReportYet" />

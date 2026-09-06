@@ -4,7 +4,13 @@ import type { SpeechDriver } from "./server-driver";
 import { createStoreToolExecutors } from "../agent/client-agent";
 import { $currentQuestion, $clientTurns } from "../agent/session-store";
 import { $editorBuffer, $question, $whiteboard } from "../../stores/session";
-import { $effectiveRuntime, $providerProfile, $runtimeMode, probeServer } from "../runtime";
+import {
+  $effectiveRuntime,
+  $providerProfile,
+  $runtimeMode,
+  $serverReachable,
+  probeServer,
+} from "../runtime";
 import { describeWhiteboardSnapshot } from "@di/shared";
 import type { ProviderEndpoint, ProviderSections } from "@di/shared";
 
@@ -23,6 +29,8 @@ export async function selectDriver(): Promise<VoiceDriverKind> {
   if (mode === "custom" || mode === "in-browser") return "browser";
   const pinned = import.meta.env.VITE_VOICE_DEFAULT as VoiceDriverKind | undefined;
   if (pinned === "server" || pinned === "browser") return pinned;
+  const hasCustomBase = (import.meta.env.VITE_DI_API_BASE as string | undefined) !== undefined;
+  if (!hasCustomBase && $serverReachable.get() === false) return "browser";
   try {
     const res = await fetch(`${API_BASE}/api/health`, { method: "GET" });
     return res.ok ? "server" : "browser";

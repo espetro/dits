@@ -96,7 +96,7 @@ function Finish() {
   }, [menuOpen]);
 
   return (
-    <div className="ambient grain flex min-h-[100dvh] items-center justify-center bg-cream px-4">
+    <div className="ambient grain flex min-h-[100dvh] items-center justify-center bg-cream px-4 py-16 lg:py-32">
       <main className="w-full max-w-md text-center">
         <div className="rise-in">
           <p className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">

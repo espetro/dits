@@ -132,7 +132,7 @@ function Setup() {
     <div className="ambient grain min-h-[100dvh] bg-cream">
       <main className="mx-auto w-full max-w-3xl px-4 pb-24 pt-10 md:px-8">
         <div className="rounded-shell bg-paper p-2 ring-1 ring-hairline">
-          <div className="rounded-[calc(2rem-0.375rem)] bg-cream p-6 md:p-10">
+          <div className="rounded-[calc(2rem-0.375rem)] bg-cream p-8 lg:p-12">
             <section className="rise-in" style={{ "--rise-delay": "0ms" } as React.CSSProperties}>
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
                 <FormattedMessage id="setup.presets" />
@@ -159,7 +159,7 @@ function Setup() {
             </section>
 
             <section
-              className="rise-in mt-8"
+              className="rise-in mt-10"
               style={{ "--rise-delay": "120ms" } as React.CSSProperties}
             >
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
@@ -177,7 +177,7 @@ function Setup() {
             </section>
 
             <section
-              className="rise-in mt-8"
+              className="rise-in mt-10"
               style={{ "--rise-delay": "240ms" } as React.CSSProperties}
             >
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
@@ -249,7 +249,7 @@ function Setup() {
             </section>
 
             <section
-              className="rise-in mt-8"
+              className="rise-in mt-10"
               style={{ "--rise-delay": "300ms" } as React.CSSProperties}
             >
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
@@ -261,7 +261,7 @@ function Setup() {
             </section>
 
             <section
-              className="rise-in mt-8 grid gap-6 md:grid-cols-2"
+              className="rise-in mt-10 grid gap-6 md:grid-cols-2"
               style={{ "--rise-delay": "360ms" } as React.CSSProperties}
             >
               <div>
@@ -319,7 +319,7 @@ function Setup() {
 
             {effectiveRuntime !== "server" && !profile?.llm && (
               <section
-                className="rise-in mt-8 rounded-card bg-white/70 p-4 ring-1 ring-hairline"
+                className="rise-in mt-10 rounded-card bg-white/70 p-4 ring-1 ring-hairline"
                 style={{ "--rise-delay": "300ms" } as React.CSSProperties}
               >
                 <p className="text-sm text-espresso-soft">

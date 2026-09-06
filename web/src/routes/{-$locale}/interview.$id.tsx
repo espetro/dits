@@ -237,7 +237,7 @@ function Interview() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-3 pb-3 sm:px-4 md:flex-row md:px-8 md:pb-4">
         {/* main column */}
-        <main className="flex min-w-0 flex-1 flex-col gap-4">
+        <main className="flex w-full max-w-3xl min-w-0 flex-1 flex-col gap-4">
           {/* question block — agent-editable */}
           <section className="rounded-card bg-paper p-2 ring-1 ring-hairline">
             <div className="rounded-[calc(1.5rem-0.375rem)] bg-persimmon-faint p-5 md:p-6">
