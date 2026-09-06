@@ -100,7 +100,7 @@
   "notfound.message": "このページは存在しません。リンクが古いか、アドレスが間違っている可能性があります。",
   "notfound.home": "ホームに戻る",
   "account.language": "言語",
-  "account.history": "履歴",
+  "account.history": "以前のセッション",
   "account.settings": "設定",
   "account.guest": "ゲスト",
   "account.guestEmail": "ローカルセッション · アカウントなし",
@@ -125,5 +125,10 @@
   "settings.invalid": "エンドポイントの項目に不備があります（URL・キー・モデルを確認）。",
   "setup.needsProvider": "AI プロバイダーが未設定です。di サーバーなしでセッションを行うには設定で LLM エンドポイントを追加してください。",
   "setup.openProviderSettings": "プロバイダー設定を開く",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "以前のセッション",
+  "interview.voiceError": "音声エラー",
+  "interview.voiceConnected": "音声接続済み",
+  "interview.voiceConnecting": "接続中…",
+  "interview.editorLanguages": "コード言語"
 }

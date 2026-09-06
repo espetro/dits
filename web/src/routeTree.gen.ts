@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteImport } from './routes/{-$locale}'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
-import { Route as Char123LocaleChar125HistoryRouteImport } from './routes/{-$locale}/history'
 import { Route as Char123LocaleChar125SetupRouteImport } from './routes/{-$locale}/setup'
 import { Route as Char123LocaleChar125FinishIdRouteImport } from './routes/{-$locale}/finish.$id'
 import { Route as Char123LocaleChar125InterviewIdRouteImport } from './routes/{-$locale}/interview.$id'
@@ -27,12 +26,6 @@ const Char123LocaleChar125IndexRoute =
   Char123LocaleChar125IndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => Char123LocaleChar125Route,
-  } as any)
-const Char123LocaleChar125HistoryRoute =
-  Char123LocaleChar125HistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
 const Char123LocaleChar125SetupRoute =
@@ -68,7 +61,6 @@ const Char123LocaleChar125ValidateIdRoute =
 
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
-  '/{-$locale}/history': typeof Char123LocaleChar125HistoryRoute
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
@@ -77,7 +69,6 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/validate/$id': typeof Char123LocaleChar125ValidateIdRoute
 }
 export interface FileRoutesByTo {
-  '/{-$locale}/history': typeof Char123LocaleChar125HistoryRoute
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
@@ -88,7 +79,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
-  '/{-$locale}/history': typeof Char123LocaleChar125HistoryRoute
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
@@ -100,7 +90,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/{-$locale}'
-    | '/{-$locale}/history'
     | '/{-$locale}/setup'
     | '/{-$locale}/'
     | '/{-$locale}/finish/$id'
@@ -109,7 +98,6 @@ export interface FileRouteTypes {
     | '/{-$locale}/validate/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/{-$locale}/history'
     | '/{-$locale}/setup'
     | '/{-$locale}'
     | '/{-$locale}/finish/$id'
@@ -119,7 +107,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/{-$locale}'
-    | '/{-$locale}/history'
     | '/{-$locale}/setup'
     | '/{-$locale}/'
     | '/{-$locale}/finish/$id'
@@ -146,13 +133,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/{-$locale}/'
       preLoaderRoute: typeof Char123LocaleChar125IndexRouteImport
-      parentRoute: typeof Char123LocaleChar125Route
-    }
-    '/{-$locale}/history': {
-      id: '/{-$locale}/history'
-      path: '/history'
-      fullPath: '/{-$locale}/history'
-      preLoaderRoute: typeof Char123LocaleChar125HistoryRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
     '/{-$locale}/setup': {
@@ -194,7 +174,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface Char123LocaleChar125RouteChildren {
-  Char123LocaleChar125HistoryRoute: typeof Char123LocaleChar125HistoryRoute
   Char123LocaleChar125SetupRoute: typeof Char123LocaleChar125SetupRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
   Char123LocaleChar125FinishIdRoute: typeof Char123LocaleChar125FinishIdRoute
@@ -204,7 +183,6 @@ interface Char123LocaleChar125RouteChildren {
 }
 
 const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
-  Char123LocaleChar125HistoryRoute: Char123LocaleChar125HistoryRoute,
   Char123LocaleChar125SetupRoute: Char123LocaleChar125SetupRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
   Char123LocaleChar125FinishIdRoute: Char123LocaleChar125FinishIdRoute,

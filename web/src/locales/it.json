@@ -100,7 +100,7 @@
   "notfound.message": "questa pagina non esiste — il link potrebbe essere scaduto o l'indirizzo errato.",
   "notfound.home": "torna alla home",
   "account.language": "lingua",
-  "account.history": "cronologia",
+  "account.history": "sessioni precedenti",
   "account.settings": "impostazioni",
   "account.guest": "Ospite",
   "account.guestEmail": "sessione locale · nessun account",
@@ -125,5 +125,10 @@
   "settings.invalid": "Alcuni campi dell'endpoint non sono validi (URL, chiave o modello mancanti).",
   "setup.needsProvider": "Nessun provider AI configurato. Aggiungi un endpoint LLM nelle impostazioni per una sessione senza il server di.",
   "setup.openProviderSettings": "Apri impostazioni provider",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "sessioni precedenti",
+  "interview.voiceError": "errore vocale",
+  "interview.voiceConnected": "voce connessa",
+  "interview.voiceConnecting": "connessione…",
+  "interview.editorLanguages": "linguaggi di codice"
 }

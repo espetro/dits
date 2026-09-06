@@ -100,7 +100,7 @@
   "notfound.message": "diese Seite existiert nicht — vielleicht ist der Link veraltet oder die Adresse war vertippt.",
   "notfound.home": "zurück zur Startseite",
   "account.language": "Sprache",
-  "account.history": "Verlauf",
+  "account.history": "frühere sessions",
   "account.settings": "Einstellungen",
   "account.guest": "Gast",
   "account.guestEmail": "lokale Sitzung · kein Konto",
@@ -125,5 +125,10 @@
   "settings.invalid": "Einige Endpunktfelder sind ungültig (URL, Schlüssel oder Modell fehlt).",
   "setup.needsProvider": "Noch kein KI-Anbieter konfiguriert. Fügen Sie in den Einstellungen einen LLM-Endpunkt hinzu, um ohne di-Server eine Sitzung zu starten.",
   "setup.openProviderSettings": "Anbietereinstellungen öffnen",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "frühere sessions",
+  "interview.voiceError": "sprachfehler",
+  "interview.voiceConnected": "sprache verbunden",
+  "interview.voiceConnecting": "verbinde…",
+  "interview.editorLanguages": "code-sprachen"
 }

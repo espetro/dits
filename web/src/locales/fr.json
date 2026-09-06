@@ -100,7 +100,7 @@
   "notfound.message": "cette page n'existe pas — le lien est peut-être périmé ou l'adresse mal tapée.",
   "notfound.home": "retour à l'accueil",
   "account.language": "langue",
-  "account.history": "historique",
+  "account.history": "sessions précédentes",
   "account.settings": "paramètres",
   "account.guest": "Invité",
   "account.guestEmail": "session locale · sans compte",
@@ -125,5 +125,10 @@
   "settings.invalid": "Certains champs du point de terminaison sont invalides (URL, clé ou modèle manquant).",
   "setup.needsProvider": "Aucun fournisseur IA configuré. Ajoutez un point de terminaison LLM dans les réglages pour une session sans serveur di.",
   "setup.openProviderSettings": "Ouvrir les réglages du fournisseur",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "sessions précédentes",
+  "interview.voiceError": "erreur vocale",
+  "interview.voiceConnected": "voix connectée",
+  "interview.voiceConnecting": "connexion…",
+  "interview.editorLanguages": "langages de code"
 }

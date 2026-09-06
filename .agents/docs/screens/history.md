@@ -1,29 +1,44 @@
-# Screen: History (`/{-$locale}/history`)
+# Screen: History (settings dialog pane "Previous sessions")
+
+The standalone `/{-$locale}/history` route was removed. History lives on as a
+pane inside the URL-driven settings dialog: any route can open it via
+`?settings=1&pane=history` or the user dropdown's "Previous sessions" item.
+The finish screen's "discard" button also opens this pane
+(`openSettings("history")`).
 
 ## ASCII mockup
 
 ```
 +------------------------------------------------------------------+
-|  [logo di]   history                              (import) (export)|
-+------------------------------------------------------------------+
-|                                                                  |
-|  +-----------------------------------------------------------+   |
-|  | backend screen          interview   45m   reported  2d ago|   |
-|  | frontend loop           interview   30m   finished 5d ago|   |
-|  | system design drill     coach      20m   reported  1w ago|   |
-|  +-----------------------------------------------------------+   |
-|        (click row -> /report/[id] or /finish/[id])               |
-|                                                                  |
+|  [logo di]                                    [settings] [github] |
+|  +-------------------------------------------------------+        |
+|  |  ... settings dialog ...                              |        |
+|  |  +-----------------------------------------------+   |        |
+|  |  | PREVIOUS SESSIONS                             |   |        |
+|  |  +-----------------------------------------------+   |        |
+|  |  | backend screen      interview  45m  reported  |   |        |
+|  |  | frontend loop       interview  30m  finished  |   |        |
+|  |  | system design drill coach     20m  reported   |   |        |
+|  |  +-----------------------------------------------+   |        |
+|  |        (click row -> /report/[id] or /finish/[id])    |        |
+|  +-------------------------------------------------------+        |
 +------------------------------------------------------------------+
 ```
 
 ## Behavior
 
-- Session list: title, mode, duration, status, relative time. Sorted newest first.
-- Row click: `reported` -> `/report/[id]`; `finished` -> `/finish/[id]`; otherwise -> `/interview/[id]` (resume) — v1 keeps it simple.
-- **Export**: downloads all sessions + turns + reports as one versioned JSON file (published schema lands in M5; v1 uses the shared contract shape).
-- **Import**: accepts a previously exported JSON file, validated before merge (merge by session UUID).
+- Dialog state is URL-driven (raw query string, popstate-synced; see
+  `settings-dialog.tsx`). Deep-linkable, back/forward close and re-open it.
+- Lists past sessions from the same store the old page used, newest first.
+- Clicking a row navigates to `/report/[id]` (reported sessions) or
+  `/finish/[id]` (finished but unreported).
 
-## URL / state
+## Responsive
 
-- No required params. Filters (mode, status) are typed search params when added — URL is the source of truth.
+- Dialog fills the viewport below `sm`; centered card with backdrop from `sm`
+  up.
+
+## Notes
+
+- The pane label is "Previous sessions" (`settings.history` locale key); the
+  `history` id is kept for URL continuity.

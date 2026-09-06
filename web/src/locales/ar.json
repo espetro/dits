@@ -100,7 +100,7 @@
   "notfound.message": "هذه الصفحة غير موجودة — قد يكون الرابط قديمًا أو العنوان مكتوبًا بشكل خاطئ.",
   "notfound.home": "العودة إلى الرئيسية",
   "account.language": "اللغة",
-  "account.history": "السجل",
+  "account.history": "الجلسات السابقة",
   "account.settings": "الإعدادات",
   "account.guest": "زائر",
   "account.guestEmail": "جلسة محلية · بدون حساب",
@@ -125,5 +125,10 @@
   "settings.invalid": "بعض حقول نقطة النهاية غير صالحة (تحقق من العنوان أو المفتاح أو النموذج).",
   "setup.needsProvider": "لم يتم تكوين مزود الذكاء الاصطناعي بعد. أضف نقطة نهاية للنموذج اللغوي في الإعدادات لإجراء جلسة بدون خادم di.",
   "setup.openProviderSettings": "افتح إعدادات المزود",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "الجلسات السابقة",
+  "interview.voiceError": "خطأ في الصوت",
+  "interview.voiceConnected": "الصوت متصل",
+  "interview.voiceConnecting": "جارٍ الاتصال…",
+  "interview.editorLanguages": "لغات البرمجة"
 }

@@ -8,6 +8,8 @@ import { getSession, getTurns } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
 import { $effectiveRuntime } from "../../lib/runtime";
 import { getClientSession, getClientTurns } from "../../lib/opfs-store";
+import { openSettings } from "../../components/settings-dialog";
+import { Button } from "../../components/vendor/button";
 
 function formatTimestamp(createdAt: string) {
   const d = new Date(createdAt);
@@ -100,7 +102,7 @@ function Finish() {
           <p className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
             <FormattedMessage id="finish.complete" />
           </p>
-          <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight">
+          <h1 className="mt-3 break-words font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             {session?.title ?? "session"}
           </h1>
           <p className="mt-2 text-sm text-espresso-soft">
@@ -120,49 +122,54 @@ function Finish() {
             className="rise-in relative"
             style={{ "--rise-delay": "200ms" } as React.CSSProperties}
           >
-            <button
+            <Button
+              variant="outline"
               onClick={downloadMarkdown}
-              className="w-full rounded-full bg-white px-6 py-3.5 font-display font-semibold ring-1 ring-hairline transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/50 active:scale-[0.98]"
+              className="w-full rounded-full bg-white px-6 py-3.5 h-auto font-display ring-hairline duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/50 active:scale-[0.98]"
             >
               <FormattedMessage id="finish.getTranscript" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMenuOpen((o) => !o)}
               aria-label="more transcript formats"
               aria-expanded={menuOpen}
-              className="absolute right-1.5 top-1.5 flex h-[calc(100%-0.75rem)] w-10 items-center justify-center rounded-full text-espresso-soft transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-cream-deep"
+              className="absolute right-1.5 top-1.5 h-[calc(100%-0.75rem)] w-10 rounded-full text-espresso-soft duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-cream-deep"
             >
               <svg viewBox="0 0 12 8" className="h-2 w-3 fill-current">
                 <path d="M0 0h12L6 8z" />
               </svg>
-            </button>
+            </Button>
             {menuOpen && (
               <div className="absolute right-0 top-full z-10 mt-2 w-48 rounded-2xl bg-white p-1 shadow-lg ring-1 ring-hairline">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={downloadJson}
-                  className="w-full rounded-xl px-4 py-2.5 text-left text-sm text-espresso transition-all duration-300 hover:bg-cream-deep"
+                  className="w-full justify-start rounded-xl px-4 py-2.5 text-left text-sm text-espresso duration-300 hover:bg-cream-deep"
                 >
                   <FormattedMessage id="finish.downloadJson" />
-                </button>
+                </Button>
               </div>
             )}
           </div>
-          <button
+          <Button
             style={{ "--rise-delay": "350ms" } as React.CSSProperties}
-            className="rise-in group flex w-full items-center justify-center gap-3 rounded-full bg-espresso px-6 py-3.5 font-display font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98]"
+            className="rise-in group w-full rounded-full bg-espresso px-6 py-3.5 h-auto font-display font-semibold text-cream duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98]"
             onClick={() => navigate({ href: withLocale(locale, `/report/${id}`) })}
           >
             <FormattedMessage id="finish.generateReport" />
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
               →
             </span>
-          </button>
-          <button
-            onClick={() => navigate({ href: withLocale(locale, "/history") })}
-            className="text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon"
+          </Button>
+          <Button
+            variant="link"
+            onClick={() => openSettings("history")}
+            className="h-auto text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon"
           >
             <FormattedMessage id="finish.discard" />
-          </button>
+          </Button>
         </div>
       </main>
     </div>

@@ -100,7 +100,7 @@
   "notfound.message": "esta página não existe — o link pode estar desatualizado ou o endereço digitado errado.",
   "notfound.home": "voltar ao início",
   "account.language": "idioma",
-  "account.history": "histórico",
+  "account.history": "sessões anteriores",
   "account.settings": "configurações",
   "account.guest": "Convidado",
   "account.guestEmail": "sessão local · sem conta",
@@ -125,5 +125,10 @@
   "settings.invalid": "Alguns campos do endpoint são inválidos (URL, chave ou modelo ausente).",
   "setup.needsProvider": "Nenhum provedor de IA configurado. Adicione um endpoint de LLM nas configurações para sessões sem o servidor di.",
   "setup.openProviderSettings": "Abrir configurações do provedor",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras."
+  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
+  "settings.history": "sessões anteriores",
+  "interview.voiceError": "erro de voz",
+  "interview.voiceConnected": "voz conectada",
+  "interview.voiceConnecting": "conectando…",
+  "interview.editorLanguages": "linguagens de código"
 }
