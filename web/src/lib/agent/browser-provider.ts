@@ -216,7 +216,14 @@ export function createLlmModel(
   }
   const handles =
     section.engine === "gemini-nano" ? geminiNanoHandles() : transformersHandles(section.modelId);
-  return handles ? { model: handles.model, browser: handles } : null;
+  if (!handles) return null;
+  // lazy: reading .model before load() would throw inside the getter
+  return {
+    get model() {
+      return handles.model;
+    },
+    browser: handles,
+  };
 }
 
 /** Ask a loaded model for a tiny answer; used by the settings Test button. */
