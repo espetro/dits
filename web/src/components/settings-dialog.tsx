@@ -215,8 +215,6 @@ function AiProviderPane() {
     tts: draftFromEndpoint(profile?.tts),
     llm: draftFromLlm(profile?.llm),
   }));
-  const [error, setError] = React.useState<string | null>(null);
-  const [saved, setSaved] = React.useState(false);
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
   // STT read-aloud block: live transcript shown in a read-only textarea.
@@ -228,34 +226,6 @@ function AiProviderPane() {
   const browserCapable =
     typeof window !== "undefined" &&
     (tab === "stt" ? hasBrowserStt() : tab === "tts" ? "speechSynthesis" in window : false);
-
-  // LLM in-browser capability: Gemini Nano (Prompt API) available now, or
-  // transformers.js possible (WebGPU). Re-probed when the llm tab opens.
-  const [llmBrowserCapable, setLlmBrowserCapable] = React.useState(false);
-  React.useEffect(() => {
-    if (tab !== "llm") return;
-    if (typeof window === "undefined") return;
-    if ("LanguageModel" in globalThis) {
-      setLlmBrowserCapable(true);
-      return;
-    }
-    if (typeof navigator !== "undefined" && "gpu" in navigator) {
-      setLlmBrowserCapable(true);
-      return;
-    }
-    setLlmBrowserCapable(false);
-  }, [tab]);
-
-  // Test results persist until the user edits an input (see `update`) or
-  // re-tests. Only the "Saved." confirmation auto-clears; the timer resets
-  // whenever it is scheduled again and is cleaned up on unmount.
-  const savedTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  React.useEffect(() => {
-    const timer = savedTimer.current;
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
 
   const draft = drafts[tab];
 
@@ -290,19 +260,24 @@ function AiProviderPane() {
       clearTimeout(timer);
     };
   }, [draft.enabled, draft.baseUrl, draft.apiKey]);
-  const llmComplete =
-    !drafts.llm.enabled ||
-    drafts.llm.llmMode === "browser" ||
-    (drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model);
-  const llmOk = drafts.llm.enabled ? Boolean(llmComplete) : Boolean(profile?.llm);
-  const canSave = llmOk || drafts.llm.enabled;
-
   function update(patch: Partial<SectionDraft>) {
     setDrafts((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
-    setSaved(false);
-    setError(null);
     setTestState((prev) => ({ ...prev, [tab]: undefined }));
   }
+
+  // Autosave: every edit is validated and persisted after a short debounce,
+  // so there is no Save button to forget. An incomplete llm draft never
+  // overwrites the last valid persisted profile (the stale one keeps the
+  // session startable while the user is mid-edit).
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = buildProfile();
+      if (!next.llm) return;
+      const parsed = v.safeParse(ProviderSectionsSchema, next);
+      if (parsed.success) $providerProfile.set(parsed.output);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [drafts]);
 
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
@@ -339,25 +314,6 @@ function AiProviderPane() {
       };
     }
     return out;
-  }
-
-  function save() {
-    setSaved(false);
-    const profile = buildProfile();
-    if (!profile.llm) {
-      setError(intl.formatMessage({ id: "settings.llmRequired" }));
-      return;
-    }
-    const parsed = v.safeParse(ProviderSectionsSchema, profile);
-    if (!parsed.success) {
-      setError(intl.formatMessage({ id: "settings.invalid" }));
-      return;
-    }
-    setError(null);
-    $providerProfile.set(parsed.output);
-    setSaved(true);
-    if (savedTimer.current) clearTimeout(savedTimer.current);
-    savedTimer.current = setTimeout(() => setSaved(false), 3000);
   }
 
   async function runTest() {
@@ -523,14 +479,21 @@ function AiProviderPane() {
               <div className="space-y-5 rounded-xl border border-border p-4">
                 <RadioGroup
                   value={draft.enabled ? "custom" : "browser"}
-                  onValueChange={(value) => update({ enabled: value === "custom" })}
+                  onValueChange={(value) =>
+                    update(
+                      value === "custom"
+                        ? { enabled: true }
+                        : // in-browser on the llm tab also flips llmMode;
+                          // enabled stays false (no endpoint fields to fill)
+                          tab === "llm"
+                          ? { enabled: false, llmMode: "browser" }
+                          : { enabled: false },
+                    )
+                  }
                   className="flex flex-wrap gap-4"
                 >
                   <Label className="flex items-center gap-1.5 text-sm font-normal">
-                    <RadioGroupItem
-                      value="browser"
-                      disabled={tab === "llm" && !llmBrowserCapable}
-                    />
+                    <RadioGroupItem value="browser" />
                     <FormattedMessage id="settings.inBrowser" />
                   </Label>
                   <Label className="flex items-center gap-1.5 text-sm font-normal">
@@ -568,12 +531,12 @@ function AiProviderPane() {
                     onModelIdChange={(browserModelId) => update({ browserModelId })}
                   />
                 )}
-                {tab === "llm" && !draft.enabled && (
+                {tab === "llm" && !draft.enabled && draft.llmMode !== "browser" && (
                   <p className="text-xs text-muted-foreground">
                     <FormattedMessage id="settings.llmRequired" />
                   </p>
                 )}
-                {tab === "llm" && (
+                {tab === "llm" && draft.llmMode === "browser" && (
                   <div
                     role="note"
                     className="flex gap-2 rounded-lg border border-persimmon/30 bg-persimmon/5 p-3 text-xs text-espresso-soft"
@@ -582,7 +545,20 @@ function AiProviderPane() {
                       className="mt-0.5 size-3.5 shrink-0 text-persimmon-deep"
                       aria-hidden="true"
                     />
-                    <FormattedMessage id="settings.llm.inBrowserWarning" />
+                    <span>
+                      <FormattedMessage id="settings.llm.inBrowserWarning" />{" "}
+                      <strong className="font-semibold">
+                        <FormattedMessage id="settings.llm.cloudRecommended" />
+                      </strong>{" "}
+                      <a
+                        href="https://huggingface.co/blog/Xenova/run-gemini-nano-in-your-browser"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2 hover:text-persimmon-text"
+                      >
+                        <FormattedMessage id="settings.llm.geminiEnableLink" />
+                      </a>
+                    </span>
                   </div>
                 )}
 
@@ -649,32 +625,15 @@ function AiProviderPane() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 sm:ml-auto">
-                    {saved && (
-                      <span
-                        role="status"
-                        className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
-                      >
-                        <Check className="size-3.5" aria-hidden="true" />
-                        <FormattedMessage id="settings.saved" />
-                      </span>
-                    )}
-                    <Button type="button" size="sm" onClick={save} disabled={!canSave}>
-                      <FormattedMessage id="settings.save" />
-                    </Button>
-                  </div>
+                  <span role="note" className="text-xs text-muted-foreground sm:ml-auto">
+                    <FormattedMessage id="settings.autosaveNote" />
+                  </span>
                 </div>
               </div>
             )}
           </TabsContent>
         ))}
       </Tabs>
-
-      {error && (
-        <p role="alert" className="text-sm text-red-600">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

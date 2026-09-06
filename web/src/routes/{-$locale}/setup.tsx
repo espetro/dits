@@ -10,11 +10,18 @@ import { MicSelector } from "../../components/vendor/mic-selector";
 import { Button } from "../../components/vendor/button";
 import { Textarea } from "../../components/vendor/textarea";
 import { ToggleGroup, ToggleGroupItem } from "../../components/vendor/toggle-group";
-import { $effectiveRuntime, $providerProfile, ensureRuntimeProbe } from "../../lib/runtime";
+import {
+  $effectiveRuntime,
+  $providerProfile,
+  $serverReachable,
+  ensureRuntimeProbe,
+  probeServer,
+} from "../../lib/runtime";
 import { openSettings } from "../../components/settings-dialog";
 import { createClientSession } from "../../lib/opfs-store";
 import { resetClientSession } from "../../lib/agent/session-store";
 import { toast } from "sonner";
+import { ArrowRight } from "lucide-react";
 
 const MAX_FILES = 10;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
@@ -55,6 +62,10 @@ function Setup() {
   const profile = useStore($providerProfile);
   React.useEffect(() => {
     ensureRuntimeProbe();
+    // A stale persisted "reachable" value would skip the probe and send the
+    // session POST at a static host (405, dead button). Re-probe on mount
+    // whenever reachability is not freshly confirmed this session.
+    if ($serverReachable.get() !== false) void probeServer();
   }, []);
   const navigate = useNavigate();
   const [files, setFiles] = React.useState<File[]>([]);
@@ -135,6 +146,18 @@ function Setup() {
       navigate({
         href: withLocale(locale, validate ? `/validate/${session.id}` : `/interview/${session.id}`),
       });
+    } catch (err) {
+      // a dead/unexpected server surface (405 from a static host, network
+      // error, 5xx) must never silently swallow the click: tell the user,
+      // refresh reachability so the next attempt uses the client runtime.
+      const probed = await probeServer();
+      if (!probed) {
+        toast.error(intl.formatMessage({ id: "setup.startFailedToast" }), {
+          description: intl.formatMessage({ id: "setup.needsProvider" }),
+        });
+      } else {
+        setError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setBusy(false);
     }
@@ -354,12 +377,14 @@ function Setup() {
               <Button
                 onClick={() => void start(true)}
                 disabled={busy}
-                className="group inline-flex items-center gap-3 rounded-full bg-espresso px-8 py-4 font-body text-lg font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                aria-busy={busy}
+                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-espresso px-7 py-3.5 font-body text-base font-semibold text-cream shadow-lg shadow-espresso/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon hover:shadow-persimmon/30 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.validate" />
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
-                  →
-                </span>
+                <ArrowRight
+                  className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </Button>
               <Button
                 variant="ghost"

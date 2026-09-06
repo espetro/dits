@@ -28,7 +28,7 @@
   "setup.mode.interview": "面试",
   "setup.mode.coach": "教练",
   "setup.coachHint": "首次报告后可用",
-  "setup.validate": "验证并开始",
+  "setup.validate": "开始面试",
   "setup.skipValidation": "不验证直接开始",
   "setup.defaultTitle": "练习会话",
   "validate.header": "验证：{title}",
@@ -122,8 +122,6 @@
   "settings.test": "测试",
   "settings.test.inBrowser": "浏览器内置模式,无需测试",
   "settings.test.unsupported": "此浏览器不支持",
-  "settings.saved": "已保存。",
-  "settings.save": "保存",
   "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "部分端点字段无效(请检查 URL、密钥或模型)。",
   "setup.needsProvider": "尚未配置 AI 提供方。请在设置中添加 LLM 端点,以便在没有 di 服务器时进行会话。",
@@ -163,7 +161,7 @@
   "settings.section.tts.providers": "任何 OpenAI 兼容的 /audio/speech 端点都可以：Piper（通过 OpenAI 兼容 shim）、Kokoro 或 Speaches。",
   "settings.section.llm.title": "LLM 选项",
   "settings.section.llm.providers": "OpenAI 兼容端点（OpenAI、OpenRouter、Groq、Cerebras、Google AI Studio、Ollama、llama.cpp）或 Anthropic 兼容端点。",
-  "settings.llm.inBrowserWarning": "浏览器内模型通过 WebGPU 在你的设备上运行：占用大量内存/CPU，且在遵循面试指令方面明显不如云端模型可靠。为获得最流畅的体验，建议使用云端端点。",
+  "settings.llm.inBrowserWarning": "浏览器内模型通过 WebGPU 在你的设备上运行：占用大量内存/CPU，且在遵循面试指令方面明显不如云端模型可靠。",
   "settings.llm.browserEngine": "引擎",
   "settings.llm.engineGemini": "Gemini Nano（Chrome 内置）",
   "settings.llm.engineTransformers": "Transformers.js（WebGPU，可下载模型）",
@@ -178,5 +176,9 @@
   "settings.llm.geminiReady": "由 Chrome 管理，下载与更新自动完成。",
   "settings.llm.statusDot": "引擎状态",
   "settings.llm.testOk": "模型已响应",
-  "setup.llmMissing": "未配置 LLM"
+  "setup.llmMissing": "未配置 LLM",
+  "setup.startFailedToast": "无法启动会话",
+  "settings.autosaveNote": "更改会自动保存。",
+  "settings.llm.cloudRecommended": "为获得最流畅的体验，建议使用云端端点。",
+  "settings.llm.geminiEnableLink": "在使用 Chrome？启用 Gemini Nano →"
 }

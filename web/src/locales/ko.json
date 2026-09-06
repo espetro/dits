@@ -28,7 +28,7 @@
   "setup.mode.interview": "면접",
   "setup.mode.coach": "코치",
   "setup.coachHint": "첫 리포트 이후 사용 가능",
-  "setup.validate": "검증 후 시작",
+  "setup.validate": "면접 시작",
   "setup.skipValidation": "검증 없이 진행",
   "setup.defaultTitle": "연습 세션",
   "validate.header": "검증: {title}",
@@ -122,8 +122,6 @@
   "settings.test": "테스트",
   "settings.test.inBrowser": "브라우저 내장 모드, 테스트할 항목 없음",
   "settings.test.unsupported": "이 브라우저에서는 지원되지 않습니다",
-  "settings.saved": "저장되었습니다.",
-  "settings.save": "저장",
   "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "일부 엔드포인트 필드가 잘못되었습니다(URL, 키 또는 모델 확인).",
   "setup.needsProvider": "AI 공급자가 아직 구성되지 않았습니다. di 서버 없이 세션을 진행하려면 설정에서 LLM 엔드포인트를 추가하세요.",
@@ -163,7 +161,7 @@
   "settings.section.tts.providers": "OpenAI 호환 /audio/speech 엔드포인트라면 무엇이든 동작합니다: Piper(OpenAI 호환 shim 경유), Kokoro, Speaches.",
   "settings.section.llm.title": "LLM 옵션",
   "settings.section.llm.providers": "OpenAI 호환(OpenAI, OpenRouter, Groq, Cerebras, Google AI Studio, Ollama, llama.cpp) 또는 Anthropic 호환 엔드포인트.",
-  "settings.llm.inBrowserWarning": "브라우저 내 모델은 WebGPU로 기기에서 실행됩니다: 메모리/CPU를 많이 소모하고 인터뷰 지시 수행 신뢰성이 클라우드 모델보다 상당히 낮습니다. 원활한 경험에는 클라우드 엔드포인트를 권장합니다.",
+  "settings.llm.inBrowserWarning": "브라우저 내 모델은 WebGPU로 기기에서 실행됩니다: 메모리/CPU를 많이 소모하고 인터뷰 지시 수행 신뢰성이 클라우드 모델보다 상당히 낮습니다.",
   "settings.llm.browserEngine": "엔진",
   "settings.llm.engineGemini": "Gemini Nano (Chrome 내장)",
   "settings.llm.engineTransformers": "Transformers.js (WebGPU, 다운로드 모델)",
@@ -178,5 +176,9 @@
   "settings.llm.geminiReady": "Chrome 이 관리합니다. 다운로드와 업데이트가 자동으로 진행됩니다.",
   "settings.llm.statusDot": "엔진 상태",
   "settings.llm.testOk": "모델이 응답했습니다",
-  "setup.llmMissing": "LLM 미설정"
+  "setup.llmMissing": "LLM 미설정",
+  "setup.startFailedToast": "세션을 시작하지 못했습니다",
+  "settings.autosaveNote": "변경 사항은 자동으로 저장됩니다.",
+  "settings.llm.cloudRecommended": "원활한 경험에는 클라우드 엔드포인트를 권장합니다.",
+  "settings.llm.geminiEnableLink": "Chrome을 사용 중인가요? Gemini Nano 활성화 →"
 }

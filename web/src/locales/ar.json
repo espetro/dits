@@ -28,7 +28,7 @@
   "setup.mode.interview": "مقابلة",
   "setup.mode.coach": "مدرب",
   "setup.coachHint": "متاح بعد أول تقرير لك",
-  "setup.validate": "تحقّق وابدأ",
+  "setup.validate": "ابدأ المقابلة",
   "setup.skipValidation": "المتابعة دون تحقق",
   "setup.defaultTitle": "جلسة تدريب",
   "validate.header": "تحقق: {title}",
@@ -122,8 +122,6 @@
   "settings.test": "اختبار",
   "settings.test.inBrowser": "وضع المتصفح، لا شيء لاختباره",
   "settings.test.unsupported": "غير مدعوم في هذا المتصفح",
-  "settings.saved": "تم الحفظ.",
-  "settings.save": "حفظ",
   "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "بعض حقول نقطة النهاية غير صالحة (تحقق من العنوان أو المفتاح أو النموذج).",
   "setup.needsProvider": "لم يتم تكوين مزود الذكاء الاصطناعي بعد. أضف نقطة نهاية للنموذج اللغوي في الإعدادات لإجراء جلسة بدون خادم di.",
@@ -163,7 +161,7 @@
   "settings.section.tts.providers": "أي نقطة نهاية /audio/speech متوافقة مع OpenAI تعمل: Piper (عبر shim متوافق مع OpenAI) أو Kokoro أو Speaches.",
   "settings.section.llm.title": "خيارات LLM",
   "settings.section.llm.providers": "نقاط نهاية متوافقة مع OpenAI (OpenAI وOpenRouter وGroq وCerebras وGoogle AI Studio وOllama وllama.cpp) أو مع Anthropic.",
-  "settings.llm.inBrowserWarning": "النماذج داخل المتصفح تعمل عبر WebGPU على جهازك: تستهلك ذاكرة/معالجة كبيرة وتكون أقل موثوقية بوضوح في اتباع تعليمات المقابلة من النماذج السحابية. يُنصح بنقطة نهاية سحابية لتجربة أكثر سلاسة.",
+  "settings.llm.inBrowserWarning": "النماذج داخل المتصفح تعمل عبر WebGPU على جهازك: تستهلك ذاكرة/معالجة كبيرة وتكون أقل موثوقية بوضوح في اتباع تعليمات المقابلة من النماذج السحابية.",
   "settings.llm.browserEngine": "المحرك",
   "settings.llm.engineGemini": "Gemini Nano (مدمج في Chrome)",
   "settings.llm.engineTransformers": "Transformers.js (WebGPU، نماذج قابلة للتنزيل)",
@@ -178,5 +176,9 @@
   "settings.llm.geminiReady": "يديره Chrome؛ التنزيلات والتحديثات تتم تلقائيًا.",
   "settings.llm.statusDot": "حالة المحرك",
   "settings.llm.testOk": "استجاب النموذج",
-  "setup.llmMissing": "لم يتم إعداد LLM"
+  "setup.llmMissing": "لم يتم إعداد LLM",
+  "setup.startFailedToast": "تعذّر بدء الجلسة",
+  "settings.autosaveNote": "يتم حفظ التغييرات تلقائيًا.",
+  "settings.llm.cloudRecommended": "يُنصح بنقطة نهاية سحابية لتجربة أكثر سلاسة.",
+  "settings.llm.geminiEnableLink": "تستخدم Chrome؟ فعّل Gemini Nano ←"
 }

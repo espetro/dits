@@ -28,7 +28,7 @@
   "setup.mode.interview": "面接",
   "setup.mode.coach": "コーチ",
   "setup.coachHint": "初回レポート後に利用可能",
-  "setup.validate": "確認して開始",
+  "setup.validate": "面接を開始",
   "setup.skipValidation": "確認せずに進む",
   "setup.defaultTitle": "練習セッション",
   "validate.header": "確認: {title}",
@@ -122,8 +122,6 @@
   "settings.test": "テスト",
   "settings.test.inBrowser": "ブラウザ内モードのためテスト対象なし",
   "settings.test.unsupported": "このブラウザではサポートされていません",
-  "settings.saved": "保存しました。",
-  "settings.save": "保存",
   "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "エンドポイントの項目に不備があります（URL・キー・モデルを確認）。",
   "setup.needsProvider": "AI プロバイダーが未設定です。di サーバーなしでセッションを行うには設定で LLM エンドポイントを追加してください。",
@@ -163,7 +161,7 @@
   "settings.section.tts.providers": "OpenAI互換の /audio/speech エンドポイントなら動作します: Piper（OpenAI互換シム経由）、Kokoro、Speaches など。",
   "settings.section.llm.title": "LLMの選択肢",
   "settings.section.llm.providers": "OpenAI互換（OpenAI、OpenRouter、Groq、Cerebras、Google AI Studio、Ollama、llama.cpp）またはAnthropic互換のエンドポイント。",
-  "settings.llm.inBrowserWarning": "ブラウザ内モデルはWebGPUでデバイス上で動作します: メモリ/CPUを大きく消費し、面接の指示への追従はクラウドモデルよりかなり劣ります。最も快適な体験にはクラウドエンドポイントを推奨します。",
+  "settings.llm.inBrowserWarning": "ブラウザ内モデルはWebGPUでデバイス上で動作します: メモリ/CPUを大きく消費し、面接の指示への追従はクラウドモデルよりかなり劣ります。",
   "settings.llm.browserEngine": "エンジン",
   "settings.llm.engineGemini": "Gemini Nano（Chrome 組み込み）",
   "settings.llm.engineTransformers": "Transformers.js（WebGPU、ダウンロード型モデル）",
@@ -178,5 +176,9 @@
   "settings.llm.geminiReady": "Chrome が管理します。ダウンロードや更新は自動的です。",
   "settings.llm.statusDot": "エンジン状態",
   "settings.llm.testOk": "モデルが応答しました",
-  "setup.llmMissing": "LLMが未設定"
+  "setup.llmMissing": "LLMが未設定",
+  "setup.startFailedToast": "セッションを開始できませんでした",
+  "settings.autosaveNote": "変更は自動的に保存されます。",
+  "settings.llm.cloudRecommended": "最も快適な体験にはクラウドエンドポイントを推奨します。",
+  "settings.llm.geminiEnableLink": "Chromeを使っていますか？Gemini Nanoを有効にする →"
 }

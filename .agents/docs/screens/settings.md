@@ -31,7 +31,7 @@ button in its own block, inset card with a centered max-w-xl column.
                  |  |  rows py-2.5     |  |  model    [_________]           |       |
                  |  |  px-3 (~44px)    |  |    one-line muted helper        |       |
                  |  |  gap-y-1         |  |  free providers (links)         |       |
-                 |  |                  |  |  [Test]          [Save]         |       |
+                 |  |                  |  |  [Test]  changes save auto      |       |
                  |  +------------------+  +---------------------------------+       |
                  +------------------------------------------------------------------+
                     sm:max-w-4xl lg:max-w-5xl, h-[min(40rem,100vh-6rem)];
@@ -55,7 +55,7 @@ button in its own block, inset card with a centered max-w-xl column.
         |  model    [___________]   |
         |    one-line muted helper  |
         |  free provider links      |
-        |  [Test]      [Save]       |   <- footer stacks vertically
+        |  [Test]  changes save auto|   <- footer stacks vertically
         |                           |
         +---------------------------+
         full-screen: no rounding, no card chrome, no centered column,
@@ -98,9 +98,14 @@ button in its own block, inset card with a centered max-w-xl column.
 - AI Provider pane: three sub-tabs STT / TTS / LLM. Each chooses
   In-browser vs Custom endpoint (baseUrl, apiKey redacted when saved via
   redactKey, model, voice for TTS). STT in-browser = Web Speech fallback.
-  LLM in-browser radio is enabled when the browser has the Prompt API
-  (LanguageModel global) or WebGPU; selecting it shows the browser LLM
-  manager (see below). LLM custom mode adds a flavor select
+  The LLM in-browser radio is always selectable; the browser LLM manager
+  shows per-engine availability (Gemini Nano status dot, transformers
+  install state) so a missing WebGPU or Prompt API surfaces as manager
+  state, not a locked radio. Selecting in-browser shows the browser LLM
+  manager (see below) plus the settings.llm.inBrowserWarning callout
+  (WebGPU cost/reliability), a bold settings.llm.cloudRecommended line
+  and a settings.llm.geminiEnableLink to the Gemini Nano enable guide.
+  LLM custom mode adds a flavor select
   (OpenAI/Anthropic-compatible) above the endpoint fields. STT/TTS custom
   mode shows the settings.customProviders helper (whisper.cpp/Speaches for
   STT, Piper/Kokoro for TTS) and a FreeProviderLinks row (OpenRouter,
@@ -126,6 +131,8 @@ button in its own block, inset card with a centered max-w-xl column.
   browser lacks the feature the button is disabled with a muted
   settings.test.unsupported reason line (role=note) and a matching
   title tooltip.
-- Save: validates with ProviderSectionsSchema (LLM required), sets
-  $providerProfile, shows inline "Saved." (role=status) that
-  auto-clears after 3s; editing a field resets it.
+- Saving is automatic: every edit is validated and written to
+  $providerProfile after a 600ms debounce; a muted settings.autosaveNote
+  (role=note) replaces the old Save button. An incomplete LLM draft
+  never overwrites the last valid persisted profile, so the session
+  stays startable mid-edit.

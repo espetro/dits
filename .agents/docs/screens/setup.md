@@ -28,7 +28,7 @@
 |  language: [dropdown]     mode:  (interview) (coach*)            |
 |                                                                  |
 |              +-----------------------------+                     |
-|              |      validate & start       |  => /validate/[id]  |
+|              |        start interview      |  => /validate/[id]  |
 |              +-----------------------------+                     |
 |              proceed without validation => /interview/[id]       |
 |                                                                  |
@@ -54,7 +54,11 @@
   component renders built-in English strings (no i18n hooks). Nothing is
   recorded or transmitted; preview capture stops when the dropdown closes.
 - Form fields: duration (20/30/45/60), tone, difficulty, language (interview language, NOT the UI locale), mode (`interview|coach`).
-- Primary action **validate & start** creates the session (POST /v1/sessions) then routes to `/validate/[id]`.
+- Primary action **start interview** (setup.validate) creates the session
+  (POST /v1/sessions) then routes to `/validate/[id]`. Design: espresso pill,
+  semibold base-size text, lucide ArrowRight that slides right on hover,
+  persimmon hover with soft shadow lift, active scale 0.97 (replaces the old
+  oversized "validate & start →" text-arrow pill).
 - Link **proceed without validation** routes straight to `/interview/[id]`.
 - Coach mode button is disabled but animated, with an explanatory tooltip ("available after your first report") until a report exists.
 
@@ -63,6 +67,13 @@
   not `server` and no profile with an llm section exists, setup shows a muted
   notice (setup.needsProvider) with a button that opens the settings dialog at
   the AI provider pane.
+- Failure feedback: `start()` wraps session creation in try/catch. On failure
+  it re-probes the server; if unreachable it raises a sonner toast
+  (setup.startFailedToast with setup.needsProvider as description), otherwise
+  an inline error. This covers the static-host 405 case: reachability is
+  re-probed on mount whenever it is not freshly confirmed false, so a stale
+  persisted "reachable" value can no longer pin the runtime to `server` and
+  silently swallow the click.
 
 - **Custom runtime** (ADR-0003, `$effectiveRuntime !== "server"`):
   the start action creates the session via `web/src/lib/opfs-store.ts#createClientSession`

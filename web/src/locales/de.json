@@ -28,7 +28,7 @@
   "setup.mode.interview": "interview",
   "setup.mode.coach": "coach",
   "setup.coachHint": "verfügbar nach deinem ersten bericht",
-  "setup.validate": "prüfen & starten",
+  "setup.validate": "Interview starten",
   "setup.skipValidation": "ohne prüfung fortfahren",
   "setup.defaultTitle": "übungssession",
   "validate.header": "prüfung: {title}",
@@ -122,8 +122,6 @@
   "settings.test": "Testen",
   "settings.test.inBrowser": "Browser-Modus, nichts zu testen",
   "settings.test.unsupported": "in diesem Browser nicht unterstützt",
-  "settings.saved": "Gespeichert.",
-  "settings.save": "Speichern",
   "settings.llmRequired": "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements).",
   "settings.invalid": "Einige Endpunktfelder sind ungültig (URL, Schlüssel oder Modell fehlt).",
   "setup.needsProvider": "Noch kein KI-Anbieter konfiguriert. Fügen Sie in den Einstellungen einen LLM-Endpunkt hinzu, um ohne di-Server eine Sitzung zu starten.",
@@ -163,7 +161,7 @@
   "settings.section.tts.providers": "Jeder OpenAI-kompatible /audio/speech-Endpunkt funktioniert: Piper (über einen OpenAI-kompatiblen Shim), Kokoro oder Speaches.",
   "settings.section.llm.title": "LLM-Optionen",
   "settings.section.llm.providers": "OpenAI-kompatible Endpunkte (OpenAI, OpenRouter, Groq, Cerebras, Google AI Studio, Ollama, llama.cpp) oder Anthropic-kompatible.",
-  "settings.llm.inBrowserWarning": "Im-Browser-Modelle laufen über WebGPU auf deinem Gerät: Sie belegen viel Speicher/CPU und sind deutlich unzuverlässiger bei Interviewanweisungen als Cloud-Modelle. Ein Cloud-Endpunkt wird für das reibungsfreieste Erlebnis empfohlen.",
+  "settings.llm.inBrowserWarning": "Im-Browser-Modelle laufen über WebGPU auf deinem Gerät: Sie belegen viel Speicher/CPU und sind deutlich unzuverlässiger bei Interviewanweisungen als Cloud-Modelle.",
   "settings.llm.browserEngine": "Engine",
   "settings.llm.engineGemini": "Gemini Nano (in Chrome integriert)",
   "settings.llm.engineTransformers": "Transformers.js (WebGPU, herunterladbare Modelle)",
@@ -178,5 +176,9 @@
   "settings.llm.geminiReady": "Wird von Chrome verwaltet; Downloads/Updates erfolgen automatisch.",
   "settings.llm.statusDot": "Engine-Status",
   "settings.llm.testOk": "Modell hat geantwortet",
-  "setup.llmMissing": "kein LLM konfiguriert"
+  "setup.llmMissing": "kein LLM konfiguriert",
+  "setup.startFailedToast": "Sitzung konnte nicht gestartet werden",
+  "settings.autosaveNote": "Änderungen werden automatisch gespeichert.",
+  "settings.llm.cloudRecommended": "Ein Cloud-Endpunkt wird für das reibungsfreieste Erlebnis empfohlen.",
+  "settings.llm.geminiEnableLink": "Chrome im Einsatz? Gemini Nano aktivieren →"
 }
