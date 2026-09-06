@@ -129,6 +129,7 @@ export class VoiceLoop {
         baseUrl: this.config.llm.base_url,
         apiKey: this.config.llm.api_key,
         model: this.config.llm.model,
+        flavor: this.config.llm.flavor,
         events,
         sessionId: this.sessionId,
       });

@@ -8,7 +8,7 @@ import { AUDIO_HEADER_BYTES, TTS_SAMPLE_RATE } from "@di/shared/voice";
 function testConfig(): Config {
   return {
     server: { port: 3000, auth: "none" },
-    llm: { provider: "mock", base_url: "http://localhost:9000", model: "m" },
+    llm: { provider: "mock", base_url: "http://localhost:9000", model: "m", flavor: "openai" },
     stt: { base_url: "http://localhost:9000", model: "s", mode: "buffered" },
     tts: { base_url: "http://localhost:9000", model: "t", voice: "v" },
     files: { db_path: ":memory:", log_path: "", data_dir: "" },

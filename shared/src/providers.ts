@@ -12,7 +12,11 @@ import * as v from "valibot";
  * in-browser LLM fallback, so a usable profile always has an `llm` section.
  */
 
-/** One OpenAI-compatible endpoint configuration. */
+/** Wire protocol the endpoint speaks for LLM calls. */
+export const FlavorSchema = v.picklist(["openai", "anthropic"]);
+export type Flavor = v.InferOutput<typeof FlavorSchema>;
+
+/** One LLM/STT-compatible endpoint configuration. */
 export const ProviderEndpointSchema = v.object({
   /** OpenAI-compatible base URL, e.g. http://localhost:8317/v1 or a cloud endpoint */
   baseUrl: v.pipe(v.string(), v.url()),
@@ -20,6 +24,8 @@ export const ProviderEndpointSchema = v.object({
   apiKey: v.pipe(v.string(), v.minLength(1)),
   /** Model id for this endpoint */
   model: v.pipe(v.string(), v.minLength(1)),
+  /** API flavor; "anthropic" targets native /v1/messages endpoints. */
+  flavor: v.optional(FlavorSchema),
 });
 
 /** TTS endpoint: adds a voice selector (empty = provider default). */
@@ -73,14 +79,15 @@ export function decodeProviderProfile(raw: string): ProviderSections | null {
     if (legacy.success) {
       const old = legacy.output;
       return {
-        stt: { baseUrl: old.baseUrl, apiKey: old.apiKey, model: "whisper-1" },
+        stt: { baseUrl: old.baseUrl, apiKey: old.apiKey, model: "whisper-1", flavor: "openai" },
         tts: {
           baseUrl: old.baseUrl,
           apiKey: old.apiKey,
           model: old.ttsModel || "tts-1",
           voice: old.ttsVoice,
+          flavor: "openai",
         },
-        llm: { baseUrl: old.baseUrl, apiKey: old.apiKey, model: old.llmModel },
+        llm: { baseUrl: old.baseUrl, apiKey: old.apiKey, model: old.llmModel, flavor: "openai" },
       };
     }
     return null;

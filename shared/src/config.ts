@@ -6,6 +6,8 @@ export const ProviderSchema = v.object({
   base_url: v.pipe(v.string(), v.url()),
   api_key: v.optional(v.string()),
   model: v.string(),
+  /** Wire protocol for LLM calls; "anthropic" targets native /v1/messages. */
+  flavor: v.optional(v.picklist(["openai", "anthropic"])),
 });
 export type Provider = v.InferOutput<typeof ProviderSchema>;
 

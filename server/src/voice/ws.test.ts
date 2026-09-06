@@ -9,7 +9,7 @@ import { VoiceLoop } from "./loop";
 function testConfig(): Config {
   return {
     server: { port: 0, auth: "none" },
-    llm: { provider: "mock", base_url: "http://localhost:9", model: "m" },
+    llm: { provider: "mock", base_url: "http://localhost:9", model: "m", flavor: "openai" },
     stt: { base_url: "http://localhost:9", model: "s", mode: "buffered" },
     tts: { base_url: "http://localhost:9", model: "t", voice: "v" },
     files: { db_path: ":memory:", log_path: "", data_dir: "" },

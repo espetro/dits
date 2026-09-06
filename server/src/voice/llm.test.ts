@@ -267,3 +267,79 @@ describe("OpenAiChatClient.streamChat", () => {
     });
   });
 });
+
+describe("OpenAiChatClient.chat anthropic flavor", () => {
+  it("posts the Anthropic Messages shape to /v1/messages and maps text + tool_use blocks", async () => {
+    let captured: { url: string; body: any; headers: Record<string, string> } | undefined;
+    const llm = new OpenAiChatClient({
+      baseUrl: "http://fake.local/",
+      model: "claude-sonnet",
+      apiKey: "ak-test",
+      flavor: "anthropic",
+      fetchImpl: fetchStub((url, init) => {
+        captured = {
+          url,
+          body: JSON.parse(String(init!.body)),
+          headers: init!.headers as Record<string, string>,
+        };
+        return Response.json({
+          content: [
+            { type: "text", text: "Maps are useful." },
+            { type: "tool_use", id: "tu_1", name: "update_question", input: { question: "why?" } },
+            { type: "text", text: " Done." },
+          ],
+        });
+      }),
+    });
+    const result = await llm.chat(
+      [
+        { role: "system", content: "sys one" },
+        { role: "system", content: "sys two" },
+        { role: "user", content: "hi" },
+        { role: "assistant", content: "hello" },
+        { role: "user", content: "go" },
+      ],
+      tools,
+    );
+    expect(result.content).toBe("Maps are useful. Done.");
+    expect(result.toolCalls).toEqual([{ name: "update_question", args: { question: "why?" } }]);
+    expect(captured!.url).toBe("http://fake.local/v1/messages");
+    expect(captured!.headers["x-api-key"]).toBe("ak-test");
+    expect(captured!.headers["anthropic-version"]).toBe("2023-06-01");
+    expect(captured!.body).toEqual({
+      model: "claude-sonnet",
+      max_tokens: 1024,
+      system: "sys one\n\nsys two",
+      messages: [
+        { role: "user", content: "hi" },
+        { role: "assistant", content: "hello" },
+        { role: "user", content: "go" },
+      ],
+      tools: [
+        {
+          name: "update_question",
+          description: "Rewrite the current question",
+          input_schema: tools[0]!.parameters,
+        },
+      ],
+    });
+  });
+
+  it("falls back to buffered chat() in streamChat when flavor is anthropic", async () => {
+    let calls = 0;
+    const llm = new OpenAiChatClient({
+      baseUrl: "http://fake.local/",
+      model: "claude-sonnet",
+      flavor: "anthropic",
+      fetchImpl: fetchStub(() => {
+        calls++;
+        return Response.json({ content: [{ type: "text", text: "buffered" }] });
+      }),
+    });
+    const result = await llm.streamChat([{ role: "user", content: "hi" }], undefined, {
+      onText: (t) => t,
+    });
+    expect(calls).toBe(1);
+    expect(result).toEqual({ content: "buffered", toolCalls: [] });
+  });
+});

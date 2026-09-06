@@ -24,6 +24,8 @@ export interface OpenAiChatOptions {
   baseUrl: string;
   apiKey?: string;
   model: string;
+  /** Wire protocol; "anthropic" posts to /v1/messages instead of chat/completions. */
+  flavor?: "openai" | "anthropic";
   fetchImpl?: typeof fetch;
   /** When set, emit llm.request/llm.result pipeline events. */
   events?: EventSink;
@@ -45,6 +47,8 @@ export class OpenAiChatClient {
     tools?: readonly ToolDef[],
     opts?: { signal?: AbortSignal },
   ): Promise<LlmResult> {
+    if ((this.opts.flavor ?? "openai") === "anthropic")
+      return this.anthropicChat(messages, tools, opts);
     const { events, sessionId } = this.opts;
     events
       ?.postEvent(sessionId!, "llm.request", {
@@ -118,6 +122,98 @@ export class OpenAiChatClient {
    * (`data: ` lines, `[DONE]` sentinel). Non-SSE responses (some gateways
    * ignore stream:true) fall back to buffered JSON parsing.
    */
+  /**
+   * Anthropic Messages API (/v1/messages) path. Maps the shared LlmMessage/
+   * ToolDef shapes into Anthropic's request and content blocks back into
+   * LlmResult.
+   */
+  private async anthropicChat(
+    messages: LlmMessage[],
+    tools?: readonly ToolDef[],
+    opts?: { signal?: AbortSignal },
+  ): Promise<LlmResult> {
+    const { events, sessionId } = this.opts;
+    events
+      ?.postEvent(sessionId!, "llm.request", {
+        message_count: messages.length,
+        tool_count: tools?.length ?? 0,
+        flavor: "anthropic",
+      })
+      .catch((err) => console.warn(`[voice] failed to log llm.request: ${err}`));
+    const startedAt = Date.now();
+
+    const system = messages
+      .filter((m) => m.role === "system")
+      .map((m) => m.content)
+      .join("\n\n");
+    const body = {
+      model: this.opts.model,
+      max_tokens: 1024,
+      ...(system ? { system } : {}),
+      messages: messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role, content: m.content })),
+      ...(tools && tools.length > 0
+        ? {
+            tools: tools.map((t) => ({
+              name: t.name,
+              description: t.description,
+              input_schema: t.parameters,
+            })),
+          }
+        : {}),
+    };
+    const res = await (this.opts.fetchImpl ?? fetch)(
+      `${providerUrl(this.opts.baseUrl)}/v1/messages`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(this.opts.apiKey ? { "x-api-key": this.opts.apiKey } : {}),
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(body),
+        signal: opts?.signal,
+      },
+    );
+    const latency_ms = Date.now() - startedAt;
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => "");
+      events
+        ?.postEvent(sessionId!, "llm.failed", {
+          status: res.status,
+          body: errBody,
+          latency_ms,
+        })
+        .catch(() => undefined);
+      throw new Error(`llm chat failed: ${res.status} ${errBody}`);
+    }
+    const json = (await res.json()) as {
+      content?: {
+        type: string;
+        text?: string;
+        id?: string;
+        name?: string;
+        input?: Record<string, unknown>;
+      }[];
+    };
+    const content = (json.content ?? [])
+      .filter((b) => b.type === "text")
+      .map((b) => b.text ?? "")
+      .join("");
+    const toolCalls = (json.content ?? [])
+      .filter((b) => b.type === "tool_use")
+      .map((b) => ({ name: b.name ?? "", args: b.input ?? {} }));
+    events
+      ?.postEvent(sessionId!, "llm.result", {
+        text_length: content.length,
+        tool_calls: toolCalls.length,
+        latency_ms,
+      })
+      .catch(() => undefined);
+    return { content, toolCalls };
+  }
+
   async streamChat(
     messages: LlmMessage[],
     tools?: readonly ToolDef[],
@@ -127,6 +223,9 @@ export class OpenAiChatClient {
       onText?: (delta: string) => void;
     },
   ): Promise<LlmResult> {
+    // Anthropic SSE differs from OpenAI's; fall back to buffered chat() for now.
+    if ((this.opts.flavor ?? "openai") === "anthropic")
+      return this.chat(messages, tools, { signal: opts?.signal });
     const { events, sessionId } = this.opts;
     events
       ?.postEvent(sessionId!, "llm.request", {
