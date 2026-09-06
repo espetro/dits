@@ -40,10 +40,13 @@ prefix via real links, so prerender crawl discovers every locale page.
 - CTA **"grill me ->"** navigates to `/setup` (locale-prefixed).
 - Locale switcher in the header area: real links to `/`, `/es`, ... so crawlLinks prerenders all locale pages.
 - 5 tilted sticker/post-it cards with real interview-question content, placed at edges; decorative rotation, no interactivity.
-- **Grid slot allocation** (`web/src/components/landing-page.tsx`): desktop
+- **Grid slot allocation** (`web/src/components/landing-page.tsx`): scattered
   stickers are absolutely positioned into one of 5 fixed, non-overlapping
-  slots (fractions of the hero band) via `--slot-x`/`--slot-y` CSS custom
-  properties applied at `md:` only. On each mount the stickers are shuffled
+  slots (fractions of the hero band) via `--slot-x`/`--slot-x-compact`/`--slot-y`
+  CSS custom properties, gated by container queries on the `@container/hero`
+  band: a compact tier (`@[42rem]`, narrower `xCompact` spread, `w-40` cards)
+  and the full tier (`@[54rem]`, full `x` spread, `w-52` cards). On each mount
+  the stickers are shuffled
   across the slots (Fisher-Yates), so the composition varies per reload
   while never overlapping the headline, CTA, or locale pill. This keeps long
   localized sticker text (de/pt/zh) from drifting into the hero as it did
@@ -53,9 +56,10 @@ prefix via real links, so prerender crawl discovers every locale page.
 ## Responsive
 
 - Mobile-first; base styles target 375px. On mobile the stickers render as
-  two flow strips (above the hero, below the CTA) via the `md:contents`
-  wrappers; the absolute slot positioning only applies from `md` up
-  (`relative` -> `md:absolute`). CTA button is full-width below `sm`
+  two flow strips (above the hero, below the CTA) via the `@[42rem]/hero:contents`
+  wrappers; absolute slot positioning activates on the hero band's own width
+  (container queries, not viewport breakpoints): compact scatter from a 42rem
+  band, full scatter from 54rem. CTA button is full-width below `sm`
   (`w-full sm:w-auto`). Text sizes and paddings use existing `md:` steps; no
   fixed widths.
 
