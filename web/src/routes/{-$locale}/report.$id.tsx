@@ -15,6 +15,7 @@ import {
 import { generateReport } from "../../lib/agent/report-generator";
 import { Button } from "../../components/vendor/button";
 import { Badge } from "../../components/vendor/badge";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/{-$locale}/report/$id")({
   component: Report,
@@ -88,6 +89,13 @@ function Report() {
     retryDelay: 1500,
   });
   const [slowLoad, setSlowLoad] = React.useState(false);
+  // toast on failure/timeout, alongside the inline failure state + retry
+  React.useEffect(() => {
+    if (!isError) return;
+    toast.error(intl.formatMessage({ id: "report.failed" }), {
+      description: intl.formatMessage({ id: "report.failedBody" }),
+    });
+  }, [isError, intl]);
   React.useEffect(() => {
     if (!isLoading) {
       setSlowLoad(false);

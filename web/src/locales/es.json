@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "Abrir ajustes del proveedor",
   "settings.history": "Sesiones anteriores",
   "interview.voiceError": "error de voz",
+  "interview.voiceErrorToast": "error de voz",
   "interview.voiceConnected": "voz conectada",
   "interview.voiceConnecting": "conectando…",
   "interview.editorLanguages": "lenguajes de código",

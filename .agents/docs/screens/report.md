@@ -45,6 +45,10 @@
 - **Loading state**: spinner with `report.scoring` copy; after 15s swap in
   `report.scoringSlow` ("this can take a minute on free models") so slow
   providers don't look stuck.
+- **Failure toast**: in addition to the inline failure state below, a
+  sonner toast (`report.failed` + `report.failedBody` as description)
+  fires when the report query errors, so the failure is visible even if
+  the user has navigated or scrolled away.
 - **Failure state**: if scoring fails (provider error, abort) show
   `report.failed` / `report.failedBody` ("the agent failed to score this
   session — check your AI provider settings") with a `report.tryAgain`

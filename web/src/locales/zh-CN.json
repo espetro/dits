@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "打开提供方设置",
   "settings.history": "历史会话",
   "interview.voiceError": "语音错误",
+  "interview.voiceErrorToast": "语音出错",
   "interview.voiceConnected": "语音已连接",
   "interview.voiceConnecting": "连接中…",
   "interview.editorLanguages": "代码语言",

@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "プロバイダー設定を開く",
   "settings.history": "以前のセッション",
   "interview.voiceError": "音声エラー",
+  "interview.voiceErrorToast": "音声エラーが発生しました",
   "interview.voiceConnected": "音声接続済み",
   "interview.voiceConnecting": "接続中…",
   "interview.editorLanguages": "コード言語",

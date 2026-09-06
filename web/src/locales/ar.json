@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "افتح إعدادات المزود",
   "settings.history": "الجلسات السابقة",
   "interview.voiceError": "خطأ في الصوت",
+  "interview.voiceErrorToast": "حدث خطأ في الصوت",
   "interview.voiceConnected": "الصوت متصل",
   "interview.voiceConnecting": "جارٍ الاتصال…",
   "interview.editorLanguages": "لغات البرمجة",

@@ -8,6 +8,7 @@ import { PanelRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../../components/vendor/sheet";
 import { useVoice } from "../../lib/voice/use-voice";
 import { FormattedMessage, useIntl } from "react-intl";
+import { toast } from "sonner";
 import { getSession, getTurns, postTextTurn, pushToolState } from "../../lib/api";
 import { getClientSession } from "../../lib/opfs-store";
 import { $clientTurns } from "../../lib/agent/session-store";
@@ -141,6 +142,22 @@ function Interview() {
         : voice.status === "connecting"
           ? "interview.voiceConnecting"
           : "interview.voiceIdle";
+
+  // global toast on voice failure (barge-in aborts are filtered at the driver
+  // level and never reach onError)
+  const voiceErroredRef = React.useRef(false);
+  React.useEffect(() => {
+    if (voice.status === "error") {
+      if (!voiceErroredRef.current) {
+        voiceErroredRef.current = true;
+        toast.error(intl.formatMessage({ id: "interview.voiceErrorToast" }), {
+          description: voice.error ?? undefined,
+        });
+      }
+    } else {
+      voiceErroredRef.current = false;
+    }
+  }, [voice.status, voice.error, intl]);
 
   // Mirror browser-held editor/whiteboard state to di so the voice agent can
   // read it. Client-only mode's tool executors read the stores in-process

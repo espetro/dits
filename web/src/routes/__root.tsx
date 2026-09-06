@@ -26,6 +26,8 @@ export const Route = createRootRoute({
   notFoundComponent: NotFound,
 });
 
+import { Toaster } from "sonner";
+
 function RootDocument() {
   const isRtl = useIsRtl();
 
@@ -49,6 +51,18 @@ function RootDocument() {
           <AppHeaderSlot />
           <Outlet />
           <SettingsDialogHost />
+          {/* global, out-of-context events only (voice/report failures) */}
+          <Toaster
+            position="top-center"
+            richColors
+            toastOptions={{
+              style: {
+                background: "var(--color-paper)",
+                color: "var(--color-espresso)",
+                border: "1px solid var(--color-hairline)",
+              },
+            }}
+          />
         </AppIntlProvider>
         <Scripts />
       </body>

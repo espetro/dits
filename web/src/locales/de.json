@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "Anbietereinstellungen öffnen",
   "settings.history": "Frühere Sitzungen",
   "interview.voiceError": "sprachfehler",
+  "interview.voiceErrorToast": "sprachfehler aufgetreten",
   "interview.voiceConnected": "sprache verbunden",
   "interview.voiceConnecting": "verbinde…",
   "interview.editorLanguages": "code-sprachen",

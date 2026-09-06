@@ -51,6 +51,10 @@
   ask your first question"), so the interview opens instead of sitting silent.
   The timer fires at most once and is cancelled by any real user input
   (final speech result or `sendText`) and by `stop()`.
+- **Voice failure toast**: when the voice driver surfaces an error
+  (`onError` → `voice.status === "error"`), a sonner toast
+  (`interview.voiceErrorToast`, raw error as description) fires once per
+  error episode, alongside the existing status-pill error state.
 - **No-speech fallback hint**: if no agent question is on screen after 15s
   (`question.text` still empty), the question block reveals a visible hint
   ("no speech detected? type instead.") with an autofocused type-instead

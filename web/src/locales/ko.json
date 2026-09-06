@@ -130,6 +130,7 @@
   "setup.openProviderSettings": "공급자 설정 열기",
   "settings.history": "이전 세션",
   "interview.voiceError": "음성 오류",
+  "interview.voiceErrorToast": "음성 오류가 발생했습니다",
   "interview.voiceConnected": "음성 연결됨",
   "interview.voiceConnecting": "연결 중…",
   "interview.editorLanguages": "코드 언어",
