@@ -101,11 +101,9 @@
   "notfound.home": "retour à l'accueil",
   "account.language": "langue",
   "account.history": "sessions précédentes",
-  "account.settings": "paramètres",
   "account.guest": "Invité",
   "account.guestEmail": "session locale · sans compte",
   "settings.title": "paramètres",
-  "settings.comingSoon": "configuration du fournisseur d'IA bientôt disponible",
   "settings.aiProvider": "Fournisseur IA",
   "settings.stt": "Synthèse vocale",
   "settings.tts": "Texte en voix",
@@ -125,10 +123,14 @@
   "settings.invalid": "Certains champs du point de terminaison sont invalides (URL, clé ou modèle manquant).",
   "setup.needsProvider": "Aucun fournisseur IA configuré. Ajoutez un point de terminaison LLM dans les réglages pour une session sans serveur di.",
   "setup.openProviderSettings": "Ouvrir les réglages du fournisseur",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "sessions précédentes",
   "interview.voiceError": "erreur vocale",
   "interview.voiceConnected": "voix connectée",
   "interview.voiceConnecting": "connexion…",
-  "interview.editorLanguages": "langages de code"
+  "interview.editorLanguages": "langages de code",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }

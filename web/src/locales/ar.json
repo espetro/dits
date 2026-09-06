@@ -101,11 +101,9 @@
   "notfound.home": "العودة إلى الرئيسية",
   "account.language": "اللغة",
   "account.history": "الجلسات السابقة",
-  "account.settings": "الإعدادات",
   "account.guest": "زائر",
   "account.guestEmail": "جلسة محلية · بدون حساب",
   "settings.title": "الإعدادات",
-  "settings.comingSoon": "إعداد مزود الذكاء الاصطناعي قريبًا",
   "settings.aiProvider": "مزود الذكاء الاصطناعي",
   "settings.stt": "تحويل الكلام إلى نص",
   "settings.tts": "تحويل النص إلى كلام",
@@ -125,10 +123,14 @@
   "settings.invalid": "بعض حقول نقطة النهاية غير صالحة (تحقق من العنوان أو المفتاح أو النموذج).",
   "setup.needsProvider": "لم يتم تكوين مزود الذكاء الاصطناعي بعد. أضف نقطة نهاية للنموذج اللغوي في الإعدادات لإجراء جلسة بدون خادم di.",
   "setup.openProviderSettings": "افتح إعدادات المزود",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "الجلسات السابقة",
   "interview.voiceError": "خطأ في الصوت",
   "interview.voiceConnected": "الصوت متصل",
   "interview.voiceConnecting": "جارٍ الاتصال…",
-  "interview.editorLanguages": "لغات البرمجة"
+  "interview.editorLanguages": "لغات البرمجة",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }

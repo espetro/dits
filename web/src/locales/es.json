@@ -101,11 +101,9 @@
   "notfound.home": "volver al inicio",
   "account.language": "idioma",
   "account.history": "sesiones anteriores",
-  "account.settings": "ajustes",
   "account.guest": "Invitado",
   "account.guestEmail": "sesión local · sin cuenta",
   "settings.title": "ajustes",
-  "settings.comingSoon": "configuración del proveedor de IA próximamente",
   "settings.aiProvider": "Proveedor de IA",
   "settings.stt": "Voz a texto",
   "settings.tts": "Texto a voz",
@@ -125,10 +123,14 @@
   "settings.invalid": "Algunos campos del endpoint no son válidos (falta URL, clave o modelo).",
   "setup.needsProvider": "Todavía no hay proveedor de IA configurado. Añade un endpoint de LLM en ajustes para una sesión sin el servidor de.",
   "setup.openProviderSettings": "Abrir ajustes del proveedor",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "sesiones anteriores",
   "interview.voiceError": "error de voz",
   "interview.voiceConnected": "voz conectada",
   "interview.voiceConnecting": "conectando…",
-  "interview.editorLanguages": "lenguajes de código"
+  "interview.editorLanguages": "lenguajes de código",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }

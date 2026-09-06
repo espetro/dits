@@ -1,4 +1,4 @@
-import { Bot, History, Settings } from "lucide-react";
+import { Bot, Check, History, Loader2, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Link } from "@tanstack/react-router";
@@ -21,14 +21,14 @@ import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
 import { Tabs, TabsList, TabsTrigger } from "./vendor/tabs";
 
 /**
- * Centered settings dialog, brioso-style: glass panel with a left nav
- * (History / AI Provider / Settings) and a right pane. Fully URL-driven:
+ * Centered settings dialog, ChatGPT-style: borderless left nav
+ * (History / AI Provider) and an inset rounded content card. Fully URL-driven:
  * `?settings=1&pane=…` in the root search params opens it at a pane, so any
  * flow (and any QA agent) can reach it by link. Uses the root Route search
  * schema; navigate with the openSettings/clearSettings helpers below.
  */
 
-export type SettingsPane = "history" | "settings" | "aiProvider";
+export type SettingsPane = "history" | "aiProvider";
 
 export interface SettingsSearch {
   settings?: "1";
@@ -36,7 +36,7 @@ export interface SettingsSearch {
 }
 
 /** Open (or retarget) the settings dialog via URL search params. */
-export function openSettings(pane: SettingsPane = "settings"): void {
+export function openSettings(pane: SettingsPane = "history"): void {
   const url = new URL(window.location.href);
   url.searchParams.set("settings", "1");
   url.searchParams.set("pane", pane);
@@ -76,7 +76,7 @@ function parseSettingsSearch(query: string): SettingsSearch {
   const parsed = v.safeParse(
     v.object({
       settings: v.optional(v.picklist(["1"])),
-      pane: v.optional(v.picklist(["history", "aiProvider", "settings"])),
+      pane: v.optional(v.picklist(["history", "aiProvider"])),
     }),
     Object.fromEntries(new URLSearchParams(query)),
   );
@@ -90,7 +90,7 @@ function parseSettingsSearch(query: string): SettingsSearch {
 export function SettingsDialogHost() {
   const { settings, pane } = useSettingsSearch();
   const open = settings === "1";
-  const activePane: SettingsPane = pane ?? "settings";
+  const activePane: SettingsPane = pane ?? "history";
   return (
     <SettingsDialog
       open={open}
@@ -194,16 +194,6 @@ function HistoryPane() {
   );
 }
 
-function SettingsPanePlaceholder() {
-  return (
-    <div className="rounded-lg border border-dashed p-4">
-      <p className="text-sm text-muted-foreground">
-        <FormattedMessage id="settings.comingSoon" />
-      </p>
-    </div>
-  );
-}
-
 /** Per-section editable endpoint state (empty string = not set). */
 interface SectionDraft {
   enabled: boolean;
@@ -237,6 +227,35 @@ type TestState = { status: "idle" | "running" | "ok" | "err"; message?: string }
 
 const fieldClass = "block text-xs text-muted-foreground";
 
+/** Clickable free-provider links shared by the LLM/STT/TTS helper notes. */
+const FREE_PROVIDERS = [
+  { name: "OpenRouter", href: "https://openrouter.ai/" },
+  { name: "Groq", href: "https://console.groq.com/home" },
+  { name: "Cerebras", href: "https://inference.cerebras.ai/" },
+  { name: "Google AI Studio", href: "https://aistudio.google.com/" },
+];
+
+function FreeProviderLinks() {
+  return (
+    <>
+      {FREE_PROVIDERS.map((p, i) => (
+        <React.Fragment key={p.name}>
+          {i > 0 && ", "}
+          <a
+            href={p.href}
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2 hover:text-persimmon"
+          >
+            {p.name}
+          </a>
+        </React.Fragment>
+      ))}
+      {"."}
+    </>
+  );
+}
+
 /** /models probe shared by all sections: the endpoint class is the same. */
 async function probeModels(draft: SectionDraft): Promise<void> {
   const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
@@ -261,12 +280,42 @@ function AiProviderPane() {
           model: profile.llm.model,
           voice: "",
         }
-      : { ...EMPTY_SECTION },
+      : // LLM has no usable in-browser fallback on most setups, so the
+        // section defaults to a custom endpoint (the in-browser radio is
+        // disabled for LLM anyway).
+        { ...EMPTY_SECTION, enabled: true },
   }));
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
+
+  // Auto-clear transient test/save feedback; the timer is reset whenever the
+  // state it clears changes, and cleaned up on unmount.
+  const feedbackTimers = React.useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  React.useEffect(() => {
+    const timers = feedbackTimers.current;
+    return () => {
+      for (const t of timers.values()) clearTimeout(t);
+      timers.clear();
+    };
+  }, []);
+
+  function scheduleFeedbackClear(key: string, delayMs: number) {
+    const prev = feedbackTimers.current.get(key);
+    if (prev) clearTimeout(prev);
+    feedbackTimers.current.set(
+      key,
+      setTimeout(() => {
+        feedbackTimers.current.delete(key);
+        if (key === "saved") {
+          setSaved(false);
+        } else {
+          setTestState((prev2) => ({ ...prev2, [key]: undefined }));
+        }
+      }, delayMs),
+    );
+  }
 
   const draft = drafts[tab];
   const llmComplete =
@@ -314,9 +363,20 @@ function AiProviderPane() {
     setError(null);
     $providerProfile.set(parsed.output);
     setSaved(true);
+    scheduleFeedbackClear("saved", 3000);
   }
 
   async function runTest() {
+    // Client-side guard: an empty baseUrl/model would otherwise hit a
+    // relative fetch or an empty completion and look like a false "ok".
+    if (!draft.baseUrl || !draft.model || (tab !== "tts" && !draft.apiKey)) {
+      setTestState((prev) => ({
+        ...prev,
+        [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
+      }));
+      scheduleFeedbackClear(tab, 4000);
+      return;
+    }
     setTesting(tab);
     setTestState((prev) => ({ ...prev, [tab]: { status: "running" } }));
     try {
@@ -336,6 +396,7 @@ function AiProviderPane() {
         });
         for await (const delta of textStream) reply += delta;
         setTestState((prev) => ({ ...prev, llm: { status: "ok", message: reply.slice(0, 40) } }));
+        scheduleFeedbackClear("llm", 4000);
       } else if (tab === "tts") {
         const d = draft;
         if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
@@ -350,10 +411,12 @@ function AiProviderPane() {
         );
         if (pcm.length === 0) throw new Error("empty audio");
         setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
+        scheduleFeedbackClear("tts", 4000);
       } else {
         if (!draft.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
         await probeModels(draft);
         setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
+        scheduleFeedbackClear("stt", 4000);
       }
     } catch (err) {
       setTestState((prev) => ({
@@ -384,7 +447,7 @@ function AiProviderPane() {
         </TabsList>
       </Tabs>
 
-      <div className="space-y-3 rounded-lg border border-border p-3">
+      <div className="space-y-4 rounded-xl border border-border p-4">
         <RadioGroup
           value={draft.enabled ? "custom" : "browser"}
           onValueChange={(value) => update({ enabled: value === "custom" })}
@@ -399,29 +462,10 @@ function AiProviderPane() {
             <FormattedMessage id="settings.customEndpoint" />
           </Label>
         </RadioGroup>
-        {tab === "llm" && !draft.enabled && (
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <p>
-              <FormattedMessage id="settings.llmRequired" />
-            </p>
-            <p>
-              <FormattedMessage
-                id="settings.freeProviders"
-                values={{
-                  openrouter: (chunks: React.ReactNode) => (
-                    <a
-                      href="https://openrouter.ai/keys"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline underline-offset-2 hover:text-persimmon"
-                    >
-                      {chunks}
-                    </a>
-                  ),
-                }}
-              />
-            </p>
-          </div>
+        {tab === "llm" && (
+          <p className="text-xs text-muted-foreground">
+            <FormattedMessage id="settings.llmRequired" />
+          </p>
         )}
 
         {draft.enabled && (
@@ -478,25 +522,68 @@ function AiProviderPane() {
                 />
               </label>
             )}
+            <p className="text-xs text-muted-foreground">
+              <FormattedMessage id="settings.customProviders" />
+            </p>
+            <p className="text-xs text-muted-foreground">
+              <FormattedMessage id="settings.freeProvidersLabel" /> <FreeProviderLinks />
+            </p>
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void runTest()}
-            disabled={!draft.enabled || testing === tab}
-          >
-            {testing === tab ? "…" : <FormattedMessage id="settings.test" />}
-          </Button>
-          {state?.status === "ok" && (
-            <span className="text-xs text-emerald-600">
-              ok{state.message ? `: ${state.message}` : ""}
-            </span>
-          )}
-          {state?.status === "err" && <span className="text-xs text-red-600">{state.message}</span>}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void runTest()}
+              disabled={!draft.enabled || testing === tab}
+              aria-busy={testing === tab}
+            >
+              {testing === tab ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                  <FormattedMessage id="settings.testing" />
+                </>
+              ) : (
+                <FormattedMessage id="settings.test" />
+              )}
+            </Button>
+            {state?.status === "ok" && (
+              <span
+                role="status"
+                className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
+              >
+                <Check className="size-3.5" aria-hidden="true" />
+                <FormattedMessage id="settings.testOk" />
+                {state.message ? `: ${state.message}` : ""}
+              </span>
+            )}
+            {state?.status === "err" && (
+              <span role="status" className="flex items-center gap-1 text-xs text-red-600">
+                <X className="size-3.5" aria-hidden="true" />
+                <FormattedMessage
+                  id="settings.testFailed"
+                  values={{ message: state.message ?? "" }}
+                />
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {saved && (
+              <span
+                role="status"
+                className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
+              >
+                <Check className="size-3.5" aria-hidden="true" />
+                <FormattedMessage id="settings.saved" />
+              </span>
+            )}
+            <Button type="button" size="sm" onClick={save} disabled={!canSave}>
+              <FormattedMessage id="settings.save" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -505,14 +592,6 @@ function AiProviderPane() {
           {error}
         </p>
       )}
-      {saved && (
-        <p className="text-sm text-emerald-600">
-          <FormattedMessage id="settings.saved" />
-        </p>
-      )}
-      <Button type="button" onClick={save} disabled={!canSave}>
-        <FormattedMessage id="settings.save" />
-      </Button>
     </div>
   );
 }
@@ -532,11 +611,6 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
       label: intl.formatMessage({ id: "settings.aiProvider" }),
       icon: <Bot className="size-4" aria-hidden="true" />,
     },
-    {
-      id: "settings",
-      label: intl.formatMessage({ id: "account.settings" }),
-      icon: <Settings className="size-4" aria-hidden="true" />,
-    },
   ];
 
   const nav = (
@@ -546,15 +620,15 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           key={tab.id}
           variant="ghost"
           className={
-            "justify-start gap-2 px-2.5 py-2.5 text-sm font-normal " +
+            "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 text-sm font-normal " +
             (pane === tab.id
               ? "bg-accent font-medium text-accent-foreground"
-              : "text-muted-foreground")
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")
           }
           onClick={() => onPaneChange(tab.id)}
         >
           {tab.icon}
-          {tab.label}
+          <span className="truncate">{tab.label}</span>
         </Button>
       ))}
     </>
@@ -566,7 +640,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
         className={
           isMobile
             ? "inset-0 flex h-svh w-screen max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 bg-background p-0 [&>button]:hidden"
-            : "flex h-[min(28rem,calc(100vh-4rem))] w-[calc(100vw-2rem)] max-w-2xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl"
+            : "flex h-[min(34rem,calc(100vh-4rem))] w-[calc(100vw-2rem)] max-w-3xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl"
         }
       >
         <DialogTitle className="sr-only">
@@ -589,24 +663,16 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
             </Tabs>
           </div>
         ) : (
-          <nav className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-border p-3">
-            {nav}
-          </nav>
+          <nav className="flex w-48 shrink-0 flex-col gap-1 p-3 pt-4">{nav}</nav>
         )}
         <div
           className={
             isMobile
               ? "flex-1 overflow-y-auto p-3"
-              : "m-2 ml-0 flex-1 overflow-y-auto rounded-xl bg-card p-5 ring-1 ring-hairline"
+              : "my-3 mr-3 flex-1 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-sm"
           }
         >
-          {pane === "history" ? (
-            <HistoryPane />
-          ) : pane === "aiProvider" ? (
-            <AiProviderPane />
-          ) : (
-            <SettingsPanePlaceholder />
-          )}
+          {pane === "history" ? <HistoryPane /> : <AiProviderPane />}
         </div>
       </DialogContent>
     </Dialog>

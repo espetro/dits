@@ -101,11 +101,9 @@
   "notfound.home": "返回首页",
   "account.language": "语言",
   "account.history": "历史会话",
-  "account.settings": "设置",
   "account.guest": "访客",
   "account.guestEmail": "本地会话 · 无账号",
   "settings.title": "设置",
-  "settings.comingSoon": "AI 提供商配置即将推出",
   "settings.aiProvider": "AI 提供方",
   "settings.stt": "语音识别",
   "settings.tts": "语音合成",
@@ -125,10 +123,14 @@
   "settings.invalid": "部分端点字段无效(请检查 URL、密钥或模型)。",
   "setup.needsProvider": "尚未配置 AI 提供方。请在设置中添加 LLM 端点,以便在没有 di 服务器时进行会话。",
   "setup.openProviderSettings": "打开提供方设置",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "历史会话",
   "interview.voiceError": "语音错误",
   "interview.voiceConnected": "语音已连接",
   "interview.voiceConnecting": "连接中…",
-  "interview.editorLanguages": "代码语言"
+  "interview.editorLanguages": "代码语言",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }

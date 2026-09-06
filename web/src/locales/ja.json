@@ -101,11 +101,9 @@
   "notfound.home": "ホームに戻る",
   "account.language": "言語",
   "account.history": "以前のセッション",
-  "account.settings": "設定",
   "account.guest": "ゲスト",
   "account.guestEmail": "ローカルセッション · アカウントなし",
   "settings.title": "設定",
-  "settings.comingSoon": "AIプロバイダーの設定は近日公開",
   "settings.aiProvider": "AI プロバイダー",
   "settings.stt": "音声認識",
   "settings.tts": "音声合成",
@@ -125,10 +123,14 @@
   "settings.invalid": "エンドポイントの項目に不備があります（URL・キー・モデルを確認）。",
   "setup.needsProvider": "AI プロバイダーが未設定です。di サーバーなしでセッションを行うには設定で LLM エンドポイントを追加してください。",
   "setup.openProviderSettings": "プロバイダー設定を開く",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "以前のセッション",
   "interview.voiceError": "音声エラー",
   "interview.voiceConnected": "音声接続済み",
   "interview.voiceConnecting": "接続中…",
-  "interview.editorLanguages": "コード言語"
+  "interview.editorLanguages": "コード言語",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }

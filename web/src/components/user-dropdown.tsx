@@ -1,4 +1,4 @@
-import { History, Settings, SlidersHorizontal } from "lucide-react";
+import { History, SlidersHorizontal } from "lucide-react";
 import { FormattedMessage } from "react-intl";
 
 import { openSettings } from "./settings-dialog";
@@ -67,16 +67,6 @@ export function UserDropdown() {
           >
             <History className="size-4" aria-hidden="true" />
             <FormattedMessage id="account.history" />
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer rounded-lg px-2.5 py-2.5"
-            onSelect={(event) => {
-              event.preventDefault();
-              openSettings("settings");
-            }}
-          >
-            <Settings className="size-4" aria-hidden="true" />
-            <FormattedMessage id="account.settings" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -101,11 +101,9 @@
   "notfound.home": "홈으로 돌아가기",
   "account.language": "언어",
   "account.history": "이전 세션",
-  "account.settings": "설정",
   "account.guest": "게스트",
   "account.guestEmail": "로컬 세션 · 계정 없음",
   "settings.title": "설정",
-  "settings.comingSoon": "AI 공급자 설정이 곧 제공될 예정입니다",
   "settings.aiProvider": "AI 공급자",
   "settings.stt": "음성 인식",
   "settings.tts": "음성 합성",
@@ -125,10 +123,14 @@
   "settings.invalid": "일부 엔드포인트 필드가 잘못되었습니다(URL, 키 또는 모델 확인).",
   "setup.needsProvider": "AI 공급자가 아직 구성되지 않았습니다. di 서버 없이 세션을 진행하려면 설정에서 LLM 엔드포인트를 추가하세요.",
   "setup.openProviderSettings": "공급자 설정 열기",
-  "settings.freeProviders": "No key yet? Free providers: {openrouter} (recommended), Google AI Studio, Groq, Cerebras.",
   "settings.history": "이전 세션",
   "interview.voiceError": "음성 오류",
   "interview.voiceConnected": "음성 연결됨",
   "interview.voiceConnecting": "연결 중…",
-  "interview.editorLanguages": "코드 언어"
+  "interview.editorLanguages": "코드 언어",
+  "settings.testing": "Testing…",
+  "settings.testOk": "Working",
+  "settings.testFailed": "Failed: {message}",
+  "settings.customProviders": "Any OpenAI-compatible endpoint works. Free/local options: whisper.cpp server or Speaches for speech to text; Piper (via an OpenAI-compatible shim) or Kokoro for text to speech; Speaches serves both.",
+  "settings.freeProvidersLabel": "No key yet? Free providers:"
 }
