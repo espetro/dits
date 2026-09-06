@@ -6,6 +6,9 @@ import { useStore } from "@nanostores/react";
 import { $draft } from "../../stores/session";
 import { createSession, uploadDocuments } from "../../lib/api";
 import { MicSelector } from "../../components/vendor/mic-selector";
+import { Button } from "../../components/vendor/button";
+import { Textarea } from "../../components/vendor/textarea";
+import { ToggleGroup, ToggleGroupItem } from "../../components/vendor/toggle-group";
 import { $effectiveRuntime, $providerProfile, ensureRuntimeProbe } from "../../lib/runtime";
 import { openSettings } from "../../components/settings-dialog";
 import { createClientSession } from "../../lib/opfs-store";
@@ -134,21 +137,25 @@ function Setup() {
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
                 <FormattedMessage id="setup.presets" />
               </h2>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <ToggleGroup
+                type="single"
+                value={PRESETS.find((p) => draft.title === p.id)?.id ?? ""}
+                onValueChange={(v) => {
+                  const p = PRESETS.find((x) => x.id === v);
+                  if (p) $draft.set({ ...draft, prompt: p.prompt, title: p.id });
+                }}
+                className="mt-3 flex flex-wrap gap-2"
+              >
                 {PRESETS.map((p) => (
-                  <button
+                  <ToggleGroupItem
                     key={p.id}
-                    onClick={() => $draft.set({ ...draft, prompt: p.prompt, title: p.id })}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] ${
-                      draft.prompt === p.prompt
-                        ? "bg-persimmon text-cream"
-                        : "bg-white text-espresso-soft ring-1 ring-hairline hover:ring-persimmon/40"
-                    }`}
+                    value={p.id}
+                    className="rounded-full bg-white px-4 py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/40 active:scale-[0.97] data-[state=on]:bg-persimmon data-[state=on]:text-cream data-[state=on]:hover:bg-persimmon"
                   >
                     <FormattedMessage id={`setup.preset.${p.id}`} />
-                  </button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </section>
 
             <section
@@ -158,14 +165,14 @@ function Setup() {
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
                 <FormattedMessage id="setup.promptLabel" />
               </h2>
-              <textarea
+              <Textarea
                 value={draft.prompt}
                 onChange={(e) => $draft.set({ ...draft, prompt: e.target.value })}
                 placeholder={intl.formatMessage({
                   id: "setup.promptPlaceholder",
                 })}
                 rows={4}
-                className="mt-3 w-full resize-none rounded-card bg-white p-4 text-sm ring-1 ring-hairline outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus:ring-2 focus:ring-persimmon/50"
+                className="mt-3 w-full resize-none rounded-card bg-white p-4 text-sm ring-1 ring-hairline outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus-visible:ring-2 focus-visible:ring-persimmon/50"
               />
             </section>
 
@@ -203,7 +210,7 @@ function Setup() {
                   e.preventDefault();
                   addFiles(e.dataTransfer.files);
                 }}
-                className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-8 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft"
+                className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft"
               >
                 <FormattedMessage id="setup.dropHint" />
               </div>
@@ -212,21 +219,23 @@ function Setup() {
                   {files.map((f, i) => (
                     <li
                       key={`${f.name}-${i}`}
-                      className="flex items-center justify-between rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
+                      className="flex min-w-0 items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
                     >
                       <span className="truncate text-espresso">{f.name}</span>
                       <span className="ml-3 flex shrink-0 items-center gap-3 text-xs text-espresso-soft">
                         {Math.round(f.size / 1024)} kb
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           aria-label={intl.formatMessage(
                             { id: "setup.fileRemove" },
                             { name: f.name },
                           )}
                           onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                          className="text-espresso-soft transition-fluid hover:text-persimmon"
+                          className="text-espresso-soft transition-fluid hover:bg-transparent hover:text-persimmon"
                         >
                           ×
-                        </button>
+                        </Button>
                       </span>
                     </li>
                   ))}
@@ -259,45 +268,52 @@ function Setup() {
                 <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
                   <FormattedMessage id="setup.duration" />
                 </h2>
-                <div className="mt-3 flex gap-2">
+                <ToggleGroup
+                  type="single"
+                  value={String(draft.durationMin)}
+                  onValueChange={(v) => {
+                    if (v) $draft.set({ ...draft, durationMin: Number(v) });
+                  }}
+                  className="mt-3 flex w-full flex-wrap gap-2"
+                >
                   {DURATIONS.map((d) => (
-                    <button
+                    <ToggleGroupItem
                       key={d}
-                      onClick={() => $draft.set({ ...draft, durationMin: d })}
-                      className={`flex-1 rounded-full py-2 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] ${
-                        draft.durationMin === d
-                          ? "bg-espresso text-cream"
-                          : "bg-white ring-1 ring-hairline text-espresso-soft"
-                      }`}
+                      value={String(d)}
+                      className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
                     >
                       {d}
-                    </button>
+                    </ToggleGroupItem>
                   ))}
-                </div>
+                </ToggleGroup>
               </div>
               <div>
                 <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
                   <FormattedMessage id="setup.mode" />
                 </h2>
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => $draft.set({ ...draft, mode: "interview" })}
-                    className={`flex-1 rounded-full py-2 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] ${
-                      draft.mode === "interview"
-                        ? "bg-espresso text-cream"
-                        : "bg-white ring-1 ring-hairline text-espresso-soft"
-                    }`}
+                <ToggleGroup
+                  type="single"
+                  value={draft.mode}
+                  onValueChange={(v) => {
+                    if (v) $draft.set({ ...draft, mode: v as "interview" | "coach" });
+                  }}
+                  className="mt-3 flex w-full flex-wrap gap-2"
+                >
+                  <ToggleGroupItem
+                    value="interview"
+                    className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
                   >
                     <FormattedMessage id="setup.mode.interview" />
-                  </button>
-                  <span
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    value="coach"
+                    disabled
                     title={intl.formatMessage({ id: "setup.coachHint" })}
-                    aria-disabled
-                    className="flex-1 cursor-not-allowed rounded-full bg-white/50 py-2 text-center text-sm font-medium text-espresso-soft ring-1 ring-hairline animate-pulse"
+                    className="flex-1 cursor-not-allowed rounded-full bg-white/50 py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline animate-pulse data-[state=on]:bg-white/50 data-[state=on]:text-espresso-soft data-[state=on]:hover:bg-white/50"
                   >
                     <FormattedMessage id="setup.mode.coach" />
-                  </span>
-                </div>
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
             </section>
 
@@ -309,12 +325,13 @@ function Setup() {
                 <p className="text-sm text-espresso-soft">
                   <FormattedMessage id="setup.needsProvider" />
                 </p>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => openSettings("aiProvider")}
-                  className="mt-3 rounded-full bg-white px-5 py-2 text-sm font-medium ring-1 ring-hairline transition-fluid hover:ring-persimmon/50"
+                  className="mt-3 h-auto rounded-full bg-white px-5 py-2 text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
                 >
                   <FormattedMessage id="setup.openProviderSettings" />
-                </button>
+                </Button>
               </section>
             )}
 
@@ -322,22 +339,29 @@ function Setup() {
               className="rise-in mt-10 flex flex-col items-center gap-3"
               style={{ "--rise-delay": "480ms" } as React.CSSProperties}
             >
-              <button
+              <Button
                 onClick={() => void start(true)}
-                disabled={busy}
-                className="group inline-flex items-center gap-3 rounded-full bg-espresso px-8 py-4 font-display text-lg font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
+                disabled={busy || (effectiveRuntime !== "server" && !profile?.llm)}
+                title={
+                  effectiveRuntime !== "server" && !profile?.llm
+                    ? intl.formatMessage({ id: "setup.needsProvider" })
+                    : undefined
+                }
+                className="group inline-flex items-center gap-3 rounded-full bg-espresso px-8 py-4 font-display text-lg font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.validate" />
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
                   →
                 </span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => void start(false)}
-                className="text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon"
+                disabled={effectiveRuntime !== "server" && !profile?.llm}
+                className="text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:bg-transparent hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.skipValidation" />
-              </button>
+              </Button>
             </section>
           </div>
         </div>

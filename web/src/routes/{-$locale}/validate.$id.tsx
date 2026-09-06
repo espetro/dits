@@ -4,6 +4,7 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FormattedMessage } from "react-intl";
 import { getSession } from "../../lib/api";
+import { Button } from "../../components/vendor/button";
 
 export const Route = createFileRoute("/{-$locale}/validate/$id")({
   component: Validate,
@@ -40,19 +41,19 @@ function Validate() {
               <FormattedMessage id="validate.plan" />
             </h2>
             <dl className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between">
+              <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                 <dt className="text-espresso-soft">
                   <FormattedMessage id="validate.type" />
                 </dt>
                 <dd>{session?.title}</dd>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                 <dt className="text-espresso-soft">
                   <FormattedMessage id="validate.duration" />
                 </dt>
                 <dd>{session?.duration_min} min</dd>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                 <dt className="text-espresso-soft">
                   <FormattedMessage id="validate.mode" />
                 </dt>
@@ -64,15 +65,17 @@ function Validate() {
       </main>
 
       <div className="mx-auto flex w-full max-w-6xl justify-end px-4 pb-16 md:px-8">
-        <Link
-          to={withLocale(locale, `/interview/${id}`)}
-          className="group inline-flex items-center gap-3 rounded-full bg-espresso px-7 py-3.5 font-display font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98]"
+        <Button
+          asChild
+          className="w-full rounded-full bg-espresso px-7 py-3.5 h-auto font-display font-semibold text-cream duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] sm:w-auto"
         >
-          <FormattedMessage id="validate.start" />
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
-            →
-          </span>
-        </Link>
+          <Link to={withLocale(locale, `/interview/${id}`)} className="group">
+            <FormattedMessage id="validate.start" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
+              →
+            </span>
+          </Link>
+        </Button>
       </div>
     </div>
   );

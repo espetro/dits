@@ -13,6 +13,8 @@ import {
   saveClientReport,
 } from "../../lib/opfs-store";
 import { generateReport } from "../../lib/agent/report-generator";
+import { Button } from "../../components/vendor/button";
+import { Badge } from "../../components/vendor/badge";
 
 export const Route = createFileRoute("/{-$locale}/report/$id")({
   component: Report,
@@ -111,12 +113,13 @@ function Report() {
             <FormattedMessage id="report.notScoredBody" />
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={() => void refetch()}
-              className="rounded-full bg-white px-6 py-3 text-sm font-medium ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/50 active:scale-[0.97]"
+              className="rounded-full bg-white px-6 py-3 h-auto ring-hairline duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/50 active:scale-[0.97]"
             >
               <FormattedMessage id="report.tryAgain" />
-            </button>
+            </Button>
             <Link
               to={withLocale(locale, `/finish/${id}`)}
               className="text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon"
@@ -184,7 +187,7 @@ function Report() {
               }
             >
               <div className="rounded-[calc(1.5rem-0.375rem)] bg-cream p-5">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <span className="font-display font-semibold">{c.name}</span>
                   <span className="font-display text-lg font-bold text-persimmon">
                     {c.score.toFixed(1)}
@@ -199,11 +202,12 @@ function Report() {
                 <ul className="mt-4 space-y-2">
                   {c.evidence.map((e, ei) => (
                     <li key={ei} className="flex flex-wrap items-baseline gap-2 text-sm">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${VERDICT_TONE[e.verdict] ?? ""}`}
+                      <Badge
+                        variant="ghost"
+                        className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${VERDICT_TONE[e.verdict] ?? ""}`}
                       >
                         {e.verdict}
-                      </span>
+                      </Badge>
                       <span className="text-espresso-soft">“{e.quote}”</span>
                       <span className="text-xs text-espresso-soft">
                         <FormattedMessage id="report.turn" values={{ n: e.turn_seq }} />
@@ -217,16 +221,17 @@ function Report() {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <span
+          <Button
+            disabled
             title={intl.formatMessage({ id: "report.practiceHint" })}
             aria-disabled
-            className="group inline-flex cursor-not-allowed items-center gap-3 rounded-full bg-white/60 px-7 py-3.5 font-display font-semibold text-espresso-soft ring-1 ring-hairline animate-pulse"
+            className="group max-w-full rounded-full bg-white/60 px-7 py-3.5 h-auto font-display font-semibold text-espresso-soft ring-1 ring-hairline animate-pulse"
           >
             <FormattedMessage id="report.practiceWeak" />
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-espresso/5">
               →
             </span>
-          </span>
+          </Button>
         </div>
       </main>
     </div>
