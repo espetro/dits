@@ -4,6 +4,7 @@ import { createPcmPlayer } from "./pcm-player";
 import type { AudioContextLike } from "./pcm-player";
 
 const LLM = {
+  mode: "remote" as const,
   baseUrl: "http://t.local/v1",
   apiKey: "sk-x",
   model: "test-model",

@@ -3,6 +3,7 @@ import { ClientAgent } from "./client-agent";
 import { decodeWav, resamplePcm16, synthesizeSpeech } from "./tts";
 
 const LLM = {
+  mode: "remote" as const,
   baseUrl: "http://t.local/v1",
   apiKey: "sk-x",
   model: "m1",

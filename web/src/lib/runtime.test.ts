@@ -5,7 +5,6 @@ import {
   ProviderSectionsSchema,
 } from "@di/shared";
 import * as v from "valibot";
-import type { ProviderSections } from "@di/shared";
 import {
   $effectiveRuntime,
   $providerProfile,
@@ -15,7 +14,12 @@ import {
   redactKey,
 } from "./runtime";
 
-const LLM = { baseUrl: "http://localhost:8317/v1", apiKey: "sk-test-123456", model: "gpt-4o-mini" };
+const LLM = {
+  mode: "remote" as const,
+  baseUrl: "http://localhost:8317/v1",
+  apiKey: "sk-test-123456",
+  model: "gpt-4o-mini",
+};
 const PROFILE = { llm: LLM };
 
 describe("runtime stores", () => {
@@ -38,12 +42,16 @@ describe("runtime stores", () => {
       tts: { ...LLM, model: "tts-1", voice: "alloy" },
     });
     expect(localStorage.getItem("di.runtime-mode")).toBe("custom");
-    const raw = JSON.parse(localStorage.getItem("di.provider-profile") ?? "") as ProviderSections;
+    const raw = JSON.parse(localStorage.getItem("di.provider-profile") ?? "") as {
+      llm?: { mode: string; model?: string };
+    };
     expect(raw.llm?.model).toBe(LLM.model);
 
     // simulate a reload: persistent atoms decode from storage
     $runtimeMode.set($runtimeMode.get());
-    expect($providerProfile.get()?.llm?.baseUrl).toBe(LLM.baseUrl);
+    const reloaded = $providerProfile.get()?.llm;
+    if (reloaded?.mode !== "remote") throw new Error("expected remote llm");
+    expect(reloaded.baseUrl).toBe(LLM.baseUrl);
   });
 
   it("drops a sections-shaped profile without an llm section", () => {
@@ -79,6 +87,7 @@ describe("runtime stores", () => {
         apiKey: legacy.apiKey,
         model: legacy.llmModel,
         flavor: "openai",
+        mode: "remote",
       },
     });
     expect(v.safeParse(LegacyProviderProfileSchema, legacy).success).toBe(true);

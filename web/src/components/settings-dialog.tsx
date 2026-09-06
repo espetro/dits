@@ -6,8 +6,23 @@ import * as v from "valibot";
 import { useLocale } from "../lib/locale-href";
 import { HistoryPane } from "./history-pane";
 import { ProviderSectionsSchema } from "@di/shared";
-import type { ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
+import type {
+  BrowserLlmSection,
+  LlmSection,
+  ProviderEndpoint,
+  ProviderSections,
+  TtsEndpoint,
+} from "@di/shared";
 import { $providerProfile, redactKey } from "../lib/runtime";
+import {
+  DEFAULT_TRANSFORMERS_MODEL_ID,
+  TRANSFORMERS_CATALOG,
+  deleteAllTransformersModels,
+  deleteTransformersModel,
+  smokeTestModel,
+  transformersModelInstalled,
+  type BrowserModelStatus,
+} from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
@@ -127,6 +142,12 @@ interface SectionDraft {
   apiKey: string;
   model: string;
   voice: string;
+  /** llm only: remote endpoint vs in-browser engine. */
+  llmMode: "remote" | "browser";
+  /** llm only: which in-browser engine. */
+  engine: "gemini-nano" | "transformers";
+  /** llm only: transformers.js model id (catalog default when empty). */
+  browserModelId: string;
 }
 
 const EMPTY_SECTION: SectionDraft = {
@@ -136,11 +157,36 @@ const EMPTY_SECTION: SectionDraft = {
   apiKey: "",
   model: "",
   voice: "",
+  llmMode: "remote",
+  engine: "gemini-nano",
+  browserModelId: "",
 };
+
+function draftFromLlm(llm: LlmSection | undefined): SectionDraft {
+  if (!llm) return { ...EMPTY_SECTION, enabled: true };
+  if (llm.mode === "browser") {
+    return {
+      ...EMPTY_SECTION,
+      enabled: true,
+      llmMode: "browser",
+      engine: llm.engine,
+      browserModelId: llm.modelId ?? "",
+    };
+  }
+  return {
+    ...EMPTY_SECTION,
+    enabled: true,
+    flavor: llm.flavor ?? "openai",
+    baseUrl: llm.baseUrl,
+    apiKey: llm.apiKey,
+    model: llm.model,
+  };
+}
 
 function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined): SectionDraft {
   if (!endpoint) return { ...EMPTY_SECTION };
   return {
+    ...EMPTY_SECTION,
     enabled: true,
     flavor: endpoint.flavor ?? "openai",
     baseUrl: endpoint.baseUrl,
@@ -209,6 +255,204 @@ function FreeProviderLinks() {
   );
 }
 
+/** Status dot color for a browser model status. */
+function statusDotClass(state: BrowserModelStatus["state"]): string {
+  switch (state) {
+    case "available":
+      return "bg-emerald-500";
+    case "installed":
+      return "bg-sky-500";
+    case "downloadable":
+      return "bg-amber-500";
+    case "unsupported":
+      return "bg-red-500";
+  }
+}
+
+/**
+ * In-browser LLM manager: engine picker, Gemini Nano availability row, and
+ * the transformers.js model list (size, installed state, download progress,
+ * delete / remove-all). Kept as its own component so the endpoint pane stays
+ * under the file-size ratchet.
+ */
+function BrowserLlmManager(props: {
+  engine: BrowserLlmSection["engine"];
+  modelId: string;
+  onEngineChange: (engine: BrowserLlmSection["engine"]) => void;
+  onModelIdChange: (modelId: string) => void;
+}) {
+  const intl = useIntl();
+  const [geminiStatus, setGeminiStatus] = React.useState<BrowserModelStatus | null>(null);
+  const [installed, setInstalled] = React.useState<Record<string, boolean>>({});
+  const [progress, setProgress] = React.useState<number | null>(null);
+  const [busy, setBusy] = React.useState(false);
+
+  const refresh = React.useCallback(async () => {
+    const gemini = "LanguageModel" in globalThis;
+    setGeminiStatus(
+      gemini ? { state: "installed", detail: "prompt-api" } : { state: "unsupported" },
+    );
+    const next: Record<string, boolean> = {};
+    for (const entry of TRANSFORMERS_CATALOG) {
+      next[entry.id] = await transformersModelInstalled(entry.id);
+    }
+    setInstalled(next);
+  }, []);
+
+  React.useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  async function download(modelId: string) {
+    setBusy(true);
+    setProgress(0);
+    try {
+      const engine = props.engine === "gemini-nano" ? "gemini-nano" : "transformers";
+      const section: BrowserLlmSection =
+        engine === "transformers"
+          ? { mode: "browser", engine, modelId }
+          : { mode: "browser", engine };
+      await smokeTestModel(section);
+      await refresh();
+    } finally {
+      setBusy(false);
+      setProgress(null);
+    }
+  }
+
+  const geminiUnsupported = geminiStatus?.state === "unsupported";
+  const selectedId = props.modelId || DEFAULT_TRANSFORMERS_MODEL_ID;
+
+  return (
+    <div className="space-y-4 rounded-lg bg-muted/40 p-3">
+      <div className="space-y-1.5">
+        <span className={fieldClass}>
+          <FormattedMessage id="settings.llm.browserEngine" />
+        </span>
+        <select
+          value={props.engine}
+          onChange={(e) => props.onEngineChange(e.target.value as BrowserLlmSection["engine"])}
+          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-persimmon/50"
+        >
+          <option value="gemini-nano">
+            {intl.formatMessage({ id: "settings.llm.engineGemini" })}
+          </option>
+          <option value="transformers">
+            {intl.formatMessage({ id: "settings.llm.engineTransformers" })}
+          </option>
+        </select>
+      </div>
+
+      {props.engine === "gemini-nano" ? (
+        <div className="flex items-center gap-2 text-xs">
+          <span
+            role="img"
+            aria-label={intl.formatMessage({ id: "settings.llm.statusDot" })}
+            className={`inline-block size-2 rounded-full ${statusDotClass(geminiStatus?.state ?? "downloadable")}`}
+          />
+          {geminiUnsupported ? (
+            <span className="text-muted-foreground">
+              <FormattedMessage id="settings.llm.geminiUnavailable" />
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              <FormattedMessage id="settings.llm.geminiReady" />
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <span className={fieldClass}>
+            <FormattedMessage id="settings.llm.browserModel" />
+          </span>
+          <div className="space-y-1.5">
+            {TRANSFORMERS_CATALOG.map((entry) => {
+              const isInstalled = installed[entry.id] ?? false;
+              const isSelected = selectedId === entry.id;
+              return (
+                <label
+                  key={entry.id}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2 text-xs ${
+                    isSelected ? "border-persimmon/60 bg-background" : "border-border bg-background"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="browser-llm-model"
+                    className="accent-persimmon"
+                    checked={isSelected}
+                    onChange={() => props.onModelIdChange(entry.id)}
+                  />
+                  <span className="flex-1">
+                    <span className="font-medium">{entry.label}</span>
+                    <span className="ml-2 text-muted-foreground">~{entry.sizeMb} MB</span>
+                    {isInstalled && (
+                      <span className="ml-2 text-emerald-600 dark:text-emerald-400">
+                        <FormattedMessage id="settings.llm.installed" />
+                      </span>
+                    )}
+                  </span>
+                  {isSelected && isInstalled && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={busy}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void deleteTransformersModel(entry.id).then(refresh);
+                      }}
+                    >
+                      <FormattedMessage id="settings.llm.delete" />
+                    </Button>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {progress !== null ? (
+              <span className="text-xs text-muted-foreground">
+                <FormattedMessage
+                  id="settings.llm.downloading"
+                  values={{ percent: Math.round(progress * 100) }}
+                />
+              </span>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy || installed[selectedId]}
+                onClick={() => void download(selectedId)}
+              >
+                {installed[selectedId] ? (
+                  <FormattedMessage id="settings.llm.reDownload" />
+                ) : (
+                  <FormattedMessage id="settings.llm.download" />
+                )}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() =>
+                void deleteAllTransformersModels()
+                  .then(refresh)
+                  .catch(() => undefined)
+              }
+            >
+              <FormattedMessage id="settings.llm.removeAll" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AiProviderPane() {
   const intl = useIntl();
   const profile = useStore($providerProfile);
@@ -216,19 +460,7 @@ function AiProviderPane() {
   const [drafts, setDrafts] = React.useState<Record<SectionKey, SectionDraft>>(() => ({
     stt: draftFromEndpoint(profile?.stt),
     tts: draftFromEndpoint(profile?.tts),
-    llm: profile?.llm
-      ? {
-          enabled: true,
-          flavor: profile.llm.flavor ?? "openai",
-          baseUrl: profile.llm.baseUrl,
-          apiKey: profile.llm.apiKey,
-          model: profile.llm.model,
-          voice: "",
-        }
-      : // LLM has no usable in-browser fallback on most setups, so the
-        // section defaults to a custom endpoint (the in-browser radio is
-        // disabled for LLM anyway).
-        { ...EMPTY_SECTION, enabled: true },
+    llm: draftFromLlm(profile?.llm),
   }));
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
@@ -243,6 +475,23 @@ function AiProviderPane() {
   const browserCapable =
     typeof window !== "undefined" &&
     (tab === "stt" ? hasBrowserStt() : tab === "tts" ? "speechSynthesis" in window : false);
+
+  // LLM in-browser capability: Gemini Nano (Prompt API) available now, or
+  // transformers.js possible (WebGPU). Re-probed when the llm tab opens.
+  const [llmBrowserCapable, setLlmBrowserCapable] = React.useState(false);
+  React.useEffect(() => {
+    if (tab !== "llm") return;
+    if (typeof window === "undefined") return;
+    if ("LanguageModel" in globalThis) {
+      setLlmBrowserCapable(true);
+      return;
+    }
+    if (typeof navigator !== "undefined" && "gpu" in navigator) {
+      setLlmBrowserCapable(true);
+      return;
+    }
+    setLlmBrowserCapable(false);
+  }, [tab]);
 
   // Test results persist until the user edits an input (see `update`) or
   // re-tests. Only the "Saved." confirmation auto-clears; the timer resets
@@ -289,7 +538,9 @@ function AiProviderPane() {
     };
   }, [draft.enabled, draft.baseUrl, draft.apiKey]);
   const llmComplete =
-    !drafts.llm.enabled || (drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model);
+    !drafts.llm.enabled ||
+    drafts.llm.llmMode === "browser" ||
+    (drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model);
   const llmOk = drafts.llm.enabled ? Boolean(llmComplete) : Boolean(profile?.llm);
   const canSave = llmOk || drafts.llm.enabled;
 
@@ -302,8 +553,15 @@ function AiProviderPane() {
 
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
-    if (drafts.llm.enabled && drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model) {
+    if (drafts.llm.enabled && drafts.llm.llmMode === "browser") {
       out.llm = {
+        mode: "browser",
+        engine: drafts.llm.engine,
+        ...(drafts.llm.browserModelId ? { modelId: drafts.llm.browserModelId } : {}),
+      };
+    } else if (drafts.llm.enabled && drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model) {
+      out.llm = {
+        mode: "remote",
         flavor: drafts.llm.flavor,
         baseUrl: drafts.llm.baseUrl,
         apiKey: drafts.llm.apiKey,
@@ -350,6 +608,30 @@ function AiProviderPane() {
   }
 
   async function runTest() {
+    // Browser-mode LLM test skips the endpoint guards; the manager handles it.
+    if (tab === "llm" && draft.llmMode === "browser") {
+      setTesting(tab);
+      setTestState((prev) => ({ ...prev, llm: { status: "running" } }));
+      try {
+        await smokeTestModel({
+          mode: "browser",
+          engine: draft.engine,
+          ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
+        });
+        setTestState((prev) => ({
+          ...prev,
+          llm: { status: "ok", message: intl.formatMessage({ id: "settings.llm.testOk" }) },
+        }));
+      } catch (err) {
+        setTestState((prev) => ({
+          ...prev,
+          llm: { status: "err", message: err instanceof Error ? err.message : String(err) },
+        }));
+      } finally {
+        setTesting(null);
+      }
+      return;
+    }
     // Client-side guard: an empty baseUrl/model would otherwise hit a
     // relative fetch or an empty completion and look like a false "ok".
     if (draft.enabled && (!draft.baseUrl || !draft.model || (tab !== "tts" && !draft.apiKey))) {
@@ -492,7 +774,10 @@ function AiProviderPane() {
                   className="flex flex-wrap gap-4"
                 >
                   <Label className="flex items-center gap-1.5 text-sm font-normal">
-                    <RadioGroupItem value="browser" disabled={tab === "llm"} />
+                    <RadioGroupItem
+                      value="browser"
+                      disabled={tab === "llm" && !llmBrowserCapable}
+                    />
                     <FormattedMessage id="settings.inBrowser" />
                   </Label>
                   <Label className="flex items-center gap-1.5 text-sm font-normal">
@@ -500,7 +785,7 @@ function AiProviderPane() {
                     <FormattedMessage id="settings.customEndpoint" />
                   </Label>
                 </RadioGroup>
-                {tab === "llm" && draft.enabled && (
+                {tab === "llm" && draft.enabled && draft.llmMode === "remote" && (
                   <div className="space-y-1.5">
                     <span className={fieldClass}>
                       <FormattedMessage id="settings.flavor" />
@@ -521,6 +806,14 @@ function AiProviderPane() {
                       <FormattedMessage id="settings.flavorHelp" />
                     </span>
                   </div>
+                )}
+                {tab === "llm" && draft.llmMode === "browser" && (
+                  <BrowserLlmManager
+                    engine={draft.engine}
+                    modelId={draft.browserModelId}
+                    onEngineChange={(engine) => update({ engine })}
+                    onModelIdChange={(browserModelId) => update({ browserModelId })}
+                  />
                 )}
                 {tab === "llm" && !draft.enabled && (
                   <p className="text-xs text-muted-foreground">
@@ -570,7 +863,11 @@ function AiProviderPane() {
                           profile?.[tab]
                             ? intl.formatMessage(
                                 { id: "settings.apiKeySaved" },
-                                { key: redactKey(profile[tab]!.apiKey) },
+                                {
+                                  key: redactKey(
+                                    ("apiKey" in profile[tab] ? profile[tab].apiKey : "") as string,
+                                  ),
+                                },
                               )
                             : ""
                         }

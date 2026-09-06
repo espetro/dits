@@ -12,7 +12,7 @@ import {
   probeServer,
 } from "../runtime";
 import { describeWhiteboardSnapshot } from "@di/shared";
-import type { ProviderEndpoint, ProviderSections } from "@di/shared";
+import type { LlmSection, ProviderSections } from "@di/shared";
 
 export type VoiceDriverKind = "server" | "browser";
 
@@ -46,7 +46,7 @@ export async function createDriver(sessionId: string): Promise<SpeechDriver> {
   const profile = $providerProfile.get();
   const driver = new BrowserVoiceDriver(sessionId);
   if (profile?.llm && $effectiveRuntime.get() !== "server") {
-    const withLlm = profile as ProviderSections & { llm: ProviderEndpoint };
+    const withLlm = profile as ProviderSections & { llm: LlmSection };
     const executors = createStoreToolExecutors({
       editorGetter: () => $editorBuffer.get(),
       whiteboardGetter: () => describeWhiteboardSnapshot($whiteboard.get()),

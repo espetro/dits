@@ -96,13 +96,23 @@ button in its own block, inset card with a centered max-w-xl column.
   state). Rows link to /interview/$id, /finish/$id or /report/$id by
   status, with a status chip and relative date.
 - AI Provider pane: three sub-tabs STT / TTS / LLM. Each chooses
-  In-browser (Web Speech fallback; radio disabled for LLM) vs Custom
-  endpoint (baseUrl, apiKey redacted when saved via redactKey, model,
-  voice for TTS). LLM defaults to custom (llmRequired helper always
-  shown there). STT/TTS custom mode shows the settings.customProviders
-  helper (whisper.cpp/Speaches for STT, Piper/Kokoro for TTS) and a
-  FreeProviderLinks row (OpenRouter, Groq, Cerebras, Google AI Studio;
-  target=_blank rel=noreferrer).
+  In-browser vs Custom endpoint (baseUrl, apiKey redacted when saved via
+  redactKey, model, voice for TTS). STT in-browser = Web Speech fallback.
+  LLM in-browser radio is enabled when the browser has the Prompt API
+  (LanguageModel global) or WebGPU; selecting it shows the browser LLM
+  manager (see below). LLM custom mode adds a flavor select
+  (OpenAI/Anthropic-compatible) above the endpoint fields. STT/TTS custom
+  mode shows the settings.customProviders helper (whisper.cpp/Speaches for
+  STT, Piper/Kokoro for TTS) and a FreeProviderLinks row (OpenRouter,
+  Groq, Cerebras, Google AI Studio; target=_blank rel=noreferrer).
+- LLM browser manager: engine select (Gemini Nano | Transformers.js).
+  Gemini Nano row shows a status dot (green installed / amber
+  downloadable / red unsupported) plus a muted hint; unsupported shows a
+  "use Chrome 148+ or Transformers.js" note. Transformers.js lists the
+  curated catalog (label + ~size MB + installed chip) as radio rows with
+  Download (shows live {percent}% while busy), per-selected-model Delete,
+  and Remove all models; weights live in the Cache API, deletion purges
+  the matching entries.
 - Test button: disabled while running (Loader2 spinner +
   settings.testing), client-side guard rejects empty fields with
   settings.invalid instead of a false ok; result is a check "Working"

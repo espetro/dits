@@ -1,6 +1,6 @@
 import { cutSentences } from "@di/shared";
 import type {
-  ProviderEndpoint,
+  LlmSection,
   ProviderSections,
   SessionContext,
   TurnMetrics,
@@ -92,7 +92,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
 
   /** Wire the client-only agent. Called by createDriver when an llm endpoint exists. */
   useClientAgent(
-    profile: ProviderSections & { llm: ProviderEndpoint },
+    profile: ProviderSections & { llm: LlmSection },
     tools: AgentToolExecutors,
     getContext: () => SessionContext,
     fetchImpl?: typeof fetch,
