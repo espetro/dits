@@ -245,7 +245,7 @@ function FreeProviderLinks() {
             href={p.href}
             target="_blank"
             rel="noreferrer"
-            className="underline underline-offset-2 hover:text-persimmon"
+            className="underline underline-offset-2 hover:text-persimmon-text"
           >
             {p.name}
           </a>
