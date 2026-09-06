@@ -1,9 +1,8 @@
 import { History, Settings, SlidersHorizontal } from "lucide-react";
-import * as React from "react";
 import { FormattedMessage } from "react-intl";
 
+import { openSettings } from "./settings-dialog";
 import { LocaleSwitcher } from "./locale-switcher";
-import { SettingsDialog, type SettingsPane } from "./settings-dialog";
 import { Avatar, AvatarFallback } from "./vendor/avatar";
 import { Button } from "./vendor/button";
 import {
@@ -17,18 +16,10 @@ import {
 /**
  * Account dropdown, brioso-style: avatar trigger, glass menu with a header
  * block (guest identity), a Language row reusing the LocaleSwitcher, and
- * History / Settings items that open the centered settings dialog at the
- * matching pane.
+ * History / Settings items that open the settings dialog at the matching
+ * pane via URL search params (?settings=1&pane=…).
  */
 export function UserDropdown() {
-  const [open, setOpen] = React.useState(false);
-  const [pane, setPane] = React.useState<SettingsPane>("history");
-
-  function openAt(next: SettingsPane) {
-    setPane(next);
-    setOpen(true);
-  }
-
   return (
     <>
       <DropdownMenu>
@@ -37,7 +28,7 @@ export function UserDropdown() {
             variant="ghost"
             size="icon"
             aria-label="account"
-            className="size-8 rounded-full border bg-card/60 p-0"
+            className="size-8 rounded-full bg-card/60 p-0 hover:bg-accent"
           >
             <SlidersHorizontal className="size-4 text-espresso" aria-hidden="true" />
           </Button>
@@ -45,7 +36,7 @@ export function UserDropdown() {
         <DropdownMenuContent
           align="end"
           sideOffset={6}
-          className="min-w-[22rem] rounded-xl border-border/70 bg-popover p-1.5 shadow-2xl"
+          className="w-[calc(100vw-2rem)] min-w-[22rem] max-w-[22rem] rounded-xl border-border/70 bg-popover p-1.5 shadow-2xl"
         >
           <div className="flex items-start gap-3 px-2 py-2">
             <Avatar className="size-9">
@@ -71,7 +62,7 @@ export function UserDropdown() {
             className="cursor-pointer rounded-lg px-2.5 py-2.5"
             onSelect={(event) => {
               event.preventDefault();
-              openAt("history");
+              openSettings("history");
             }}
           >
             <History className="size-4" aria-hidden="true" />
@@ -81,7 +72,7 @@ export function UserDropdown() {
             className="cursor-pointer rounded-lg px-2.5 py-2.5"
             onSelect={(event) => {
               event.preventDefault();
-              openAt("settings");
+              openSettings("settings");
             }}
           >
             <Settings className="size-4" aria-hidden="true" />
@@ -89,7 +80,6 @@ export function UserDropdown() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <SettingsDialog open={open} onOpenChange={setOpen} pane={pane} onPaneChange={setPane} />
     </>
   );
 }

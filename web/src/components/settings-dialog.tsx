@@ -22,31 +22,83 @@ import { Tabs, TabsList, TabsTrigger } from "./vendor/tabs";
 
 /**
  * Centered settings dialog, brioso-style: glass panel with a left nav
- * (History / AI Provider / Settings) and a right pane. Open state is lifted
- * so the user dropdown items can open it directly at a given pane.
+ * (History / AI Provider / Settings) and a right pane. Fully URL-driven:
+ * `?settings=1&pane=…` in the root search params opens it at a pane, so any
+ * flow (and any QA agent) can reach it by link. Uses the root Route search
+ * schema; navigate with the openSettings/clearSettings helpers below.
  */
 
 export type SettingsPane = "history" | "settings" | "aiProvider";
 
-/** Tiny event API so any route can open the settings dialog at a pane. */
-const OPEN_EVENT = "di:open-settings";
-export function openSettings(pane: SettingsPane = "settings"): void {
-  window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: pane }));
+export interface SettingsSearch {
+  settings?: "1";
+  pane?: SettingsPane;
 }
 
-/** Mount once near the app root: wires the openSettings() event to the dialog. */
-export function SettingsDialogHost() {
-  const [open, setOpen] = React.useState(false);
-  const [pane, setPane] = React.useState<SettingsPane>("settings");
+/** Open (or retarget) the settings dialog via URL search params. */
+export function openSettings(pane: SettingsPane = "settings"): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("settings", "1");
+  url.searchParams.set("pane", pane);
+  window.history.pushState(null, "", url);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
+/** Close the dialog by dropping its search params (history back if ours). */
+export function clearSettings(): void {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("settings");
+  url.searchParams.delete("pane");
+  window.history.pushState(null, "", url);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
+/**
+ * Reactive read of the settings search params. Deliberately NOT TanStack
+ * validateSearch: the Start dev/prerender server canonicalizes root-route
+ * search params and 307s `/?settings=1` to `/` before hydration, so the
+ * dialog could never open from a cold URL. Reading the raw query string
+ * keeps the params in the address bar for QA agents and deep links.
+ */
+function useSettingsSearch(): SettingsSearch {
+  const [search, setSearch] = React.useState<SettingsSearch>(() =>
+    typeof window === "undefined" ? {} : parseSettingsSearch(window.location.search),
+  );
   React.useEffect(() => {
-    const onOpen = (e: Event) => {
-      setPane((e as CustomEvent<SettingsPane>).detail ?? "settings");
-      setOpen(true);
-    };
-    window.addEventListener(OPEN_EVENT, onOpen);
-    return () => window.removeEventListener(OPEN_EVENT, onOpen);
+    const update = () => setSearch(parseSettingsSearch(window.location.search));
+    window.addEventListener("popstate", update);
+    return () => window.removeEventListener("popstate", update);
   }, []);
-  return <SettingsDialog open={open} onOpenChange={setOpen} pane={pane} onPaneChange={setPane} />;
+  return search;
+}
+
+function parseSettingsSearch(query: string): SettingsSearch {
+  const parsed = v.safeParse(
+    v.object({
+      settings: v.optional(v.picklist(["1"])),
+      pane: v.optional(v.picklist(["history", "aiProvider", "settings"])),
+    }),
+    Object.fromEntries(new URLSearchParams(query)),
+  );
+  return {
+    settings: parsed.success ? parsed.output.settings : undefined,
+    pane: parsed.success ? parsed.output.pane : undefined,
+  };
+}
+
+/** Mount once near the app root: mirrors ?settings&pane onto the dialog. */
+export function SettingsDialogHost() {
+  const { settings, pane } = useSettingsSearch();
+  const open = settings === "1";
+  const activePane: SettingsPane = pane ?? "settings";
+  return (
+    <SettingsDialog
+      open={open}
+      onOpenChange={(next) => (next ? openSettings(activePane) : clearSettings())}
+      pane={activePane}
+      onPaneChange={(next) => openSettings(next)}
+    />
+  );
 }
 
 function useIsMobile(): boolean {
@@ -336,7 +388,7 @@ function AiProviderPane() {
         <RadioGroup
           value={draft.enabled ? "custom" : "browser"}
           onValueChange={(value) => update({ enabled: value === "custom" })}
-          className="flex gap-4"
+          className="flex flex-wrap gap-4"
         >
           <Label className="flex items-center gap-1.5 text-sm font-normal">
             <RadioGroupItem value="browser" disabled={tab === "llm"} />
@@ -472,7 +524,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
   const tabs: { id: SettingsPane; label: string; icon: React.ReactNode }[] = [
     {
       id: "history",
-      label: intl.formatMessage({ id: "account.history" }),
+      label: intl.formatMessage({ id: "settings.history" }),
       icon: <History className="size-4" aria-hidden="true" />,
     },
     {
@@ -487,12 +539,33 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
     },
   ];
 
+  const nav = (
+    <>
+      {tabs.map((tab) => (
+        <Button
+          key={tab.id}
+          variant="ghost"
+          className={
+            "justify-start gap-2 px-2.5 py-2.5 text-sm font-normal " +
+            (pane === tab.id
+              ? "bg-accent font-medium text-accent-foreground"
+              : "text-muted-foreground")
+          }
+          onClick={() => onPaneChange(tab.id)}
+        >
+          {tab.icon}
+          {tab.label}
+        </Button>
+      ))}
+    </>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={
           isMobile
-            ? "inset-0 h-svh w-screen max-w-none translate-x-0 translate-y-0 rounded-none border-0 bg-background p-0 [&>button]:hidden"
+            ? "inset-0 flex h-svh w-screen max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 bg-background p-0 [&>button]:hidden"
             : "flex h-[min(28rem,calc(100vh-4rem))] w-[calc(100vw-2rem)] max-w-2xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl"
         }
       >
@@ -502,25 +575,31 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
         <DialogDescription className="sr-only">
           <FormattedMessage id="settings.title" />
         </DialogDescription>
-        <nav className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-border p-3">
-          {tabs.map((tab) => (
-            <Button
-              key={tab.id}
-              variant="ghost"
-              className={
-                "justify-start gap-2 px-2.5 py-2.5 text-sm font-normal " +
-                (pane === tab.id
-                  ? "bg-accent font-medium text-accent-foreground"
-                  : "text-muted-foreground")
-              }
-              onClick={() => onPaneChange(tab.id)}
-            >
-              {tab.icon}
-              {tab.label}
-            </Button>
-          ))}
-        </nav>
-        <div className="m-2 ml-0 flex-1 overflow-y-auto rounded-xl bg-card p-5 ring-1 ring-hairline">
+        {isMobile ? (
+          <div className="shrink-0 border-b border-border p-2">
+            <Tabs value={pane} onValueChange={(value) => onPaneChange(value as SettingsPane)}>
+              <TabsList className="w-full">
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="flex-1 gap-1.5 px-2 text-xs">
+                    {tab.icon}
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+        ) : (
+          <nav className="flex w-44 shrink-0 flex-col gap-0.5 border-r border-border p-3">
+            {nav}
+          </nav>
+        )}
+        <div
+          className={
+            isMobile
+              ? "flex-1 overflow-y-auto p-3"
+              : "m-2 ml-0 flex-1 overflow-y-auto rounded-xl bg-card p-5 ring-1 ring-hairline"
+          }
+        >
           {pane === "history" ? (
             <HistoryPane />
           ) : pane === "aiProvider" ? (
