@@ -8,8 +8,9 @@ import * as v from "valibot";
  *
  * The profile has three independent sections: stt, tts, llm. Each section is
  * optional; `undefined` means "use the in-browser fallback" for that
- * capability (Web Speech API for stt, speechSynthesis for tts). There is no
- * in-browser LLM fallback, so a usable profile always has an `llm` section.
+ * capability (Web Speech API for stt, speechSynthesis for tts). The llm
+ * section is a union: mode "remote" (endpoint) or mode "browser" (in-browser
+ * engine, Gemini Nano or transformers.js).
  */
 
 /** Wire protocol the endpoint speaks for LLM calls. */
@@ -28,6 +29,49 @@ export const ProviderEndpointSchema = v.object({
   flavor: v.optional(FlavorSchema),
 });
 
+/**
+ * LLM section of the profile: either a remote endpoint or an in-browser
+ * engine. Legacy stored profiles decode to mode "remote".
+ */
+export const BrowserEngineSchema = v.picklist(["gemini-nano", "transformers"]);
+export type BrowserEngine = v.InferOutput<typeof BrowserEngineSchema>;
+
+export interface RemoteLlmSection extends v.InferOutput<typeof ProviderEndpointSchema> {
+  readonly mode: "remote";
+}
+
+export interface BrowserLlmSection {
+  readonly mode: "browser";
+  readonly engine: BrowserEngine;
+  /** transformers.js model id from the curated catalog; engine default if unset */
+  readonly modelId?: string;
+}
+
+export const RemoteLlmSectionSchema = v.object({
+  ...ProviderEndpointSchema.entries,
+  mode: v.literal("remote"),
+});
+
+export const BrowserLlmSectionSchema = v.object({
+  mode: v.literal("browser"),
+  engine: BrowserEngineSchema,
+  modelId: v.optional(v.pipe(v.string(), v.minLength(1))),
+});
+
+export const LlmSectionSchema = v.union([RemoteLlmSectionSchema, BrowserLlmSectionSchema]);
+export type LlmSection = v.InferOutput<typeof LlmSectionSchema>;
+
+/** Narrow a possibly-legacy llm section to the current union. */
+export function decodeLlmSection(raw: unknown): LlmSection | null {
+  if (typeof raw === "object" && raw !== null && !("mode" in raw)) {
+    const legacy = v.safeParse(ProviderEndpointSchema, raw);
+    if (legacy.success) return { ...legacy.output, mode: "remote" };
+    return null;
+  }
+  const parsed = v.safeParse(LlmSectionSchema, raw);
+  return parsed.success ? parsed.output : null;
+}
+
 /** TTS endpoint: adds a voice selector (empty = provider default). */
 export const TtsEndpointSchema = v.object({
   ...ProviderEndpointSchema.entries,
@@ -42,7 +86,7 @@ export const TtsEndpointSchema = v.object({
 export const ProviderSectionsSchema = v.object({
   stt: v.optional(ProviderEndpointSchema),
   tts: v.optional(TtsEndpointSchema),
-  llm: v.optional(ProviderEndpointSchema),
+  llm: v.optional(LlmSectionSchema),
 });
 export type ProviderEndpoint = v.InferOutput<typeof ProviderEndpointSchema>;
 export type TtsEndpoint = v.InferOutput<typeof TtsEndpointSchema>;
@@ -87,7 +131,13 @@ export function decodeProviderProfile(raw: string): ProviderSections | null {
           voice: old.ttsVoice,
           flavor: "openai",
         },
-        llm: { baseUrl: old.baseUrl, apiKey: old.apiKey, model: old.llmModel, flavor: "openai" },
+        llm: {
+          baseUrl: old.baseUrl,
+          apiKey: old.apiKey,
+          model: old.llmModel,
+          flavor: "openai",
+          mode: "remote",
+        },
       };
     }
     return null;
