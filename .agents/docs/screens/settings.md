@@ -86,7 +86,14 @@ full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`.
   settings.invalid instead of a false ok; result is a check "Working"
   or "Failed: {message}" line (role=status) that auto-clears after 4s.
   LLM runs a tiny streamed completion, TTS synthesizes a phrase, STT
-  probes ${base}/v1/models.
+  probes ${base}/v1/models. In-browser STT/TTS (custom endpoint off)
+  the Test button stays enabled when the browser exposes the Web
+  Speech feature (STT: SpeechRecognition; TTS: speechSynthesis):
+  STT starts recognition for ~3s and reports ok on audio events, TTS
+  speaks "hello" and resolves on `end` (5s timeout fallback). When the
+  browser lacks the feature the button is disabled with a muted
+  settings.test.unsupported reason line (role=note) and a matching
+  title tooltip.
 - Save: validates with ProviderSectionsSchema (LLM required), sets
   $providerProfile, shows inline "Saved." (role=status) that
   auto-clears after 3s; editing a field resets it.

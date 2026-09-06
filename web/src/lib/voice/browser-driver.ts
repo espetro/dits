@@ -24,7 +24,7 @@ import type { SpeechDriver } from "./server-driver";
  *   Web Speech API behavior: speechSynthesis speaks the final agent text.
  */
 
-interface RecognitionLike {
+export interface RecognitionLike {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
@@ -62,6 +62,17 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private profile: ProviderSections | null = null;
   private pending = "";
   private abort: AbortController | null = null;
+  private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Sent as a user turn when the candidate is silent after connect, so the
+   * agent opens the interview instead of the page sitting idle. Phrased as a
+   * direct instruction so the LLM asks a question rather than commenting on
+   * the parenthetical.
+   */
+  private static readonly KICKOFF =
+    "(candidate has joined — begin the interview now: greet them briefly and ask your first question)";
+  private static readonly KICKOFF_MS = 5_000;
 
   constructor(
     private readonly sessionId: string,
@@ -124,6 +135,29 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.recognition = rec;
     this.status = "connected";
     rec.start();
+    this.armKickoff();
+  }
+
+  /**
+   * Cold-start dead-end guard: if the candidate never speaks after connect,
+   * auto-fire the first agent turn after a short grace window so the
+   * interview opens instead of sitting silent. Any real user input (speech
+   * or typed turn) cancels it; it can only fire once.
+   */
+  private armKickoff(): void {
+    if (!this.agent || this.kickoffTimer) return;
+    this.kickoffTimer = setTimeout(() => {
+      this.kickoffTimer = null;
+      if (this.status !== "connected" || this.abort) return;
+      void this.runAgentTurn(BrowserVoiceDriver.KICKOFF, "text");
+    }, BrowserVoiceDriver.KICKOFF_MS);
+  }
+
+  private cancelKickoff(): void {
+    if (this.kickoffTimer) {
+      clearTimeout(this.kickoffTimer);
+      this.kickoffTimer = null;
+    }
   }
 
   private handleResult(ev: SpeechRecognitionEventLike) {
@@ -132,6 +166,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       if (!result || !result.isFinal) continue;
       const text = result[0].transcript.trim();
       if (!text || this.muted) continue;
+      this.cancelKickoff();
       this.events.onSpeechStart?.();
       this.events.onSpeechEnd?.(text);
       if (this.agent) {
@@ -143,6 +178,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
   /** Typed-input counterpart to speech recognition results (same agent turn path). */
   sendText(text: string): void {
     if (!text.trim() || !this.agent) return;
+    this.cancelKickoff();
     void this.runAgentTurn(text.trim(), "text");
   }
 
@@ -275,6 +311,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   async stop(): Promise<void> {
+    this.cancelKickoff();
     this.recognition?.stop();
     this.recognition = null;
     this.interrupt();

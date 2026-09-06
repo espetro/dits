@@ -113,6 +113,22 @@ function Interview() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const [text, setText] = useState("");
+  const [showSlowHint, setShowSlowHint] = useState(false);
+  const slowHintInput = React.useRef<HTMLInputElement | null>(null);
+  const noQuestionYet = !question.text;
+  // cold-start fallback: if the agent hasn't asked anything after 15s
+  // (e.g. mic never picked the candidate up), surface a type-instead hint.
+  useEffect(() => {
+    if (!noQuestionYet) {
+      setShowSlowHint(false);
+      return;
+    }
+    const t = setTimeout(() => setShowSlowHint(true), 15_000);
+    return () => clearTimeout(t);
+  }, [noQuestionYet]);
+  useEffect(() => {
+    if (showSlowHint) slowHintInput.current?.focus();
+  }, [showSlowHint]);
   const isMobile = useIsMobile();
   const editor = useStore($editorBuffer);
   const whiteboard = useStore($whiteboard);
@@ -229,6 +245,22 @@ function Interview() {
                     </li>
                   ))}
                 </ul>
+              )}
+              {showSlowHint && noQuestionYet && (
+                <div className="rise-in mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <p className="text-xs text-espresso-soft">
+                    <FormattedMessage id="interview.noSpeechDetected" />
+                  </p>
+                  <Input
+                    ref={slowHintInput}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && void sendText()}
+                    placeholder={intl.formatMessage({ id: "interview.typeInstead" })}
+                    aria-label={intl.formatMessage({ id: "interview.typeInsteadHint" })}
+                    className="h-auto min-w-0 flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm ring-1 ring-hairline shadow-none placeholder:text-espresso-soft focus-visible:ring-2 focus-visible:ring-persimmon/50"
+                  />
+                </div>
               )}
             </div>
           </section>

@@ -256,6 +256,71 @@ function FreeProviderLinks() {
   );
 }
 
+/** True when the browser exposes the Web Speech recognition constructor. */
+export function hasBrowserStt(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    Boolean(
+      (window as unknown as Record<string, unknown>).SpeechRecognition ||
+      (window as unknown as Record<string, unknown>).webkitSpeechRecognition,
+    )
+  );
+}
+
+/**
+ * In-browser STT test: start recognition briefly and resolve only if the
+ * engine reports actual audio events; any error (not-allowed, no-speech,
+ * network, ...) rejects.
+ */
+function testBrowserStt(): Promise<void> {
+  const Ctor =
+    (window as unknown as Record<string, unknown>).SpeechRecognition ??
+    (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+  if (typeof Ctor !== "function") return Promise.reject(new Error("unsupported"));
+  const recognition = new (Ctor as new () => {
+    start(): void;
+    stop(): void;
+    onresult: (() => void) | null;
+    onerror: ((event: { error: string }) => void) | null;
+  })();
+  return new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      recognition.stop();
+      resolve();
+    }, 3000);
+    recognition.onresult = () => {
+      clearTimeout(timer);
+      recognition.stop();
+      resolve();
+    };
+    recognition.onerror = (event) => {
+      clearTimeout(timer);
+      reject(new Error(event.error));
+    };
+    recognition.start();
+  });
+}
+
+/** In-browser TTS test: resolve on `end`, reject on `error` or 5s timeout. */
+function testBrowserTts(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const utterance = new SpeechSynthesisUtterance("hello");
+    const timer = setTimeout(() => {
+      speechSynthesis.cancel();
+      resolve();
+    }, 5000);
+    utterance.onend = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    utterance.onerror = (event) => {
+      clearTimeout(timer);
+      reject(new Error(event.error));
+    };
+    speechSynthesis.speak(utterance);
+  });
+}
+
 /** /models probe shared by all sections: the endpoint class is the same. */
 async function probeModels(draft: SectionDraft): Promise<void> {
   const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
@@ -289,6 +354,11 @@ function AiProviderPane() {
   const [saved, setSaved] = React.useState(false);
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
+  // In-browser sections can only be tested when the browser actually ships
+  // the Web Speech feature; computed per-render (SSR-safe, cheap).
+  const browserCapable =
+    typeof window !== "undefined" &&
+    (tab === "stt" ? hasBrowserStt() : tab === "tts" ? "speechSynthesis" in window : false);
 
   // Test results persist until the user edits an input (see `update`) or
   // re-tests. Only the "Saved." confirmation auto-clears; the timer resets
@@ -355,7 +425,7 @@ function AiProviderPane() {
   async function runTest() {
     // Client-side guard: an empty baseUrl/model would otherwise hit a
     // relative fetch or an empty completion and look like a false "ok".
-    if (!draft.baseUrl || !draft.model || (tab !== "tts" && !draft.apiKey)) {
+    if (draft.enabled && (!draft.baseUrl || !draft.model || (tab !== "tts" && !draft.apiKey))) {
       setTestState((prev) => ({
         ...prev,
         [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
@@ -383,22 +453,27 @@ function AiProviderPane() {
         setTestState((prev) => ({ ...prev, llm: { status: "ok", message: reply.slice(0, 40) } }));
       } else if (tab === "tts") {
         const d = draft;
-        if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
-        const pcm = await synthesizeSpeech(
-          {
-            baseUrl: d.baseUrl,
-            apiKey: d.apiKey,
-            model: d.model || "tts-1",
-            voice: d.voice,
-          },
-          "hello",
-        );
-        if (pcm.length === 0) throw new Error("empty audio");
-        setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
+        if (!d.enabled) {
+          await testBrowserTts();
+        } else {
+          const pcm = await synthesizeSpeech(
+            {
+              baseUrl: d.baseUrl,
+              apiKey: d.apiKey,
+              model: d.model || "tts-1",
+              voice: d.voice,
+            },
+            "hello",
+          );
+          if (pcm.length === 0) throw new Error("empty audio");
+          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
+        }
       } else {
-        if (!draft.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
-        await probeModels(draft);
-        setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
+        if (!draft.enabled) await testBrowserStt();
+        else {
+          await probeModels(draft);
+          setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
+        }
       }
     } catch (err) {
       setTestState((prev) => ({
@@ -525,8 +600,13 @@ function AiProviderPane() {
                       variant="outline"
                       size="sm"
                       onClick={() => void runTest()}
-                      disabled={!draft.enabled || testing === tab}
+                      disabled={(!draft.enabled && !browserCapable) || testing === tab}
                       aria-busy={testing === tab}
+                      title={
+                        !draft.enabled && !browserCapable
+                          ? intl.formatMessage({ id: "settings.test.unsupported" })
+                          : undefined
+                      }
                     >
                       {testing === tab ? (
                         <>
@@ -537,6 +617,11 @@ function AiProviderPane() {
                         <FormattedMessage id="settings.test" />
                       )}
                     </Button>
+                    {!draft.enabled && !browserCapable && (
+                      <span role="note" className="text-xs text-muted-foreground">
+                        <FormattedMessage id="settings.test.unsupported" />
+                      </span>
+                    )}
                     {state?.status === "ok" && (
                       <span
                         role="status"
