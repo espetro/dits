@@ -81,6 +81,9 @@
 
 ## URL / state
 
+- Heading structure: the page's single `h1` is the localized "configure
+  interview" title rendered in the shared app header (`AppHeaderSlot` in
+  `web/src/routes/__root.tsx`); section labels on the page itself are `h2`.
 - Optional locale prefix: `/setup` (en) or `/es/setup`, ... — the prefix is the i18n source of truth.
 - No URL params on entry. On submit, the created session id drives the next route.
 - Form state is local + valibot schema (`CreateSessionRequest` from `@di/shared` via formisch).

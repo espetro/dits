@@ -143,9 +143,9 @@ function AppHeaderSlot() {
     <AppHeader
       title={
         titleKey ? (
-          <span className="text-sm font-normal text-espresso-soft">
+          <h1 className="text-sm font-normal text-espresso-soft">
             <FormattedMessage id={titleKey} />
-          </span>
+          </h1>
         ) : undefined
       }
     />
