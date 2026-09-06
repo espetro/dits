@@ -66,9 +66,20 @@ describe("runtime stores", () => {
     // the stored decode maps the legacy flat shape:
     const decoded = decodeProviderProfile(localStorage.getItem("di.provider-profile") ?? "");
     expect(decoded).toEqual({
-      stt: { baseUrl: legacy.baseUrl, apiKey: legacy.apiKey, model: "whisper-1" },
-      tts: { baseUrl: legacy.baseUrl, apiKey: legacy.apiKey, model: "tts-1", voice: "alloy" },
-      llm: { baseUrl: legacy.baseUrl, apiKey: legacy.apiKey, model: legacy.llmModel },
+      stt: { baseUrl: legacy.baseUrl, apiKey: legacy.apiKey, model: "whisper-1", flavor: "openai" },
+      tts: {
+        baseUrl: legacy.baseUrl,
+        apiKey: legacy.apiKey,
+        model: "tts-1",
+        voice: "alloy",
+        flavor: "openai",
+      },
+      llm: {
+        baseUrl: legacy.baseUrl,
+        apiKey: legacy.apiKey,
+        model: legacy.llmModel,
+        flavor: "openai",
+      },
     });
     expect(v.safeParse(LegacyProviderProfileSchema, legacy).success).toBe(true);
   });
