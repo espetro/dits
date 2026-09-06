@@ -196,7 +196,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
           this.pending = rest;
           for (const s of sentences) void speak(s);
         },
-        onError: reportError,
+        // respond() resolves (rather than rejecting) when the LLM call
+        // fails, so aborts from barge-in surface here instead of the catch
+        // below; drop them so expected interrupts never read as errors.
+        onError: (error, phase) => {
+          if (!ctrl.signal.aborted) reportError(error, phase);
+        },
         onMetrics: (metrics) => this.deps.onMetrics?.(metrics),
       });
       if (ctrl.signal.aborted) return;
