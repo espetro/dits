@@ -4,6 +4,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useStore } from "@nanostores/react";
 import { $draft } from "../../stores/session";
+import { $micDeviceId } from "../../stores/devices";
 import { createSession, uploadDocuments } from "../../lib/api";
 import { MicSelector } from "../../components/vendor/mic-selector";
 import { Button } from "../../components/vendor/button";
@@ -13,6 +14,7 @@ import { $effectiveRuntime, $providerProfile, ensureRuntimeProbe } from "../../l
 import { openSettings } from "../../components/settings-dialog";
 import { createClientSession } from "../../lib/opfs-store";
 import { resetClientSession } from "../../lib/agent/session-store";
+import { toast } from "sonner";
 
 const MAX_FILES = 10;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
@@ -48,6 +50,7 @@ function Setup() {
   const { locale } = useLocaleNav();
   const intl = useIntl();
   const draft = useStore($draft);
+  const micDeviceId = useStore($micDeviceId);
   const effectiveRuntime = useStore($effectiveRuntime);
   const profile = useStore($providerProfile);
   React.useEffect(() => {
@@ -86,6 +89,15 @@ function Setup() {
   }
 
   async function start(validate: boolean) {
+    // guard tied to the runtime FSM: custom/in-browser sessions run the
+    // agent loop client-side, which is impossible without an LLM endpoint
+    if (effectiveRuntime !== "server" && !profile?.llm) {
+      toast.error(intl.formatMessage({ id: "setup.needsProviderToast" }), {
+        description: intl.formatMessage({ id: "setup.needsProvider" }),
+      });
+      openSettings("aiProvider");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -256,7 +268,7 @@ function Setup() {
                 <FormattedMessage id="setup.mic" />
               </h2>
               <div className="mt-3" data-testid="mic-check">
-                <MicSelector />
+                <MicSelector value={micDeviceId} onValueChange={(id) => $micDeviceId.set(id)} />
               </div>
             </section>
 
@@ -328,7 +340,7 @@ function Setup() {
                 <Button
                   variant="ghost"
                   onClick={() => openSettings("aiProvider")}
-                  className="mt-3 h-auto rounded-full bg-white px-5 py-2 text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
+                  className="mt-3 h-auto rounded-full bg-white px-5 py-2 font-body text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
                 >
                   <FormattedMessage id="setup.openProviderSettings" />
                 </Button>
@@ -341,13 +353,8 @@ function Setup() {
             >
               <Button
                 onClick={() => void start(true)}
-                disabled={busy || (effectiveRuntime !== "server" && !profile?.llm)}
-                title={
-                  effectiveRuntime !== "server" && !profile?.llm
-                    ? intl.formatMessage({ id: "setup.needsProvider" })
-                    : undefined
-                }
-                className="group inline-flex items-center gap-3 rounded-full bg-espresso px-8 py-4 font-display text-lg font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={busy}
+                className="group inline-flex items-center gap-3 rounded-full bg-espresso px-8 py-4 font-body text-lg font-semibold text-cream transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.validate" />
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
@@ -357,8 +364,8 @@ function Setup() {
               <Button
                 variant="ghost"
                 onClick={() => void start(false)}
-                disabled={effectiveRuntime !== "server" && !profile?.llm}
-                className="text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:bg-transparent hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={busy}
+                className="font-body text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:bg-transparent hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <FormattedMessage id="setup.skipValidation" />
               </Button>

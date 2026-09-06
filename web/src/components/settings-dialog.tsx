@@ -1,18 +1,17 @@
-import { Bot, Check, History, Loader2, X } from "lucide-react";
+import { AlertTriangle, Bot, Check, History, Loader2, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Link } from "@tanstack/react-router";
 import * as v from "valibot";
 
-import { withLocale, useLocale } from "../lib/locale-href";
-import { listClientSessions } from "../lib/opfs-store";
-import type { Session } from "@di/shared/session";
+import { useLocale } from "../lib/locale-href";
+import { HistoryPane } from "./history-pane";
 import { ProviderSectionsSchema } from "@di/shared";
 import type { ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
 import { $providerProfile, redactKey } from "../lib/runtime";
+import { SttTestPanel } from "./stt-test-panel";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
-import { hasBrowserStt, probeModels, testBrowserStt, testBrowserTts } from "../lib/settings-tests";
+import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
 import { useStore } from "@nanostores/react";
 import { Button } from "./vendor/button";
 import {
@@ -120,90 +119,10 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-function useHistoryPane() {
-  const locale = useLocale();
-  const intl = useIntl();
-  const [sessions, setSessions] = React.useState<Session[] | null>(null);
-
-  React.useEffect(() => {
-    let cancelled = false;
-    listClientSessions()
-      .then((all) => {
-        if (cancelled) return;
-        all.sort((a, b) => b.created_at.localeCompare(a.created_at));
-        setSessions(all);
-      })
-      .catch(() => {
-        if (!cancelled) setSessions([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  function target(s: Session): string {
-    if (s.status === "reported") return withLocale(locale, `/report/${s.id}`);
-    if (s.status === "finished") return withLocale(locale, `/finish/${s.id}`);
-    return withLocale(locale, `/interview/${s.id}`);
-  }
-
-  function relative(iso: string): string {
-    const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-    if (days < 1) return intl.formatMessage({ id: "history.today" });
-    if (days === 1) return intl.formatMessage({ id: "history.yesterday" });
-    if (days < 7) return intl.formatMessage({ id: "history.daysAgo" }, { n: days });
-    return intl.formatMessage({ id: "history.weeksAgo" }, { n: Math.floor(days / 7) });
-  }
-
-  return { sessions, target, relative };
-}
-
-function HistoryPane() {
-  const { sessions, target, relative } = useHistoryPane();
-
-  if (sessions === null) {
-    return <p className="text-sm text-muted-foreground">…</p>;
-  }
-  if (sessions.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        <FormattedMessage id="history.empty" />
-      </p>
-    );
-  }
-  return (
-    <div className="space-y-2">
-      {sessions.map((s) => (
-        <Link
-          key={s.id}
-          to={target(s)}
-          className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted/60"
-        >
-          <span className="min-w-0">
-            <span className="block truncate font-medium">{s.title}</span>
-            <span className="block text-xs text-muted-foreground">
-              {s.status} · {relative(s.created_at)}
-            </span>
-          </span>
-          <span
-            className={
-              "ml-3 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
-              (s.status === "reported"
-                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
-                : "bg-muted text-muted-foreground")
-            }
-          >
-            {s.status}
-          </span>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
 /** Per-section editable endpoint state (empty string = not set). */
 interface SectionDraft {
   enabled: boolean;
+  flavor: "openai" | "anthropic";
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -212,6 +131,7 @@ interface SectionDraft {
 
 const EMPTY_SECTION: SectionDraft = {
   enabled: false,
+  flavor: "openai",
   baseUrl: "",
   apiKey: "",
   model: "",
@@ -222,6 +142,7 @@ function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined)
   if (!endpoint) return { ...EMPTY_SECTION };
   return {
     enabled: true,
+    flavor: endpoint.flavor ?? "openai",
     baseUrl: endpoint.baseUrl,
     apiKey: endpoint.apiKey,
     model: endpoint.model,
@@ -298,6 +219,7 @@ function AiProviderPane() {
     llm: profile?.llm
       ? {
           enabled: true,
+          flavor: profile.llm.flavor ?? "openai",
           baseUrl: profile.llm.baseUrl,
           apiKey: profile.llm.apiKey,
           model: profile.llm.model,
@@ -312,6 +234,10 @@ function AiProviderPane() {
   const [saved, setSaved] = React.useState(false);
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
+  // STT read-aloud block: live transcript shown in a read-only textarea.
+  const [sttOutput, setSttOutput] = React.useState("");
+  const liveStt = React.useRef<{ stop: () => void } | null>(null);
+  React.useEffect(() => () => liveStt.current?.stop(), []);
   // In-browser sections can only be tested when the browser actually ships
   // the Web Speech feature; computed per-render (SSR-safe, cheap).
   const browserCapable =
@@ -330,6 +256,38 @@ function AiProviderPane() {
   }, []);
 
   const draft = drafts[tab];
+
+  // /models poll results for the Model ID datalist (custom endpoint mode).
+  const [modelOptions, setModelOptions] = React.useState<string[]>([]);
+
+  // Once base URL + key are set, poll the endpoint's /models and offer the
+  // ids in the Model ID input's datalist. Failures are silent: the field
+  // stays free-text.
+  React.useEffect(() => {
+    if (!draft.enabled || !draft.baseUrl || !draft.apiKey) {
+      setModelOptions([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
+      fetch(`${base}/v1/models`, { headers: { authorization: `Bearer ${draft.apiKey}` } })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json: { data?: Array<{ id?: string }> } | null) => {
+          if (cancelled || !json) return;
+          const ids = (json.data ?? [])
+            .map((m) => m.id ?? "")
+            .filter(Boolean)
+            .sort();
+          setModelOptions(ids);
+        })
+        .catch(() => undefined);
+    }, 600);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [draft.enabled, draft.baseUrl, draft.apiKey]);
   const llmComplete =
     !drafts.llm.enabled || (drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model);
   const llmOk = drafts.llm.enabled ? Boolean(llmComplete) : Boolean(profile?.llm);
@@ -345,13 +303,24 @@ function AiProviderPane() {
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
     if (drafts.llm.enabled && drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model) {
-      out.llm = { baseUrl: drafts.llm.baseUrl, apiKey: drafts.llm.apiKey, model: drafts.llm.model };
+      out.llm = {
+        flavor: drafts.llm.flavor,
+        baseUrl: drafts.llm.baseUrl,
+        apiKey: drafts.llm.apiKey,
+        model: drafts.llm.model,
+      };
     }
     if (drafts.stt.enabled && drafts.stt.baseUrl && drafts.stt.apiKey && drafts.stt.model) {
-      out.stt = { baseUrl: drafts.stt.baseUrl, apiKey: drafts.stt.apiKey, model: drafts.stt.model };
+      out.stt = {
+        flavor: drafts.stt.flavor,
+        baseUrl: drafts.stt.baseUrl,
+        apiKey: drafts.stt.apiKey,
+        model: drafts.stt.model,
+      };
     }
     if (drafts.tts.enabled && drafts.tts.baseUrl && drafts.tts.apiKey && drafts.tts.model) {
       out.tts = {
+        flavor: drafts.tts.flavor,
         baseUrl: drafts.tts.baseUrl,
         apiKey: drafts.tts.apiKey,
         model: drafts.tts.model,
@@ -388,6 +357,58 @@ function AiProviderPane() {
         ...prev,
         [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
       }));
+      return;
+    }
+    if (tab === "stt" && !draft.enabled) {
+      // in-browser STT: run the read-aloud test with the selected mic
+      if (!hasBrowserStt()) {
+        setTestState((prev) => ({
+          ...prev,
+          stt: { status: "err", message: intl.formatMessage({ id: "settings.test.unsupported" }) },
+        }));
+        return;
+      }
+      setTesting(tab);
+      setTestState((prev) => ({ ...prev, stt: { status: "running" } }));
+      setSttOutput("");
+      liveStt.current?.stop();
+      liveStt.current = startLiveStt({
+        onText: (text) => setSttOutput(text),
+        onError: (message) => {
+          liveStt.current = null;
+          setTesting(null);
+          setTestState((prev) => ({
+            ...prev,
+            stt: { status: "err", message },
+          }));
+        },
+        timeoutMs: 15_000,
+      });
+      // the session ends via its own timeout/stop; success is judged by
+      // whether any transcript was captured, checked when it finishes
+      const checkDone = setInterval(() => {
+        if (!liveStt.current) {
+          clearInterval(checkDone);
+          return;
+        }
+      }, 500);
+      setTimeout(() => {
+        clearInterval(checkDone);
+        if (liveStt.current) {
+          liveStt.current.stop();
+          liveStt.current = null;
+          setTesting(null);
+          setSttOutput((output) => {
+            setTestState((prev) => ({
+              ...prev,
+              stt: output.trim()
+                ? { status: "ok" }
+                : { status: "err", message: intl.formatMessage({ id: "settings.stt.noSpeech" }) },
+            }));
+            return output;
+          });
+        }
+      }, 15_500);
       return;
     }
     setTesting(tab);
@@ -427,11 +448,8 @@ function AiProviderPane() {
           setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
         }
       } else {
-        if (!draft.enabled) await testBrowserStt();
-        else {
-          await probeModels(draft);
-          setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
-        }
+        await probeModels(draft);
+        setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
       }
     } catch (err) {
       setTestState((prev) => ({
@@ -482,17 +500,57 @@ function AiProviderPane() {
                     <FormattedMessage id="settings.customEndpoint" />
                   </Label>
                 </RadioGroup>
-                {tab === "llm" && (
+                {tab === "llm" && draft.enabled && (
+                  <div className="space-y-1.5">
+                    <span className={fieldClass}>
+                      <FormattedMessage id="settings.flavor" />
+                    </span>
+                    <select
+                      value={draft.flavor}
+                      onChange={(e) => update({ flavor: e.target.value as "openai" | "anthropic" })}
+                      className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-persimmon/50"
+                    >
+                      <option value="openai">
+                        {intl.formatMessage({ id: "settings.flavor.openai" })}
+                      </option>
+                      <option value="anthropic">
+                        {intl.formatMessage({ id: "settings.flavor.anthropic" })}
+                      </option>
+                    </select>
+                    <span className={helperClass}>
+                      <FormattedMessage id="settings.flavorHelp" />
+                    </span>
+                  </div>
+                )}
+                {tab === "llm" && !draft.enabled && (
                   <p className="text-xs text-muted-foreground">
                     <FormattedMessage id="settings.llmRequired" />
                   </p>
                 )}
+                {tab === "llm" && (
+                  <div
+                    role="note"
+                    className="flex gap-2 rounded-lg border border-persimmon/30 bg-persimmon/5 p-3 text-xs text-espresso-soft"
+                  >
+                    <AlertTriangle
+                      className="mt-0.5 size-3.5 shrink-0 text-persimmon-deep"
+                      aria-hidden="true"
+                    />
+                    <FormattedMessage id="settings.llm.inBrowserWarning" />
+                  </div>
+                )}
 
+                {tab === "stt" && <SttTestPanel inBrowser={!draft.enabled} output={sttOutput} />}
                 {draft.enabled && (
                   <div className="space-y-4">
                     <SettingsField
                       label={intl.formatMessage({ id: "settings.baseUrl" })}
-                      helper={intl.formatMessage({ id: "settings.baseUrlHelp" })}
+                      helper={intl.formatMessage({
+                        id:
+                          tab === "llm" && draft.flavor === "anthropic"
+                            ? "settings.baseUrlHelpAnthropic"
+                            : "settings.baseUrlHelp",
+                      })}
                     >
                       <Input
                         value={draft.baseUrl}
@@ -519,13 +577,26 @@ function AiProviderPane() {
                       />
                     </SettingsField>
                     <SettingsField
-                      label={intl.formatMessage({ id: "settings.model" })}
+                      label={intl.formatMessage({ id: "settings.modelId" })}
                       helper={intl.formatMessage({ id: "settings.modelHelp" })}
                     >
-                      <Input
-                        value={draft.model}
-                        onChange={(e) => update({ model: e.target.value })}
-                      />
+                      <>
+                        <Input
+                          value={draft.model}
+                          onChange={(e) => update({ model: e.target.value })}
+                          list={`${tab}-models`}
+                          placeholder={
+                            modelOptions.length === 0
+                              ? intl.formatMessage({ id: "settings.modelPlaceholder" })
+                              : undefined
+                          }
+                        />
+                        <datalist id={`${tab}-models`}>
+                          {modelOptions.map((id) => (
+                            <option key={id} value={id} />
+                          ))}
+                        </datalist>
+                      </>
                     </SettingsField>
                     {tab === "tts" && (
                       <SettingsField
@@ -538,17 +609,25 @@ function AiProviderPane() {
                         />
                       </SettingsField>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      <FormattedMessage id="settings.customProviders" />
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      <FormattedMessage id="settings.freeProvidersLabel" /> <FreeProviderLinks />
-                    </p>
+                    <div className="space-y-1.5 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
+                      <p className="font-medium text-foreground">
+                        <FormattedMessage id={`settings.section.${tab}.title`} />
+                      </p>
+                      <p>
+                        <FormattedMessage id={`settings.section.${tab}.providers`} />
+                      </p>
+                      {tab === "llm" && (
+                        <p>
+                          <FormattedMessage id="settings.freeProvidersLabel" />{" "}
+                          <FreeProviderLinks />
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -596,7 +675,7 @@ function AiProviderPane() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 sm:ml-auto">
                     {saved && (
                       <span
                         role="status"
@@ -643,9 +722,31 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
     },
   ];
 
+  const configTabs = tabs.filter((tab) => tab.id !== "history");
+
   const nav = (
     <>
-      {tabs.map((tab) => (
+      {tabs
+        .filter((tab) => tab.id === "history")
+        .map((tab) => (
+          <Button
+            key={tab.id}
+            variant="ghost"
+            className={
+              "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 py-2.5 text-sm font-normal " +
+              (pane === tab.id
+                ? "bg-accent font-medium text-accent-foreground"
+                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")
+            }
+            onClick={() => onPaneChange(tab.id)}
+          >
+            {tab.icon}
+            <span className="truncate">{tab.label}</span>
+          </Button>
+        ))}
+      {/* cached session data sits apart from actual configuration */}
+      <div role="separator" className="mx-1 my-2 border-t border-border" />
+      {configTabs.map((tab) => (
         <Button
           key={tab.id}
           variant="ghost"
@@ -670,7 +771,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
         className={
           isMobile
             ? "inset-0 flex h-svh w-screen max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 bg-background p-0 [&>button]:hidden"
-            : "flex h-[min(40rem,calc(100vh-6rem))] w-[calc(100vw-2rem)] max-w-4xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl lg:max-w-5xl"
+            : "flex h-[min(40rem,calc(100vh-6rem))] w-[calc(100vw-2rem)] max-w-4xl flex-row gap-0 overflow-hidden rounded-2xl border-border bg-background p-0 shadow-2xl [&>button]:hidden lg:max-w-5xl"
         }
       >
         <DialogTitle className="sr-only">
@@ -681,7 +782,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           <FormattedMessage id="settings.aiProvider" />
         </DialogDescription>
         {isMobile ? (
-          <div className="shrink-0 border-b border-border p-2">
+          <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
             <Tabs value={pane} onValueChange={(value) => onPaneChange(value as SettingsPane)}>
               <TabsList className="w-full">
                 {tabs.map((tab) => (
@@ -692,6 +793,15 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
                 ))}
               </TabsList>
             </Tabs>
+            <DialogClose
+              className="ml-2 flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+              onClick={clearSettings}
+            >
+              <X className="size-4" aria-hidden="true" />
+              <span className="sr-only">
+                <FormattedMessage id="settings.close" />
+              </span>
+            </DialogClose>
           </div>
         ) : (
           <nav className="flex w-60 shrink-0 flex-col p-5">
