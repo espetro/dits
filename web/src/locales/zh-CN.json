@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "配置面试",
   "setup.presets": "预设",
+  "setup.mic": "麦克风",
   "setup.preset.sysDesign": "系统设计",
   "setup.preset.behavioral": "行为面试",
   "setup.preset.frontend": "前端",

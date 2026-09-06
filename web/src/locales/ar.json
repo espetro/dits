@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "إعداد المقابلة",
   "setup.presets": "إعدادات جاهزة",
+  "setup.mic": "الميكروفون",
   "setup.preset.sysDesign": "تصميم أنظمة",
   "setup.preset.behavioral": "سلوكية",
   "setup.preset.frontend": "واجهات",

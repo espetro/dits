@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "configurer l’entretien",
   "setup.presets": "préréglages",
+  "setup.mic": "microphone",
   "setup.preset.sysDesign": "sys design",
   "setup.preset.behavioral": "comportemental",
   "setup.preset.frontend": "frontend",

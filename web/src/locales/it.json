@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "configura colloquio",
   "setup.presets": "preimpostazioni",
+  "setup.mic": "microfono",
   "setup.preset.sysDesign": "sys design",
   "setup.preset.behavioral": "comportamentale",
   "setup.preset.frontend": "frontend",

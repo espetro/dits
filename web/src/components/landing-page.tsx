@@ -69,7 +69,10 @@ function assign(count: number): Array<Slot> {
 }
 
 function useStickerPlacement(count: number): Array<Slot> {
-  const [placement, setPlacement] = React.useState(() => assign(count));
+  // Initial placement must be deterministic: the first N slots in order.
+  // A Math.random shuffle here would differ between server render and
+  // client hydration; the shuffle runs post-mount instead.
+  const [placement, setPlacement] = React.useState(() => STICKER_SLOTS.slice(0, count));
   React.useEffect(() => {
     setPlacement(assign(count));
   }, [count]);

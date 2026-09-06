@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "configurar entrevista",
   "setup.presets": "predefinições",
+  "setup.mic": "microfone",
   "setup.preset.sysDesign": "sys design",
   "setup.preset.behavioral": "comportamental",
   "setup.preset.frontend": "frontend",

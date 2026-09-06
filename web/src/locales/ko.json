@@ -13,6 +13,7 @@
   "common.github": "github",
   "setup.title": "면접 설정",
   "setup.presets": "프리셋",
+  "setup.mic": "마이크",
   "setup.preset.sysDesign": "시스템 디자인",
   "setup.preset.behavioral": "행동 면접",
   "setup.preset.frontend": "프론트엔드",
