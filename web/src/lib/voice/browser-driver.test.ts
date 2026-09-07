@@ -55,7 +55,7 @@ describe("BrowserVoiceDriver barge-in", () => {
     });
     const onError = vi.fn();
     driver.onError = onError;
-    driver.useClientAgent(
+    await driver.useClientAgent(
       { llm: LLM },
       {
         update_question: async () => "ok",
@@ -121,7 +121,7 @@ function fakeRecognitionCtor(): {
 }
 
 describe("BrowserVoiceDriver kickoff on silence", () => {
-  function setupDriver() {
+  async function setupDriver() {
     const rec = fakeRecognitionCtor();
     const driver = new BrowserVoiceDriver("s1", {
       player: createPcmPlayer({ createContext: () => fakeCtx() }),
@@ -129,7 +129,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
     });
     const respond = vi.fn(async () => "hello, let's begin");
     driver.onError = vi.fn();
-    driver.useClientAgent(
+    await driver.useClientAgent(
       { llm: LLM },
       {
         update_question: async () => "ok",
@@ -146,7 +146,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
   it("auto-fires the opening agent turn after the silence window", async () => {
     vi.useFakeTimers();
     try {
-      const { driver, respond } = setupDriver();
+      const { driver, respond } = await setupDriver();
       await driver.start();
       await vi.advanceTimersByTimeAsync(5_000);
       expect(respond).toHaveBeenCalledTimes(1);
@@ -161,7 +161,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
   it("does not kick off when the user speaks within the window", async () => {
     vi.useFakeTimers();
     try {
-      const { driver, respond, emit } = setupDriver();
+      const { driver, respond, emit } = await setupDriver();
       await driver.start();
       emit("hello");
       await vi.advanceTimersByTimeAsync(10_000);
@@ -175,7 +175,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
   it("cancels the kickoff on stop() and fires at most once", async () => {
     vi.useFakeTimers();
     try {
-      const { driver, respond } = setupDriver();
+      const { driver, respond } = await setupDriver();
       await driver.start();
       await driver.stop();
       await vi.advanceTimersByTimeAsync(10_000);
@@ -187,7 +187,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
 });
 
 describe("BrowserVoiceDriver phantom final gating", () => {
-  function setupDriver() {
+  async function setupDriver() {
     const rec = fakeRecognitionCtor();
     const driver = new BrowserVoiceDriver("s1", {
       player: createPcmPlayer({ createContext: () => fakeCtx() }),
@@ -195,7 +195,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
     });
     const respond = vi.fn(async () => "ok");
     driver.onError = vi.fn();
-    driver.useClientAgent(
+    await driver.useClientAgent(
       { llm: LLM },
       {
         update_question: async () => "ok",
@@ -210,7 +210,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
   }
 
   it("drops a final transcript with no speech evidence", async () => {
-    const { driver, respond, emitFinal } = setupDriver();
+    const { driver, respond, emitFinal } = await setupDriver();
     await driver.start();
     emitFinal("the weather is nice");
     await new Promise((r) => setTimeout(r, 10));
@@ -218,7 +218,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
   });
 
   it("accepts a final transcript after interim speech evidence", async () => {
-    const { driver, respond, emitInterim, emitFinal } = setupDriver();
+    const { driver, respond, emitInterim, emitFinal } = await setupDriver();
     await driver.start();
     emitInterim("hel");
     emitFinal("hello");
@@ -228,7 +228,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
   });
 
   it("accepts a high-confidence final without interim evidence", async () => {
-    const { driver, respond, emitFinal } = setupDriver();
+    const { driver, respond, emitFinal } = await setupDriver();
     await driver.start();
     emitFinal("hello", 0.9);
     await new Promise((r) => setTimeout(r, 10));
@@ -236,7 +236,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
   });
 
   it("recovers: evidence is per-utterance, next phantom final is also dropped", async () => {
-    const { driver, respond, emitInterim, emitFinal } = setupDriver();
+    const { driver, respond, emitInterim, emitFinal } = await setupDriver();
     await driver.start();
     emitInterim("real");
     emitFinal("real words");
@@ -248,14 +248,14 @@ describe("BrowserVoiceDriver phantom final gating", () => {
 });
 
 describe("BrowserVoiceDriver recognition errors", () => {
-  function setupDriver() {
+  async function setupDriver() {
     const rec = fakeRecognitionCtor();
     const driver = new BrowserVoiceDriver("s1", {
       player: createPcmPlayer({ createContext: () => fakeCtx() }),
       recognitionCtor: rec.ctor,
     });
     driver.onError = vi.fn();
-    driver.useClientAgent(
+    await driver.useClientAgent(
       { llm: LLM },
       {
         update_question: async () => "ok",
@@ -272,7 +272,7 @@ describe("BrowserVoiceDriver recognition errors", () => {
   it("stops cleanly on not-allowed and reports once without restarting", async () => {
     vi.useFakeTimers();
     try {
-      const { driver, emitError } = setupDriver();
+      const { driver, emitError } = await setupDriver();
       await driver.start();
       emitError("not-allowed");
       await vi.advanceTimersByTimeAsync(2_000);
@@ -287,7 +287,7 @@ describe("BrowserVoiceDriver recognition errors", () => {
   it("stops cleanly on audio-capture", async () => {
     vi.useFakeTimers();
     try {
-      const { driver, emitError } = setupDriver();
+      const { driver, emitError } = await setupDriver();
       await driver.start();
       emitError("audio-capture");
       await vi.advanceTimersByTimeAsync(2_000);

@@ -55,7 +55,7 @@ export async function createDriver(sessionId: string): Promise<SpeechDriver> {
         $currentQuestion.set(q);
       },
     });
-    driver.useClientAgent(withLlm, executors, () => ({
+    await driver.useClientAgent(withLlm, executors, () => ({
       mode: "interview",
       currentQuestion: $question.get().text,
       hints: $question.get().hints,

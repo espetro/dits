@@ -91,14 +91,14 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   /** Wire the client-only agent. Called by createDriver when an llm endpoint exists. */
-  useClientAgent(
+  async useClientAgent(
     profile: ProviderSections & { llm: LlmSection },
     tools: AgentToolExecutors,
     getContext: () => SessionContext,
     fetchImpl?: typeof fetch,
-  ): void {
+  ): Promise<void> {
     this.profile = profile;
-    this.agent = new ClientAgent(profile.llm, tools, getContext, fetchImpl);
+    this.agent = await ClientAgent.create(profile.llm, tools, getContext, fetchImpl);
   }
 
   private get useTtsEndpoint(): boolean {
