@@ -49,6 +49,30 @@ export function testBrowserStt(): Promise<void> {
 }
 
 /**
+ * Map raw Web Speech error codes to a human-readable sentence. "network"
+ * is the common desktop-Chrome trap: SpeechRecognition is server-backed
+ * there, so a VPN/firewall/adblocker breaks it even though the page is
+ * online (mobile Chrome often routes differently and works).
+ */
+function explainSttError(code: string): string {
+  switch (code) {
+    case "network":
+      return "speech service unreachable: desktop Chrome sends mic audio to Google's servers, so a VPN, firewall, or adblocker can block it (mobile Chrome often works)";
+    case "not-allowed":
+    case "service-not-allowed":
+      return "microphone permission denied";
+    case "no-speech":
+      return "no speech detected";
+    case "audio-capture":
+      return "no microphone found";
+    case "language-not-supported":
+      return `language not supported: ${navigator.language ?? "unknown locale"}`;
+    default:
+      return code;
+  }
+}
+
+/**
  * Live in-browser STT session: streams interim+final transcripts to
  * onText as the engine hears them. Returns a stop() handle; the session
  * also self-stops after `timeoutMs`. Errors (not-allowed, no-speech,
@@ -106,7 +130,7 @@ export function startLiveStt(handlers: {
   };
   recognition.onerror = (event) => {
     stop();
-    handlers.onError(event.error);
+    handlers.onError(explainSttError(event.error));
   };
   recognition.onend = () => stop();
   recognition.start();
