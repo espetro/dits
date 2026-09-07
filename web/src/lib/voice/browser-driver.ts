@@ -243,6 +243,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
         this.events.onAgentStart?.();
       }
       try {
+        if (!this.useTtsEndpoint) {
+          // no TTS endpoint configured: final text is spoken by the
+          // speechSynthesis fallback in speakAgentTurn instead
+          return;
+        }
         const pcm = await tts(this.profile!.tts!, sentence, ctrl.signal);
         if (ctrl.signal.aborted) return;
         this.player.write(pcm);
