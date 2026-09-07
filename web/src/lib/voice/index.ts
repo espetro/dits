@@ -39,7 +39,10 @@ export async function selectDriver(): Promise<VoiceDriverKind> {
   }
 }
 
-export async function createDriver(sessionId: string): Promise<SpeechDriver> {
+export async function createDriver(
+  sessionId: string,
+  loadSignal?: AbortSignal,
+): Promise<SpeechDriver> {
   const kind = await selectDriver();
   if (kind === "server") return new ServerVoiceDriver(sessionId);
 
@@ -55,13 +58,29 @@ export async function createDriver(sessionId: string): Promise<SpeechDriver> {
         $currentQuestion.set(q);
       },
     });
-    await driver.useClientAgent(withLlm, executors, () => ({
-      mode: "interview",
-      currentQuestion: $question.get().text,
-      hints: $question.get().hints,
-    }));
+    // model load is caller-abortable (interview route bounds it at 10min); a
+    // timeout/abort surfaces as a normal error state (p0.2 retry path)
+    await AbortSignalAbortable(loadSignal, () =>
+      driver.useClientAgent(withLlm, executors, () => ({
+        mode: "interview",
+        currentQuestion: $question.get().text,
+        hints: $question.get().hints,
+      })),
+    );
   }
   return driver;
+}
+
+async function AbortSignalAbortable(signal: AbortSignal | undefined, run: () => Promise<void>) {
+  if (!signal) return run();
+  return Promise.race([
+    run(),
+    new Promise<never>((_, reject) =>
+      signal.addEventListener("abort", () => reject(signal.reason ?? new Error("aborted")), {
+        once: true,
+      }),
+    ),
+  ]);
 }
 
 export { BrowserVoiceDriver, ServerVoiceDriver, probeServer, $clientTurns };

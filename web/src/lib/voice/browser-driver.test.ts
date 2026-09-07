@@ -299,3 +299,46 @@ describe("BrowserVoiceDriver recognition errors", () => {
     }
   });
 });
+
+describe("BrowserVoiceDriver retry-once on llm failure", () => {
+  async function setupRetryDriver() {
+    const rec = fakeRecognitionCtor();
+    const driver = new BrowserVoiceDriver("s1", {
+      player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      recognitionCtor: rec.ctor,
+    });
+    const script = ["", "an answer"];
+    const respond = vi.fn(() => Promise.resolve(script.shift() ?? ""));
+    driver.onError = vi.fn();
+    await driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      () => ({ mode: "interview" }),
+    );
+    const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+    agent.respond = respond as unknown as (...args: any[]) => Promise<string>;
+    return { driver, respond, emit: rec.emit };
+  }
+
+  it("retries a failed turn once, then surfaces the error once", async () => {
+    const { driver, respond } = await setupRetryDriver();
+    // cancel the kickoff so only explicit turns run
+    driver["cancelKickoff"]();
+    const onError = driver.onError as unknown as ReturnType<typeof vi.fn>;
+    // first turn: attempt 1 resolves empty, attempt 2 succeeds
+    await driver["runAgentTurn"]("first question", "voice");
+    expect(respond).toHaveBeenCalledTimes(2);
+    expect(onError).not.toHaveBeenCalled();
+
+    // a turn that fails twice surfaces the error exactly once
+    respond.mockResolvedValue("");
+    onError.mockClear();
+    await driver["runAgentTurn"]("second question", "voice");
+    expect(respond).toHaveBeenCalledTimes(4);
+    expect(onError).toHaveBeenCalledTimes(1);
+  }, 15_000);
+});

@@ -129,3 +129,27 @@ describe("voiceMachine", () => {
     expect(new Uint8Array(4).byteLength).toBe(4);
   });
 });
+
+describe("voiceMachine reconnecting", () => {
+  it("unexpected close enters reconnecting, CONNECTED resumes listening", () => {
+    expect(
+      run([
+        { type: "CONNECT" },
+        { type: "CONNECTED" },
+        { type: "RECONNECTING", attempt: 1 },
+        { type: "CONNECTED" },
+      ]),
+    ).toEqual(["idle", "connecting", "listening", "reconnecting", "listening"]);
+  });
+
+  it("RETRY from error returns to idle and clears the error", () => {
+    const actor = createActor(voiceMachine);
+    actor.start();
+    actor.send({ type: "ERROR", message: "ws closed" });
+    expect(actor.getSnapshot().value).toBe("error");
+    actor.send({ type: "RETRY" });
+    const snap = actor.getSnapshot();
+    expect(snap.value).toBe("idle");
+    expect(snap.context.error).toBeNull();
+  });
+});

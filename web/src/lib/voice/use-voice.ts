@@ -6,20 +6,22 @@ import { appendClientTurn } from "../opfs-store";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { createDriver } from "./index";
 import { voiceMachine } from "./machine";
+import { MODEL_LOAD_TIMEOUT_MS } from "../timeouts";
 import type { SpeechDriver } from "./server-driver";
 
 /** Shape-compatible with the old VoiceRoom hook so the header UI keeps working. */
 export interface VoiceState {
-  status: "idle" | "connecting" | "connected" | "error";
+  status: "idle" | "connecting" | "connected" | "reconnecting" | "error";
   agentSpeaking: boolean;
   error: string | null;
-  /** machine state for the status label: listening/thinking/speaking/… */
   phase: string;
   muted: boolean;
   /** browser-driver only: read a new agent turn aloud (no-op for server driver) */
   speakAgentTurn(text: string): void;
   /** browser-driver only: run a typed turn through the client agent (no-op for server driver) */
   sendText(text: string): void;
+  /** rebuild the driver after a voice error; success returns to connected */
+  restart(): Promise<void>;
 }
 
 interface VoiceCoreState {
@@ -70,7 +72,7 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
     async function boot() {
       let driver: SpeechDriver;
       try {
-        driver = await createDriver(sessionId);
+        driver = await createDriver(sessionId, AbortSignal.timeout(MODEL_LOAD_TIMEOUT_MS));
       } catch (err) {
         if (!cancelled) {
           setState((s) => ({ ...s, status: "error", error: String(err) }));
@@ -83,6 +85,10 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       driver.onError = (message: string) => {
         actor.send({ type: "ERROR", message });
         if (!cancelled) setState((s) => ({ ...s, status: "error", error: message }));
+      };
+      driver.onReconnecting = (attempt: number) => {
+        actor.send({ type: "RECONNECTING", attempt });
+        if (!cancelled) setState((s) => ({ ...s, status: "reconnecting", phase: "reconnecting" }));
       };
       driver.events.onSpeechStart = () => actor.send({ type: "SPEECH_START" });
       driver.events.onSpeechEnd = (text) => actor.send({ type: "SPEECH_END", text });
@@ -152,5 +158,21 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
     setState((s) => ({ ...s, muted }));
   }, [muted]);
 
-  return { ...state, speakAgentTurn: speak, sendText };
+  const restart = React.useCallback(async () => {
+    const driver = driverRef.current;
+    if (!driver) return;
+    setState((s) => ({ ...s, status: "connecting", phase: "connecting" }));
+    actorRef.current?.send({ type: "RETRY" });
+    try {
+      await driver.restart();
+      actorRef.current?.send({ type: "CONNECTED" });
+      setState((s) => ({ ...s, status: "connected", error: null }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "voice restart failed";
+      actorRef.current?.send({ type: "CONNECT_FAILED" });
+      setState((s) => ({ ...s, status: "error", error: message }));
+    }
+  }, []);
+
+  return { ...state, speakAgentTurn: speak, sendText, restart };
 }

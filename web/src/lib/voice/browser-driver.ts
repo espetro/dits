@@ -13,6 +13,7 @@ import { synthesizeSpeech } from "../agent/tts";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
 import type { SpeechDriver } from "./server-driver";
+import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 
 /**
  * Browser driver, dual-mode:
@@ -55,6 +56,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
   status: SpeechDriver["status"] = "idle";
   agentSpeaking = false;
   onError: (message: string) => void = () => undefined;
+  onReconnecting: (attempt: number) => void = () => undefined;
   events: SpeechDriver["events"] = {};
 
   private recognition: RecognitionLike | null = null;
@@ -68,6 +70,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
   /** set when interim results arrive during the current utterance */
   private speechSeen = false;
+  /** id of the user turn that already consumed the one retry (p0.4 guard) */
+  private retriedTurnId: string | null = null;
 
   /**
    * Sent as a user turn when the candidate is silent after connect, so the
@@ -117,6 +121,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       return;
     }
     const rec = new Ctor();
+    this.recognition = rec;
     this.speechSeen = false;
     rec.continuous = true;
     rec.interimResults = true;
@@ -153,6 +158,18 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.status = "connected";
     rec.start();
     this.armKickoff();
+  }
+
+  /** rebuild recognition/agent transport after an error; model handles stay cached. */
+  async restart(): Promise<void> {
+    if (this.restarting) return;
+    this.restarting = true;
+    try {
+      await this.stop();
+      await this.start();
+    } finally {
+      this.restarting = false;
+    }
   }
 
   /**
@@ -248,7 +265,16 @@ export class BrowserVoiceDriver implements SpeechDriver {
           // speechSynthesis fallback in speakAgentTurn instead
           return;
         }
-        const pcm = await tts(this.profile!.tts!, sentence, ctrl.signal);
+        const pcm = await tts(
+          this.profile!.tts!,
+          sentence,
+          AbortSignal.any([
+            ctrl.signal,
+            // per-sentence budget: a stalled tts must skip the sentence, not
+            // stall the speak queue (p0.3)
+            AbortSignal.timeout(TTS_SENTENCE_TIMEOUT_MS),
+          ]),
+        );
         if (ctrl.signal.aborted) return;
         this.player.write(pcm);
       } catch (err) {
@@ -256,9 +282,33 @@ export class BrowserVoiceDriver implements SpeechDriver {
       }
     };
 
+    const first = await this.attemptAgentTurn(text, source, ctrl, speak, reportError);
+    if (first !== "failed") return;
+    // retry-once (p0.4/p1.3b2): a failed turn must not leave the user turn
+    // dangling with no agent response. retry once, guarded by the turn id so
+    // the failure surfaces at most once per user turn.
+    if (this.retriedTurnId !== userTurn.id) {
+      this.retriedTurnId = userTurn.id;
+      this.pending = "";
+      const retry = await this.attemptAgentTurn(text, source, ctrl, speak, reportError);
+      if (retry !== "failed") return;
+    }
+    this.onError(`[${"llm" as TurnPhase}] no agent response for turn; retry also failed`);
+    this.finishSpeaking();
+  }
+
+  private async attemptAgentTurn(
+    text: string,
+    source: Turn["source"],
+    ctrl: AbortController,
+    speak: (sentence: string) => Promise<void>,
+    reportError: (error: unknown, phase: TurnPhase) => void,
+  ): Promise<"ok" | "aborted" | "failed"> {
+    const agent = this.agent;
+    if (!agent) return "aborted";
     try {
       const full = await agent.respond(text, {
-        signal: ctrl.signal,
+        signal: AbortSignal.any([ctrl.signal, AbortSignal.timeout(LLM_TURN_TIMEOUT_MS)]),
         onText: (delta) => {
           if (ctrl.signal.aborted) return;
           this.pending += delta;
@@ -274,36 +324,34 @@ export class BrowserVoiceDriver implements SpeechDriver {
         },
         onMetrics: (metrics) => this.deps.onMetrics?.(metrics),
       });
-      if (ctrl.signal.aborted) return;
+      if (ctrl.signal.aborted) return "aborted";
       // flush the sentence remainder
       if (this.pending.trim()) {
         const rest = this.pending;
         this.pending = "";
         await speak(rest);
       }
-      // full is empty when the LLM call failed: respond()'s onError sink
-      // reports the failure but resolves rather than rejecting, so guard
-      // here instead of persisting an empty agent turn.
-      if (full.trim()) {
-        const agentTurn: Turn = {
-          id: crypto.randomUUID(),
-          session_id: this.sessionId,
-          seq: Date.now() + 1,
-          speaker: "agent",
-          text: full,
-          created_at: new Date().toISOString(),
-          source,
-        };
-        this.events.onAgentTurn?.(agentTurn);
-        // speechSynthesis fallback when no TTS endpoint is configured
-        if (!this.useTtsEndpoint) this.speakAgentTurn(full);
-      }
+      // empty response means the LLM call failed; treat as failed so the
+      // retry-once path can fire instead of dangling the user turn.
+      if (!full.trim()) return "failed";
+      const agentTurn: Turn = {
+        id: crypto.randomUUID(),
+        session_id: this.sessionId,
+        seq: Date.now() + 1,
+        speaker: "agent",
+        text: full,
+        created_at: new Date().toISOString(),
+        source,
+      };
+      this.events.onAgentTurn?.(agentTurn);
+      // speechSynthesis fallback when no TTS endpoint is configured
+      if (!this.useTtsEndpoint) this.speakAgentTurn(full);
       this.finishSpeaking();
+      return "ok";
     } catch (err) {
-      if (!ctrl.signal.aborted) {
-        reportError(err, "llm");
-        this.finishSpeaking();
-      }
+      if (ctrl.signal.aborted) return "aborted";
+      reportError(err, "llm");
+      return "failed";
     }
   }
 

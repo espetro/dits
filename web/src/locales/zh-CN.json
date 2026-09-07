@@ -129,6 +129,8 @@
   "settings.history": "历史会话",
   "interview.voiceError": "语音错误",
   "interview.voiceErrorToast": "语音出错",
+  "interview.voiceRetry": "重试语音",
+  "interview.voiceReconnecting": "重新连接中…",
   "interview.voiceConnected": "语音已连接",
   "interview.voiceConnecting": "连接中…",
   "interview.editorLanguages": "代码语言",

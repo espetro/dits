@@ -228,3 +228,106 @@ describe("ServerVoiceDriver", () => {
     expect(errs).toEqual(["stt down"]);
   });
 });
+
+describe("reconnect loop", () => {
+  interface TestSocket {
+    open: () => void;
+    close: () => void;
+    fail: () => void;
+  }
+
+  function reconnectHarness() {
+    const sockets: TestSocket[] = [];
+    const errs: string[] = [];
+    const reconnects: number[] = [];
+    const capture = fakeCapture();
+    let current: {
+      onopen: (() => void) | null;
+      onerror: (() => void) | null;
+      onclose: (() => void) | null;
+    } = {
+      onopen: null,
+      onerror: null,
+      onclose: null,
+    };
+    const driver = new ServerVoiceDriver("s1", {
+      WebSocketCtor: function () {
+        current = { onopen: null, onerror: null, onclose: null };
+        const ws = {
+          readyState: 0,
+          OPEN: 1,
+          send: () => undefined,
+          close: () => undefined,
+          set onopen(cb: () => void) {
+            this.readyState = 1;
+            current.onopen = cb;
+          },
+          set onerror(cb: () => void) {
+            current.onerror = cb;
+          },
+          set onclose(cb: () => void) {
+            current.onclose = cb;
+          },
+          set onmessage(cb: unknown) {
+            void cb;
+          },
+        };
+        sockets.push({
+          open: () => current.onopen?.(),
+          close: () => current.onclose?.(),
+          fail: () => current.onerror?.(),
+        });
+        return ws as unknown as WebSocket;
+      } as unknown as new (url: string) => WebSocket,
+      capture: async () => capture.cap,
+      player: fakePlayer(),
+      vad: fakeVad().factory as never,
+    });
+    driver.onError = (m) => errs.push(m);
+    driver.onReconnecting = (attempt) => reconnects.push(attempt);
+    return { driver, sockets, errs, reconnects };
+  }
+
+  it("reconnects with exp backoff after an unexpected close", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, sockets, reconnects } = reconnectHarness();
+      const started = driver.start();
+      await vi.advanceTimersByTimeAsync(0);
+      sockets[0]!.open();
+      await started;
+      expect(driver.status).toBe("connected");
+      sockets[0]!.close();
+      expect(driver.status).toBe("reconnecting");
+      await vi.advanceTimersByTimeAsync(1_000);
+      sockets[1]!.open();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(driver.status).toBe("connected");
+      expect(reconnects).toEqual([1]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("gives up after 5 failed attempts with a human-readable error", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, sockets, errs, reconnects } = reconnectHarness();
+      const started = driver.start();
+      await vi.advanceTimersByTimeAsync(0);
+      sockets[0]!.open();
+      await started;
+      sockets[0]!.close();
+      for (let i = 1; i <= 5; i++) {
+        await vi.advanceTimersByTimeAsync(16_000);
+        sockets[i]!.fail();
+      }
+      await vi.advanceTimersByTimeAsync(16_000);
+      expect(reconnects).toEqual([1, 2, 3, 4, 5]);
+      expect(driver.status).toBe("error");
+      expect(errs[0]).toContain("retry");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

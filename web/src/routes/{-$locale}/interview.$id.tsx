@@ -9,10 +9,17 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../../components/
 import { useVoice } from "../../lib/voice/use-voice";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "sonner";
-import { getSession, getTurns, postTextTurn, pushToolState } from "../../lib/api";
+import {
+  getSession,
+  getTurns,
+  postTextTurn,
+  pushToolState,
+  replayPendingTurns,
+} from "../../lib/api";
 import { getClientSession } from "../../lib/opfs-store";
 import { $clientTurns } from "../../lib/agent/session-store";
 import { $effectiveRuntime } from "../../lib/runtime";
+import { MODEL_LOAD_TIMEOUT_MS } from "../../lib/timeouts";
 import { Button } from "../../components/vendor/button";
 import { Input } from "../../components/vendor/input";
 import { Tabs, TabsList, TabsTrigger } from "../../components/vendor/tabs";
@@ -137,11 +144,32 @@ function Interview() {
   const statusKey =
     voice.status === "error"
       ? "interview.voiceError"
-      : voice.status === "connected"
-        ? (phaseKeys[voice.phase] ?? "interview.voiceConnected")
-        : voice.status === "connecting"
-          ? "interview.voiceConnecting"
-          : "interview.voiceIdle";
+      : voice.status === "reconnecting"
+        ? "interview.voiceReconnecting"
+        : voice.status === "connected"
+          ? (phaseKeys[voice.phase] ?? "interview.voiceConnected")
+          : voice.status === "connecting"
+            ? "interview.voiceConnecting"
+            : "interview.voiceIdle";
+
+  // retry the voice driver after an error (p0.2); transcript stays intact
+  const [restarting, setRestarting] = useState(false);
+  async function retryVoice() {
+    setRestarting(true);
+    try {
+      await voice.restart();
+    } finally {
+      setRestarting(false);
+    }
+  }
+
+  // replay text turns that never reached the server (p0.5), once per mount
+  const replayedRef = useRef(false);
+  useEffect(() => {
+    if (replayedRef.current) return;
+    replayedRef.current = true;
+    void replayPendingTurns(id).catch(() => undefined);
+  }, [id]);
 
   // global toast on voice failure (barge-in aborts are filtered at the driver
   // level and never reach onError)
@@ -152,6 +180,10 @@ function Interview() {
         voiceErroredRef.current = true;
         toast.error(intl.formatMessage({ id: "interview.voiceErrorToast" }), {
           description: voice.error ?? undefined,
+          action: {
+            label: intl.formatMessage({ id: "interview.voiceRetry" }),
+            onClick: () => void retryVoice(),
+          },
         });
       }
     } else {
@@ -231,6 +263,17 @@ function Interview() {
               }`}
             />
             {intl.formatMessage({ id: statusKey })}
+            {voice.status === "error" && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={restarting}
+                onClick={() => void retryVoice()}
+                className="h-6 rounded-full px-2 text-[10px]"
+              >
+                <FormattedMessage id="interview.voiceRetry" />
+              </Button>
+            )}
           </span>
         </div>
       </header>

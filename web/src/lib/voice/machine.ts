@@ -10,7 +10,9 @@ export type VoiceEvent =
   | { type: "AGENT_START" }
   | { type: "AGENT_DONE" }
   | { type: "INTERRUPT" }
+  | { type: "RECONNECTING"; attempt: number }
   | { type: "ERROR"; message: string }
+  | { type: "RETRY" }
   | { type: "RESET" };
 
 export interface VoiceContext {
@@ -20,7 +22,8 @@ export interface VoiceContext {
 
 /**
  * Turn FSM for the voice loop. States: idle | connecting | listening |
- * user_speaking | thinking | agent_speaking | interrupted | error. Mute is
+ * user_speaking | thinking | agent_speaking | interrupted | reconnecting |
+ * error. Mute is
  * orthogonal state (kept in $muted), not a machine state. Barge-in:
  * SPEECH_START while agent_speaking moves to interrupted; the driver stops
  * playback, the pipeline re-enters thinking.
@@ -52,6 +55,12 @@ export const voiceMachine = setup({
       on: {
         CONNECTED: "listening",
         CONNECT_FAILED: { target: "error", actions: "setConnectError" },
+      },
+    },
+    reconnecting: {
+      on: {
+        // resume protocol is a p1 follow-up: a fresh socket just continues
+        CONNECTED: "listening",
       },
     },
     listening: {
@@ -91,10 +100,16 @@ export const voiceMachine = setup({
       },
     },
     error: {
-      on: { RESET: { target: "idle", actions: "clear" } },
+      on: {
+        RESET: { target: "idle", actions: "clear" },
+        // retry: driver restart rebuilds the socket/recognizer and reconnects
+        RETRY: { target: "idle", actions: "clear" },
+      },
     },
   },
   on: {
     ERROR: { target: ".error", actions: "setError" },
+    // unexpected ws close from any active state kicks off the reconnect loop
+    RECONNECTING: ".reconnecting",
   },
 });

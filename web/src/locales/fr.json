@@ -129,6 +129,8 @@
   "settings.history": "Sessions précédentes",
   "interview.voiceError": "erreur vocale",
   "interview.voiceErrorToast": "erreur vocale",
+  "interview.voiceRetry": "réessayer la voix",
+  "interview.voiceReconnecting": "reconnexion…",
   "interview.voiceConnected": "voix connectée",
   "interview.voiceConnecting": "connexion…",
   "interview.editorLanguages": "langages de code",
