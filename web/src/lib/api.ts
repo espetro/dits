@@ -2,7 +2,12 @@
  * di API client. The di binary serves the SPA and the /v1 API from one origin,
  * so plain fetch against relative paths is all the web app needs.
  */
+import { enqueuePendingTurn, dequeuePendingTurn, getPendingTurns } from "./opfs-store";
+import type { PendingTurn } from "./opfs-store";
 const BASE = import.meta.env.VITE_DI_API_BASE ?? "";
+
+const PENDING_TURN_RETRIES = 3;
+const POST_TURN_RETRY_BASE_MS = 1_000;
 
 export interface SessionDto {
   id: string;
@@ -104,14 +109,29 @@ export async function pushToolState(id: string, state: ToolStateDto): Promise<vo
   if (!res.ok) throw new Error(`push tool state failed: ${res.status}`);
 }
 
+/**
+ * Durable text turn (p0.5): the turn is enqueued in OPFS before the fetch and
+ * removed on 2xx, so a failed/killed fetch can be retried (see
+ * flushPendingTurns) without losing the turn.
+ */
 export async function postTextTurn(id: string, text: string): Promise<TurnDto> {
-  const turn = {
+  const pending: PendingTurn = {
     id: crypto.randomUUID(),
+    text,
+    queued_at: new Date().toISOString(),
+  };
+  await enqueuePendingTurn(id, pending);
+  return flushPendingTurn(id, pending);
+}
+
+async function postQueuedTurn(id: string, pending: PendingTurn): Promise<TurnDto> {
+  const turn = {
+    id: pending.id,
     session_id: id,
     seq: Date.now(),
     speaker: "user",
-    text,
-    created_at: new Date().toISOString(),
+    text: pending.text,
+    created_at: pending.queued_at,
     source: "text",
   };
   const res = await fetch(`${BASE}/v1/sessions/${id}/turns`, {
@@ -120,5 +140,36 @@ export async function postTextTurn(id: string, text: string): Promise<TurnDto> {
     body: JSON.stringify(turn),
   });
   if (!res.ok) throw new Error(`post turn failed: ${res.status}`);
+  await dequeuePendingTurn(id, pending.id);
   return res.json();
+}
+
+/** Retry a single enqueued turn with backoff (3 tries). */
+async function flushPendingTurn(id: string, pending: PendingTurn): Promise<TurnDto> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < PENDING_TURN_RETRIES; attempt++) {
+    try {
+      return await postQueuedTurn(id, pending);
+    } catch (err) {
+      lastErr = err;
+      const delay = POST_TURN_RETRY_BASE_MS * 2 ** attempt;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw lastErr;
+}
+
+/**
+ * Replay any turns queued for this interview that never made it to the server
+ * (page closed mid-turn, network down). Call on interview page mount.
+ */
+export async function replayPendingTurns(id: string): Promise<void> {
+  const pending = await getPendingTurns(id);
+  for (const turn of pending) {
+    try {
+      await postQueuedTurn(id, turn);
+    } catch {
+      return;
+    }
+  }
 }
