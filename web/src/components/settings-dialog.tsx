@@ -221,13 +221,21 @@ function AiProviderPane() {
   const [sttOutput, setSttOutput] = React.useState("");
   const liveStt = React.useRef<{ stop: () => void } | null>(null);
   React.useEffect(() => () => liveStt.current?.stop(), []);
+  const draft = drafts[tab];
+
   // In-browser sections can only be tested when the browser actually ships
   // the Web Speech feature; computed per-render (SSR-safe, cheap).
   const browserCapable =
     typeof window !== "undefined" &&
-    (tab === "stt" ? hasBrowserStt() : tab === "tts" ? "speechSynthesis" in window : false);
-
-  const draft = drafts[tab];
+    (tab === "stt"
+      ? hasBrowserStt()
+      : tab === "tts"
+        ? "speechSynthesis" in window
+        : tab === "llm" && draft.llmMode === "browser"
+          ? draft.engine === "gemini-nano"
+            ? "LanguageModel" in globalThis
+            : "gpu" in navigator
+          : false);
 
   // /models poll results for the Model ID datalist (custom endpoint mode).
   const [modelOptions, setModelOptions] = React.useState<string[]>([]);
@@ -281,7 +289,9 @@ function AiProviderPane() {
 
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
-    if (drafts.llm.enabled && drafts.llm.llmMode === "browser") {
+    // In-browser mode has no endpoint fields, so `enabled` (which means
+    // "custom endpoint fields shown") is false; gate on llmMode alone.
+    if (drafts.llm.llmMode === "browser") {
       out.llm = {
         mode: "browser",
         engine: drafts.llm.engine,
@@ -425,6 +435,7 @@ function AiProviderPane() {
         const d = draft;
         if (!d.enabled) {
           await testBrowserTts();
+          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
         } else {
           const pcm = await synthesizeSpeech(
             {
