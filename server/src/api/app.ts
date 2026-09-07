@@ -20,6 +20,25 @@ export interface AppDeps {
 export async function createApp(deps: AppDeps): Promise<Hono> {
   const app = new Hono();
 
+  // Dev CORS: when the SPA runs under a vite dev server (different origin
+  // from this API), the health probe and driver fetches are cross-origin.
+  // The production binary serves the SPA itself, same origin, so the browser
+  // never sees these headers there.
+  app.use("*", async (c, next) => {
+    if (c.req.method === "OPTIONS") {
+      c.header("access-control-allow-origin", c.req.header("origin") ?? "*");
+      c.header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      c.header("access-control-allow-headers", "content-type, authorization");
+      return c.body(null, 204);
+    }
+    await next();
+    if (c.req.header("origin")) {
+      c.header("access-control-allow-origin", c.req.header("origin")!);
+      c.header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      c.header("access-control-allow-headers", "content-type, authorization");
+    }
+  });
+
   app.route(
     "/v1",
     apiRoutes(deps.db, {
