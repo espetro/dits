@@ -11,6 +11,7 @@ import {
   type BrowserModelStatus,
 } from "../lib/agent/browser-provider";
 import { Button } from "./vendor/button";
+import { MODEL_DOWNLOAD_TIMEOUT_MS } from "../lib/timeouts";
 
 const fieldClass = "block text-xs text-muted-foreground";
 
@@ -74,7 +75,7 @@ export function BrowserLlmManager(props: {
       // the percent readout, then a tiny smoke prompt confirms the weights.
       await smokeTestModel(section, {
         onProgress: (fraction) => setProgress(fraction),
-        timeoutMs: 10 * 60_000,
+        timeoutMs: MODEL_DOWNLOAD_TIMEOUT_MS,
       });
       await refresh();
     } finally {

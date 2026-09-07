@@ -34,6 +34,7 @@ import { Input } from "./vendor/input";
 import { Label } from "./vendor/label";
 import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./vendor/tabs";
+import { LLM_SMOKE_TEST_TIMEOUT_MS } from "../lib/timeouts";
 
 /**
  * Centered settings dialog, ChatGPT-style: borderless left nav
@@ -366,9 +367,9 @@ function AiProviderPane() {
             engine: draft.engine,
             ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
           },
-          // 90s: a cached model loads in seconds; a cold 450MB download
-          // belongs behind the manager's Download button, not the test.
-          { timeoutMs: 90_000 },
+          // a cached model loads in seconds; a cold 450MB download belongs
+          // behind the manager's Download button, not the test.
+          { timeoutMs: LLM_SMOKE_TEST_TIMEOUT_MS },
         );
         setTestState((prev) => ({
           ...prev,

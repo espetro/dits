@@ -1,3 +1,4 @@
+import { TTS_TEST_TIMEOUT_MS } from "./timeouts";
 /**
  * Capability-aware in-browser speech/endpoint probes used by the AI
  * provider settings pane. Browser-only: all guards assume `window`.
@@ -137,14 +138,14 @@ export function startLiveStt(handlers: {
   return { stop };
 }
 
-/** In-browser TTS test: resolve on `end`, reject on `error` or 5s timeout. */
+/** In-browser TTS test: resolve on `end`, reject on `error` or timeout. */
 export function testBrowserTts(): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const utterance = new SpeechSynthesisUtterance("hello");
     const timer = setTimeout(() => {
       speechSynthesis.cancel();
       resolve();
-    }, 5000);
+    }, TTS_TEST_TIMEOUT_MS);
     utterance.onend = () => {
       clearTimeout(timer);
       resolve();
