@@ -75,6 +75,13 @@
   `POST /v1/sessions/:id/turns`. The `pushToolState` REST call (editor/
   whiteboard mirroring) is skipped entirely in this mode — client-only's tool
   executors read the nanostores in-process, so there is nothing to push.
+  To keep gpu headroom for the in-browser llm, this mode also trims page
+  gpu load: the whiteboard tab is hidden entirely (the `WhiteboardPanel`
+  tldraw canvas never mounts; if the tab were active it would show the
+  `interview.whiteboardLoading` pulse placeholder) and the voice orb renders
+  a css-only pulse dot instead of the three.js/WebGL canvas
+  (`web/src/components/voice-orb.tsx`). The agent's `read_whiteboard` tool
+  degrades gracefully (`$whiteboard` stays `"{}"`).
 
 ## Responsive
 

@@ -286,26 +286,38 @@ function Interview() {
           <section className="flex min-h-0 flex-1 flex-col rounded-card bg-paper p-2 ring-1 ring-hairline">
             <Tabs value={tab} onValueChange={(v) => setTab(v as "editor" | "whiteboard")}>
               <TabsList className="flex gap-1 rounded-full bg-transparent p-1">
-                {(["editor", "whiteboard"] as const).map((t) => (
-                  <TabsTrigger
-                    key={t}
-                    value={t}
-                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] after:hidden ${
-                      tab === t
-                        ? "bg-espresso text-cream"
-                        : "text-espresso-soft hover:bg-cream-deep"
-                    }`}
-                  >
-                    <FormattedMessage
-                      id={t === "editor" ? "interview.tab.editor" : "interview.tab.whiteboard"}
-                    />
-                  </TabsTrigger>
-                ))}
+                {/* whiteboard tab hidden in client-only runs: tldraw canvas is a
+                    gpu cost the browser llm does not need; read_whiteboard
+                    degrades to an empty snapshot. */}
+                {(["editor", "whiteboard"] as const)
+                  .filter((t) => t !== "whiteboard" || !clientOnly)
+                  .map((t) => (
+                    <TabsTrigger
+                      key={t}
+                      value={t}
+                      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] after:hidden ${
+                        tab === t
+                          ? "bg-espresso text-cream"
+                          : "text-espresso-soft hover:bg-cream-deep"
+                      }`}
+                    >
+                      <FormattedMessage
+                        id={t === "editor" ? "interview.tab.editor" : "interview.tab.whiteboard"}
+                      />
+                    </TabsTrigger>
+                  ))}
               </TabsList>
             </Tabs>
             <div className="min-h-0 flex-1 rounded-[calc(1.5rem-0.375rem)] bg-cream p-4">
               {tab === "editor" ? (
                 <EditorPanel />
+              ) : clientOnly ? (
+                <div
+                  className="h-full w-full animate-pulse rounded-2xl bg-espresso/5"
+                  aria-label={intl.formatMessage({
+                    id: "interview.whiteboardLoading",
+                  })}
+                />
               ) : mounted ? (
                 <Suspense
                   fallback={

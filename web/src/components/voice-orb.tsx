@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { Orb } from "./vendor/orb";
 import { getAgentLevel, getMicLevel } from "../lib/voice/levels";
+import { $effectiveRuntime } from "../lib/runtime";
+import { useStore } from "@nanostores/react";
 
 /**
  * Voice orb for the interview screen: ElevenLabs UI Orb (WebGL, three.js)
@@ -11,6 +13,10 @@ import { getAgentLevel, getMicLevel } from "../lib/voice/levels";
  *
  * agentState mapping: phase "speaking" -> talking, "listening" -> listening,
  * "thinking" -> thinking; otherwise null (idle drift).
+ *
+ * In client-only runs (browser llm) a css-only pulse dot renders instead of
+ * the WebGL canvas: the three.js context is a real gpu cost we skip so the
+ * in-browser model keeps its headroom.
  *
  * Volumes go through refs (polled by the orb's frame loop, per upstream
  * docs). When the voice session is not connected (or the active driver does
@@ -34,6 +40,8 @@ export function VoiceOrb({
 }) {
   const inputRef = React.useRef(0);
   const outputRef = React.useRef(0);
+  const effectiveRuntime = useStore($effectiveRuntime);
+  const clientOnly = effectiveRuntime !== "server";
 
   React.useEffect(() => {
     let raf = 0;
@@ -59,6 +67,20 @@ export function VoiceOrb({
         : phase === "thinking"
           ? ("thinking" as const)
           : null;
+
+  if (clientOnly) {
+    return (
+      <div aria-hidden="true" className={`flex shrink-0 items-center justify-center ${className}`}>
+        <span
+          className={`size-4 animate-pulse rounded-full ${
+            agentState === "listening" || agentState === "talking"
+              ? "bg-persimmon"
+              : "bg-espresso/40"
+          }`}
+        />
+      </div>
+    );
+  }
 
   return (
     <Orb
