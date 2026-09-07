@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteImport } from './routes/{-$locale}'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125SetupRouteImport } from './routes/{-$locale}/setup'
+import { Route as Char123LocaleChar125DevVoiceHarnessRouteImport } from './routes/{-$locale}/dev.voice-harness'
 import { Route as Char123LocaleChar125FinishIdRouteImport } from './routes/{-$locale}/finish.$id'
 import { Route as Char123LocaleChar125InterviewIdRouteImport } from './routes/{-$locale}/interview.$id'
 import { Route as Char123LocaleChar125ReportIdRouteImport } from './routes/{-$locale}/report.$id'
@@ -32,6 +33,12 @@ const Char123LocaleChar125SetupRoute =
   Char123LocaleChar125SetupRouteImport.update({
     id: '/setup',
     path: '/setup',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125DevVoiceHarnessRoute =
+  Char123LocaleChar125DevVoiceHarnessRouteImport.update({
+    id: '/dev/voice-harness',
+    path: '/dev/voice-harness',
     getParentRoute: () => Char123LocaleChar125Route,
   } as any)
 const Char123LocaleChar125FinishIdRoute =
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
   '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
   '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
@@ -71,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
   '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
   '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
@@ -81,6 +90,7 @@ export interface FileRoutesById {
   '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
   '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
   '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
   '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
   '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
@@ -92,6 +102,7 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/setup'
     | '/{-$locale}/'
+    | '/{-$locale}/dev/voice-harness'
     | '/{-$locale}/finish/$id'
     | '/{-$locale}/interview/$id'
     | '/{-$locale}/report/$id'
@@ -100,6 +111,7 @@ export interface FileRouteTypes {
   to:
     | '/{-$locale}/setup'
     | '/{-$locale}'
+    | '/{-$locale}/dev/voice-harness'
     | '/{-$locale}/finish/$id'
     | '/{-$locale}/interview/$id'
     | '/{-$locale}/report/$id'
@@ -109,6 +121,7 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/setup'
     | '/{-$locale}/'
+    | '/{-$locale}/dev/voice-harness'
     | '/{-$locale}/finish/$id'
     | '/{-$locale}/interview/$id'
     | '/{-$locale}/report/$id'
@@ -140,6 +153,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/{-$locale}/setup'
       preLoaderRoute: typeof Char123LocaleChar125SetupRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/dev/voice-harness': {
+      id: '/{-$locale}/dev/voice-harness'
+      path: '/dev/voice-harness'
+      fullPath: '/{-$locale}/dev/voice-harness'
+      preLoaderRoute: typeof Char123LocaleChar125DevVoiceHarnessRouteImport
       parentRoute: typeof Char123LocaleChar125Route
     }
     '/{-$locale}/finish/$id': {
@@ -176,6 +196,7 @@ declare module '@tanstack/react-router' {
 interface Char123LocaleChar125RouteChildren {
   Char123LocaleChar125SetupRoute: typeof Char123LocaleChar125SetupRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
+  Char123LocaleChar125DevVoiceHarnessRoute: typeof Char123LocaleChar125DevVoiceHarnessRoute
   Char123LocaleChar125FinishIdRoute: typeof Char123LocaleChar125FinishIdRoute
   Char123LocaleChar125InterviewIdRoute: typeof Char123LocaleChar125InterviewIdRoute
   Char123LocaleChar125ReportIdRoute: typeof Char123LocaleChar125ReportIdRoute
@@ -185,6 +206,8 @@ interface Char123LocaleChar125RouteChildren {
 const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
   Char123LocaleChar125SetupRoute: Char123LocaleChar125SetupRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
+  Char123LocaleChar125DevVoiceHarnessRoute:
+    Char123LocaleChar125DevVoiceHarnessRoute,
   Char123LocaleChar125FinishIdRoute: Char123LocaleChar125FinishIdRoute,
   Char123LocaleChar125InterviewIdRoute: Char123LocaleChar125InterviewIdRoute,
   Char123LocaleChar125ReportIdRoute: Char123LocaleChar125ReportIdRoute,

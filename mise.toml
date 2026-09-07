@@ -74,6 +74,10 @@ run = '''
 tail -n 100 -f .di/logs/*.log | jq -rR --unbuffered '
   fromjson? | "\(.time // .timestamp // "") [\(.level // "")] \(.msg // .)" // .]'
 '''
+[tasks.seed]
+description = "Seed demo session (turns + report + tools) via the server API (requires DI server running; DI_URL to override)"
+run = "bun scripts/seed-demo.ts"
+
 [tasks.smoke]
 description = "Behavioral smoke probe: create session, post turn, assert persisted"
 run = '''

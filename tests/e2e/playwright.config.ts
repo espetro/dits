@@ -6,7 +6,7 @@ const baseURL = process.env.DI_URL ?? "http://localhost:3000";
 
 export default defineConfig({
   testDir: ".",
-  testMatch: "playwright.spec.ts",
+  testMatch: ["*.spec.ts"],
   timeout: 15_000,
   reporter: [["list", { printSteps: false }]],
   use: {
