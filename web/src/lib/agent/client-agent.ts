@@ -11,7 +11,7 @@ import type {
   UpdateQuestionArgs,
 } from "@di/shared";
 import type { LanguageModelV3, LanguageModelV4 } from "@ai-sdk/provider";
-import { type BrowserModelHandles, createLlmModel } from "./browser-provider";
+import { type BrowserModelHandles, createLlmModel, resolveBrowserLlm } from "./browser-provider";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
 
 /** Model spec version accepted by ai v7's model union. */
@@ -37,11 +37,73 @@ interface ChatMsg {
 }
 
 /** Plain JSON-schema tool spec sent to the model (from shared VOICE_TOOLS). */
-/** Plain JSON-schema tool spec sent to the model (from shared VOICE_TOOLS). */
 function toolDef(name: string): ToolDef {
   const def = VOICE_TOOLS.find((t) => t.name === name);
   if (!def) throw new Error(`unknown voice tool: ${name}`);
   return def;
+}
+
+/** Longest suffix of `text` that is a proper prefix of `tag` (for split tags). */
+function partialTagSuffix(text: string, tag: string): number {
+  for (let len = Math.min(tag.length - 1, text.length); len > 0; len--) {
+    if (text.endsWith(tag.slice(0, len))) return len;
+  }
+  return 0;
+}
+
+const THINK_OPEN = "<think>";
+const THINK_CLOSE = "</think>";
+
+/**
+ * State machine over text deltas that suppresses `\<think>...\</think>`
+ * reasoning traces (qwen3 can emit them even with thinking disabled),
+ * including when the tags are split across chunk boundaries.
+ */
+class ThinkFilter {
+  private inside = false;
+  private buffer = "";
+
+  push(delta: string): string {
+    this.buffer += delta;
+    let out = "";
+    for (;;) {
+      if (this.inside) {
+        const end = this.buffer.indexOf(THINK_CLOSE);
+        if (end === -1) {
+          const keep = partialTagSuffix(this.buffer, THINK_CLOSE);
+          this.buffer = this.buffer.slice(this.buffer.length - keep);
+          return out;
+        }
+        this.buffer = this.buffer.slice(end + THINK_CLOSE.length);
+        this.inside = false;
+      } else {
+        const start = this.buffer.indexOf(THINK_OPEN);
+        if (start === -1) {
+          const keep = partialTagSuffix(this.buffer, THINK_OPEN);
+          const cut = this.buffer.length - keep;
+          out += this.buffer.slice(0, cut);
+          this.buffer = this.buffer.slice(cut);
+          return out;
+        }
+        out += this.buffer.slice(0, start);
+        this.buffer = this.buffer.slice(start + THINK_OPEN.length);
+        this.inside = true;
+      }
+    }
+  }
+
+  /** At end of stream, buffered text outside a think block is real text. */
+  flush(): string {
+    const rest = this.inside ? "" : this.buffer;
+    this.buffer = "";
+    return rest;
+  }
+}
+
+/** Strip think traces from a complete generated text. */
+function stripThink(text: string): string {
+  const filter = new ThinkFilter();
+  return filter.push(text) + filter.flush();
 }
 
 export interface RespondOptions extends TurnEvents {
@@ -80,18 +142,48 @@ export class ClientAgent implements TurnRunner {
   /** Rolling summary of turns evicted from the verbatim window. */
   private rollingSummary = "";
 
-  constructor(
-    private readonly llm: LlmSection,
-    private readonly tools: AgentToolExecutors,
-    private readonly getContext: () => SessionContext,
-    private readonly fetchImpl?: typeof fetch,
+  private readonly llm: LlmSection;
+  private readonly tools: AgentToolExecutors;
+  private readonly getContext: () => SessionContext;
+  private readonly fetchImpl?: typeof fetch;
+
+  private constructor(
+    model: AnyLanguageModel,
+    browserHandles: BrowserModelHandles | null,
+    llm: LlmSection,
+    tools: AgentToolExecutors,
+    getContext: () => SessionContext,
+    fetchImpl?: typeof fetch,
   ) {
-    const built = createLlmModel(llm, { fetchImpl });
+    this.model = model;
+    this.browserHandles = browserHandles;
+    this.llm = llm;
+    this.tools = tools;
+    this.getContext = getContext;
+    this.fetchImpl = fetchImpl;
+  }
+
+  /**
+   * Async construction: engine resolution may need to probe the Cache API
+   * (two-pass transformers -> Gemini Nano fallback), so construction goes
+   * through this factory instead of a synchronous constructor.
+   */
+  static async create(
+    llm: LlmSection,
+    tools: AgentToolExecutors,
+    getContext: () => SessionContext,
+    fetchImpl?: typeof fetch,
+  ): Promise<ClientAgent> {
+    const built = await resolveBrowserLlm(llm, { fetchImpl });
     if (!built) {
       throw new Error("in-browser llm engine unsupported in this browser");
     }
-    this.browserHandles = built.browser ?? null;
-    this.model = built.model;
+    // Browser engines construct lazily: load() instantiates the underlying
+    // model (and waits for weights to be ready) before the getter is read.
+    // Skipping this makes `this.model = model` in the constructor throw
+    // "browser llm not loaded yet" on the first agent turn.
+    await built.browser?.load();
+    return new ClientAgent(built.model, built.browser ?? null, llm, tools, getContext, fetchImpl);
   }
 
   /** Full transcript so far (for persistence/report). */
@@ -150,8 +242,9 @@ export class ClientAgent implements TurnRunner {
     ].join("\n");
     const { generateText } = await import("ai");
     const { text } = await generateText({ model: this.model, prompt });
-    if (text.trim()) {
-      this.rollingSummary = text.trim();
+    const clean = stripThink(text).trim();
+    if (clean) {
+      this.rollingSummary = clean;
       this.history = this.history.slice(evictCount);
     }
   }
@@ -204,6 +297,7 @@ export class ClientAgent implements TurnRunner {
         },
       },
       abortSignal: opts.signal,
+      maxOutputTokens: 512,
       stopWhen: stepCountIs(MAX_HOPS),
       onError: ({ error }: { error: unknown }) => {
         const phase: TurnPhase =
@@ -215,10 +309,18 @@ export class ClientAgent implements TurnRunner {
     });
 
     let full = "";
+    const thinkFilter = new ThinkFilter();
     for await (const delta of result.textStream) {
       if (llmTtftMs === undefined) llmTtftMs = Date.now() - t0;
-      full += delta;
-      opts.onText?.(delta);
+      const clean = thinkFilter.push(delta);
+      if (!clean) continue;
+      full += clean;
+      opts.onText?.(clean);
+    }
+    const tail = thinkFilter.flush();
+    if (tail) {
+      full += tail;
+      opts.onText?.(tail);
     }
     if (full.trim()) this.history.push({ role: "assistant", content: full });
     opts.onMetrics?.({

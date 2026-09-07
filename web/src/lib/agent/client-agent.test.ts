@@ -61,7 +61,12 @@ describe("ClientAgent.respond", () => {
       ]);
     });
 
-    const agent = new ClientAgent(LLM, executors, CTX, fetchMock as unknown as typeof fetch);
+    const agent = await ClientAgent.create(
+      LLM,
+      executors,
+      CTX,
+      fetchMock as unknown as typeof fetch,
+    );
     const deltas: string[] = [];
     const full = await agent.respond("hello", {
       onText: (d) => deltas.push(d),
@@ -83,7 +88,12 @@ describe("ClientAgent.respond", () => {
     };
     const fetchMock = vi.fn().mockResolvedValue(new Response("server exploded", { status: 500 }));
 
-    const agent = new ClientAgent(LLM, executors, CTX, fetchMock as unknown as typeof fetch);
+    const agent = await ClientAgent.create(
+      LLM,
+      executors,
+      CTX,
+      fetchMock as unknown as typeof fetch,
+    );
     const errors: unknown[] = [];
     const full = await agent.respond("hello", {
       onError: (err) => errors.push(err),
@@ -126,7 +136,12 @@ describe("ClientAgent.respond", () => {
       });
     });
 
-    const agent = new ClientAgent(LLM, executors, CTX, fetchMock as unknown as typeof fetch);
+    const agent = await ClientAgent.create(
+      LLM,
+      executors,
+      CTX,
+      fetchMock as unknown as typeof fetch,
+    );
     const deltas: string[] = [];
     await agent.respond("hello", {
       signal: ctrl.signal,
@@ -134,6 +149,39 @@ describe("ClientAgent.respond", () => {
     });
     // only text emitted before the abort may be observed; no throw
     expect(deltas.join("")).not.toContain("second.");
+  });
+
+  it("strips a think block split across stream deltas", async () => {
+    const executors = {
+      update_question: vi.fn(async () => "ok"),
+      read_editor: vi.fn(async () => "(editor is empty)"),
+      read_whiteboard: vi.fn(async () => "empty whiteboard"),
+    };
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async () =>
+        sse([
+          { choices: [{ delta: { content: "Hello. <th" } }] },
+          { choices: [{ delta: { content: "ink>hidden rea" } }] },
+          { choices: [{ delta: { content: "soning</thi" } }] },
+          { choices: [{ delta: { content: "nk> World." } }] },
+        ]),
+      );
+
+    const agent = await ClientAgent.create(
+      LLM,
+      executors,
+      CTX,
+      fetchMock as unknown as typeof fetch,
+    );
+    const deltas: string[] = [];
+    const full = await agent.respond("hello", {
+      onText: (d) => deltas.push(d),
+    });
+
+    expect(full).toBe("Hello.  World.");
+    expect(full).not.toContain("hidden");
+    expect(deltas.join("")).toBe(full);
   });
 });
 
