@@ -70,14 +70,12 @@ export function BrowserLlmManager(props: {
         props.engine === "transformers"
           ? { mode: "browser", engine: "transformers", modelId }
           : { mode: "browser", engine: "gemini-nano" };
-      // loading IS the download for both engines (create monitors progress);
-      // a tiny smoke prompt confirms the weights actually work.
-      if (section.engine === "transformers") {
-        const { TransformersJSLanguageModel } = await import("@browser-ai/transformers-js");
-        // weights are fetched here; progress surfaces via smokeTestModel load
-        void TransformersJSLanguageModel;
-      }
-      await smokeTestModel(section);
+      // loading IS the download for both engines; forward load progress to
+      // the percent readout, then a tiny smoke prompt confirms the weights.
+      await smokeTestModel(section, {
+        onProgress: (fraction) => setProgress(fraction),
+        timeoutMs: 10 * 60_000,
+      });
       await refresh();
     } finally {
       setBusy(false);

@@ -127,6 +127,23 @@ interface WasmOverride {
 
 const WASM_OVERRIDE: WasmOverride = { device: "wasm", dtype: "q4" };
 
+/**
+ * Normalize a transformers.js initProgressCallback event into a 0..1
+ * fraction. Events are objects ({status, loaded, total, ...}); numeric
+ * progress (Chrome built-in AI) passes through. Returns null for events
+ * with no usable progress info.
+ */
+function normalizeProgressEvent(progress: unknown): number | null {
+  if (typeof progress === "number") return progress;
+  if (progress && typeof progress === "object") {
+    const e = progress as { status?: string; loaded?: number; total?: number };
+    if (e.status === "progress" && typeof e.total === "number" && e.total > 0) {
+      return Math.min(1, (e.loaded ?? 0) / e.total);
+    }
+  }
+  return null;
+}
+
 function lowMemoryDevice(): boolean {
   const memory = (navigator as { deviceMemory?: number }).deviceMemory;
   return memory !== undefined && memory <= 4;
@@ -153,14 +170,16 @@ function transformersHandles(requestedId?: string): BrowserModelHandles | null {
         ? {
             ...WASM_OVERRIDE,
             initProgressCallback: (progress: unknown) => {
-              if (typeof progress === "number") onProgress?.(progress);
+              const fraction = normalizeProgressEvent(progress);
+              if (fraction !== null) onProgress?.(fraction);
             },
           }
         : {
             device: "auto",
             dtype: "q4f16",
             initProgressCallback: (progress: unknown) => {
-              if (typeof progress === "number") onProgress?.(progress);
+              const fraction = normalizeProgressEvent(progress);
+              if (fraction !== null) onProgress?.(fraction);
             },
           },
     );
@@ -318,11 +337,28 @@ export async function resolveBrowserLlm(
 }
 
 /** Ask a loaded model for a tiny answer; used by the settings Test button. */
-export async function smokeTestModel(section: BrowserLlmSection): Promise<void> {
+export async function smokeTestModel(
+  section: BrowserLlmSection,
+  opts: { onProgress?: (fraction: number) => void; timeoutMs?: number } = {},
+): Promise<void> {
   const handles =
     section.engine === "gemini-nano" ? geminiNanoHandles() : transformersHandles(section.modelId);
   if (!handles) throw new Error("engine unsupported in this browser");
-  await handles.load();
+  const load = handles.load(opts.onProgress);
+  const timeout = opts.timeoutMs
+    ? new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(new Error(`model load timed out after ${Math.round(opts.timeoutMs! / 1000)}s`)),
+          opts.timeoutMs,
+        ),
+      )
+    : null;
+  if (timeout) {
+    await Promise.race([load, timeout]);
+  } else {
+    await load;
+  }
   const { generateText } = await import("ai");
   await generateText({
     model: handles.model,
