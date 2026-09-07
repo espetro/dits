@@ -223,6 +223,34 @@ function AiProviderPane() {
   React.useEffect(() => () => liveStt.current?.stop(), []);
   const draft = drafts[tab];
 
+  // Gemini Nano can appear after the flag/module load, so probe the real
+  // availability() API while the llm tab is open instead of a one-time
+  // "LanguageModel in globalThis" check.
+  const [geminiNanoCapable, setGeminiNanoCapable] = React.useState(false);
+  React.useEffect(() => {
+    if (tab !== "llm") return;
+    let cancelled = false;
+    const lm = (
+      globalThis as unknown as {
+        LanguageModel?: { availability(): Promise<string> };
+      }
+    ).LanguageModel;
+    if (!lm) {
+      setGeminiNanoCapable(false);
+      return;
+    }
+    lm.availability()
+      .then((availability) => {
+        if (!cancelled) setGeminiNanoCapable(availability !== "unavailable");
+      })
+      .catch(() => {
+        if (!cancelled) setGeminiNanoCapable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, draft.llmMode, draft.engine]);
+
   // In-browser sections can only be tested when the browser actually ships
   // the Web Speech feature; computed per-render (SSR-safe, cheap).
   const browserCapable =
@@ -233,7 +261,7 @@ function AiProviderPane() {
         ? "speechSynthesis" in window
         : tab === "llm" && draft.llmMode === "browser"
           ? draft.engine === "gemini-nano"
-            ? "LanguageModel" in globalThis
+            ? geminiNanoCapable
             : "gpu" in navigator
           : false);
 
@@ -332,11 +360,16 @@ function AiProviderPane() {
       setTesting(tab);
       setTestState((prev) => ({ ...prev, llm: { status: "running" } }));
       try {
-        await smokeTestModel({
-          mode: "browser",
-          engine: draft.engine,
-          ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
-        });
+        await smokeTestModel(
+          {
+            mode: "browser",
+            engine: draft.engine,
+            ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
+          },
+          // 90s: a cached model loads in seconds; a cold 450MB download
+          // belongs behind the manager's Download button, not the test.
+          { timeoutMs: 90_000 },
+        );
         setTestState((prev) => ({
           ...prev,
           llm: { status: "ok", message: intl.formatMessage({ id: "settings.llm.testOk" }) },
@@ -489,11 +522,19 @@ function AiProviderPane() {
             {tab === t.key && (
               <div className="space-y-5 rounded-xl border border-border p-4">
                 <RadioGroup
-                  value={draft.enabled ? "custom" : "browser"}
+                  value={
+                    tab === "llm"
+                      ? draft.llmMode === "browser"
+                        ? "browser"
+                        : "custom"
+                      : draft.enabled
+                        ? "custom"
+                        : "browser"
+                  }
                   onValueChange={(value) =>
                     update(
                       value === "custom"
-                        ? { enabled: true }
+                        ? { enabled: true, llmMode: "remote" }
                         : // in-browser on the llm tab also flips llmMode;
                           // enabled stays false (no endpoint fields to fill)
                           tab === "llm"
@@ -534,7 +575,7 @@ function AiProviderPane() {
                     </span>
                   </div>
                 )}
-                {tab === "llm" && draft.llmMode === "browser" && (
+                {tab === "llm" && draft.llmMode === "browser" && !draft.enabled && (
                   <BrowserLlmManager
                     engine={draft.engine}
                     modelId={draft.browserModelId}
