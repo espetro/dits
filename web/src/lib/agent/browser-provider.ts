@@ -40,6 +40,7 @@ export interface BrowserModelStatus {
 let geminiModel: AnyLanguageModel | null = null;
 let transformersModel: AnyLanguageModel | null = null;
 let transformersModelId: string | null = null;
+let transformersModelWasm = false;
 
 export const DEFAULT_TRANSFORMERS_MODEL_ID = "onnx-community/Qwen3-0.6B-ONNX";
 
@@ -118,22 +119,54 @@ function geminiNanoHandles(): BrowserModelHandles | null {
   };
 }
 
+/** Forced wasm/q4 override so the retry path rebuilds off webgpu. */
+interface WasmOverride {
+  device: "wasm";
+  dtype: "q4";
+}
+
+const WASM_OVERRIDE: WasmOverride = { device: "wasm", dtype: "q4" };
+
+function lowMemoryDevice(): boolean {
+  const memory = (navigator as { deviceMemory?: number }).deviceMemory;
+  return memory !== undefined && memory <= 4;
+}
+
 function transformersHandles(requestedId?: string): BrowserModelHandles | null {
   const modelId = requestedId ?? DEFAULT_TRANSFORMERS_MODEL_ID;
-  const ensure = async (onProgress?: (fraction: number) => void): Promise<AnyLanguageModel> => {
-    if (transformersModel && transformersModelId === modelId) {
+  const ensure = async (
+    onProgress?: (fraction: number) => void,
+    override?: WasmOverride,
+  ): Promise<AnyLanguageModel> => {
+    if (
+      transformersModel &&
+      transformersModelId === modelId &&
+      (!override || transformersModelWasm)
+    ) {
       return transformersModel;
     }
     const { TransformersJSLanguageModel } = await import("@browser-ai/transformers-js");
-    const created = new TransformersJSLanguageModel(modelId, {
-      device: "auto",
-      dtype: "q4f16",
-      initProgressCallback: (progress: unknown) => {
-        if (typeof progress === "number") onProgress?.(progress);
-      },
-    });
+    const wasm = override !== undefined || lowMemoryDevice();
+    const created = new TransformersJSLanguageModel(
+      modelId,
+      wasm
+        ? {
+            ...WASM_OVERRIDE,
+            initProgressCallback: (progress: unknown) => {
+              if (typeof progress === "number") onProgress?.(progress);
+            },
+          }
+        : {
+            device: "auto",
+            dtype: "q4f16",
+            initProgressCallback: (progress: unknown) => {
+              if (typeof progress === "number") onProgress?.(progress);
+            },
+          },
+    );
     transformersModel = created;
     transformersModelId = modelId;
+    transformersModelWasm = wasm;
     return created;
   };
   return {
@@ -144,10 +177,28 @@ function transformersHandles(requestedId?: string): BrowserModelHandles | null {
       return transformersModel;
     },
     async load(onProgress) {
-      const m = (await ensure(onProgress)) as unknown as {
-        createSessionWithProgress?: (cb: (fraction: number) => void) => Promise<void>;
+      const session = async (): Promise<void> => {
+        const m = (await ensure(onProgress)) as {
+          createSessionWithProgress?: (cb: (fraction: number) => void) => Promise<void>;
+        };
+        await m.createSessionWithProgress?.((fraction: number) => onProgress?.(fraction));
       };
-      await m.createSessionWithProgress?.((fraction: number) => onProgress?.(fraction));
+      try {
+        await session();
+      } catch (err) {
+        if (!(err instanceof Error) || !/webgpu|popErrorScope|validation/i.test(err.message)) {
+          throw err;
+        }
+        transformersModel = null;
+        transformersModelId = null;
+        transformersModelWasm = false;
+        try {
+          await ensure(onProgress, WASM_OVERRIDE);
+          await session();
+        } catch {
+          throw err;
+        }
+      }
     },
     async status(): Promise<BrowserModelStatus> {
       if (typeof navigator === "undefined" || !("gpu" in navigator)) {
@@ -188,6 +239,7 @@ export async function deleteTransformersModel(modelId: string): Promise<void> {
   if (transformersModelId === modelId) {
     transformersModel = null;
     transformersModelId = null;
+    transformersModelWasm = false;
   }
 }
 
@@ -197,6 +249,7 @@ export async function deleteAllTransformersModels(): Promise<void> {
   await caches.delete("transformers-cache");
   transformersModel = null;
   transformersModelId = null;
+  transformersModelWasm = false;
 }
 
 /**
@@ -224,6 +277,44 @@ export function createLlmModel(
     },
     browser: handles,
   };
+}
+
+/**
+ * Fallback engine preference for browser LLM sections: transformers.js
+ * models are downloadable and deterministic (same weights everywhere), so
+ * they are the primary pass; Chrome's Gemini Nano is the lower-priority
+ * second pass when the transformers model is not installed yet (its
+ * download is managed by Chrome and can be unavailable across platforms).
+ */
+export const BROWSER_LLM_FALLBACK: BrowserLlmSection = {
+  mode: "browser",
+  engine: "gemini-nano",
+};
+
+/**
+ * Two-pass engine resolution for browser LLM sections: the configured
+ * transformers.js model is the primary pass, but when it has never been
+ * downloaded (nothing in the Cache API) the session falls back to Chrome's
+ * Gemini Nano so a fresh browser can still run an interview immediately
+ * instead of forcing a multi-hundred-MB download first. Remote sections and
+ * already-downloaded transformers models resolve exactly like createLlmModel.
+ */
+export async function resolveBrowserLlm(
+  section: LlmSection,
+  opts: { fetchImpl?: typeof fetch } = {},
+): Promise<{ model: AnyLanguageModel; browser?: BrowserModelHandles } | null> {
+  if (!isBrowserLlm(section) || section.engine !== "transformers") {
+    return createLlmModel(section, opts);
+  }
+  const modelId = section.modelId ?? DEFAULT_TRANSFORMERS_MODEL_ID;
+  if (await transformersModelInstalled(modelId)) {
+    return createLlmModel(section, opts);
+  }
+  const fallback = createLlmModel(BROWSER_LLM_FALLBACK, opts);
+  if (fallback) return fallback;
+  // No Prompt API either: keep the transformers model so load() surfaces
+  // the download (and its progress) rather than a dead end.
+  return createLlmModel(section, opts);
 }
 
 /** Ask a loaded model for a tiny answer; used by the settings Test button. */
