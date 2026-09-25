@@ -6,7 +6,9 @@ the `dist` root) — `mise run build` builds it.
 ## Routes (`src/routes/`)
 
 `/`, `/setup`, `/validate/$id`, `/interview/$id`, `/finish/$id`,
-`/report/$id`, `/history`. Forms validated against `@di/shared` schemas
+`/report/$id`, `/dev/voice-harness`. History is a settings pane, not a
+route; the whiteboard/editor are ToolDock tabs, not routes. Forms
+validated against `@di/shared` schemas
 (formisch). Update the matching `.agents/docs/screens/*.md` in the same
 commit as any route behavior change — a spec enforces `tests/e2e` stays in
 sync with these headings too.
