@@ -193,5 +193,19 @@
   "report.coachSeed": "Entraîne-moi sur {name}. Lance une session de pratique ciblée et creuse les détails.",
   "settings.demoLlm.fill": "utiliser l'endpoint démo managé — pas de clé requise",
   "settings.demoLlm.badge": "démo",
-  "settings.demoLlm.upsell": "envie d'un zero-conf illimité ? dis-le-nous"
+  "settings.demoLlm.upsell": "envie d'un zero-conf illimité ? dis-le-nous",
+  "interview.questionN": "question {n}",
+  "interview.talkOrType": "parle ou tape…",
+  "interview.type": "taper",
+  "interview.endedBadge": "terminée",
+  "interview.endedBody": "cette entrevue est terminée — la transcription ci-dessous est en lecture seule.",
+  "interview.endedEmpty": "aucun échange n'a été enregistré dans cette session.",
+  "interview.viewReport": "voir le rapport",
+  "interview.newSession": "nouvelle session",
+  "interview.endConfirmTitle": "terminer l'entrevue ?",
+  "interview.endConfirmBody": "la transcription actuelle est conservée, et tu peux encore générer un rapport.",
+  "interview.stay": "rester",
+  "interview.leave": "quitter",
+  "interview.leaveTitle": "quitter l'entrevue ?",
+  "interview.leaveBody": "l'entrevue est encore en cours — quitter y mettra fin."
 }

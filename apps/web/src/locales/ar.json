@@ -193,5 +193,19 @@
   "report.coachSeed": "درّبني على {name}. نفّذ جلسة تدريب مركّزة واسأل عن التفاصيل.",
   "settings.demoLlm.fill": "استخدم نقطة النهاية التجريبية المُدارة — لا حاجة لمفتاح",
   "settings.demoLlm.badge": "تجريبي",
-  "settings.demoLlm.upsell": "تريد zero-conf غير محدود؟ أخبرنا"
+  "settings.demoLlm.upsell": "تريد zero-conf غير محدود؟ أخبرنا",
+  "interview.questionN": "سؤال {n}",
+  "interview.talkOrType": "تحدث أو اكتب…",
+  "interview.type": "اكتب",
+  "interview.endedBadge": "منتهية",
+  "interview.endedBody": "انتهت هذه المقابلة — النص أدناه للقراءة فقط.",
+  "interview.endedEmpty": "لم يتم تسجيل أي أدوار في هذه الجلسة.",
+  "interview.viewReport": "عرض التقرير",
+  "interview.newSession": "جلسة جديدة",
+  "interview.endConfirmTitle": "إنهاء المقابلة؟",
+  "interview.endConfirmBody": "النص المسجل حتى الآن محفوظ، ولا يزال بإمكانك إنشاء تقرير.",
+  "interview.stay": "البقاء",
+  "interview.leave": "مغادرة",
+  "interview.leaveTitle": "مغادرة المقابلة؟",
+  "interview.leaveBody": "المقابلة لا تزال جارية — المغادرة ستنهيها مبكرًا."
 }

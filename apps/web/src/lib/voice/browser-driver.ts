@@ -93,11 +93,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
   async useClientAgent(
     profile: ProviderSections & { llm: LlmSection },
     tools: AgentToolExecutors,
+    toolset: Record<string, string>,
     getContext: () => SessionContext,
     fetchImpl?: typeof fetch,
   ): Promise<void> {
     this.profile = profile;
-    this.agent = await ClientAgent.create(profile.llm, tools, getContext, fetchImpl);
+    this.agent = await ClientAgent.create(profile.llm, tools, getContext, fetchImpl, toolset);
   }
 
   private get useTtsEndpoint(): boolean {

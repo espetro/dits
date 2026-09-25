@@ -193,5 +193,19 @@
   "report.coachSeed": "Treine-me em {name}. Faça uma sessão de prática focada e cobre detalhes concretos.",
   "settings.demoLlm.fill": "usar o endpoint demo gerenciado — sem chave",
   "settings.demoLlm.badge": "demo",
-  "settings.demoLlm.upsell": "quer zero-conf ilimitado? avise a gente"
+  "settings.demoLlm.upsell": "quer zero-conf ilimitado? avise a gente",
+  "interview.questionN": "pergunta {n}",
+  "interview.talkOrType": "fale ou digite…",
+  "interview.type": "digitar",
+  "interview.endedBadge": "encerrada",
+  "interview.endedBody": "esta entrevista já terminou — a transcrição abaixo é somente leitura.",
+  "interview.endedEmpty": "nenhum turno foi registrado nesta sessão.",
+  "interview.viewReport": "ver relatório",
+  "interview.newSession": "nova sessão",
+  "interview.endConfirmTitle": "encerrar a entrevista?",
+  "interview.endConfirmBody": "a transcrição até agora é preservada, e você ainda pode gerar um relatório.",
+  "interview.stay": "ficar",
+  "interview.leave": "sair",
+  "interview.leaveTitle": "sair da entrevista?",
+  "interview.leaveBody": "a entrevista ainda está em andamento — sair a encerrará antes do tempo."
 }

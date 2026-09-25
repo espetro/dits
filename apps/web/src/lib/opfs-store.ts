@@ -59,6 +59,7 @@ export async function createClientSession(input: {
   title: string;
   mode: Session["mode"];
   duration_min: number;
+  tools?: Session["tools"];
 }): Promise<Session> {
   const session: Session = {
     id: crypto.randomUUID(),
@@ -67,6 +68,7 @@ export async function createClientSession(input: {
     duration_min: input.duration_min,
     created_at: new Date().toISOString(),
     status: "created",
+    tools: input.tools,
   };
   await writeRecord(session.id, { session, turns: [] });
   return session;

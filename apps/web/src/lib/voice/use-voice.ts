@@ -4,7 +4,7 @@ import type { Turn } from "@di/shared/session";
 import { appendTurn } from "../agent/session-store";
 import { appendClientTurn } from "../opfs-store";
 import { $providerProfile } from "../runtime";
-import { $question } from "../../stores/session";
+import { setQuestion } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { createDriver } from "./index";
 import { voiceMachine } from "./machine";
@@ -105,7 +105,7 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
         if (driver instanceof BrowserVoiceDriver) onClientTurn(turn);
       };
       // server driver: question.updated tool calls arrive as ws messages
-      driver.events.onQuestion = (q) => $question.set({ text: q.text, hints: q.hints });
+      driver.events.onQuestion = (q) => setQuestion({ text: q.text, hints: q.hints });
       driver.events.onAgentStart = () => actor.send({ type: "AGENT_START" });
       driver.events.onAgentDone = () => actor.send({ type: "AGENT_DONE" });
 
