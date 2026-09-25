@@ -22,7 +22,10 @@ import { openSettings } from "../../components/settings-dialog";
 import { createClientSession, listClientSessions } from "../../lib/opfs-store";
 import { resetClientSession } from "../../lib/agent/session-store";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { ScenarioCard } from "../../components/scenario-card";
+import type { Scenario } from "../../components/scenario-card";
+import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 
 const MAX_FILES = 10;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
@@ -33,26 +36,47 @@ export const Route = createFileRoute("/{-$locale}/setup")({
   component: Setup,
 });
 
-const PRESETS = [
+const SCENARIOS: Scenario[] = [
   {
     id: "sysDesign",
     prompt: "Run a system design interview. Focus on scaling, caching and tradeoff reasoning.",
+    goalCount: 3,
+    tools: { editor: "", whiteboard: "" },
   },
   {
     id: "behavioral",
     prompt: "Run a behavioral interview using the STAR method. Probe for specifics.",
+    goalCount: 3,
+    tools: { editor: "" },
   },
   {
     id: "frontend",
     prompt: "Run a frontend interview. Mix of component design and JS fundamentals.",
+    goalCount: 3,
+    tools: { editor: "" },
   },
   {
     id: "ml",
     prompt: "Run a machine learning interview. Model choice, evaluation, and data hygiene.",
+    goalCount: 3,
+    tools: { editor: "" },
+  },
+  {
+    id: "custom",
+    // custom keeps whatever the candidate typed — the textarea drives it
+    prompt: "",
+    goalCount: 0,
+    tools: { ...DEFAULT_SESSION_TOOLS },
   },
 ];
 
 const DURATIONS = [20, 30, 45, 60];
+const TONES = ["friendly", "challenging", "neutral"];
+const DIFFICULTIES = ["easy", "medium", "hard"];
+const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "ar"];
+
+const chipClass =
+  "rounded-full bg-white px-3 py-2 min-h-11 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso sm:min-h-8 sm:py-1.5";
 
 function Setup() {
   const { locale } = useLocaleNav();
@@ -81,6 +105,8 @@ function Setup() {
   const [files, setFiles] = React.useState<File[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = React.useState(false);
   const fileInput = React.useRef<HTMLInputElement>(null);
 
   function addFiles(incoming: FileList | null) {
@@ -109,7 +135,7 @@ function Setup() {
     });
   }
 
-  async function start(validate: boolean) {
+  async function start(validate: boolean, scenario?: Scenario) {
     // guard tied to the runtime FSM: custom/in-browser sessions run the
     // agent loop client-side, which is impossible without an LLM endpoint
     if (clientOnly && !profile?.llm) {
@@ -121,15 +147,23 @@ function Setup() {
     }
     setBusy(true);
     setError(null);
+    if (scenario) {
+      setSelectedId(scenario.id);
+      if (scenario.prompt) $draft.set({ ...draft, prompt: scenario.prompt });
+    }
+    const tools =
+      scenario?.tools ?? SCENARIOS.find((s) => s.id === selectedId)?.tools ?? DEFAULT_SESSION_TOOLS;
+    const prompt = buildBriefWith(scenario);
     try {
-      const title =
-        draft.title || PRESETS.find((p) => draft.prompt === p.prompt)?.id || "practice session";
+      const title = scenario?.id || draft.title || "practice session";
       if (clientOnly) {
         resetClientSession();
         const session = await createClientSession({
           title,
           mode: draft.mode,
           duration_min: draft.durationMin,
+          tools,
+          prompt: prompt || undefined,
         });
         // no ingestion pipeline client-side: say so rather than dropping silently.
         if (files.length > 0) {
@@ -147,6 +181,8 @@ function Setup() {
         title,
         mode: draft.mode,
         duration_min: draft.durationMin,
+        tools,
+        prompt: prompt || undefined,
       });
       if (files.length > 0) {
         try {
@@ -176,34 +212,59 @@ function Setup() {
     }
   }
 
+  // Card starts use the scenario's prompt (the textarea is already synced,
+  // but build it off the card value so it is right even pre-sync).
+  function buildBriefWith(scenario?: Scenario): string {
+    const base = scenario?.prompt || draft.prompt;
+    const knobs = [
+      draft.tone !== "friendly" ? `tone: ${draft.tone}` : null,
+      draft.difficulty !== "medium" ? `difficulty: ${draft.difficulty}` : null,
+      draft.language !== "en" ? `language: ${draft.language}` : null,
+    ]
+      .filter(Boolean)
+      .join(", ");
+    return [base.trim(), knobs].filter(Boolean).join("\n\n");
+  }
+
   return (
     <div className="ambient grain min-h-[100dvh] bg-cream">
-      <main className="mx-auto w-full max-w-3xl px-4 pb-24 pt-10 md:px-8">
+      <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-10 md:px-8">
         <div className="rounded-shell bg-paper p-2 ring-1 ring-hairline">
-          <div className="rounded-[calc(2rem-0.375rem)] bg-cream p-8 lg:p-12">
+          <div className="rounded-[calc(2rem-0.375rem)] bg-cream p-6 sm:p-8 lg:p-12">
+            {clientOnly && !profile?.llm && (
+              <section className="rise-in mb-10 rounded-card bg-white/70 p-4 ring-1 ring-hairline">
+                <p className="text-sm text-espresso-soft">
+                  <FormattedMessage id="setup.needsProvider" />
+                </p>
+                <Button
+                  variant="ghost"
+                  onClick={() => openSettings("aiProvider")}
+                  className="mt-3 h-auto min-h-11 rounded-full bg-white px-5 py-2 font-body text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
+                >
+                  <FormattedMessage id="setup.openProviderSettings" />
+                </Button>
+              </section>
+            )}
+
             <section className="rise-in" style={{ "--rise-delay": "0ms" } as React.CSSProperties}>
               <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                <FormattedMessage id="setup.presets" />
+                <FormattedMessage id="setup.pickScenario" />
               </h2>
-              <ToggleGroup
-                type="single"
-                value={PRESETS.find((p) => draft.title === p.id)?.id ?? ""}
-                onValueChange={(v) => {
-                  const p = PRESETS.find((x) => x.id === v);
-                  if (p) $draft.set({ ...draft, prompt: p.prompt, title: p.id });
-                }}
-                className="mt-3 flex flex-wrap gap-2"
-              >
-                {PRESETS.map((p) => (
-                  <ToggleGroupItem
-                    key={p.id}
-                    value={p.id}
-                    className="rounded-full bg-white px-4 py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-persimmon/40 active:scale-[0.97] data-[state=on]:bg-persimmon data-[state=on]:text-cream data-[state=on]:hover:bg-persimmon"
-                  >
-                    <FormattedMessage id={`setup.preset.${p.id}`} />
-                  </ToggleGroupItem>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {SCENARIOS.map((s) => (
+                  <ScenarioCard
+                    key={s.id}
+                    scenario={s}
+                    selected={selectedId === s.id}
+                    busy={busy}
+                    onSelect={() => {
+                      setSelectedId(s.id);
+                      if (s.prompt) $draft.set({ ...draft, prompt: s.prompt });
+                    }}
+                    onStart={() => void start(false, s)}
+                  />
                 ))}
-              </ToggleGroup>
+              </div>
             </section>
 
             <section
@@ -224,200 +285,237 @@ function Setup() {
               />
             </section>
 
+            {/* advanced options: every knob is pre-picked — cards are zero-knob */}
             <section
               className="rise-in mt-10"
               style={{ "--rise-delay": "240ms" } as React.CSSProperties}
             >
-              <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                <FormattedMessage id="setup.files" />{" "}
-                <span className="normal-case tracking-normal text-espresso-soft">
-                  · <FormattedMessage id="setup.filesHint" />
-                </span>
-              </h2>
-              <input
-                ref={fileInput}
-                type="file"
-                multiple
-                accept={ACCEPTED.join(",")}
-                className="hidden"
-                onChange={(e) => {
-                  addFiles(e.target.files);
-                  e.target.value = "";
-                }}
-              />
-              {clientOnly ? (
-                <div className="mt-3 rounded-card border border-dashed border-espresso-faint/40 bg-white/40 p-6 text-center text-sm text-espresso-soft md:p-8">
-                  <FormattedMessage id="setup.filesServerOnly" />
-                </div>
-              ) : (
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-label={intl.formatMessage({ id: "setup.dropHint" })}
-                  onClick={() => fileInput.current?.click()}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") fileInput.current?.click();
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    addFiles(e.dataTransfer.files);
-                  }}
-                  className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8"
-                >
-                  <FormattedMessage id="setup.dropHint" />
-                </div>
-              )}
-              {files.length > 0 && (
-                <ul className="mt-3 space-y-1.5">
-                  {files.map((f, i) => (
-                    <li
-                      key={`${f.name}-${i}`}
-                      className="flex min-w-0 items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
-                    >
-                      <span className="truncate text-espresso">{f.name}</span>
-                      <span className="ml-3 flex shrink-0 items-center gap-3 text-xs text-espresso-soft">
-                        {Math.round(f.size / 1024)} kb
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={intl.formatMessage(
-                            { id: "setup.fileRemove" },
-                            { name: f.name },
-                          )}
-                          onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                          className="text-espresso-soft transition-fluid hover:bg-transparent hover:text-persimmon"
-                        >
-                          ×
-                        </Button>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {error && (
-                <p role="alert" className="mt-3 text-sm text-persimmon-deep">
-                  {error}
-                </p>
-              )}
-            </section>
-
-            <section
-              className="rise-in mt-10"
-              style={{ "--rise-delay": "300ms" } as React.CSSProperties}
-            >
-              <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                <FormattedMessage id="setup.mic" />
-              </h2>
-              <div className="mt-3" data-testid="mic-check">
-                <MicSelector value={micDeviceId} onValueChange={(id) => $micDeviceId.set(id)} />
-              </div>
-            </section>
-
-            <section
-              className="rise-in mt-10 grid gap-6 md:grid-cols-2"
-              style={{ "--rise-delay": "360ms" } as React.CSSProperties}
-            >
-              <div>
-                <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                  <FormattedMessage id="setup.duration" />
-                </h2>
-                <ToggleGroup
-                  type="single"
-                  value={String(draft.durationMin)}
-                  onValueChange={(v) => {
-                    if (v) $draft.set({ ...draft, durationMin: Number(v) });
-                  }}
-                  className="mt-3 flex w-full flex-wrap gap-2"
-                >
-                  {DURATIONS.map((d) => (
-                    <ToggleGroupItem
-                      key={d}
-                      value={String(d)}
-                      className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
-                    >
-                      {d}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              </div>
-              <div>
-                <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                  <FormattedMessage id="setup.mode" />
-                </h2>
-                <ToggleGroup
-                  type="single"
-                  value={draft.mode}
-                  onValueChange={(v) => {
-                    if (v) $draft.set({ ...draft, mode: v as "interview" | "coach" });
-                  }}
-                  className="mt-3 flex w-full flex-wrap gap-2"
-                >
-                  <ToggleGroupItem
-                    value="interview"
-                    className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
-                  >
-                    <FormattedMessage id="setup.mode.interview" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="coach"
-                    disabled={!hasReport}
-                    title={hasReport ? undefined : intl.formatMessage({ id: "setup.coachHint" })}
-                    className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-white/50 disabled:animate-pulse data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
-                  >
-                    <FormattedMessage id="setup.mode.coach" />
-                    {!hasReport && (
-                      <span className="ml-2 text-[10px] uppercase tracking-wide opacity-60">
-                        <FormattedMessage id="setup.coachHint" />
-                      </span>
-                    )}
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </section>
-
-            {clientOnly && !profile?.llm && (
-              <section
-                className="rise-in mt-10 rounded-card bg-white/70 p-4 ring-1 ring-hairline"
-                style={{ "--rise-delay": "300ms" } as React.CSSProperties}
+              <button
+                onClick={() => setAdvancedOpen(!advancedOpen)}
+                aria-expanded={advancedOpen}
+                className="flex min-h-11 items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft transition-fluid hover:text-espresso"
               >
-                <p className="text-sm text-espresso-soft">
-                  <FormattedMessage id="setup.needsProvider" />
-                </p>
-                <Button
-                  variant="ghost"
-                  onClick={() => openSettings("aiProvider")}
-                  className="mt-3 h-auto rounded-full bg-white px-5 py-2 font-body text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
-                >
-                  <FormattedMessage id="setup.openProviderSettings" />
-                </Button>
-              </section>
-            )}
-
-            <section
-              className="rise-in mt-10 flex flex-col items-center gap-3"
-              style={{ "--rise-delay": "480ms" } as React.CSSProperties}
-            >
-              <Button
-                onClick={() => void start(true)}
-                disabled={busy}
-                aria-busy={busy}
-                className="group relative inline-flex items-center gap-2.5 rounded-full bg-espresso px-7 py-3.5 font-body text-base font-semibold text-cream ring-persimmon/0 shadow-lg shadow-espresso/20 transition-all duration-300 ease-out hover:bg-espresso hover:shadow-md hover:ring-2 hover:ring-persimmon/40 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <FormattedMessage id="setup.validate" />
-                <ArrowRight
-                  className="size-4 transition-all duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-persimmon"
+                <ChevronDown
+                  className={`size-4 transition-transform duration-300 ${advancedOpen ? "rotate-180" : ""}`}
                   aria-hidden="true"
                 />
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => void start(false)}
-                disabled={busy}
-                className="font-body text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:bg-transparent hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <FormattedMessage id="setup.skipValidation" />
-              </Button>
+                <FormattedMessage id="setup.advanced" />
+              </button>
+
+              {advancedOpen && (
+                <div className="mt-4 flex flex-col gap-8 rounded-card bg-white/50 p-5 ring-1 ring-hairline">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                        <FormattedMessage id="setup.duration" />
+                      </h3>
+                      <ToggleGroup
+                        type="single"
+                        value={String(draft.durationMin)}
+                        onValueChange={(v) => {
+                          if (v) $draft.set({ ...draft, durationMin: Number(v) });
+                        }}
+                        className="mt-3 flex w-full flex-wrap gap-2"
+                      >
+                        {DURATIONS.map((d) => (
+                          <ToggleGroupItem key={d} value={String(d)} className={chipClass}>
+                            {d}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+                    <div>
+                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                        <FormattedMessage id="setup.mode" />
+                      </h3>
+                      <ToggleGroup
+                        type="single"
+                        value={draft.mode}
+                        onValueChange={(v) => {
+                          if (v) $draft.set({ ...draft, mode: v as "interview" | "coach" });
+                        }}
+                        className="mt-3 flex w-full flex-wrap gap-2"
+                      >
+                        <ToggleGroupItem value="interview" className={chipClass}>
+                          <FormattedMessage id="setup.mode.interview" />
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                          value="coach"
+                          disabled={!hasReport}
+                          title={
+                            hasReport ? undefined : intl.formatMessage({ id: "setup.coachHint" })
+                          }
+                          className={`${chipClass} disabled:cursor-not-allowed disabled:bg-white/50 disabled:animate-pulse`}
+                        >
+                          <FormattedMessage id="setup.mode.coach" />
+                          {!hasReport && (
+                            <span className="ml-2 text-[10px] uppercase tracking-wide opacity-60">
+                              <FormattedMessage id="setup.coachHint" />
+                            </span>
+                          )}
+                        </ToggleGroupItem>
+                      </ToggleGroup>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div>
+                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                        <FormattedMessage id="setup.tone" />
+                      </h3>
+                      <ToggleGroup
+                        type="single"
+                        value={draft.tone}
+                        onValueChange={(v) => {
+                          if (v) $draft.set({ ...draft, tone: v });
+                        }}
+                        className="mt-3 flex w-full flex-wrap gap-2"
+                      >
+                        {TONES.map((t) => (
+                          <ToggleGroupItem key={t} value={t} className={chipClass}>
+                            <FormattedMessage id={`setup.tone.${t}`} />
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+                    <div>
+                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                        <FormattedMessage id="setup.difficulty" />
+                      </h3>
+                      <ToggleGroup
+                        type="single"
+                        value={draft.difficulty}
+                        onValueChange={(v) => {
+                          if (v) $draft.set({ ...draft, difficulty: v });
+                        }}
+                        className="mt-3 flex w-full flex-wrap gap-2"
+                      >
+                        {DIFFICULTIES.map((d) => (
+                          <ToggleGroupItem key={d} value={d} className={chipClass}>
+                            <FormattedMessage id={`setup.difficulty.${d}`} />
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+                    <div>
+                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                        <FormattedMessage id="setup.language" />
+                      </h3>
+                      <ToggleGroup
+                        type="single"
+                        value={draft.language}
+                        onValueChange={(v) => {
+                          if (v) $draft.set({ ...draft, language: v });
+                        }}
+                        className="mt-3 flex w-full flex-wrap gap-2"
+                      >
+                        {LANGUAGES.map((l) => (
+                          <ToggleGroupItem key={l} value={l} className={chipClass}>
+                            {l}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                      <FormattedMessage id="setup.files" />{" "}
+                      <span className="normal-case tracking-normal text-espresso-soft">
+                        · <FormattedMessage id="setup.filesHint" />
+                      </span>
+                    </h3>
+                    <input
+                      ref={fileInput}
+                      type="file"
+                      multiple
+                      accept={ACCEPTED.join(",")}
+                      className="hidden"
+                      onChange={(e) => {
+                        addFiles(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                    {clientOnly ? (
+                      <div className="mt-3 rounded-card border border-dashed border-espresso-faint/40 bg-white/40 p-6 text-center text-sm text-espresso-soft md:p-8">
+                        <FormattedMessage id="setup.filesServerOnly" />
+                      </div>
+                    ) : (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label={intl.formatMessage({ id: "setup.dropHint" })}
+                        onClick={() => fileInput.current?.click()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") fileInput.current?.click();
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          addFiles(e.dataTransfer.files);
+                        }}
+                        className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8"
+                      >
+                        <FormattedMessage id="setup.dropHint" />
+                      </div>
+                    )}
+                    {files.length > 0 && (
+                      <ul className="mt-3 space-y-1.5">
+                        {files.map((f, i) => (
+                          <li
+                            key={`${f.name}-${i}`}
+                            className="flex min-w-0 items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
+                          >
+                            <span className="truncate text-espresso">{f.name}</span>
+                            <span className="ml-3 flex shrink-0 items-center gap-3 text-xs text-espresso-soft">
+                              {Math.round(f.size / 1024)} kb
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={intl.formatMessage(
+                                  { id: "setup.fileRemove" },
+                                  { name: f.name },
+                                )}
+                                onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                                className="text-espresso-soft transition-fluid hover:bg-transparent hover:text-persimmon"
+                              >
+                                ×
+                              </Button>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+                      <FormattedMessage id="setup.mic" />
+                    </h3>
+                    <div className="mt-3" data-testid="mic-check">
+                      <MicSelector
+                        value={micDeviceId}
+                        onValueChange={(id) => $micDeviceId.set(id)}
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <p role="alert" className="text-sm text-persimmon-deep">
+                      {error}
+                    </p>
+                  )}
+
+                  {/* the validate step stays reachable, opt-in only (p3) */}
+                  <button
+                    onClick={() => void start(true)}
+                    disabled={busy}
+                    className="flex min-h-11 items-center gap-2 self-start font-body text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <FormattedMessage id="setup.startWithPlan" />
+                  </button>
+                </div>
+              )}
             </section>
           </div>
         </div>
