@@ -160,7 +160,7 @@ test.describe("client-only runtime (no di server)", () => {
       .poll(
         async () => {
           if (!/\/interview\//.test(page.url())) {
-            await page.getByText("proceed without validation").click();
+            await page.getByRole("button", { name: "start", exact: true }).first().click();
           }
           return /\/interview\//.test(page.url());
         },
@@ -197,7 +197,10 @@ test.describe("client-only runtime (no di server)", () => {
       route.fulfill({ status: 500, body: "no tts in e2e" }),
     );
     const id = await startClientOnlySession(page);
-    const input = page.getByPlaceholder("type instead…");
+    // the type input lives in the collapsed transcript rail — the
+    // ControlBar "type" button opens it and focuses the input (p3-22).
+    await page.getByRole("button", { name: "type", exact: true }).click();
+    const input = page.getByPlaceholder("talk or type…");
     await input.fill("hello from e2e");
     await input.press("Enter");
 
@@ -224,7 +227,8 @@ test.describe("client-only runtime (no di server)", () => {
       await route.fulfill({ status: 500, body: "mock failure" });
     });
     const id = await startClientOnlySession(page);
-    const input = page.getByPlaceholder("type instead…");
+    await page.getByRole("button", { name: "type", exact: true }).click();
+    const input = page.getByPlaceholder("talk or type…");
     await input.fill("this will fail");
     await input.press("Enter");
 
