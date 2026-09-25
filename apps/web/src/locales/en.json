@@ -190,5 +190,8 @@
   "runtime.unreachable": "server unreachable — using {fallback}",
   "settings.incomplete": "enabled but incomplete — fill in the fields below or switch off to keep your saved config",
   "setup.filesServerOnly": "document upload needs the server runtime — files aren't stored in browser mode",
-  "report.coachSeed": "Coach me on {name}. Run a focused practice session and probe for specifics."
+  "report.coachSeed": "Coach me on {name}. Run a focused practice session and probe for specifics.",
+  "settings.demoLlm.fill": "use the managed demo endpoint — no key needed",
+  "settings.demoLlm.badge": "demo",
+  "settings.demoLlm.upsell": "want unlimited zero-conf? let us know"
 }

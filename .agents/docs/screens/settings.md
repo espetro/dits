@@ -142,3 +142,12 @@ button in its own block, inset card with a centered max-w-xl column.
   never silent. Saving a profile rebuilds the browser voice driver
   (`useVoice` re-boots on `$providerProfile` change) so the new
   endpoint takes effect in the live session.
+- Demo LLM (p2 zero-conf): the llm tab's hint block also offers a
+  settings.demoLlm.fill link that one-clicks a managed demo endpoint
+  (VITE_DEMO_LLM_* env in dev, else the DEMO_LLM_BASE_URL managed proxy
+  constant) into baseUrl/model — managed endpoints legitimately carry
+  an empty apiKey, so neither the schema, the incomplete-warning, the
+  persist guard, nor the Test guard requires a key for them. While the
+  draft or saved endpoint is a demo url a settings.demoLlm.badge chip
+  renders next to the link, and a settings.demoLlm.upsell link
+  (demand signal) logs clicks to localStorage `di.demoUpsellClicks`.
