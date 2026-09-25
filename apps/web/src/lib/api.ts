@@ -23,6 +23,16 @@ export interface SessionDto {
   prompt?: string;
 }
 
+export interface ReportDto {
+  overall_score: number;
+  coverage_pct: number;
+  competencies: Array<{
+    name: string;
+    score: number;
+    evidence: Array<{ quote: string; turn_seq: number; verdict: string }>;
+  }>;
+}
+
 export interface TurnDto {
   id: string;
   session_id: string;
@@ -86,6 +96,16 @@ export async function listSessions(): Promise<SessionDto[]> {
   return res.json();
 }
 
+export async function updateSessionStatus(id: string, status: string): Promise<SessionDto> {
+  const res = await fetch(`${BASE}/v1/sessions/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(`update session failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getSession(id: string): Promise<SessionDto> {
   const res = await fetch(`${BASE}/v1/sessions/${id}`);
   if (!res.ok) throw new Error(`get session failed: ${res.status}`);
@@ -109,7 +129,7 @@ export async function getReport(id: string): Promise<unknown> {
  * write-shaped request but idempotent: an already-generated report is
  * returned unchanged, matching getReport's semantics for repeat loads.
  */
-export async function requestReport(id: string): Promise<unknown> {
+export async function requestReport(id: string): Promise<ReportDto> {
   const res = await fetch(`${BASE}/v1/sessions/${id}/report`, { method: "POST" });
   if (!res.ok) throw new Error(`generate report failed: ${res.status}`);
   return res.json();
