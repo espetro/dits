@@ -2,6 +2,7 @@ import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router
 import { useLocale, withLocale } from "../../lib/locale-href";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../../lib/ssr";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { PanelBottom } from "lucide-react";
@@ -91,7 +92,7 @@ const ACTIVE_STATUSES = new Set(["created", "interviewing"]);
 
 function Interview() {
   const { id } = Route.useParams();
-  const effectiveRuntime = useStore($effectiveRuntime);
+  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
   const clientOnly = effectiveRuntime !== "server";
   const { data: session } = useQuery({
     queryKey: ["session", id, effectiveRuntime],

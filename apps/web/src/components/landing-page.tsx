@@ -93,7 +93,10 @@ function StickerCard({ s, slot }: StickerCardProps) {
         ["--slot-x-compact" as string]: `${slot.xCompact * 100}%`,
         ["--slot-y" as string]: `${slot.y * 100}%`,
       }}
-      className={`rise-in relative ${s.rotate} ${s.tone} mx-2 w-40 rounded-card p-3 font-display text-sm font-medium leading-snug shadow-[0_20px_50px_-20px_rgba(43,33,24,0.25)] ring-1 ring-hairline transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:rotate-0 hover:scale-[1.03] @[42rem]/hero:absolute @[42rem]/hero:left-[var(--slot-x-compact)] @[42rem]/hero:top-[var(--slot-y)] @[42rem]/hero:mx-0 @[54rem]/hero:left-[var(--slot-x)] @[54rem]/hero:w-52 @[54rem]/hero:p-4`}
+      // slots are a fraction of (container - sticker width), not raw
+      // container width — a right-edge slot plus a 10/13rem sticker used to
+      // overflow the band horizontally at ~1024px (p3-25 landing overflow).
+      className={`rise-in relative ${s.rotate} ${s.tone} mx-2 w-40 rounded-card p-3 font-display text-sm font-medium leading-snug shadow-[0_20px_50px_-20px_rgba(43,33,24,0.25)] ring-1 ring-hairline transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:rotate-0 hover:scale-[1.03] @[42rem]/hero:absolute @[42rem]/hero:left-[calc(var(--slot-x-compact)*(100%_-_10rem))] @[42rem]/hero:top-[var(--slot-y)] @[42rem]/hero:mx-0 @[54rem]/hero:left-[calc(var(--slot-x)*(100%_-_13rem))] @[54rem]/hero:w-52 @[54rem]/hero:p-4`}
     >
       “<FormattedMessage id={`landing.sticker.${s.id}`} />”
     </div>
