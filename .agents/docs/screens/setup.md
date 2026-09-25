@@ -1,5 +1,8 @@
 # Screen: Setup (`/{-$locale}/setup`)
 
+> p3 restructure: presets become scenario cards (narrative + goals +
+> toolset preview + start CTA); knobs collapse into an advanced section.
+
 ## ASCII mockup
 
 ```
@@ -7,99 +10,83 @@
 |  [logo di]                 configure interview          history   |
 +------------------------------------------------------------------+
 |                                                                  |
-|  PRESETS                                                         |
-|  ( (sys design) (behavioral) (frontend) (ML) (custom) )          |
+|  pick a scenario                                                 |
 |                                                                  |
-|  CUSTOM PROMPT                                                   |
+|  +---------------------+  +---------------------+  +-----------+ |
+|  | sys design          |  | behavioral          |  | frontend  | |
+|  | scale a service     |  | STAR stories with   |  | dom, css, | |
+|  | under pressure      |  | follow-ups          |  | react     | |
+|  | - requirements      |  | - conflict story    |  | - layout  | |
+|  | - capacity math     |  | - ownership         |  | - a11y    | |
+|  | - trade-offs        |  | - failure           |  | - perf    | |
+|  | tools: editor wb    |  | tools: editor       |  | tools: ed | |
+|  |      [start ->]     |  |      [start ->]     |  |  [start>] | |
+|  +---------------------+  +---------------------+  +-----------+ |
+|  +---------------------+  +---------------------+                 |
+|  | ML                  |  | custom              |                 |
+|  | ...                 |  | bring your own      |                 |
+|  |                     |  | prompt              |                 |
+|  |                     |  |      [start ->]     |                 |
+|  +---------------------+  +---------------------+                 |
+|                                                                  |
 |  +----------------------------------------------------------+   |
-|  | textarea: paste a job description, your resume context,  |   |
-|  | or anything the agent should know about                  |   |
+|  | custom prompt (fills from card, editable)                |   |
 |  +----------------------------------------------------------+   |
 |                                                                  |
-|  FILES (text-only: pdf, md, txt, docx — 10 files / 20MB max)     |
-|  +----------------------------------------------------------+   |
-|  |  [drop files or click to browse]                         |   |
-|  +----------------------------------------------------------+   |
-|  ( resume.pdf 24kB x ) ( jd.md 2kB x )                           |
-|                                                                  |
-|  FORM                                                            |
-|  duration: (20) (30) (45) (60) min                               |
-|  tone:     [dropdown]     difficulty: [dropdown]                 |
-|  language: [dropdown]     mode:  (interview) (coach*)            |
-|                                                                  |
-|              +-----------------------------+                     |
-|              |        start interview      |  => /validate/[id]  |
-|              +-----------------------------+                     |
-|              proceed without validation => /interview/[id]       |
+|  > advanced options  (duration 30 | tone | difficulty |          |
+|                       language | mode | files | mic)             |
 |                                                                  |
 +------------------------------------------------------------------+
 ```
 
 ## Behavior
 
-- Preset scenario chips fill the custom-prompt textarea with canned content; selecting a preset is just a textarea pre-fill.
-- File drop: functional since M3. Files upload to `POST /v1/sessions/:id/documents`
-  right after session creation (before navigating away). Text-only: pdf, md, txt,
-  docx. Caps enforced client- and server-side (10 files / 20MB total) with inline
-  error copy; bad-type and cap violations never navigate. Files are listed under
-  the drop zone with size and a remove control. Upload failure shows an error but
-  does not block starting the interview.
-- Mic selector: ElevenLabs UI `mic-selector` registry component
-  (`apps/web/src/components/vendor/mic-selector.tsx`, with `live-waveform.tsx`)
-  between files and the form, wrapped in a `data-testid="mic-check"` element.
-  Device list populates without permission (labels fallback to "Microphone
-  <id>"); opening the dropdown requests getUserMedia to resolve real labels.
-  Mute toggle and live waveform preview appear in the dropdown footer while
-  open. Not gated: the start buttons do not depend on mic state. The
-  component renders built-in English strings (no i18n hooks). Nothing is
-  recorded or transmitted; preview capture stops when the dropdown closes.
-- Form fields: duration (20/30/45/60), tone, difficulty, language (interview language, NOT the UI locale), mode (`interview|coach`).
-- Primary action **start interview** (setup.validate) creates the session
-  (POST /v1/sessions) then routes to `/validate/[id]`. Design: espresso pill,
-  semibold base-size text, lucide ArrowRight that slides right on hover,
-  persimmon hover with soft shadow lift, active scale 0.97 (replaces the old
-  oversized "validate & start →" text-arrow pill).
-- Link **proceed without validation** routes straight to `/interview/[id]`.
-- Coach mode button: gated on any session reaching status `reported`
-  (`listSessions` in server mode, `listClientSessions` in browser mode).
-  Until then it renders disabled + pulsing with the setup.coachHint tooltip
-  and an inline hint label.
-
-- The provider profile form and the runtime selector moved out of setup into
-  the settings dialog's AI provider pane (B4). When the effective runtime is
-  not `server` and no profile with an llm section exists, setup shows a muted
-  notice (setup.needsProvider) with a button that opens the settings dialog at
-  the AI provider pane.
-- Failure feedback: `start()` wraps session creation in try/catch. On failure
-  it re-probes the server; if unreachable it raises a sonner toast
-  (setup.startFailedToast with setup.needsProvider as description), otherwise
-  an inline error. This covers the static-host 405 case: reachability is
-  re-probed on mount whenever it is not freshly confirmed false, so a stale
-  persisted "reachable" value can no longer pin the runtime to `server` and
-  silently swallow the click.
-
-- **Custom runtime** (ADR-0003, `$effectiveRuntime !== "server"`):
-  the start action creates the session via `apps/web/src/lib/opfs-store.ts#createClientSession`
-  instead of `POST /v1/sessions`, and skips `uploadDocuments` entirely — no
-  ingestion pipeline exists client-side. The FILES section renders a muted
-  setup.filesServerOnly hint box instead of the dropzone in this mode; if
-  files were picked before switching to a client runtime, `start()` raises a
-  setup.filesServerOnly toast instead of dropping them silently. It also calls
-  `resetClientSession()` first so a new session never inherits turns/question
-  state left over from a previous client-only interview in the same tab.
+- **Scenario cards**: one card per preset (`sys design`, `behavioral`,
+  `frontend`, `ML`, `custom`). A card carries a one-line narrative, a 3-item
+  goal checklist (what the interviewer will probe), a toolset preview chip
+  row (which dock tools the session starts with — seeds `session.tools`),
+  and its own **start** CTA. Clicking a card also fills the custom-prompt
+  textarea with the preset text (editable before starting).
+- **Advanced options** disclosure (collapsed by default, chevron): duration
+  (20/30/45/60), tone, difficulty, language, mode (`interview|coach`), the
+  FILES dropzone, and the mic selector. Defaults are pre-picked so a card's
+  start CTA is a zero-knob path.
+- **Coach mode** stays in advanced: gated on any session reaching `reported`
+  (setup.coachHint tooltip + inline hint while locked).
+- Custom prompt textarea stays visible above advanced — it is the shared
+  context field, filled by whichever card was last clicked.
+- File dropzone (advanced): `POST /v1/sessions/:id/documents` right after
+  session creation; pdf/md/txt/docx, 10 files / 20MB caps enforced client-
+  and server-side; upload failure never blocks the start.
+- Mic selector (advanced): ElevenLabs `mic-selector` registry component in a
+  `data-testid="mic-check"` element; device list without permission, real
+  labels on open, live waveform preview. Never gates the start CTA.
+- Card **start** creates the session (`POST /v1/sessions` or OPFS in
+  client-only) and routes straight to `/interview/[id]` — the validate step
+  remains reachable via advanced (`start with plan check` link) but is no
+  longer the default path.
+- Failure feedback unchanged: `start()` re-probes the server on failure,
+  sonner toast vs inline error; static-host 405 handled by the reachability
+  re-probe.
+- **Custom runtime**: sessions via `createClientSession`, `FILES` section
+  inside advanced renders the setup.filesServerOnly hint, and
+  `resetClientSession()` runs before a new session. When no llm profile
+  exists the setup.needsProvider notice with the settings-dialog button
+  still renders above the cards.
 
 ## Responsive
 
-- Mobile-first: base styles fit 375px. Preset chips, duration pills and mode
-  pills wrap (`flex-wrap`); the file dropzone reduces padding on mobile
-  (`p-6 md:p-8`); file rows use `min-w-0` + `truncate` so long names never
-  overflow. Desktop layout is unchanged.
+- Mobile-first: cards stack single-column at base, `sm:grid-cols-2`,
+  `lg:grid-cols-3`. Card CTAs and disclosure targets are `>= 44px`.
+- Advanced disclosure content wraps (`flex-wrap`); dropzone reduces padding
+  on mobile (`p-6 md:p-8`); file rows `min-w-0` + `truncate`.
 
 ## URL / state
 
 - Heading structure: the page's single `h1` is the localized "configure
-  interview" title rendered in the shared app header (`AppHeaderSlot` in
-  `apps/web/src/routes/__root.tsx`); section labels on the page itself are `h2`.
-- Optional locale prefix: `/setup` (en) or `/es/setup`, ... — the prefix is the i18n source of truth.
-- No URL params on entry. On submit, the created session id drives the next route.
-- Form state is local + valibot schema (`CreateSessionRequest` from `@di/shared` via formisch).
+  interview" title in the shared app header; section labels are `h2`.
+- Optional locale prefix: `/setup` (en) or `/es/setup`, ...
+- No URL params on entry. On submit, the created session id drives the next
+  route (`/interview/[id]` by default, `/validate/[id]` via advanced).
+- Form state is local + valibot (`CreateSessionRequest` from `@di/shared`
+  via formisch), plus the selected card's toolset written into the session.
