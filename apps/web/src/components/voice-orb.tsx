@@ -3,7 +3,7 @@ import * as React from "react";
 import { Orb } from "./vendor/orb";
 import { getAgentLevel, getMicLevel } from "../lib/voice/levels";
 import { $effectiveRuntime } from "../lib/runtime";
-import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../lib/ssr";
 
 /**
  * Voice orb for the interview screen: ElevenLabs UI Orb (WebGL, three.js)
@@ -40,7 +40,7 @@ export function VoiceOrb({
 }) {
   const inputRef = React.useRef(0);
   const outputRef = React.useRef(0);
-  const effectiveRuntime = useStore($effectiveRuntime);
+  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
   const clientOnly = effectiveRuntime !== "server";
 
   React.useEffect(() => {

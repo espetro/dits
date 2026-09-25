@@ -139,10 +139,10 @@ test.describe("client-only runtime (no di server)", () => {
   }
 
   async function readOpfsSession(page: Page, id: string) {
-    return page.evaluate(async (sessionId) => {
+    return page.evaluate(async (sid) => {
       const opfsRoot = await navigator.storage.getDirectory();
       const dir = await opfsRoot.getDirectoryHandle("sessions");
-      const handle = await dir.getFileHandle(`${sessionId}.json`);
+      const handle = await dir.getFileHandle(`${sid}.json`);
       const file = await handle.getFile();
       return JSON.parse(await file.text());
     }, id);
@@ -167,7 +167,7 @@ test.describe("client-only runtime (no di server)", () => {
         { timeout: 10_000, intervals: [500] },
       )
       .toBe(true);
-    const match = /\/interview\/([^\/?#]+)/.exec(page.url());
+    const match = /\/interview\/([^/?#]+)/.exec(page.url());
     if (!match) throw new Error(`unexpected url: ${page.url()}`);
     return match[1]!;
   }
