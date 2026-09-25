@@ -19,6 +19,10 @@ dir = "apps/web"
 description = "Run the OpenAI-compatible mock provider on :9000 (CORS-enabled for browser dev)"
 run = "bun run packages/evals/mock-provider/main.ts --port 9000"
 
+[tasks."dev:server:cauce"]
+description = "Run the di server with the CAUCE managed LLM (zero-conf dev; needs CAUCE_AI_* env)"
+run = "source scripts/dev-env-cauce.sh && bun run apps/server/src/cli.ts --config config.example.yaml"
+
 [tasks.build]
 description = "Build web SPA"
 run = """

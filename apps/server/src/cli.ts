@@ -117,7 +117,8 @@ async function check(
 
   const providers = await probeProviders(config);
   for (const [name, ok] of Object.entries(providers)) {
-    results.push([`${name} provider`, ok, config.llm.base_url]);
+    const endpoint = name === "llm" || name === "stt" || name === "tts" ? config[name] : undefined;
+    results.push([`${name} provider`, ok, endpoint?.base_url ?? ""]);
   }
 
   const allOk = results.every(([, ok]) => ok);
