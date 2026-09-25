@@ -1,6 +1,6 @@
 # Config reference
 
-Config file is YAML, validated by `ConfigSchema` in `shared/src/config.ts`. Any key
+Config file is YAML, validated by `ConfigSchema` in `packages/shared/src/config.ts`. Any key
 can be overridden by env: `DI_` prefix, `__` as nesting separator, digits coerced to
 numbers. Example: `DI_LLM__MODEL=gpt-4o` overrides `llm.model`;
 `DI_SERVER__PORT=9000` overrides `server.port`. A value in env always wins over the
@@ -57,4 +57,4 @@ server (OpenAPI 3.1). Summary:
 | `DELETE /v1/sessions/:id/documents/:docId` | remove a document and its chunks                                                                     |
 | `GET /v1/sessions/:id/context`             | retrieved document chunks grounding the agent (optional `?query=`)                                   |
 | `PUT` / `GET /v1/sessions/:id/report`      | store / read the scored report                                                                       |
-| `GET /v1/sessions/:id/voice`               | WebSocket upgrade; voice loop (messages: `shared/src/voice.ts`, not in openapi.json)                 |
+| `GET /v1/sessions/:id/voice`               | WebSocket upgrade; voice loop (messages: `packages/shared/src/voice.ts`, not in openapi.json)        |

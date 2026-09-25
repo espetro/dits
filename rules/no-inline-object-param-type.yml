@@ -6,9 +6,9 @@ message: >
   AGENTS.md type-style rules) so the shape is reusable and shows up in
   hovers/errors by name instead of structurally.
 files:
-  - "shared/src/**/*.ts"
-  - "server/src/**/*.ts"
-  - "web/src/**/*.ts"
+  - "packages/shared/src/**/*.ts"
+  - "apps/server/src/**/*.ts"
+  - "apps/web/src/**/*.ts"
 ignores:
   - "**/*.test.ts"
 rule:

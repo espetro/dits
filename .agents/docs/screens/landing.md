@@ -40,7 +40,7 @@ prefix via real links, so prerender crawl discovers every locale page.
 - CTA **"grill me ->"** navigates to `/setup` (locale-prefixed).
 - Locale switcher in the header area: real links to `/`, `/es`, ... so crawlLinks prerenders all locale pages.
 - 5 tilted sticker/post-it cards with real interview-question content, placed at edges; decorative rotation, no interactivity.
-- **Grid slot allocation** (`web/src/components/landing-page.tsx`): scattered
+- **Grid slot allocation** (`apps/web/src/components/landing-page.tsx`): scattered
   stickers are absolutely positioned into one of 5 fixed, non-overlapping
   slots (fractions of the hero band) via `--slot-x`/`--slot-x-compact`/`--slot-y`
   CSS custom properties, gated by container queries on the `@container/hero`

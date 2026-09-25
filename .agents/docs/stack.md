@@ -89,20 +89,20 @@ BYO `baseUrl`, with no local hop in between:
 
 No numbers are captured here yet; this is a latency _shape_ map (what talks
 to what), not a benchmark. Recommended follow-up in `04-m3-rag-ingestion`
-scope: measure with the mock provider (`evals/src/mock-provider`) once one
+scope: measure with the mock provider (`packages/evals/src/mock-provider`) once one
 exists.
 
 ## Static deploy (Cloudflare Pages)
 
-The static bundle (`web/dist/client` after `cd web && bun run build`) is a
+The static bundle (`apps/web/dist/client` after `cd web && bun run build`) is a
 plain SPA — no CF Worker, no server code — so `client-only` mode is the only
 mode a static deploy can offer (there is no `di` binary to reach, so
 `$effectiveRuntime` always resolves to `client-only` per the probe logic in
-`web/src/lib/runtime.ts`).
+`apps/web/src/lib/runtime.ts`).
 
-- **Build output**: `web/dist/client`, one prerendered `index.html` per
+- **Build output**: `apps/web/dist/client`, one prerendered `index.html` per
   locale directory plus a root fallback. Point the Pages project's build
-  output directory at `web/dist/client`.
+  output directory at `apps/web/dist/client`.
 - **Build command**: `cd web && bun run build` (bun, not npm/pnpm — see root
   `AGENTS.md` package-manager rule).
 - **No secrets to configure**: BYO provider `baseUrl`/`apiKey` are entered by

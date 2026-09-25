@@ -7,8 +7,8 @@ message: >
   feat/client-side-opfs commit-E regression) — route it through the
   turn-lifecycle onError/onMetrics sink instead.
 files:
-  - "web/src/lib/agent/**/*.ts"
-  - "web/src/lib/voice/**/*.ts"
+  - "apps/web/src/lib/agent/**/*.ts"
+  - "apps/web/src/lib/voice/**/*.ts"
 rule:
   pattern: "() => undefined"
   inside:

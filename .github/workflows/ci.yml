@@ -40,7 +40,7 @@ jobs:
           path: |
             .turbo
             node_modules/.cache/turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('bun.lock', 'tsconfig*.json', '*/tsconfig.json') }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('bun.lock', 'tsconfig*.json', '**/tsconfig.json') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 

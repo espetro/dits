@@ -6,9 +6,9 @@ message: >
   Prefer `interface X extends A, B` — interface members are resolved lazily
   and cached, which keeps the type-aware lint/tsc tiers cheap.
 files:
-  - "shared/src/**/*.ts"
-  - "server/src/**/*.ts"
-  - "web/src/**/*.ts"
+  - "packages/shared/src/**/*.ts"
+  - "apps/server/src/**/*.ts"
+  - "apps/web/src/**/*.ts"
 rule:
   kind: type_alias_declaration
   has:

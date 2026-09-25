@@ -45,7 +45,7 @@
   the drop zone with size and a remove control. Upload failure shows an error but
   does not block starting the interview.
 - Mic selector: ElevenLabs UI `mic-selector` registry component
-  (`web/src/components/vendor/mic-selector.tsx`, with `live-waveform.tsx`)
+  (`apps/web/src/components/vendor/mic-selector.tsx`, with `live-waveform.tsx`)
   between files and the form, wrapped in a `data-testid="mic-check"` element.
   Device list populates without permission (labels fallback to "Microphone
   <id>"); opening the dropdown requests getUserMedia to resolve real labels.
@@ -76,7 +76,7 @@
   silently swallow the click.
 
 - **Custom runtime** (ADR-0003, `$effectiveRuntime !== "server"`):
-  the start action creates the session via `web/src/lib/opfs-store.ts#createClientSession`
+  the start action creates the session via `apps/web/src/lib/opfs-store.ts#createClientSession`
   instead of `POST /v1/sessions`, and skips `uploadDocuments` entirely — no
   ingestion pipeline exists client-side, so files picked in this mode are
   accepted by the widget but never sent anywhere. It also calls
@@ -94,7 +94,7 @@
 
 - Heading structure: the page's single `h1` is the localized "configure
   interview" title rendered in the shared app header (`AppHeaderSlot` in
-  `web/src/routes/__root.tsx`); section labels on the page itself are `h2`.
+  `apps/web/src/routes/__root.tsx`); section labels on the page itself are `h2`.
 - Optional locale prefix: `/setup` (en) or `/es/setup`, ... — the prefix is the i18n source of truth.
 - No URL params on entry. On submit, the created session id drives the next route.
 - Form state is local + valibot schema (`CreateSessionRequest` from `@di/shared` via formisch).

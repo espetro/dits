@@ -1,5 +1,5 @@
 # Example config for local development with the in-repo mock provider.
-# Start the mock provider first: bun run evals/mock-provider/main.ts --port 9000
+# Start the mock provider first: bun run packages/evals/mock-provider/main.ts --port 9000
 
 server:
   port: 3000

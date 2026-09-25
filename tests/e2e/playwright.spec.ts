@@ -117,7 +117,7 @@ test("spec md scenarios all have executed counterparts", () => {
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
   const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
-  // Storage keys mirror shared/src/providers.ts RUNTIME_MODE_STORAGE_KEY /
+  // Storage keys mirror packages/shared/src/providers.ts RUNTIME_MODE_STORAGE_KEY /
   // PROVIDER_PROFILE_STORAGE_KEY; not imported since this package has no
   // workspace dependency on @di/shared.
   const PROFILE = {

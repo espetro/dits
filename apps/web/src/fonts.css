@@ -1,0 +1,66 @@
+/**
+ * Display font face declarations. Fraunces (OFL) is self-hosted to match the
+ * brioso brand family's --font-display — no third-party CDN, deterministic
+ * first paint. woff2 files live in apps/web/public/fonts/, sourced from
+ * packages/brioso-brand/fonts/ in the brioso repo.
+ */
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Fraunces Regular"),
+    url("/fonts/Fraunces-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("Fraunces Italic"),
+    url("/fonts/Fraunces-Italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Fraunces Bold"),
+    url("/fonts/Fraunces-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Fraunces Bold Italic"),
+    url("/fonts/Fraunces-BoldItalic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src:
+    local("Fraunces Black"),
+    url("/fonts/Fraunces-Black.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src:
+    local("Fraunces Black Italic"),
+    url("/fonts/Fraunces-BlackItalic.woff2") format("woff2");
+}

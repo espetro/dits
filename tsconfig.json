@@ -5,5 +5,5 @@
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
   },
   "include": ["scripts/**/*.ts", "build/**/*.ts"],
-  "exclude": ["shared", "server", "web", "evals", "node_modules"]
+  "exclude": ["apps", "packages", "node_modules"]
 }

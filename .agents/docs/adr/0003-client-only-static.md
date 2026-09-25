@@ -18,28 +18,28 @@ provider.
 ## decision
 
 Add a third axis, orthogonal to the voice driver split: a **runtime mode**
-(`web/src/lib/runtime.ts`) that is `local-server` (default) or `client-only`,
+(`apps/web/src/lib/runtime.ts`) that is `local-server` (default) or `client-only`,
 persisted (`$runtimeMode`) and overridden to `client-only` whenever a health
 probe finds the configured server unreachable ($effectiveRuntime, computed —
 never rewrites the persisted choice). Every route that currently calls the
 REST API branches on `$effectiveRuntime`:
 
-- **setup** (`web/src/routes/setup.tsx`): client-only creates the session via
-  `web/src/lib/opfs-store.ts#createClientSession` instead of `POST
+- **setup** (`apps/web/src/routes/setup.tsx`): client-only creates the session via
+  `apps/web/src/lib/opfs-store.ts#createClientSession` instead of `POST
 /v1/sessions`, and skips document upload (no ingestion pipeline exists
   client-side — files are accepted by the picker but dropped). Also resets
   `$clientTurns`/`$currentQuestion` (`resetClientSession`) so a new session
   never inherits a previous one's turns from the nanostore.
-- **interview** (`web/src/routes/interview.$id.tsx`): session/turns come from
+- **interview** (`apps/web/src/routes/interview.$id.tsx`): session/turns come from
   OPFS + `$clientTurns` instead of REST polling; typed and spoken turns run
   through `ClientAgent` (ADR-0002's `browser-driver`) and are persisted via
   `opfs-store.ts#appendClientTurn` as they're produced, since there is no
   server to persist them.
-- **finish** (`web/src/routes/finish.$id.tsx`): reads session/turns from OPFS
+- **finish** (`apps/web/src/routes/finish.$id.tsx`): reads session/turns from OPFS
   instead of REST for the transcript download.
-- **report** (`web/src/routes/report.$id.tsx`): checks
+- **report** (`apps/web/src/routes/report.$id.tsx`): checks
   `opfs-store.ts#getClientReport` first; if absent, scores the transcript with
-  `web/src/lib/agent/report-generator.ts#generateReport` (an AI SDK
+  `apps/web/src/lib/agent/report-generator.ts#generateReport` (an AI SDK
   `generateObject` call against the BYO provider, schema-constrained to
   `ReportSchema`) and persists the result with `saveClientReport`.
 
@@ -50,16 +50,16 @@ REST API branches on `$effectiveRuntime`:
 `navigator.storage.getDirectory()`, read-modify-write. No IndexedDB, no
 sql.js/wasm sqlite: a single interview is a few hundred turns at most, so
 there is no query workload that justifies an embedded database, and JSON
-read-modify-write mirrors `server/src/store/db.ts`'s responsibilities closely
+read-modify-write mirrors `apps/server/src/store/db.ts`'s responsibilities closely
 enough that the two are easy to keep in sync by inspection.
 
 ### report prompt: new shared contract, not reused
 
 The handoff plan assumed the server had a report-generation prompt to reuse
-read-only. It does not — `server/src/api/routes.ts` only stores and retrieves
-a client-supplied report; nothing in `server/src` ever scores a transcript.
-`buildReportPrompt`/`ReportPromptContext` (`shared/src/report.ts`) is a new
-prompt, designed from scratch and placed in `shared/` specifically so a
+read-only. It does not — `apps/server/src/api/routes.ts` only stores and retrieves
+a client-supplied report; nothing in `apps/server/src` ever scores a transcript.
+`buildReportPrompt`/`ReportPromptContext` (`packages/shared/src/report.ts`) is a new
+prompt, designed from scratch and placed in `packages/shared/` specifically so a
 future server-side generator (e.g. for `local-server` mode once the server
 gains its own LLM-scoring endpoint) would consume the identical contract
 instead of drifting from the client-only one.
@@ -68,8 +68,8 @@ instead of drifting from the client-only one.
 
 None of the above needed new abstractions because ADR-0002's ports/adapters
 split already drew the line in the right place: `ClientAgent` and the
-server's `VoiceLoop` both consume `shared/src/interview-agent.ts`
-(`buildPrompt`/`VOICE_TOOLS`/`describeWhiteboardSnapshot`), and `shared/`'s
+server's `VoiceLoop` both consume `packages/shared/src/interview-agent.ts`
+(`buildPrompt`/`VOICE_TOOLS`/`describeWhiteboardSnapshot`), and `packages/shared/`'s
 valibot schemas (`Session`, `Turn`, `Report`) are the wire format regardless
 of whether the far end is `di`'s sqlite or an OPFS JSON file. Client-only mode
 is additive: a second implementation behind the same contracts, not a fork of
@@ -89,7 +89,7 @@ the app.
   (one `generateObject` call per report) instead of running on `di`'s
   configured LLM; this is the intended tradeoff of "no server."
 - the OPFS schema (`SessionRecord`) and the sqlite schema
-  (`server/src/store/db.ts`) are two representations of the same `shared/`
+  (`apps/server/src/store/db.ts`) are two representations of the same `packages/shared/`
   contracts, kept honest only by both compiling against `Session`/`Turn`/
   `Report` — there is no migration path between them (by design: moving a
   session from client-only to local-server would need an explicit export/

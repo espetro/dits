@@ -1,13 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreFiles": ["spikes/**", "web/public/vad/**"],
+  "ignoreFiles": ["spikes/**", "apps/web/public/vad/**"],
   "ignore": [
     "build/release.ts",
     "scripts/check-agents-md-length.ts",
     "scripts/check-import-paths.ts",
     "scripts/check-ratchets.ts",
     "scripts/pocket-shim.ts",
-    "evals/src/spike-sqlite-vec.ts",
+    "packages/evals/src/spike-sqlite-vec.ts",
     "tests/e2e/playwright.config.ts",
     "scripts/seed-demo.ts"
   ],

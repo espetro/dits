@@ -1,8 +1,0 @@
-{
-  "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "types": ["bun"],
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
-  },
-  "include": ["src/**/*.ts"]
-}

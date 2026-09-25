@@ -36,14 +36,14 @@ Then run the server against the in-repo mock provider — no keys needed:
 
 ```bash
 cp config.example.yaml config.yaml
-bun run evals/mock-provider/main.ts --port 9000 &
-bun run server/src/cli.ts --config config.yaml
+bun run packages/evals/mock-provider/main.ts --port 9000 &
+bun run apps/server/src/cli.ts --config config.yaml
 ```
 
 ### Running offline (the mock-first rule)
 
 **You should never need a paid API key to develop or run the test suite.** The
-`evals/mock-provider` is an OpenAI-compatible mock server (chat, transcription,
+`packages/evals/mock-provider` is an OpenAI-compatible mock server (chat, transcription,
 models endpoints) that every LLM/STT/TTS provider config can point at. This keeps
 CI hermetic and lets new contributors run the whole configure → interview → report
 flow on day one.
@@ -58,19 +58,19 @@ mock provider so the offline path stays green.
 Bun workspaces, `mise` tasks. See [AGENTS.md](AGENTS.md) for the authoritative,
 kept-up-to-date layout; summary:
 
-| Path         | What it owns                                                                                                                                                                      | Language            |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `shared/`    | **The contract.** `@di/shared` — valibot schemas for config, session/turn/report/tool-state/event. Any API change starts here.                                                    | TS (valibot)        |
-| `server/`    | Hono API on Bun, `bun:sqlite` storage via Kysely. `src/cli.ts` is the entry; `src/supervisor/` spawns worker + LiveKit children. Serves the built web SPA from `web/dist/client`. | TS (Bun)            |
-| `worker/`    | `@livekit/agents` voice worker. Tools: `read_editor`, `read_whiteboard`, `update_question`. STT/TTS/LLM all speak OpenAI-compatible HTTP.                                         | TS                  |
-| `web/`       | TanStack Start SPA — `/`, `/setup`, `/validate/$id`, `/interview/$id`, `/finish/$id`, `/report/$id`, `/history`.                                                                  | TS (TanStack Start) |
-| `evals/`     | vitest eval suite plus `mock-provider/main.ts`, the OpenAI-compatible mock server.                                                                                                | TS                  |
-| `tests/e2e/` | Playwright spec executing scenarios from `specs/*.md`. Needs a running test-mode server (`DI_URL` to target it).                                                                  | TS                  |
-| `docs/`      | Architecture + setup docs.                                                                                                                                                        | Markdown            |
+| Path               | What it owns                                                                                                                                                                           | Language            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `packages/shared/` | **The contract.** `@di/shared` — valibot schemas for config, session/turn/report/tool-state/event. Any API change starts here.                                                         | TS (valibot)        |
+| `apps/server/`     | Hono API on Bun, `bun:sqlite` storage via Kysely. `src/cli.ts` is the entry; `src/supervisor/` spawns worker + LiveKit children. Serves the built web SPA from `apps/web/dist/client`. | TS (Bun)            |
+| `worker/`          | `@livekit/agents` voice worker. Tools: `read_editor`, `read_whiteboard`, `update_question`. STT/TTS/LLM all speak OpenAI-compatible HTTP.                                              | TS                  |
+| `apps/web/`        | TanStack Start SPA — `/`, `/setup`, `/validate/$id`, `/interview/$id`, `/finish/$id`, `/report/$id`, `/history`.                                                                       | TS (TanStack Start) |
+| `packages/evals/`  | vitest eval suite plus `mock-provider/main.ts`, the OpenAI-compatible mock server.                                                                                                     | TS                  |
+| `tests/e2e/`       | Playwright spec executing scenarios from `specs/*.md`. Needs a running test-mode server (`DI_URL` to target it).                                                                       | TS                  |
+| `docs/`            | Architecture + setup docs.                                                                                                                                                             | Markdown            |
 
-**Cross-cutting rule:** `shared/` is the single source of truth for request/response
+**Cross-cutting rule:** `packages/shared/` is the single source of truth for request/response
 shapes. Server routes validate against it with `@hono/valibot-validator`; never
-hand-roll request shapes in `server/` or `web/`.
+hand-roll request shapes in `apps/server/` or `apps/web/`.
 
 ---
 

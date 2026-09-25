@@ -1,8 +1,0 @@
-{
-  "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "types": ["bun", "node"],
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
-  },
-  "include": ["src/**/*.ts", "mock-provider/**/*.ts", "vitest.config.ts"]
-}

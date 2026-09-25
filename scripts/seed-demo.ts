@@ -6,14 +6,14 @@
  * transcript is empty. Requires a running DI server (DI_URL, default
  * http://localhost:3000); test mode is only needed for the smoke route, not here.
  */
-import * as v from "../shared/node_modules/valibot/dist/index.mjs";
+import * as v from "../packages/shared/node_modules/valibot/dist/index.mjs";
 import {
   ReportSchema,
   SessionSchema,
   ToolStateSchema,
   TurnSchema,
   type Session,
-} from "../shared/src/index";
+} from "../packages/shared/src/index";
 
 const BASE = process.env.DI_URL ?? "http://localhost:3000";
 const TITLE = "senior frontend mock interview";
