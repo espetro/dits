@@ -52,10 +52,22 @@ export const $serverReachable = persistentAtom<boolean | null>("di.server-reacha
 const API_BASE = (import.meta.env.VITE_DI_API_BASE as string | undefined) ?? "";
 
 /**
- * Probe ${API_BASE}/api/health with a 2s timeout; updates $serverReachable
- * (cached in storage so offline reloads stay in custom mode without a probe
- * round-trip). Same probe voice driver selection uses.
+ * Strict health check: the di server answers JSON `{ok:true}` — anything else
+ * (including a 200 from an SPA fallback serving index.html) is not a server.
+ * Same check `probeServer` and voice driver selection use.
  */
+export async function isHealthResponse(res: Response): Promise<boolean> {
+  if (!res.ok) return false;
+  const type = res.headers.get("content-type") ?? "";
+  if (!type.includes("application/json")) return false;
+  try {
+    const body: unknown = await res.json();
+    return typeof body === "object" && body !== null && (body as { ok?: unknown }).ok === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function probeServer(): Promise<boolean> {
   const pinned = import.meta.env.VITE_VOICE_DEFAULT;
   if (pinned === "browser") {
@@ -76,7 +88,7 @@ export async function probeServer(): Promise<boolean> {
       signal: ctrl.signal,
     });
     clearTimeout(timer);
-    const ok = res.ok;
+    const ok = await isHealthResponse(res);
     $serverReachable.set(ok);
     return ok;
   } catch {

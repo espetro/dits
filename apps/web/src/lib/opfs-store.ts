@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { SessionSchema } from "@di/shared/session";
 import type { Session, Turn } from "@di/shared/session";
 import type { Report } from "@di/shared/report";
 
@@ -25,6 +27,12 @@ export interface PendingTurn {
 async function root(): Promise<FileSystemDirectoryHandle> {
   const opfsRoot = await navigator.storage.getDirectory();
   return opfsRoot.getDirectoryHandle("sessions", { create: true });
+}
+
+/** Queue/bookkeeping files, kept out of `sessions/` so listings stay clean. */
+async function metaRoot(): Promise<FileSystemDirectoryHandle> {
+  const sessionsDir = await root();
+  return sessionsDir.getDirectoryHandle("meta", { create: true });
 }
 
 async function readRecord(id: string): Promise<SessionRecord | undefined> {
@@ -82,7 +90,9 @@ export async function listClientSessions(): Promise<Session[]> {
     if (handle.kind !== "file" || !name.endsWith(".json")) continue;
     const file = await handle.getFile();
     const record = JSON.parse(await file.text()) as SessionRecord;
-    sessions.push(record.session);
+    const parsed = v.safeParse(SessionSchema, record.session);
+    if (!parsed.success) continue;
+    sessions.push(parsed.output);
   }
   return sessions;
 }
@@ -114,7 +124,7 @@ interface QueueRecord {
 }
 
 async function readQueue(id: string): Promise<QueueRecord> {
-  const dir = await root();
+  const dir = await metaRoot();
   let handle: FileSystemFileHandle;
   try {
     handle = await dir.getFileHandle(`pending-turns-${id}.json`);
@@ -125,7 +135,7 @@ async function readQueue(id: string): Promise<QueueRecord> {
 }
 
 async function writeQueue(id: string, record: QueueRecord): Promise<void> {
-  const dir = await root();
+  const dir = await metaRoot();
   const handle = await dir.getFileHandle(`pending-turns-${id}.json`, { create: true });
   const writable = await handle.createWritable();
   await writable.write(JSON.stringify(record));

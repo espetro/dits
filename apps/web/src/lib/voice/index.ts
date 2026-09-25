@@ -9,6 +9,7 @@ import {
   $providerProfile,
   $runtimeMode,
   $serverReachable,
+  isHealthResponse,
   probeServer,
 } from "../runtime";
 import { describeWhiteboardSnapshot } from "@di/shared";
@@ -33,7 +34,7 @@ export async function selectDriver(): Promise<VoiceDriverKind> {
   if (!hasCustomBase && $serverReachable.get() === false) return "browser";
   try {
     const res = await fetch(`${API_BASE}/api/health`, { method: "GET" });
-    return res.ok ? "server" : "browser";
+    return (await isHealthResponse(res)) ? "server" : "browser";
   } catch {
     return "browser";
   }

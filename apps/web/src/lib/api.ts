@@ -96,6 +96,17 @@ export async function getReport(id: string): Promise<unknown> {
   return res.json();
 }
 
+/**
+ * Generate (or return the existing) report server-side. POST is the
+ * write-shaped request but idempotent: an already-generated report is
+ * returned unchanged, matching getReport's semantics for repeat loads.
+ */
+export async function requestReport(id: string): Promise<unknown> {
+  const res = await fetch(`${BASE}/v1/sessions/${id}/report`, { method: "POST" });
+  if (!res.ok) throw new Error(`generate report failed: ${res.status}`);
+  return res.json();
+}
+
 export interface ToolStateDto {
   editor: string;
   whiteboard: string;

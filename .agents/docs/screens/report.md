@@ -39,9 +39,9 @@
 - Score bento at top: overall / 10, coverage %, meta (duration, turns).
 - Competency list: name + bar + score; under each, verbatim evidence quotes tagged `worked / improve / drop` with turn references. Quotes are verbatim transcript text (hallucination guard: every claim carries a quote that exists in the transcript).
 - Model answers section: question text + reference answer.
-- **Export**: downloads the report JSON (GET /v1/sessions/[id]/report).
+- **Export**: downloads the report JSON (already persisted; the report itself is produced by `POST /v1/sessions/[id]/report`).
 - **Practice weak areas ->** coach CTA seeds a coach session (M5; rendered disabled with tooltip in M1).
-- Scoring is async (ScoringPoll pattern): if report not ready, show pending state and poll.
+- Scoring is async (ScoringPoll pattern): the report query fires `POST /v1/sessions/[id]/report`, which generates the report on first call (or returns the stored one — idempotent) and persists it with status `reported`.
 - **Loading state**: spinner with `report.scoring` copy; after 15s swap in
   `report.scoringSlow` ("this can take a minute on free models") so slow
   providers don't look stuck.
@@ -68,7 +68,7 @@
 
 ## URL / state
 
-- `id` path param: session id. Report via TanStack Query (GET /v1/sessions/[id]/report,
+- `id` path param: session id. Report via TanStack Query (POST /v1/sessions/[id]/report,
   or the client-only path above when there is no server).
 
 ## Responsive

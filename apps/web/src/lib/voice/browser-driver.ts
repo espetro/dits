@@ -1,4 +1,4 @@
-import { cutSentences } from "@di/shared";
+import { KICKOFF_DELAY_MS, KICKOFF_UTTERANCE, cutSentences } from "@di/shared";
 import type {
   LlmSection,
   ProviderSections,
@@ -68,20 +68,15 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private pending = "";
   private abort: AbortController | null = null;
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
+  /** interim-result debounce during agent playback; fires interrupt() (p0.8) */
+  private bargeInTimer: ReturnType<typeof setTimeout> | null = null;
   /** set when interim results arrive during the current utterance */
   private speechSeen = false;
   /** id of the user turn that already consumed the one retry (p0.4 guard) */
   private retriedTurnId: string | null = null;
 
-  /**
-   * Sent as a user turn when the candidate is silent after connect, so the
-   * agent opens the interview instead of the page sitting idle. Phrased as a
-   * direct instruction so the LLM asks a question rather than commenting on
-   * the parenthetical.
-   */
-  private static readonly KICKOFF =
-    "(candidate has joined — begin the interview now: greet them briefly and ask your first question)";
-  private static readonly KICKOFF_MS = 5_000;
+  /** continuation grace before interim speech cuts the agent off (p0.8) */
+  private static readonly BARGE_IN_GRACE_MS = 300;
   /** confidence at which an unconfirmed final is trusted without interim evidence */
   private static readonly MIN_CONFIDENCE = 0.6;
   /** recognition errors that must never trigger an onend restart loop */
@@ -134,7 +129,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
       // also keeps the onend handler from restarting recognition in a loop.
       if (BrowserVoiceDriver.FATAL_ERRORS.has(kind)) {
         this.status = "error";
-        this.cancelKickoff();
+        // no mic is not the end of the interview: the kickoff stays armed so
+        // the agent still opens; the composer keeps the session text-first.
         this.onError(
           kind === "not-allowed" ? "microphone permission denied" : "microphone unavailable",
         );
@@ -182,9 +178,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
     if (!this.agent || this.kickoffTimer) return;
     this.kickoffTimer = setTimeout(() => {
       this.kickoffTimer = null;
-      if (this.status !== "connected" || this.abort) return;
-      void this.runAgentTurn(BrowserVoiceDriver.KICKOFF, "text");
-    }, BrowserVoiceDriver.KICKOFF_MS);
+      // "error" included: mic denial still fires the opening turn so the
+      // user lands in a text-first interview instead of a dead page.
+      if (this.status === "idle" || this.status === "connecting" || this.abort) return;
+      void this.runAgentTurn(KICKOFF_UTTERANCE, "text");
+    }, KICKOFF_DELAY_MS);
   }
 
   private cancelKickoff(): void {
@@ -202,6 +200,14 @@ export class BrowserVoiceDriver implements SpeechDriver {
         // interim results only appear when the recognizer actually heard
         // audio: record it as speech evidence for the next final
         this.speechSeen = true;
+        // barge-in: the user is talking over the agent. Give the agent a
+        // short continuation grace, then cut playback + the in-flight turn.
+        if (this.agentSpeaking && this.bargeInTimer === null) {
+          this.bargeInTimer = setTimeout(() => {
+            this.bargeInTimer = null;
+            if (this.agentSpeaking) this.interrupt();
+          }, BrowserVoiceDriver.BARGE_IN_GRACE_MS);
+        }
         continue;
       }
       const alt = result[0];
@@ -394,6 +400,10 @@ export class BrowserVoiceDriver implements SpeechDriver {
 
   async stop(): Promise<void> {
     this.cancelKickoff();
+    if (this.bargeInTimer !== null) {
+      clearTimeout(this.bargeInTimer);
+      this.bargeInTimer = null;
+    }
     this.recognition?.stop();
     this.recognition = null;
     this.interrupt();
