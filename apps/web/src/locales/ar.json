@@ -61,7 +61,6 @@
   "finish.getTranscript": "احصل على transcript",
   "finish.moreFormats": "صيغ أخرى لـ transcript",
   "finish.downloadJson": "تنزيل بصيغة JSON",
-  "finish.generateReport": "إنشاء تقرير",
   "finish.discard": "تجاهل",
   "report.scoring": "جارٍ تقييم جلستك…",
   "report.scoringSlow": "قد يستغرق هذا دقيقة على النماذج المجانية.",
@@ -239,5 +238,9 @@
   "setup.difficulty.easy": "سهلة",
   "setup.difficulty.medium": "متوسطة",
   "setup.difficulty.hard": "صعبة",
-  "setup.language": "اللغة"
+  "setup.language": "اللغة",
+  "finish.building": "جارٍ إنشاء التقرير",
+  "finish.buildFailed": "تعذر إنشاء التقرير — النص المفرغ محفوظ",
+  "finish.tryAgain": "حاول مجددا",
+  "finish.openReport": "فتح التقرير"
 }

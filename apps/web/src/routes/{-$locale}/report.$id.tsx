@@ -3,17 +3,12 @@ import { useLocale, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../../lib/ssr";
 import { getSession, requestReport } from "../../lib/api";
-import { $effectiveRuntime, $providerProfile } from "../../lib/runtime";
-import {
-  getClientReport,
-  getClientSession,
-  getClientTurns,
-  saveClientReport,
-  setClientSessionStatus,
-} from "../../lib/opfs-store";
-import { generateReport } from "../../lib/agent/report-generator";
+import type { ReportDto } from "../../lib/api";
+import { $effectiveRuntime } from "../../lib/runtime";
+import { ensureClientReport } from "../../lib/report";
+import { getClientSession } from "../../lib/opfs-store";
 import { $draft } from "../../stores/session";
 import { Button } from "../../components/vendor/button";
 import { Badge } from "../../components/vendor/badge";
@@ -23,50 +18,17 @@ export const Route = createFileRoute("/{-$locale}/report/$id")({
   component: Report,
 });
 
-interface ReportDto {
-  overall_score: number;
-  coverage_pct: number;
-  competencies: Array<{
-    name: string;
-    score: number;
-    evidence: Array<{ quote: string; turn_seq: number; verdict: string }>;
-  }>;
-}
-
 const VERDICT_TONE: Record<string, string> = {
   worked: "bg-sage/15 text-sage",
   improve: "bg-butter/20 text-[#9a7d1a]",
   drop: "bg-persimmon-soft text-persimmon-deep",
 };
 
-async function loadOrGenerateClientReport(id: string): Promise<ReportDto> {
-  const cached = await getClientReport(id);
-  if (cached) return cached;
-  const profile = $providerProfile.get();
-  const session = await getClientSession(id);
-  if (!profile?.llm || !session) throw new Error("no provider profile or session");
-  const turns = await getClientTurns(id);
-  const report = await generateReport(
-    profile.llm,
-    {
-      sessionId: id,
-      title: session.title,
-      mode: session.mode,
-      turns,
-    },
-    undefined,
-    { signal: AbortSignal.timeout(90_000) },
-  );
-  await saveClientReport(id, report);
-  await setClientSessionStatus(id, "reported");
-  return report;
-}
-
 function Report() {
   const intl = useIntl();
   const { id } = Route.useParams();
   const locale = useLocale();
-  const effectiveRuntime = useStore($effectiveRuntime);
+  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
   const clientOnly = effectiveRuntime !== "server";
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
@@ -87,8 +49,7 @@ function Report() {
     refetch,
   } = useQuery<ReportDto>({
     queryKey: ["report", id, clientOnly],
-    queryFn: () =>
-      clientOnly ? loadOrGenerateClientReport(id) : (requestReport(id) as Promise<ReportDto>),
+    queryFn: () => (clientOnly ? ensureClientReport(id) : requestReport(id)),
     retry: 2,
     retryDelay: 1500,
   });

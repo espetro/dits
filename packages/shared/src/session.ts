@@ -67,6 +67,11 @@ export const CreateSessionRequestSchema = v.object({
 });
 export type CreateSessionRequest = v.InferOutput<typeof CreateSessionRequestSchema>;
 
+export const UpdateSessionRequestSchema = v.object({
+  status: SessionStatusSchema,
+});
+export type UpdateSessionRequest = v.InferOutput<typeof UpdateSessionRequestSchema>;
+
 /**
  * Browser-pushed per-tool content state the agent reads via
  * GET /v1/sessions/:id/tools. Keyed by tool id so the set of tools is not
