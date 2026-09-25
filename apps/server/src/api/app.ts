@@ -4,6 +4,7 @@ import type { Config } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
 import { embeddingsClientFromConfig } from "../rag/ingest";
+import { OpenAiChatClient } from "../voice/llm";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 
@@ -44,6 +45,12 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
     apiRoutes(deps.db, {
       testMode: deps.testMode,
       embeddings: embeddingsClientFromConfig(deps.config.embeddings),
+      reportLlm: new OpenAiChatClient({
+        baseUrl: deps.config.llm.base_url,
+        apiKey: deps.config.llm.api_key,
+        model: deps.config.llm.model,
+        flavor: deps.config.llm.flavor,
+      }),
     }),
   );
 
@@ -115,6 +122,16 @@ function openApiSpec(config: Config): Record<string, unknown> {
         },
       },
       "/v1/sessions/{id}/report": {
+        post: {
+          summary: "Generate the report via the configured LLM (idempotent)",
+          responses: {
+            "201": { description: "Generated" },
+            "200": { description: "Existing report returned" },
+            "404": { description: "Session not found" },
+            "502": { description: "Generation failed" },
+            "503": { description: "No report LLM configured" },
+          },
+        },
         put: {
           summary: "Store the report",
           responses: { "200": { description: "OK" } },

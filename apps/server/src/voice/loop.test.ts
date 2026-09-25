@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createDatabase, migrate } from "../store/db";
 import { VoiceLoop } from "./loop";
 import type { VoiceLlm, VoiceStt, VoiceTts } from "./loop";
+import { KICKOFF_UTTERANCE } from "@di/shared";
 import type { Config, VoiceServerMessage } from "@di/shared";
 import { AUDIO_HEADER_BYTES, TTS_SAMPLE_RATE } from "@di/shared/voice";
 
@@ -30,7 +31,14 @@ function frame(seq: number, pcm: Uint8Array): { t: "binary"; data: Uint8Array } 
   return { t: "binary" as const, data };
 }
 
-async function makeLoop(overrides?: Partial<{ stt: VoiceStt; tts: VoiceTts; llm: VoiceLlm }>) {
+async function makeLoop(
+  overrides?: Partial<{
+    stt: VoiceStt;
+    tts: VoiceTts;
+    llm: VoiceLlm;
+    kickoffMs: number;
+  }>,
+) {
   const db = createDatabase(":memory:");
   await migrate(db);
   await db
@@ -63,6 +71,7 @@ async function makeLoop(overrides?: Partial<{ stt: VoiceStt; tts: VoiceTts; llm:
       }
     },
     sendBinary: (d) => binary.push(d),
+    kickoffMs: 0,
     ...overrides,
   });
   await loop.start();
@@ -296,6 +305,135 @@ describe("VoiceLoop", () => {
     expect(turns.map((t) => t.speaker)).toEqual(["user", "agent"]);
   });
 
+  it("typed text message: same turn pipeline as speech, source=text, stt untouched", async () => {
+    const stt = stubStt("stt must not run");
+    const { loop, db, messages } = await makeLoop({
+      stt,
+      tts: { synthesizeToPcm: async () => pcmBytes([0]) },
+      llm: { chat: async () => ({ content: "typed reply", toolCalls: [] }) },
+    });
+    await loop.handleMessage({ t: "text", text: "typed question" });
+
+    expect(stt.calls).toBe(0);
+    const turns = await db.selectFrom("turns").selectAll().orderBy("seq").execute();
+    expect(turns.map((t) => [t.speaker, t.source, t.text])).toEqual([
+      ["user", "text", "typed question"],
+      ["agent", "voice", "typed reply"],
+    ]);
+    expect(messages.map((m) => m.t)).toEqual(
+      expect.arrayContaining(["user_transcript", "agent_transcript", "metrics"]),
+    );
+  });
+
+  it("kickoff: silent connect fires the synthetic opening turn", async () => {
+    const { db, messages } = await makeLoop({
+      kickoffMs: 1,
+      stt: stubStt("x"),
+      tts: { synthesizeToPcm: async () => pcmBytes([0]) },
+      llm: { chat: async () => ({ content: "welcome aboard", toolCalls: [] }) },
+    });
+    await vi.waitFor(async () => {
+      const turns = await db.selectFrom("turns").selectAll().execute();
+      expect(turns).toHaveLength(2);
+    });
+    const userMsg = messages.find((m) => m.t === "user_transcript");
+    expect(userMsg).toMatchObject({ turn: { text: KICKOFF_UTTERANCE, source: "text" } });
+    const turns = await db.selectFrom("turns").selectAll().orderBy("seq").execute();
+    expect(turns[1]).toMatchObject({ speaker: "agent", text: "welcome aboard" });
+  });
+
+  it("kickoff is cancelled once a real typed turn arrives", async () => {
+    const { loop, db } = await makeLoop({
+      kickoffMs: 60_000,
+      stt: stubStt("x"),
+      tts: { synthesizeToPcm: async () => pcmBytes([0]) },
+      llm: { chat: async () => ({ content: "ok", toolCalls: [] }) },
+    });
+    await loop.handleMessage({ t: "text", text: "real first turn" });
+    const turns = await db.selectFrom("turns").selectAll().execute();
+    expect(turns.every((t) => t.text !== KICKOFF_UTTERANCE)).toBe(true);
+  });
+
+  it("start() seeds history from persisted turns (text-first resume)", async () => {
+    const seenMessages: { role: string; content: string }[][] = [];
+    const db = createDatabase(":memory:");
+    await migrate(db);
+    await db
+      .insertInto("sessions")
+      .values({
+        id: "s1",
+        title: "Resume",
+        mode: "interview",
+        created_at: new Date().toISOString(),
+        status: "created",
+        duration_min: 30,
+        plan: null,
+      })
+      .execute();
+    await db
+      .insertInto("turns")
+      .values([
+        {
+          id: crypto.randomUUID(),
+          session_id: "s1",
+          seq: 0,
+          speaker: "user",
+          text: "earlier answer",
+          created_at: new Date().toISOString(),
+          source: "text",
+        },
+      ])
+      .execute();
+    const loop = new VoiceLoop({
+      sessionId: "s1",
+      config: testConfig(),
+      db,
+      send: () => undefined,
+      sendBinary: () => undefined,
+      kickoffMs: 0,
+      stt: stubStt("follow up"),
+      tts: { synthesizeToPcm: async () => pcmBytes([0]) },
+      llm: {
+        chat: async (msgs) => {
+          seenMessages.push(msgs as { role: string; content: string }[]);
+          return { content: "continuing", toolCalls: [] };
+        },
+      },
+    });
+    await loop.start();
+    await loop.handleMessage({ t: "text", text: "next answer" });
+    const call = seenMessages[0]!;
+    // system prompt + seeded prior turn + the new turn
+    expect(call.map((m) => [m.role, m.content])).toEqual([
+      ["system", expect.any(String)],
+      ["user", "earlier answer"],
+      ["user", "next answer"],
+    ]);
+  });
+
+  it("update_question also pushes a question ws message", async () => {
+    let hop = 0;
+    const { loop, messages } = await makeLoop({
+      stt: stubStt("start"),
+      tts: { synthesizeToPcm: async () => pcmBytes([0]) },
+      llm: {
+        chat: async () => {
+          hop++;
+          if (hop === 1) {
+            return {
+              content: "",
+              toolCalls: [{ name: "update_question", args: { question: "Q2?", hints: ["h1"] } }],
+            };
+          }
+          return { content: "done", toolCalls: [] };
+        },
+      },
+    });
+    await loop.handleMessage({ t: "text", text: "start" });
+    const q = messages.find((m) => m.t === "question");
+    expect(q).toMatchObject({ question: "Q2?", hints: ["h1"] });
+  });
+
   it("close() stops further processing", async () => {
     const stt = stubStt("x");
     const { loop, messages } = await makeLoop({
@@ -443,6 +581,7 @@ describe("VoiceLoop", () => {
       },
       tts: { synthesizeToPcm: async () => pcmBytes([0]) },
       llm: { chat: async () => ({ content: "ok", toolCalls: [] }) },
+      kickoffMs: 0,
     });
     await loop.start();
     await loop.handleMessage(frame(0, pcmBytes([1, 2, 3, 4])));

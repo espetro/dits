@@ -12,6 +12,8 @@ import {
 } from "@di/shared";
 import { vValidator } from "@hono/valibot-validator";
 import type { Db } from "../store/db";
+import type { ReportLlm } from "../report/generate";
+import { generateReport } from "../report/generate";
 import { testRoutes } from "./test-mode";
 import {
   CapError,
@@ -33,6 +35,8 @@ export function apiRoutes(
   opts: {
     testMode: boolean;
     embeddings?: ReturnType<typeof import("../rag/ingest").embeddingsClientFromConfig>;
+    /** LLM port for POST /sessions/:id/report; without it the route is 503. */
+    reportLlm?: ReportLlm;
   },
 ): Hono {
   const api = new Hono();
@@ -151,6 +155,59 @@ export function apiRoutes(
       .executeTakeFirst();
     if (!row) return c.json({ editor: "", whiteboard: "" });
     return c.json(v.parse(ToolStateSchema, row));
+  });
+
+  /**
+   * Generate (or return the existing) report via the configured LLM. This is
+   * the path the SPA's finish -> report flow uses in server mode: reports
+   * are produced here, PUT only stores externally-supplied ones.
+   */
+  api.post("/sessions/:id/report", async (c) => {
+    const id = c.req.param("id");
+    const session = await db
+      .selectFrom("sessions")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
+    if (!session) return c.json({ error: "not found" }, 404);
+    const existing = await db
+      .selectFrom("reports")
+      .select("data")
+      .where("session_id", "=", id)
+      .executeTakeFirst();
+    if (existing) return c.json(JSON.parse(existing.data));
+    if (!opts.reportLlm) return c.json({ error: "report generation is not configured" }, 503);
+    const turns = await db
+      .selectFrom("turns")
+      .selectAll()
+      .where("session_id", "=", id)
+      .orderBy("seq")
+      .execute();
+    let report;
+    try {
+      report = await generateReport(opts.reportLlm, {
+        sessionId: id,
+        title: session.title,
+        mode: session.mode,
+        turns: turns.map((t) => v.parse(TurnSchema, t)),
+      });
+    } catch (err) {
+      console.error(`[report] generation failed for ${id}: ${err}`);
+      return c.json({ error: "report generation failed" }, 502);
+    }
+    await db
+      .insertInto("reports")
+      .values({
+        session_id: id,
+        overall_score: report.overall_score,
+        coverage_pct: report.coverage_pct,
+        data: JSON.stringify(report),
+        generated_at: report.generated_at,
+      })
+      .onConflict((oc) => oc.column("session_id").doUpdateSet({ data: JSON.stringify(report) }))
+      .execute();
+    await db.updateTable("sessions").set({ status: "reported" }).where("id", "=", id).execute();
+    return c.json(report, 201);
   });
 
   api.put("/sessions/:id/report", vValidator("json", ReportSchema), async (c) => {

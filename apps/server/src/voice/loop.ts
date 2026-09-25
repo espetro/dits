@@ -1,5 +1,12 @@
 import * as v from "valibot";
-import { VOICE_TOOLS, buildPrompt, cutSentences, describeWhiteboardSnapshot } from "@di/shared";
+import {
+  KICKOFF_DELAY_MS,
+  KICKOFF_UTTERANCE,
+  VOICE_TOOLS,
+  buildPrompt,
+  cutSentences,
+  describeWhiteboardSnapshot,
+} from "@di/shared";
 import type {
   Config,
   SessionContext,
@@ -59,6 +66,8 @@ export interface VoiceLoopDeps {
   llm?: VoiceLlm;
   /** Streaming STT stub for tests when config.stt.mode is "streaming". */
   streamingStt?: StreamingSttPort;
+  /** Delay before the synthetic kickoff turn fires; <= 0 disables it. */
+  kickoffMs?: number;
 }
 
 /** 20ms of PCM16 mono at 24k = 480 samples = 960 bytes. */
@@ -93,6 +102,8 @@ export class VoiceLoop {
   /** Serializes turns so concurrent utterances keep monotonically increasing seqs. */
   private turnLock = Promise.resolve();
   private closed = false;
+  private kickoffTimer: ReturnType<typeof setTimeout> | undefined;
+  private readonly kickoffMs: number;
 
   constructor(deps: VoiceLoopDeps) {
     this.sessionId = deps.sessionId;
@@ -100,6 +111,7 @@ export class VoiceLoop {
     this.db = deps.db;
     this.send = deps.send;
     this.sendBinary = deps.sendBinary;
+    this.kickoffMs = deps.kickoffMs ?? KICKOFF_DELAY_MS;
     const events = {
       postEvent: (sid: string, type: string, payload?: unknown) =>
         this.postEvent(sid, type, payload),
@@ -159,6 +171,51 @@ export class VoiceLoop {
       plan: session?.plan ?? undefined,
     };
     await this.postEvent(this.sessionId, "agent.started", { transport: "ws" });
+    // Seed in-memory history from persisted turns so a reconnecting or
+    // text-first session keeps context (REST-posted turns included).
+    const priorTurns = await this.db
+      .selectFrom("turns")
+      .select(["speaker", "text"])
+      .where("session_id", "=", this.sessionId)
+      .orderBy("seq")
+      .execute();
+    this.history.push(
+      ...priorTurns.map((t): LlmMessage => ({
+        role: t.speaker === "user" ? "user" : "assistant",
+        content: t.text,
+      })),
+    );
+    this.armKickoff();
+  }
+
+  /**
+   * Nobody spoke first: after `kickoffMs` with no user input, run a synthetic
+   * user turn so the agent greets and asks the first question (parity with
+   * the browser driver's kickoff timer). Skipped when the session already
+   * has turns or once real input arrives.
+   */
+  private armKickoff(): void {
+    if (this.kickoffMs <= 0 || this.history.some((m) => m.role !== "system")) return;
+    this.kickoffTimer = setTimeout(() => {
+      this.kickoffTimer = undefined;
+      this.turnLock = this.turnLock
+        .then(() => this.runTextTurn(KICKOFF_UTTERANCE, "text"))
+        .catch((err) => {
+          console.error(`[voice] kickoff turn failed: ${err}`);
+          this.send({
+            t: "error",
+            message: err instanceof Error ? err.message : String(err),
+          });
+        });
+    }, this.kickoffMs);
+    this.kickoffTimer.unref?.();
+  }
+
+  private cancelKickoff(): void {
+    if (this.kickoffTimer !== undefined) {
+      clearTimeout(this.kickoffTimer);
+      this.kickoffTimer = undefined;
+    }
   }
 
   /** Handle one client WS message (already parsed) or a raw binary audio frame. */
@@ -201,7 +258,22 @@ export class VoiceLoop {
       this.send({ t: "agent_speaking", on: false });
       return;
     }
+    if (msg.t === "text") {
+      this.cancelKickoff();
+      this.turnLock = this.turnLock
+        .then(() => this.runTextTurn(msg.text.trim(), "text"))
+        .catch((err) => {
+          console.error(`[voice] text turn failed: ${err}`);
+          this.send({
+            t: "error",
+            message: err instanceof Error ? err.message : String(err),
+          });
+        });
+      await this.turnLock;
+      return;
+    }
     if (msg.t === "utterance_end") {
+      this.cancelKickoff();
       await this.postEvent(this.sessionId, "vad.speech_ended").catch(() => undefined);
       const t0 = Date.now();
       const vadMs = this.firstFrameAt === undefined ? 0 : t0 - this.firstFrameAt;
@@ -226,6 +298,7 @@ export class VoiceLoop {
   /** Abort in-flight work and mark the loop dead (WS close). */
   close(): void {
     this.closed = true;
+    this.cancelKickoff();
     this.abort?.abort();
     this.abort = undefined;
     this.buffer.clear();
@@ -246,22 +319,7 @@ export class VoiceLoop {
       if (text === "") return;
       metrics.stt_ms = Date.now() - sttStart;
 
-      const userTurn = await this.persistTurn("user", text);
-      this.send({ t: "user_transcript", turn: userTurn });
-      this.history.push({ role: "user", content: text });
-
-      if (this.llm.streamChat) {
-        await this.runStreamingSpeechTurn(signal, metrics);
-        return;
-      }
-      const reply = await this.runLlmTurn(signal, metrics);
-
-      const agentTurn = await this.persistTurn("agent", reply.content);
-      this.history.push({ role: "assistant", content: reply.content });
-      this.send({ t: "agent_transcript", turn: agentTurn });
-
-      if (reply.content.trim() === "") return;
-      await this.streamSpeech(reply.content, signal, metrics);
+      await this.runAgentReply(text, "voice", signal, metrics);
     } catch (err) {
       if (err instanceof Error && (err.name === "AbortError" || String(err).includes("abort")))
         return;
@@ -274,6 +332,58 @@ export class VoiceLoop {
       }
       if (this.abort?.signal === signal) this.abort = undefined;
     }
+  }
+
+  /**
+   * Turn pipeline once the user text is known (typed composer input or the
+   * synthetic kickoff): same persist -> LLM -> speak path as a voice turn,
+   * minus STT.
+   */
+  private async runTextTurn(text: string, source: "voice" | "text"): Promise<void> {
+    if (this.closed || text === "") return;
+    this.abort = new AbortController();
+    const { signal } = this.abort;
+    const t0 = Date.now();
+    const metrics: TurnMetrics = { vad_ms: 0, total_ms: 0 };
+    try {
+      await this.runAgentReply(text, source, signal, metrics);
+    } catch (err) {
+      if (err instanceof Error && (err.name === "AbortError" || String(err).includes("abort")))
+        return;
+      throw err;
+    } finally {
+      metrics.total_ms = Date.now() - t0;
+      if (!signal.aborted) {
+        this.send({ t: "metrics", metrics });
+        this.postEvent(this.sessionId, "turn.metrics", metrics).catch(() => undefined);
+      }
+      if (this.abort?.signal === signal) this.abort = undefined;
+    }
+  }
+
+  /** Persist the user turn, run the LLM, persist + speak the agent reply. */
+  private async runAgentReply(
+    text: string,
+    source: "voice" | "text",
+    signal: AbortSignal,
+    metrics: TurnMetrics,
+  ): Promise<void> {
+    const userTurn = await this.persistTurn("user", text, source);
+    this.send({ t: "user_transcript", turn: userTurn });
+    this.history.push({ role: "user", content: text });
+
+    if (this.llm.streamChat) {
+      await this.runStreamingSpeechTurn(signal, metrics);
+      return;
+    }
+    const reply = await this.runLlmTurn(signal, metrics);
+
+    const agentTurn = await this.persistTurn("agent", reply.content, "voice");
+    this.history.push({ role: "assistant", content: reply.content });
+    this.send({ t: "agent_transcript", turn: agentTurn });
+
+    if (reply.content.trim() === "") return;
+    await this.streamSpeech(reply.content, signal, metrics);
   }
 
   /** First frame of a fresh buffer marks the utterance's VAD start. */
@@ -401,6 +511,7 @@ export class VoiceLoop {
         question: q.question,
         hints: q.hints ?? [],
       });
+      this.send({ t: "question", question: q.question, hints: q.hints ?? [] });
       return JSON.stringify({ ok: true, question: q.question });
     }
     if (name === "read_editor" || name === "read_whiteboard") {
@@ -452,7 +563,11 @@ export class VoiceLoop {
   }
 
   /** Same sequencing rule as POST /v1/sessions/:id/turns: max seq + 1. */
-  private async persistTurn(speaker: "user" | "agent", text: string): Promise<Turn> {
+  private async persistTurn(
+    speaker: "user" | "agent",
+    text: string,
+    source: "voice" | "text" = "voice",
+  ): Promise<Turn> {
     const { max_seq } = await this.db
       .selectFrom("turns")
       .select((eb) => eb.fn.coalesce(eb.fn.max("seq"), eb.lit(-1)).as("max_seq"))
@@ -465,7 +580,7 @@ export class VoiceLoop {
       speaker,
       text,
       created_at: new Date().toISOString(),
-      source: "voice",
+      source,
     };
     await this.db.insertInto("turns").values(turn).execute();
     return turn;
