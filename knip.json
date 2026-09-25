@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreFiles": ["spikes/**", "web/public/vad/**", "web/src/lib/utils.ts"],
+  "ignoreFiles": ["spikes/**", "web/public/vad/**"],
   "ignore": [
     "build/release.ts",
     "scripts/check-agents-md-length.ts",
@@ -8,7 +8,8 @@
     "scripts/check-ratchets.ts",
     "scripts/pocket-shim.ts",
     "evals/src/spike-sqlite-vec.ts",
-    "tests/e2e/playwright.config.ts"
+    "tests/e2e/playwright.config.ts",
+    "scripts/seed-demo.ts"
   ],
   "ignoreDependencies": [
     "@aeriondyseti/drizzle-sqlite-vec",
@@ -16,7 +17,6 @@
     "@libsql/client",
     "drizzle-orm",
     "@formisch/react",
-    "clsx",
     "codemirror",
     "@codemirror/state",
     "@codemirror/view",
@@ -27,10 +27,7 @@
     "@codemirror/lang-python",
     "@codemirror/lang-sql",
     "@codemirror/language",
-    "lucide-react",
     "recharts",
-    "sonner",
-    "tailwind-merge",
     "onnxruntime-web",
     "vite-plugin-static-copy",
     "@ast-grep/cli",
