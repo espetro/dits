@@ -34,23 +34,25 @@
 
 - Top bar: fixed session title, countdown timer (T-2min triggers agent wrap-up; 0 hard-stops to `/finish/[id]`), voice status label. The voice orb lives in the desktop transcript rail (see below), not the top bar.
 - **Voice orb** (desktop): ElevenLabs UI Orb (`apps/web/src/components/voice-orb.tsx` wrapping the vendored `components/vendor/orb.tsx`, three.js/WebGL) sits above the transcript rail, `size-20 md:size-24`. Driven by live mic/agent loudness taps (`apps/web/src/lib/voice/levels.ts`: `$micAttack`/`$agentAttack` nanostores fed by `MicCapture` RMS and `PcmPlayer.write`) with a synthetic oscillation fallback when taps are silent (e.g. browser STT driver). Phase mapping: speaking→talking, listening→listening, thinking→thinking, else null. The vendor file carries three di-local fixes, each marked with a `di fix`/`di:` comment: (1) `flat` Canvas + own rAF `advance()` loop because r3f's global loop deadlocks under React StrictMode's double-mount (`internal.active` stays false after `unmountComponentAtNode`'s delayed teardown reuses the root); (2) `uInverted` flips on the LIGHT theme since the shader ramp is dark-first and washes out on di's cream background; (3) context-restored kick via `forceContextRestore`.
-- **Question block**: agent-editable tool. The agent rewrites the current question + hints live (tool call). User tools (editor, whiteboard) are never rewritten by the agent, but the agent can READ them.
+- **Question block**: agent-editable tool. The agent rewrites the current question + hints live (tool call); in server mode the tool call also pushes a `{t:"question"}` ws message so the block updates without polling. User tools (editor, whiteboard) are never rewritten by the agent, but the agent can READ them. Fallback: when no `update_question` call has landed yet (kickoff replies, text-only providers), the block renders the latest agent turn's text instead of staying empty.
 - **Tabbed tools**: full-width below the question block. Tabs: `Editor | Whiteboard`. Editor = Milkdown (Crepe) WYSIWYG markdown (`apps/web/src/components/milkdown-editor.tsx` + `milkdown-editor-impl.tsx`, lazy-loaded; three.js-free chunk) with a language bar (`python javascript typescript java go rust sql`) that inserts a fenced code block with the chosen language tag; code blocks render via CodeMirror 6 with syntax highlighting inside the document. External buffer sync via `replaceAll`; changes propagate through `markdownUpdated`. Whiteboard = tldraw canvas for diagrams.
   - **Agent read tools**: `read_editor` (returns current editor buffer text) and `read_whiteboard` (returns serialized shape/snapshot summary). Both feed the same LLM turn path as the transcript, so the agent can reason over code and diagrams the candidate produces.
   - This is part of the test contract: unit tests for the read-tool serializers, evals asserting the agent incorporates editor/whiteboard content in its turns (mock provider scripted with tool-call fixtures), and e2e assertions via `/v1/test/events` that `read_editor` / `read_whiteboard` tool calls land in the session event log.
 - **Transcript panel**: right side, translucent (10-20% alpha, iOS-26 style so background shows through), 10-20% collapsed-to-expanded width range.
   - Collapsed state = slim peek rail showing the last turn. **Minimize never fully hides it.**
-  - Bottom of panel: text input box. Text input is a first-class feature: posts a `source: text` turn via `POST /v1/sessions/:id/turns`, the same LLM turn path as voice.
+  - Bottom of panel: text input box. Text input is a first-class feature: when the voice socket is up the text is sent as a `{t:"text"}` ws message and the server runs it through the same turn pipeline as speech (persist `source: text` turn → llm → agent reply → tts). `POST /v1/sessions/:id/turns` remains only as a degraded-path fallback when the ws is down (writes the turn without invoking the agent).
 - Voice wiring: WebSocket + Web Audio, no SFU/WebRTC. On mount the screen picks a speech driver: the server driver (`apps/web/src/lib/voice/server-driver.ts`) opens `GET /v1/sessions/:id/voice` (WS) and streams mic audio: `AudioWorklet` capture at 16k PCM16 mono (browser resamples via the `AudioContext` rate), client-side Silero VAD (`@ricky0123/vad-web`, assets vendored at `/vad/`) delimits utterances; frames go out as binary WS frames (4-byte BE seq + PCM16LE) only while the VAD says the user is speaking, ending with `{t:"utterance_end"}`. Server messages drive playback and UI: `tts` chunks (b64 or binary with the same seq framing) play through a `PcmPlayer` (`AudioContext` at 24k, back-to-back `AudioBufferSourceNode` scheduling); `agent_speaking` on/off, `user_transcript` / `agent_transcript` surface for state (transcript display still comes from turns polling). Barge-in: a VAD speech-start during agent playback stops the player and sends `{t:"interrupt"}`. Mute keeps the mic track but drops frames client-side and sends `{t:"mute",muted}`. An xstate v5 FSM (`apps/web/src/lib/voice/machine.ts`: idle→connecting→listening→user_speaking→thinking→agent_speaking→listening, barge-in via interrupted) drives the status label.
-- Driver fallback: `apps/web/src/lib/voice/browser-driver.ts` (Web Speech API: `SpeechRecognition` for STT posting turns via the same REST endpoint, `speechSynthesis.speak` for agent turns the turns polling finds; Chrome-only in practice). Selection (`apps/web/src/lib/voice/index.ts`): `VITE_VOICE_DEFAULT` pins one; otherwise probe `${BASE}/api/health` — reachable means the di binary hosts the WS endpoint. Both drivers post turns through the existing REST API, so transcripts and reports are identical regardless of driver. Turn `seq` is assigned server-side on `POST /v1/sessions/:id/turns` (max existing seq + 1), so concurrent writers (voice, text input) never collide.
+- Driver fallback: `apps/web/src/lib/voice/browser-driver.ts` (Web Speech API: `SpeechRecognition` STT + `speechSynthesis`; Chrome-only in practice). Selection (`apps/web/src/lib/voice/index.ts`): `VITE_VOICE_DEFAULT` pins one; otherwise probe `${BASE}/api/health` — the response must be a 200 with `content-type: application/json` and a truthy `ok` body, so static hosts with SPA fallback (which return index.html for any path) correctly resolve to client-only instead of pretending a server is reachable. Barge-in: an interim speech result while the agent speaks arms a ~300ms grace timer — sustained speech interrupts playback, blips get dropped (otherwise tts crosstalk would keep barge-in firing on the agent's own audio). In server mode turn `seq` is assigned on `POST /v1/sessions/:id/turns` (max existing seq + 1), so concurrent writers (voice, text input) never collide.
 - Controls bottom: mute, end-early. Both end paths lead to `/finish/[id]`.
-- **Kickoff on silence (browser driver)**: when the browser driver starts with a
-  wired client-side agent and no user turn arrives within a 5s grace window,
-  the driver auto-fires the first agent turn with a kickoff instruction
-  ("candidate has joined — begin the interview now: greet them briefly and
-  ask your first question"), so the interview opens instead of sitting silent.
-  The timer fires at most once and is cancelled by any real user input
-  (final speech result or `sendText`) and by `stop()`.
+- **Kickoff on silence (both drivers)**: when a session starts and no real
+  user turn arrives within a 5s grace window, an auto-fired first agent turn
+  opens the interview with a kickoff instruction (`KICKOFF_UTTERANCE` /
+  `KICKOFF_DELAY_MS` in `packages/shared/src/interview-agent.ts`), so the
+  session opens instead of sitting silent. Server mode arms the timer inside
+  the VoiceLoop (`kickoffMs`, cancel on any `text`/`utterance_end`/close);
+  the browser driver keeps its own timer — and now keeps it even after a
+  fatal mic error, so a permission-denied landing still offers the
+  type-instead path to start the interview. At most once per session.
 - **Voice failure toast + retry**: when the voice driver surfaces an error
   (`onError` → `voice.status === "error"`), a sonner toast
   (`interview.voiceErrorToast`, raw error as description) fires once per
@@ -75,11 +77,14 @@
   every turn it emits (`onUserTurn`/`onAgentTurn`) is both pushed onto
   `$clientTurns` for immediate display and persisted to OPFS
   (`apps/web/src/lib/voice/use-voice.ts`), since there is no server-side turn
-  store to poll. Turn `seq` is assigned client-side (`Date.now()`-based in
-  `browser-driver.ts`) rather than server-side, since there is no shared
-  writer to serialize against. Typed input reuses the same agent path via
-  `BrowserVoiceDriver.sendText` / `voice.sendText`, rather than
-  `POST /v1/sessions/:id/turns`. The `pushToolState` REST call (editor/
+  store to poll. On mount the screen rehydrates `$clientTurns` from OPFS so a
+  reload restores the transcript, and marks the session `interviewing`
+  (`setClientSessionStatus`; `/finish` marks `finished`, report save marks
+  `reported` — see `report.md`). Turn `seq` is assigned client-side as
+  max-existing-seq + 1 (`session-store.ts` `appendTurn`), so rehydrated and
+  fresh turns interleave without colliding. Typed input reuses the same
+  agent path via `BrowserVoiceDriver.sendText` / `voice.sendText`, rather
+  than `POST /v1/sessions/:id/turns`. The `pushToolState` REST call (editor/
   whiteboard mirroring) is skipped entirely in this mode — client-only's tool
   executors read the nanostores in-process, so there is nothing to push.
   To keep gpu headroom for the in-browser llm, this mode also trims page

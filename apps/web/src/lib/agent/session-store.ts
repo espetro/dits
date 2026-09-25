@@ -20,11 +20,6 @@ export function resetClientSession(): void {
   $clientTurns.set([]);
 }
 
-/** Push an already-built Turn (e.g. from BrowserVoiceDriver's speech/text events). */
-export function pushClientTurn(turn: Turn): void {
-  $clientTurns.set([...$clientTurns.get(), turn]);
-}
-
 export function appendTurn(
   sessionId: string,
   speaker: "user" | "agent",

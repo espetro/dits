@@ -105,10 +105,31 @@ describe("runtime stores", () => {
     vi.unstubAllGlobals();
   });
 
+  function healthResponse(body: unknown, contentType = "application/json") {
+    return {
+      ok: true,
+      headers: new Headers({ "content-type": contentType }),
+      json: async () => body,
+    };
+  }
+
   it("probeServer with a healthy server reports true", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthResponse({ ok: true })));
     expect(await probeServer()).toBe(true);
     expect($effectiveRuntime.get()).toBe("server");
+    vi.unstubAllGlobals();
+  });
+
+  it("probeServer rejects an SPA-fallback 200 that serves html", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthResponse("<html></html>", "text/html")));
+    expect(await probeServer()).toBe(false);
+    expect($serverReachable.get()).toBe(false);
+    vi.unstubAllGlobals();
+  });
+
+  it("probeServer rejects a json 200 without ok:true", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthResponse({ status: "up" })));
+    expect(await probeServer()).toBe(false);
     vi.unstubAllGlobals();
   });
 });

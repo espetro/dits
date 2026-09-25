@@ -16,8 +16,8 @@ import {
   pushToolState,
   replayPendingTurns,
 } from "../../lib/api";
-import { getClientSession } from "../../lib/opfs-store";
-import { $clientTurns } from "../../lib/agent/session-store";
+import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
+import { $clientTurns, resetClientSession } from "../../lib/agent/session-store";
 import { $effectiveRuntime } from "../../lib/runtime";
 import { Button } from "../../components/vendor/button";
 import { Input } from "../../components/vendor/input";
@@ -114,6 +114,20 @@ function Interview() {
   const clientTurns = useStore($clientTurns);
   const turns = clientOnly ? clientTurns : polledTurns;
   const question = useStore($question);
+
+  // hydrate persisted state on mount: a reload must not wipe the visible
+  // transcript (p0.9). server mode polls turns from the API instead.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (!clientOnly || hydratedRef.current) return;
+    hydratedRef.current = true;
+    resetClientSession();
+    $question.set({ text: "", hints: [] });
+    void setClientSessionStatus(id, "interviewing").catch(() => undefined);
+    void getClientTurns(id).then((persisted) => {
+      $clientTurns.set([...persisted, ...$clientTurns.get()]);
+    });
+  }, [id, clientOnly]);
   const transcriptOpen = useStore($transcriptOpen);
   const muted = useStore($muted);
   const [tab, setTab] = useState<"editor" | "whiteboard">("editor");
@@ -122,7 +136,11 @@ function Interview() {
   const [text, setText] = useState("");
   const [showSlowHint, setShowSlowHint] = useState(false);
   const slowHintInput = React.useRef<HTMLInputElement | null>(null);
-  const noQuestionYet = !question.text;
+  // question-card fallback: when the agent never calls update_question
+  // (text-only providers, kickoff answers), show the latest agent turn.
+  const latestAgentText = [...(turns ?? [])].reverse().find((t) => t.speaker === "agent")?.text;
+  const displayQuestion = question.text || latestAgentText || "";
+  const noQuestionYet = !displayQuestion;
   // cold-start fallback: if the agent hasn't asked anything after 15s
   // (e.g. mic never picked the candidate up), surface a type-instead hint.
   useEffect(() => {
@@ -210,20 +228,11 @@ function Interview() {
     if (secsLeft === 0) navigate({ href: withLocale(locale, `/finish/${id}`) });
   }, [secsLeft, id, navigate]);
 
-  // browser-driver fallback: read new agent turns aloud as turns polling finds
-  // them (server driver plays tts chunks off the WS instead)
-  const seenTurns = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    for (const t of turns ?? []) {
-      if (t.speaker !== "agent" || seenTurns.current.has(t.id)) continue;
-      seenTurns.current.add(t.id);
-      voice.speakAgentTurn(t.text);
-    }
-  }, [turns, voice]);
-
   async function sendText() {
     if (!text.trim()) return;
-    if (clientOnly) {
+    // typed turns reach the agent: ws message when voice is up (both modes),
+    // durable REST write only as a degraded-path fallback in server mode.
+    if (clientOnly || voice.status === "connected") {
       voice.sendText(text.trim());
     } else {
       await postTextTurn(id, text.trim());
@@ -287,10 +296,10 @@ function Interview() {
                 <FormattedMessage id="interview.question" />
               </p>
               <p
-                key={question.text}
+                key={displayQuestion}
                 className="rise-in mt-2 font-display text-lg font-semibold leading-snug md:text-2xl"
               >
-                {question.text || intl.formatMessage({ id: "interview.preparing" })}
+                {displayQuestion || intl.formatMessage({ id: "interview.preparing" })}
               </p>
               {question.hints.length > 0 && (
                 <ul className="mt-3 flex flex-wrap gap-2">

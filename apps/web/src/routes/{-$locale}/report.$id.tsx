@@ -4,13 +4,14 @@ import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@nanostores/react";
-import { getReport, getSession } from "../../lib/api";
+import { getSession, requestReport } from "../../lib/api";
 import { $effectiveRuntime, $providerProfile } from "../../lib/runtime";
 import {
   getClientReport,
   getClientSession,
   getClientTurns,
   saveClientReport,
+  setClientSessionStatus,
 } from "../../lib/opfs-store";
 import { generateReport } from "../../lib/agent/report-generator";
 import { Button } from "../../components/vendor/button";
@@ -56,6 +57,7 @@ async function loadOrGenerateClientReport(id: string): Promise<ReportDto> {
     { signal: AbortSignal.timeout(90_000) },
   );
   await saveClientReport(id, report);
+  await setClientSessionStatus(id, "reported");
   return report;
 }
 
@@ -84,7 +86,7 @@ function Report() {
   } = useQuery<ReportDto>({
     queryKey: ["report", id, clientOnly],
     queryFn: () =>
-      clientOnly ? loadOrGenerateClientReport(id) : (getReport(id) as Promise<ReportDto>),
+      clientOnly ? loadOrGenerateClientReport(id) : (requestReport(id) as Promise<ReportDto>),
     retry: 2,
     retryDelay: 1500,
   });

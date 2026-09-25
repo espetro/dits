@@ -28,6 +28,8 @@ export interface SpeechDriver {
   onReconnecting: (attempt: number) => void;
   /** rebuild the transport and inputs after a failure; model handles stay cached */
   restart(): Promise<void>;
+  /** typed composer input — same turn pipeline as speech on both drivers */
+  sendText(text: string): void;
   /** driver-specific state machine events, surfaced for the route UI */
   events: {
     onSpeechStart?: () => void;
@@ -36,6 +38,8 @@ export interface SpeechDriver {
     onAgentTurn?: (turn: Turn) => void;
     onAgentStart?: () => void;
     onAgentDone?: () => void;
+    /** server pushed a current-question update (update_question tool) */
+    onQuestion?: (question: { text: string; hints: string[] }) => void;
   };
 }
 
@@ -258,10 +262,17 @@ export class ServerVoiceDriver implements SpeechDriver {
         this.player.write(decodeB64(msg.pcm));
         if ((msg as TtsMessage).final && !this.agentSpeaking) this.events.onAgentDone?.();
         break;
+      case "question":
+        this.events.onQuestion?.({ text: msg.question, hints: msg.hints });
+        break;
       case "error":
         this.onError(msg.message);
         break;
     }
+  }
+
+  sendText(text: string): void {
+    this.sendJson({ t: "text", text });
   }
 
   setMuted(muted: boolean): void {

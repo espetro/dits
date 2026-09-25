@@ -1,8 +1,9 @@
 import * as React from "react";
 import { createActor } from "xstate";
 import type { Turn } from "@di/shared/session";
-import { pushClientTurn } from "../agent/session-store";
+import { appendTurn } from "../agent/session-store";
 import { appendClientTurn } from "../opfs-store";
+import { $question } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { createDriver } from "./index";
 import { voiceMachine } from "./machine";
@@ -16,9 +17,7 @@ export interface VoiceState {
   error: string | null;
   phase: string;
   muted: boolean;
-  /** browser-driver only: read a new agent turn aloud (no-op for server driver) */
-  speakAgentTurn(text: string): void;
-  /** browser-driver only: run a typed turn through the client agent (no-op for server driver) */
+  /** run a typed turn through the agent (WS message in server mode) */
   sendText(text: string): void;
   /** rebuild the driver after a voice error; success returns to connected */
   restart(): Promise<void>;
@@ -47,13 +46,8 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
   });
   const driverRef = React.useRef<SpeechDriver | null>(null);
   const actorRef = React.useRef<ReturnType<typeof createActor<typeof voiceMachine>> | null>(null);
-  const speak = React.useCallback((text: string) => {
-    const d = driverRef.current;
-    if (d instanceof BrowserVoiceDriver) d.speakAgentTurn(text);
-  }, []);
   const sendText = React.useCallback((text: string) => {
-    const d = driverRef.current;
-    if (d instanceof BrowserVoiceDriver) d.sendText(text);
+    driverRef.current?.sendText(text);
   }, []);
 
   React.useEffect(() => {
@@ -95,9 +89,11 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       // server driver: transcript display via turns polling instead (di
       // already persisted the turn server-side when it emitted this event).
       // browser driver: nothing else persists this turn, so do it here.
+      // Real seqs come from the store (last seq + 1), not from the driver's
+      // ad-hoc ids, so OPFS rows match what the server would have written.
       const onClientTurn = (turn: Turn) => {
-        pushClientTurn(turn);
-        void appendClientTurn(sessionId, turn);
+        const stored = appendTurn(sessionId, turn.speaker, turn.text, turn.source);
+        void appendClientTurn(sessionId, stored);
       };
       driver.events.onUserTurn = (turn: Turn) => {
         if (driver instanceof BrowserVoiceDriver) onClientTurn(turn);
@@ -105,6 +101,8 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       driver.events.onAgentTurn = (turn: Turn) => {
         if (driver instanceof BrowserVoiceDriver) onClientTurn(turn);
       };
+      // server driver: question.updated tool calls arrive as ws messages
+      driver.events.onQuestion = (q) => $question.set({ text: q.text, hints: q.hints });
       driver.events.onAgentStart = () => actor.send({ type: "AGENT_START" });
       driver.events.onAgentDone = () => actor.send({ type: "AGENT_DONE" });
 
@@ -174,5 +172,5 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
     }
   }, []);
 
-  return { ...state, speakAgentTurn: speak, sendText, restart };
+  return { ...state, sendText, restart };
 }

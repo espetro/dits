@@ -7,7 +7,7 @@ import { FormattedMessage } from "react-intl";
 import { getSession, getTurns } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
 import { $effectiveRuntime } from "../../lib/runtime";
-import { getClientSession, getClientTurns } from "../../lib/opfs-store";
+import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
 import { openSettings } from "../../components/settings-dialog";
 import { Button } from "../../components/vendor/button";
 
@@ -63,6 +63,12 @@ function Finish() {
   });
   const session = clientOnly ? clientSession : serverSession;
   const turns = clientOnly ? clientTurns : serverTurns;
+
+  // landing here means the interview ended; server mode transitions via the
+  // API, client-only marks it here (p0.9).
+  useEffect(() => {
+    if (clientOnly) void setClientSessionStatus(id, "finished").catch(() => undefined);
+  }, [id, clientOnly]);
 
   function downloadMarkdown() {
     if (!session) return;
