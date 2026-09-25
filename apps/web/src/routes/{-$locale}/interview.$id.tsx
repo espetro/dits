@@ -60,17 +60,18 @@ export const Route = createFileRoute("/{-$locale}/interview/$id")({
   component: Interview,
 });
 
-function useCountdown(durationMin: number) {
+/** Countdown anchored to session.created_at — a reload keeps real elapsed time. */
+function useCountdown(durationMin: number, createdAt?: string) {
+  const mountAt = useRef(Date.now());
   const [secsLeft, setSecsLeft] = useState(durationMin * 60);
-  const startedRef = useRef(Date.now());
   useEffect(() => {
     const t = setInterval(() => {
-      setSecsLeft(
-        Math.max(0, durationMin * 60 - Math.floor((Date.now() - startedRef.current) / 1000)),
-      );
+      const parsed = createdAt ? Date.parse(createdAt) : NaN;
+      const start = Number.isNaN(parsed) ? mountAt.current : parsed;
+      setSecsLeft(Math.max(0, durationMin * 60 - Math.floor((Date.now() - start) / 1000)));
     }, 1000);
     return () => clearInterval(t);
-  }, [durationMin]);
+  }, [durationMin, createdAt]);
   return secsLeft;
 }
 
@@ -158,6 +159,12 @@ function Interview() {
   const editor = useStore($editorBuffer);
   const whiteboard = useStore($whiteboard);
   const voice = useVoice(id, muted);
+  // p1.14 voice->text degradation: a voice failure (mic denied, unsupported
+  // browser, ws down) immediately offers the type-instead path instead of
+  // waiting the 15s slow-start grace. Typed turns persist the same way.
+  useEffect(() => {
+    if (voice.status === "error") setShowSlowHint(true);
+  }, [voice.status]);
   const statusKey =
     voice.status === "error"
       ? "interview.voiceError"
@@ -219,7 +226,7 @@ function Interview() {
     return () => clearTimeout(t);
   }, [id, editor, whiteboard, clientOnly]);
 
-  const secsLeft = useCountdown(session?.duration_min ?? 30);
+  const secsLeft = useCountdown(session?.duration_min ?? 30, session?.created_at);
   const mm = String(Math.floor(secsLeft / 60)).padStart(2, "0");
   const ss = String(secsLeft % 60).padStart(2, "0");
   const wrapping = secsLeft <= 120;

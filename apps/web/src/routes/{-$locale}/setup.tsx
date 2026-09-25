@@ -3,9 +3,10 @@ import { useLocaleNav, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useStore } from "@nanostores/react";
+import { useQuery } from "@tanstack/react-query";
 import { $draft } from "../../stores/session";
 import { $micDeviceId } from "../../stores/devices";
-import { createSession, uploadDocuments } from "../../lib/api";
+import { createSession, listSessions, uploadDocuments } from "../../lib/api";
 import { MicSelector } from "../../components/vendor/mic-selector";
 import { Button } from "../../components/vendor/button";
 import { Textarea } from "../../components/vendor/textarea";
@@ -18,7 +19,7 @@ import {
   probeServer,
 } from "../../lib/runtime";
 import { openSettings } from "../../components/settings-dialog";
-import { createClientSession } from "../../lib/opfs-store";
+import { createClientSession, listClientSessions } from "../../lib/opfs-store";
 import { resetClientSession } from "../../lib/agent/session-store";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
@@ -59,7 +60,16 @@ function Setup() {
   const draft = useStore($draft);
   const micDeviceId = useStore($micDeviceId);
   const effectiveRuntime = useStore($effectiveRuntime);
+  const clientOnly = effectiveRuntime !== "server";
   const profile = useStore($providerProfile);
+  // coach unlock gate (p1): available once any session reached `reported`.
+  const { data: hasReport } = useQuery({
+    queryKey: ["has-report", effectiveRuntime],
+    queryFn: async () =>
+      (clientOnly ? await listClientSessions() : await listSessions()).some(
+        (s) => s.status === "reported",
+      ),
+  });
   React.useEffect(() => {
     ensureRuntimeProbe();
     // A stale persisted "reachable" value would skip the probe and send the
@@ -102,7 +112,7 @@ function Setup() {
   async function start(validate: boolean) {
     // guard tied to the runtime FSM: custom/in-browser sessions run the
     // agent loop client-side, which is impossible without an LLM endpoint
-    if (effectiveRuntime !== "server" && !profile?.llm) {
+    if (clientOnly && !profile?.llm) {
       toast.error(intl.formatMessage({ id: "setup.needsProviderToast" }), {
         description: intl.formatMessage({ id: "setup.needsProvider" }),
       });
@@ -114,14 +124,17 @@ function Setup() {
     try {
       const title =
         draft.title || PRESETS.find((p) => draft.prompt === p.prompt)?.id || "practice session";
-      if (effectiveRuntime !== "server") {
+      if (clientOnly) {
         resetClientSession();
         const session = await createClientSession({
           title,
           mode: draft.mode,
           duration_min: draft.durationMin,
         });
-        // no ingestion pipeline client-side: uploaded files are dropped.
+        // no ingestion pipeline client-side: say so rather than dropping silently.
+        if (files.length > 0) {
+          toast.error(intl.formatMessage({ id: "setup.filesServerOnly" }));
+        }
         navigate({
           href: withLocale(
             locale,
@@ -232,23 +245,29 @@ function Setup() {
                   e.target.value = "";
                 }}
               />
-              <div
-                role="button"
-                tabIndex={0}
-                aria-label={intl.formatMessage({ id: "setup.dropHint" })}
-                onClick={() => fileInput.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") fileInput.current?.click();
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  addFiles(e.dataTransfer.files);
-                }}
-                className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft"
-              >
-                <FormattedMessage id="setup.dropHint" />
-              </div>
+              {clientOnly ? (
+                <div className="mt-3 rounded-card border border-dashed border-espresso-faint/40 bg-white/40 p-6 text-center text-sm text-espresso-soft md:p-8">
+                  <FormattedMessage id="setup.filesServerOnly" />
+                </div>
+              ) : (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={intl.formatMessage({ id: "setup.dropHint" })}
+                  onClick={() => fileInput.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") fileInput.current?.click();
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    addFiles(e.dataTransfer.files);
+                  }}
+                  className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8"
+                >
+                  <FormattedMessage id="setup.dropHint" />
+                </div>
+              )}
               {files.length > 0 && (
                 <ul className="mt-3 space-y-1.5">
                   {files.map((f, i) => (
@@ -342,17 +361,22 @@ function Setup() {
                   </ToggleGroupItem>
                   <ToggleGroupItem
                     value="coach"
-                    disabled
-                    title={intl.formatMessage({ id: "setup.coachHint" })}
-                    className="flex-1 cursor-not-allowed rounded-full bg-white/50 py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline animate-pulse data-[state=on]:bg-white/50 data-[state=on]:text-espresso-soft data-[state=on]:hover:bg-white/50"
+                    disabled={!hasReport}
+                    title={hasReport ? undefined : intl.formatMessage({ id: "setup.coachHint" })}
+                    className="flex-1 rounded-full bg-white py-2 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-white/50 disabled:animate-pulse data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso"
                   >
                     <FormattedMessage id="setup.mode.coach" />
+                    {!hasReport && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide opacity-60">
+                        <FormattedMessage id="setup.coachHint" />
+                      </span>
+                    )}
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
             </section>
 
-            {effectiveRuntime !== "server" && !profile?.llm && (
+            {clientOnly && !profile?.llm && (
               <section
                 className="rise-in mt-10 rounded-card bg-white/70 p-4 ring-1 ring-hairline"
                 style={{ "--rise-delay": "300ms" } as React.CSSProperties}

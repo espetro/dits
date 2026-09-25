@@ -29,7 +29,7 @@
 |  +-----------------------------------------------------------+   |
 |                                                                  |
 |         +--------------------------------------+                 |
-|         |   practice weak areas ->             |  (coach, M5)    |
+|         |   practice weak areas ->             |  seeds coach    |
 |         +--------------------------------------+                 |
 +------------------------------------------------------------------+
 ```
@@ -40,7 +40,9 @@
 - Competency list: name + bar + score; under each, verbatim evidence quotes tagged `worked / improve / drop` with turn references. Quotes are verbatim transcript text (hallucination guard: every claim carries a quote that exists in the transcript).
 - Model answers section: question text + reference answer.
 - **Export**: downloads the report JSON (already persisted; the report itself is produced by `POST /v1/sessions/[id]/report`).
-- **Practice weak areas ->** coach CTA seeds a coach session (M5; rendered disabled with tooltip in M1).
+- **Practice weak areas ->** enabled coach CTA: seeds `$draft` with
+  `mode: coach` and a report.coachSeed prompt naming the weakest competency,
+  then navigates to `/setup` where the user confirms and starts it.
 - Scoring is async (ScoringPoll pattern): the report query fires `POST /v1/sessions/[id]/report`, which generates the report on first call (or returns the stored one — idempotent) and persists it with status `reported`.
 - **Loading state**: spinner with `report.scoring` copy; after 15s swap in
   `report.scoringSlow` ("this can take a minute on free models") so slow

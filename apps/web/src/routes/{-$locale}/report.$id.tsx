@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLocale, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
@@ -14,6 +14,7 @@ import {
   setClientSessionStatus,
 } from "../../lib/opfs-store";
 import { generateReport } from "../../lib/agent/report-generator";
+import { $draft } from "../../stores/session";
 import { Button } from "../../components/vendor/button";
 import { Badge } from "../../components/vendor/badge";
 import { toast } from "sonner";
@@ -78,6 +79,7 @@ function Report() {
     enabled: clientOnly,
   });
   const session = clientOnly ? clientSession : serverSession;
+  const navigate = useNavigate();
   const {
     data: report,
     isLoading,
@@ -106,6 +108,22 @@ function Report() {
     const t = setTimeout(() => setSlowLoad(true), 15_000);
     return () => clearTimeout(t);
   }, [isLoading]);
+
+  function startCoach() {
+    // weakest competency seeds the coach prompt; the session itself is a
+    // normal coach-mode session the user confirms on /setup.
+    const weakest = report?.competencies.slice().sort((a, b) => a.score - b.score)[0];
+    $draft.set({
+      ...$draft.get(),
+      mode: "coach",
+      prompt: intl.formatMessage(
+        { id: "report.coachSeed" },
+        { name: weakest?.name ?? "your weakest areas" },
+      ),
+      title: "",
+    });
+    navigate({ href: withLocale(locale, "/setup") });
+  }
 
   if (isLoading) {
     return (
@@ -251,10 +269,9 @@ function Report() {
 
         <div className="mt-12 flex justify-center">
           <Button
-            disabled
+            onClick={startCoach}
             title={intl.formatMessage({ id: "report.practiceHint" })}
-            aria-disabled
-            className="group max-w-full rounded-full bg-white/60 px-7 py-3.5 h-auto font-display font-semibold text-espresso-soft ring-1 ring-hairline animate-pulse"
+            className="group max-w-full rounded-full bg-white/60 px-7 py-3.5 h-auto font-display font-semibold text-espresso-soft ring-1 ring-hairline transition-fluid hover:text-espresso hover:ring-persimmon/50"
           >
             <FormattedMessage id="report.practiceWeak" />
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-espresso/5">
