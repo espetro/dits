@@ -3,6 +3,7 @@ import { createActor } from "xstate";
 import type { Turn } from "@di/shared/session";
 import { appendTurn } from "../agent/session-store";
 import { appendClientTurn } from "../opfs-store";
+import { $providerProfile } from "../runtime";
 import { $question } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { createDriver } from "./index";
@@ -46,6 +47,8 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
   });
   const driverRef = React.useRef<SpeechDriver | null>(null);
   const actorRef = React.useRef<ReturnType<typeof createActor<typeof voiceMachine>> | null>(null);
+  // bootNonce bumps force a full driver teardown + rebuild (profile change).
+  const [bootNonce, setBootNonce] = React.useState(0);
   const sendText = React.useCallback((text: string) => {
     driverRef.current?.sendText(text);
   }, []);
@@ -149,7 +152,21 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
     };
     // sessionId fixed per mount; muted handled by the follow-up effect below
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, bootNonce]);
+
+  // p1: a saved provider profile rebuilds the client-side agent — the driver
+  // must re-init, not keep the stale llm/stt/tts it was constructed with.
+  // Only the browser driver consumes the profile; the server driver reads
+  // server-side config, so a profile edit is a no-op there.
+  React.useEffect(() => {
+    let prev = JSON.stringify($providerProfile.get());
+    return $providerProfile.listen((profile) => {
+      const next = JSON.stringify(profile);
+      if (next === prev) return;
+      prev = next;
+      if (driverRef.current instanceof BrowserVoiceDriver) setBootNonce((n) => n + 1);
+    });
+  }, []);
 
   React.useEffect(() => {
     driverRef.current?.setMuted(muted);

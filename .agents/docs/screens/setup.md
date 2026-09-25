@@ -60,7 +60,10 @@
   persimmon hover with soft shadow lift, active scale 0.97 (replaces the old
   oversized "validate & start →" text-arrow pill).
 - Link **proceed without validation** routes straight to `/interview/[id]`.
-- Coach mode button is disabled but animated, with an explanatory tooltip ("available after your first report") until a report exists.
+- Coach mode button: gated on any session reaching status `reported`
+  (`listSessions` in server mode, `listClientSessions` in browser mode).
+  Until then it renders disabled + pulsing with the setup.coachHint tooltip
+  and an inline hint label.
 
 - The provider profile form and the runtime selector moved out of setup into
   the settings dialog's AI provider pane (B4). When the effective runtime is
@@ -78,8 +81,10 @@
 - **Custom runtime** (ADR-0003, `$effectiveRuntime !== "server"`):
   the start action creates the session via `apps/web/src/lib/opfs-store.ts#createClientSession`
   instead of `POST /v1/sessions`, and skips `uploadDocuments` entirely — no
-  ingestion pipeline exists client-side, so files picked in this mode are
-  accepted by the widget but never sent anywhere. It also calls
+  ingestion pipeline exists client-side. The FILES section renders a muted
+  setup.filesServerOnly hint box instead of the dropzone in this mode; if
+  files were picked before switching to a client runtime, `start()` raises a
+  setup.filesServerOnly toast instead of dropping them silently. It also calls
   `resetClientSession()` first so a new session never inherits turns/question
   state left over from a previous client-only interview in the same tab.
 

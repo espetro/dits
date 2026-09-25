@@ -311,6 +311,14 @@ function AiProviderPane() {
     return () => clearTimeout(timer);
   }, [drafts]);
 
+  // p1 truth-telling: an enabled-but-incomplete section never persisted — say
+  // so instead of silently dropping it (buildProfile skips it).
+  const isUrl = (s: string): boolean => URL.canParse(s);
+  const sectionIncomplete =
+    draft.enabled &&
+    (tab === "llm" ? draft.llmMode === "remote" : true) &&
+    (!draft.baseUrl || !draft.apiKey || !draft.model || !isUrl(draft.baseUrl));
+
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
     // In-browser mode has no endpoint fields, so `enabled` (which means
@@ -549,6 +557,11 @@ function AiProviderPane() {
                     <FormattedMessage id="settings.customEndpoint" />
                   </Label>
                 </RadioGroup>
+                {sectionIncomplete && (
+                  <p className="text-xs font-medium text-persimmon-deep">
+                    <FormattedMessage id="settings.incomplete" />
+                  </p>
+                )}
                 {tab === "llm" && draft.enabled && draft.llmMode === "remote" && (
                   <div className="space-y-1.5">
                     <span className={fieldClass}>

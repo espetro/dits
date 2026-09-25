@@ -136,3 +136,9 @@ button in its own block, inset card with a centered max-w-xl column.
   (role=note) replaces the old Save button. An incomplete LLM draft
   never overwrites the last valid persisted profile, so the session
   stays startable mid-edit.
+- Truth-telling: an enabled-but-incomplete section (missing or invalid
+  baseUrl / apiKey / model) is never persisted — a settings.incomplete
+  warning line renders under the mode picker so a skipped section is
+  never silent. Saving a profile rebuilds the browser voice driver
+  (`useVoice` re-boots on `$providerProfile` change) so the new
+  endpoint takes effect in the live session.
