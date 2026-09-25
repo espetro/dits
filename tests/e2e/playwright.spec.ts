@@ -83,6 +83,129 @@ test.describe("text mode (di server)", () => {
     expect(stored.competencies[0].evidence[0].quote).toBe("shard by user id");
   });
 
+  // Full-loop coverage (specs/e2e-full-loop.spec.md): exercises the real
+  // transport + generator rather than the api-only round-trips above.
+
+  const wsUrl = (id: string) =>
+    `${(process.env.DI_URL ?? "http://localhost:3000").replace(/^http/, "ws")}/v1/sessions/${id}/voice`;
+
+  interface VoiceMsg {
+    t: string;
+    on?: boolean;
+  }
+
+  // Collect ws JSON messages (binary tts frames skipped) until `until`
+  // matches; `onOpen` runs on connect (send a text turn, or nothing for the
+  // kickoff test). Fails after 12s so a silent loop surfaces as a timeout.
+  function collectVoice(
+    id: string,
+    onOpen: (ws: WebSocket) => void,
+    until: (m: VoiceMsg) => boolean,
+  ): Promise<VoiceMsg[]> {
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(wsUrl(id));
+      const messages: VoiceMsg[] = [];
+      const timer = setTimeout(() => {
+        ws.close();
+        reject(new Error(`voice ws timed out; got: ${JSON.stringify(messages)}`));
+      }, 12_000);
+      ws.onopen = () => onOpen(ws);
+      ws.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("voice ws error"));
+      };
+      ws.onmessage = (ev) => {
+        if (typeof ev.data !== "string") return;
+        const m = JSON.parse(ev.data) as VoiceMsg;
+        messages.push(m);
+        if (until(m)) {
+          clearTimeout(timer);
+          ws.close();
+          resolve(messages);
+        }
+      };
+    });
+  }
+
+  test("voice ws text turn reaches the agent and persists both sides", async ({ request }) => {
+    const create = await request.post("/v1/sessions", {
+      data: { title: "e2e ws", mode: "interview", duration_min: 15 },
+    });
+    const { id } = await create.json();
+
+    const messages = await collectVoice(
+      id,
+      (ws) => ws.send(JSON.stringify({ t: "text", text: "hello over ws" })),
+      // agent_transcript is emitted after agent_speaking off on the
+      // streaming path — it's the last turn signal, so wait on it.
+      (m) => m.t === "agent_transcript",
+    );
+    const types = messages.map((m) => m.t);
+    expect(types).toContain("user_transcript");
+    expect(types).toContain("agent_speaking");
+    expect(types).toContain("agent_transcript");
+
+    const res = await request.get(`/v1/sessions/${id}/turns`);
+    const turns = await res.json();
+    expect(turns).toContainEqual(
+      expect.objectContaining({ speaker: "user", text: "hello over ws", source: "text" }),
+    );
+    expect(turns).toContainEqual(expect.objectContaining({ speaker: "agent" }));
+  });
+
+  test("kickoff greets an idle session", async ({ request }) => {
+    const create = await request.post("/v1/sessions", {
+      data: { title: "e2e kickoff", mode: "interview", duration_min: 15 },
+    });
+    const { id } = await create.json();
+
+    // No input at all: the loop fires the synthetic kickoff turn itself after
+    // KICKOFF_DELAY_MS (5s) — an agent greeting arrives unprompted.
+    const messages = await collectVoice(
+      id,
+      () => undefined,
+      (m) => m.t === "agent_transcript",
+    );
+    expect(messages.map((m) => m.t)).toContain("agent_transcript");
+
+    const turns = await (await request.get(`/v1/sessions/${id}/turns`)).json();
+    expect(turns.some((t: { speaker: string }) => t.speaker === "agent")).toBe(true);
+  });
+
+  test("report is generated, not just stored", async ({ request }) => {
+    const create = await request.post("/v1/sessions", {
+      data: { title: "e2e report", mode: "interview", duration_min: 15 },
+    });
+    const { id } = await create.json();
+    await request.post(`/v1/sessions/${id}/turns`, {
+      data: {
+        id: crypto.randomUUID(),
+        seq: 0,
+        speaker: "user",
+        text: "five years of distributed systems",
+        created_at: new Date().toISOString(),
+        source: "text",
+      },
+    });
+
+    // Real generator path (generateReport -> mock provider echoes the fixture
+    // report), not a client-supplied PUT.
+    const gen = await request.post(`/v1/sessions/${id}/report`);
+    expect(gen.status()).toBe(201);
+    const report = await gen.json();
+    expect(report.session_id).toBe(id);
+    expect(report.overall_score).toBe(7.5);
+    expect(report.competencies[0].name).toBe("distributed systems");
+
+    const session = await (await request.get(`/v1/sessions/${id}`)).json();
+    expect(session.status).toBe("reported");
+
+    // Idempotent: a second POST returns the stored report, not a fresh call.
+    const again = await request.post(`/v1/sessions/${id}/report`);
+    expect(again.status()).toBe(200);
+    expect((await again.json()).generated_at).toBe(report.generated_at);
+  });
+
   test("tool state round-trips through the api", async ({ request }) => {
     const put = await request.put(`/v1/sessions/${sessionId}/tools`, {
       data: { editor: "def solve(): pass", whiteboard: '{"shapeCount":1}' },
@@ -109,6 +232,15 @@ test("spec md scenarios all have executed counterparts", () => {
   }
 });
 
+test("full-loop spec md scenarios all have executed counterparts", () => {
+  const md = readFileSync(new URL("./specs/e2e-full-loop.spec.md", import.meta.url), "utf8");
+  const headings = [...md.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
+  expect(headings.length).toBeGreaterThan(0);
+  for (const h of headings) {
+    expect(test.info().title, h).toBeTruthy();
+  }
+});
+
 // Client-only runtime (ADR-0003): no di server at all, so this drives a real
 // browser against the web dev server instead of `request`. The BYO
 // provider's /v1/chat/completions is mocked via page.route — this validates
@@ -125,6 +257,7 @@ test.describe("client-only runtime (no di server)", () => {
       baseUrl: "http://mock.local/v1",
       apiKey: "test-key",
       model: "mock-model",
+      mode: "remote",
     },
   };
 
@@ -204,9 +337,9 @@ test.describe("client-only runtime (no di server)", () => {
     await input.fill("hello from e2e");
     await input.press("Enter");
 
-    await expect(page.getByText("mock agent reply")).toBeVisible();
-    await expect(page.getByText("user · text")).toBeVisible();
-    await expect(page.getByText("agent · text")).toBeVisible();
+    await expect(page.getByText("mock agent reply").first()).toBeVisible();
+    await expect(page.getByText("user · text").first()).toBeVisible();
+    await expect(page.getByText("agent · text").first()).toBeVisible();
 
     const record = await readOpfsSession(page, id);
     expect(record.turns).toHaveLength(2);
@@ -232,13 +365,79 @@ test.describe("client-only runtime (no di server)", () => {
     await input.fill("this will fail");
     await input.press("Enter");
 
-    await expect(page.getByText("user · text")).toBeVisible();
+    await expect(page.getByText("user · text").first()).toBeVisible();
     // negative assertion: nothing else should ever show up, so poll briefly
     // instead of waiting on an event that (by design) never fires.
     await page.waitForTimeout(500);
     const record = await readOpfsSession(page, id);
     expect(record.turns).toHaveLength(1);
     expect(record.turns[0].speaker).toBe("user");
+  });
+
+  test("finish builds the report and lands on /report/:id", async ({ page }) => {
+    await page.route("**/v1/chat/completions", async (route) => {
+      const body = route.request().postData() ?? "";
+      // Report prompts carry the `overall_score` rubric and a `session_id:`
+      // line (buildReportPrompt): answer with a schema-valid report via the
+      // non-streaming shape doGenerate uses.
+      if (body.includes("overall_score")) {
+        const sid = /session_id:\s*([0-9a-f-]{36})/i.exec(body)?.[1] ?? crypto.randomUUID();
+        const report = {
+          session_id: sid,
+          overall_score: 8,
+          coverage_pct: 70,
+          competencies: [
+            {
+              name: "mock competency",
+              score: 8,
+              evidence: [{ quote: "hello from e2e", turn_seq: 0, verdict: "worked" }],
+            },
+          ],
+          model_answers: [],
+          generated_at: new Date().toISOString(),
+        };
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: "chatcmpl-mock",
+            object: "chat.completion",
+            created: 0,
+            model: "mock-llm",
+            choices: [
+              {
+                index: 0,
+                message: { role: "assistant", content: JSON.stringify(report) },
+                finish_reason: "stop",
+              },
+            ],
+          }),
+        });
+        return;
+      }
+      const chunk = { choices: [{ delta: { content: "mock agent reply" } }] };
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        body: `data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`,
+      });
+    });
+    await page.route("**/v1/audio/speech", (route) =>
+      route.fulfill({ status: 500, body: "no tts in e2e" }),
+    );
+
+    const id = await startClientOnlySession(page);
+    await page.getByRole("button", { name: "type", exact: true }).click();
+    const input = page.getByPlaceholder("talk or type…");
+    await input.fill("hello from e2e");
+    await input.press("Enter");
+    await expect(page.getByText("mock agent reply").first()).toBeVisible();
+
+    // finish auto-builds the report on mount and advances to /report/[id]
+    // when it lands — the user never sees a decision screen here (p3).
+    await page.goto(`${WEB_URL}/finish/${id}`);
+    await expect(page).toHaveURL(/\/report\//);
+    await expect(page.getByText("mock competency")).toBeVisible();
   });
 
   test("client-only spec md scenarios all have executed counterparts", () => {
