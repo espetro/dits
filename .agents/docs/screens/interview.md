@@ -63,7 +63,7 @@ The single zone that carries the agent's presence, always visible:
 
 - **Voice orb** (`apps/web/src/components/voice-orb.tsx`, ElevenLabs Orb /
   three.js, css-pulse fallback in client-only mode) centered, `size-20
-  md:size-24`. Driven by `$micAttack`/`$agentAttack` loudness taps
+md:size-24`. Driven by `$micAttack`/`$agentAttack` loudness taps
   (`lib/voice/levels.ts`) with synthetic oscillation fallback. Phase mapping:
   speaking→talking, listening→listening, thinking→thinking, else null.
   **The orb leaves the transcript rail**: it renders in AgentStage, not the
@@ -93,7 +93,7 @@ The single zone that carries the agent's presence, always visible:
   (`ToolStateSchema` widens to a record).
 - Registry (`apps/web/src/lib/tools/registry.ts`) — one `ToolSpec` per tool:
   `id`, i18n `labelKey`, lucide `icon`, lazy `component`, `agentAccess:
-  "read" | "write" | "read-write"`, `platforms: "all" | "server-only"`.
+"read" | "write" | "read-write"`, `platforms: "all" | "server-only"`.
   `agentAccess` controls which agent tools the spec exposes (`read_*` /
   `update_*` generation is per-spec), `platforms` hides heavy tools
   (whiteboard stays `server-only` while tldraw is bundled).
@@ -119,7 +119,7 @@ The single zone that carries the agent's presence, always visible:
 ### ControlBar (new, replaces bottom-left mute/end buttons)
 
 - Sticky bottom bar on **every** viewport, `padding-bottom:
-  env(safe-area-inset-bottom)`, all targets `>= 44px`.
+env(safe-area-inset-bottom)`, all targets `>= 44px`.
 - Left: **mute** toggle (`{t:"mute",muted}` on the wire, mic track kept).
 - Center: **type** — desktop focuses the rail input (opens the rail if
   collapsed), mobile opens the transcript Sheet with input focused.
