@@ -190,5 +190,8 @@
   "runtime.unreachable": "サーバーにできません — {fallback} を",
   "settings.incomplete": "ですがです — のフィールドをするか、オフにしてみのをしてください",
   "setup.filesServerOnly": "ドキュメントのアップロードにはサーバーランタイムがです — ブラウザモードではファイルはされません",
-  "report.coachSeed": "{name} についてコーチしてください。をったセッションをい、なをりげてください。"
+  "report.coachSeed": "{name} についてコーチしてください。をったセッションをい、なをりげてください。",
+  "settings.demoLlm.fill": "デモエンドポイントを — キー",
+  "settings.demoLlm.badge": "デモ",
+  "settings.demoLlm.upsell": "の zero-conf がですか？おらせください"
 }

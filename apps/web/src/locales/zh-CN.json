@@ -190,5 +190,8 @@
   "runtime.unreachable": " —  {fallback}",
   "settings.incomplete": " — ，",
   "setup.filesServerOnly": " — ",
-  "report.coachSeed": " {name} 。，。"
+  "report.coachSeed": " {name} 。，。",
+  "settings.demoLlm.fill": "使用托管演示端点 — 无需密钥",
+  "settings.demoLlm.badge": "演示",
+  "settings.demoLlm.upsell": "想要无限制的 zero-conf？告诉我们"
 }

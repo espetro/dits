@@ -190,5 +190,8 @@
   "runtime.unreachable": "서버에 연결할 수 없음 — {fallback} 사용 중",
   "settings.incomplete": "활성화됐지만 불완전함 — 아래 필드를 채우거나 꺼서 저장된 설정을 유지하세요",
   "setup.filesServerOnly": "문서 업로드에는 서버 런타임이 필요합니다 — 브라우저 모드에서는 파일이 저장되지 않습니다",
-  "report.coachSeed": "{name}에 대해 코칭해 줘. 집중 연습 세션을 진행하고 구체적인 내용을 파고들어 줘."
+  "report.coachSeed": "{name}에 대해 코칭해 줘. 집중 연습 세션을 진행하고 구체적인 내용을 파고들어 줘.",
+  "settings.demoLlm.fill": "관리형 데모 엔드포인트 사용 — 키 불필요",
+  "settings.demoLlm.badge": "데모",
+  "settings.demoLlm.upsell": "무제한 zero-conf를 원하시면 알려주세요"
 }
