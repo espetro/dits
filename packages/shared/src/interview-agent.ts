@@ -54,6 +54,18 @@ export interface UpdateQuestionArgs {
   hints?: string[];
 }
 
+/**
+ * Synthetic user turn used to open the interview when the candidate has not
+ * spoken yet. Phrased as a direct instruction so the model greets and asks
+ * the first question rather than commenting on the parenthetical. Shared by
+ * the server VoiceLoop kickoff and the browser driver's kickoff timer.
+ */
+export const KICKOFF_UTTERANCE =
+  "(candidate has joined — begin the interview now: greet them briefly and ask your first question)";
+
+/** Grace period before a kickoff turn fires when no user input has arrived. */
+export const KICKOFF_DELAY_MS = 5_000;
+
 export function buildPrompt(ctx: SessionContext): string {
   const lines: string[] = [
     "You are a live interview agent conducting a spoken interview with a candidate.",

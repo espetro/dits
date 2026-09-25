@@ -44,6 +44,13 @@ export const InterruptMessageSchema = v.object({
 });
 export type InterruptMessage = v.InferOutput<typeof InterruptMessageSchema>;
 
+/** Typed input from the composer — same turn pipeline as speech, minus STT. */
+export const TextMessageSchema = v.object({
+  t: v.literal("text"),
+  text: v.pipe(v.string(), v.minLength(1)),
+});
+export type TextMessage = v.InferOutput<typeof TextMessageSchema>;
+
 export const AgentSpeakingMessageSchema = v.object({
   t: v.literal("agent_speaking"),
   on: v.boolean(),
@@ -100,12 +107,21 @@ export const MetricsMessageSchema = v.object({
 });
 export type MetricsMessage = v.InferOutput<typeof MetricsMessageSchema>;
 
+/** Server -> client current-question update (mirrors the update_question tool). */
+export const QuestionMessageSchema = v.object({
+  t: v.literal("question"),
+  question: v.string(),
+  hints: v.array(v.string()),
+});
+export type QuestionMessage = v.InferOutput<typeof QuestionMessageSchema>;
+
 /** Client -> server WS messages (control plane; audio rides binary frames). */
 export const VoiceClientMessageSchema = v.union([
   AudioFrameMessageSchema,
   UtteranceEndMessageSchema,
   MuteMessageSchema,
   InterruptMessageSchema,
+  TextMessageSchema,
 ]);
 export type VoiceClientMessage = v.InferOutput<typeof VoiceClientMessageSchema>;
 
@@ -117,6 +133,7 @@ export const VoiceServerMessageSchema = v.union([
   TtsMessageSchema,
   ErrorMessageSchema,
   MetricsMessageSchema,
+  QuestionMessageSchema,
 ]);
 export type VoiceServerMessage = v.InferOutput<typeof VoiceServerMessageSchema>;
 

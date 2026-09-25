@@ -90,3 +90,107 @@ describe("test mode smoke route", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("POST /sessions/:id/report", () => {
+  function reportFor(id: string) {
+    return {
+      session_id: id,
+      overall_score: 7,
+      coverage_pct: 60,
+      competencies: [
+        {
+          name: "clarity",
+          score: 7,
+          evidence: [{ quote: "typed question", turn_seq: 0, verdict: "worked" }],
+        },
+      ],
+      model_answers: [],
+      generated_at: new Date().toISOString(),
+    };
+  }
+
+  async function makeReportApp() {
+    const db = createDatabase(":memory:");
+    await migrate(db);
+    const app = new Hono();
+    app.route(
+      "/v1",
+      apiRoutes(db, {
+        testMode: false,
+        reportLlm: {
+          chat: async () => ({ content: "see below", toolCalls: [] }),
+        },
+      }),
+    );
+    return { app, db };
+  }
+
+  it("generates a report via the llm and returns it idempotently", async () => {
+    const db = createDatabase(":memory:");
+    await migrate(db);
+    const app = new Hono();
+    let calls = 0;
+    app.route(
+      "/v1",
+      apiRoutes(db, {
+        testMode: false,
+        reportLlm: {
+          chat: async () => {
+            calls++;
+            const sessions = await db.selectFrom("sessions").selectAll().execute();
+            return {
+              content: JSON.stringify(reportFor(sessions[0]!.id)),
+              toolCalls: [],
+            };
+          },
+        },
+      }),
+    );
+    const id = await makeSession(app);
+    await app.request(`/v1/sessions/${id}/turns`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        id: crypto.randomUUID(),
+        seq: 0,
+        speaker: "user",
+        text: "typed question",
+        created_at: new Date().toISOString(),
+        source: "text",
+      }),
+    });
+
+    const res = await app.request(`/v1/sessions/${id}/report`, { method: "POST" });
+    expect(res.status).toBe(201);
+    const report = (await res.json()) as { overall_score: number; session_id: string };
+    expect(report.overall_score).toBe(7);
+    expect(report.session_id).toBe(id);
+    expect(calls).toBe(1);
+
+    // second call returns the stored report without hitting the llm
+    const again = await app.request(`/v1/sessions/${id}/report`, { method: "POST" });
+    expect(again.status).toBe(200);
+    expect(calls).toBe(1);
+    const session = await db
+      .selectFrom("sessions")
+      .select("status")
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+    expect(session.status).toBe("reported");
+  });
+
+  it("503s when no report llm is configured", async () => {
+    const app = await makeApp();
+    const id = await makeSession(app);
+    const res = await app.request(`/v1/sessions/${id}/report`, { method: "POST" });
+    expect(res.status).toBe(503);
+  });
+
+  it("404s for unknown sessions", async () => {
+    const { app } = await makeReportApp();
+    const res = await app.request(`/v1/sessions/${crypto.randomUUID()}/report`, {
+      method: "POST",
+    });
+    expect(res.status).toBe(404);
+  });
+});
