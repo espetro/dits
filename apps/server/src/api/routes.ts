@@ -10,6 +10,7 @@ import {
   SessionSchema,
   ToolStateSchema,
   TurnSchema,
+  UpdateSessionRequestSchema,
 } from "@di/shared";
 import { vValidator } from "@hono/valibot-validator";
 import type { Db } from "../store/db";
@@ -104,6 +105,30 @@ export function apiRoutes(
       .where("id", "=", c.req.param("id"))
       .executeTakeFirst();
     if (!row) return c.json({ error: "not found" }, 404);
+    return c.json(
+      v.parse(SessionSchema, {
+        ...row,
+        plan: row.plan ?? undefined,
+        prompt: row.prompt ?? undefined,
+        tools: parseSessionTools(row.tools),
+      }),
+    );
+  });
+
+  api.patch("/sessions/:id", vValidator("json", UpdateSessionRequestSchema), async (c) => {
+    const id = c.req.param("id");
+    const { status } = c.req.valid("json");
+    const res = await db
+      .updateTable("sessions")
+      .set({ status })
+      .where("id", "=", id)
+      .executeTakeFirst();
+    if (Number(res.numUpdatedRows) === 0) return c.json({ error: "not found" }, 404);
+    const row = await db
+      .selectFrom("sessions")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
     return c.json(
       v.parse(SessionSchema, {
         ...row,

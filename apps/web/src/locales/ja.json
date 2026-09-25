@@ -61,7 +61,6 @@
   "finish.getTranscript": "transcriptを取得",
   "finish.moreFormats": "他のtranscript形式",
   "finish.downloadJson": "JSONでダウンロード",
-  "finish.generateReport": "レポートを生成",
   "finish.discard": "破棄",
   "report.scoring": "セッションを採点中…",
   "report.scoringSlow": "無料モデルでは1分ほどかかることがあります。",
@@ -239,5 +238,9 @@
   "setup.difficulty.easy": "かんたん",
   "setup.difficulty.medium": "ふつう",
   "setup.difficulty.hard": "むずかしい",
-  "setup.language": "言語"
+  "setup.language": "言語",
+  "finish.building": "レポートを作成しています",
+  "finish.buildFailed": "レポートを作成できませんでした — 文字起こしは保存されています",
+  "finish.tryAgain": "再試行",
+  "finish.openReport": "レポートを開く"
 }

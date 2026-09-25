@@ -61,7 +61,6 @@
   "finish.getTranscript": "获取 transcript",
   "finish.moreFormats": "更多 transcript 格式",
   "finish.downloadJson": "下载为 JSON",
-  "finish.generateReport": "生成报告",
   "finish.discard": "丢弃",
   "report.scoring": "正在为你的会话评分…",
   "report.scoringSlow": "使用免费模型时可能需要一分钟。",
@@ -239,5 +238,9 @@
   "setup.difficulty.easy": "简单",
   "setup.difficulty.medium": "中等",
   "setup.difficulty.hard": "困难",
-  "setup.language": "语言"
+  "setup.language": "语言",
+  "finish.building": "正在生成报告",
+  "finish.buildFailed": "报告生成失败 — 文字记录已保存",
+  "finish.tryAgain": "重试",
+  "finish.openReport": "打开报告"
 }
