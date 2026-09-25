@@ -94,7 +94,7 @@ exists.
 
 ## Static deploy (Cloudflare Pages)
 
-The static bundle (`apps/web/dist/client` after `cd web && bun run build`) is a
+The static bundle (`apps/web/dist/client` after `cd apps/web && bun run build`) is a
 plain SPA — no CF Worker, no server code — so `client-only` mode is the only
 mode a static deploy can offer (there is no `di` binary to reach, so
 `$effectiveRuntime` always resolves to `client-only` per the probe logic in
@@ -103,7 +103,7 @@ mode a static deploy can offer (there is no `di` binary to reach, so
 - **Build output**: `apps/web/dist/client`, one prerendered `index.html` per
   locale directory plus a root fallback. Point the Pages project's build
   output directory at `apps/web/dist/client`.
-- **Build command**: `cd web && bun run build` (bun, not npm/pnpm — see root
+- **Build command**: `cd apps/web && bun run build` (bun, not npm/pnpm — see root
   `AGENTS.md` package-manager rule).
 - **No secrets to configure**: BYO provider `baseUrl`/`apiKey` are entered by
   the end user at runtime (`$providerProfile`, persisted client-side) and
