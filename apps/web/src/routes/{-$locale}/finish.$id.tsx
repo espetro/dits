@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLocale, withLocale } from "../../lib/locale-href";
 import { useQuery } from "@tanstack/react-query";
-import { useStore } from "@nanostores/react";
+import { useHydrated, useSsrStore } from "../../lib/ssr";
 import { FormattedMessage } from "react-intl";
-import { getSession, getTurns } from "../../lib/api";
+import { getSession, getTurns, updateSessionStatus } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
 import { $effectiveRuntime } from "../../lib/runtime";
+import { ensureReport } from "../../lib/report";
 import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
 import { openSettings } from "../../components/settings-dialog";
 import { Button } from "../../components/vendor/button";
@@ -31,6 +32,8 @@ function download(filename: string, blob: Blob) {
   URL.revokeObjectURL(a.href);
 }
 
+type BuildState = "building" | "done" | "failed";
+
 export const Route = createFileRoute("/{-$locale}/finish/$id")({
   component: Finish,
 });
@@ -39,7 +42,8 @@ function Finish() {
   const { id } = Route.useParams();
   const locale = useLocale();
   const navigate = useNavigate();
-  const effectiveRuntime = useStore($effectiveRuntime);
+  const hydrated = useHydrated();
+  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
   const clientOnly = effectiveRuntime !== "server";
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
@@ -69,6 +73,39 @@ function Finish() {
   useEffect(() => {
     if (clientOnly) void setClientSessionStatus(id, "finished").catch(() => undefined);
   }, [id, clientOnly]);
+
+  // p3 auto-advance: this screen is a progress state — it fires report
+  // generation on mount (idempotent: an existing report returns unchanged)
+  // and navigates to /report/[id] when it lands. Runtime is read from the
+  // atom inside the effect: useSsrStore deliberately reports the SSR default
+  // until hydration, so the build waits for `hydrated`.
+  const [build, setBuild] = useState<BuildState>("building");
+  const buildRef = useRef(false);
+  async function buildReport() {
+    setBuild("building");
+    try {
+      await ensureReport(id, $effectiveRuntime.get() !== "server");
+      setBuild("done");
+      void navigate({ href: withLocale(locale, `/report/${id}`) });
+    } catch {
+      setBuild("failed");
+    }
+  }
+  useEffect(() => {
+    if (!hydrated || buildRef.current) return;
+    buildRef.current = true;
+    void buildReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, id]);
+
+  function discard() {
+    void (
+      $effectiveRuntime.get() !== "server"
+        ? setClientSessionStatus(id, "discarded")
+        : updateSessionStatus(id, "discarded")
+    ).catch(() => undefined);
+    openSettings("history");
+  }
 
   function downloadMarkdown() {
     if (!session) return;
@@ -122,7 +159,38 @@ function Finish() {
           </p>
         </div>
 
-        <div className="mt-10 space-y-3">
+        {/* p3: report builds automatically — progress state, not a decision
+            point. Failure swaps to error + retry; no infinite spinner. */}
+        <div className="mt-8" aria-live="polite">
+          {build === "building" && (
+            <div className="rise-in flex items-center justify-center gap-3 text-sm text-espresso-soft">
+              <span
+                className="orb-live inline-block h-4 w-4 rounded-full bg-gradient-to-br from-persimmon to-persimmon-deep"
+                aria-hidden="true"
+              />
+              <FormattedMessage id="finish.building" />
+            </div>
+          )}
+          {build === "failed" && (
+            <div className="rise-in space-y-2">
+              <p className="text-sm text-persimmon-deep">
+                <FormattedMessage id="finish.buildFailed" />
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  buildRef.current = true;
+                  void buildReport();
+                }}
+                className="rounded-full px-5 py-2 h-auto text-sm ring-hairline"
+              >
+                <FormattedMessage id="finish.tryAgain" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 space-y-3">
           <div
             ref={menuRef}
             className="rise-in relative"
@@ -160,18 +228,19 @@ function Finish() {
             )}
           </div>
           <Button
+            disabled={build !== "done"}
             style={{ "--rise-delay": "350ms" } as React.CSSProperties}
-            className="rise-in group w-full rounded-full bg-espresso px-6 py-3.5 h-auto font-display font-semibold text-cream duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98]"
+            className="rise-in group w-full rounded-full bg-espresso px-6 py-3.5 h-auto font-display font-semibold text-cream duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
             onClick={() => navigate({ href: withLocale(locale, `/report/${id}`) })}
           >
-            <FormattedMessage id="finish.generateReport" />
+            <FormattedMessage id="finish.openReport" />
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
               →
             </span>
           </Button>
           <Button
             variant="link"
-            onClick={() => openSettings("history")}
+            onClick={discard}
             className="h-auto text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon"
           >
             <FormattedMessage id="finish.discard" />

@@ -61,7 +61,6 @@
   "finish.getTranscript": "obtener transcript",
   "finish.moreFormats": "más formatos de transcript",
   "finish.downloadJson": "Descargar como JSON",
-  "finish.generateReport": "generar informe",
   "finish.discard": "descartar",
   "report.scoring": "puntuando tu sesión…",
   "report.scoringSlow": "esto puede tardar un minuto en modelos gratuitos.",
@@ -239,5 +238,9 @@
   "setup.difficulty.easy": "fácil",
   "setup.difficulty.medium": "media",
   "setup.difficulty.hard": "difícil",
-  "setup.language": "idioma"
+  "setup.language": "idioma",
+  "finish.building": "creando tu informe",
+  "finish.buildFailed": "no se pudo crear el informe — la transcripción está a salvo",
+  "finish.tryAgain": "reintentar",
+  "finish.openReport": "abrir informe"
 }
