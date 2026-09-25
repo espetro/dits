@@ -10,9 +10,9 @@ import { TurnSchema } from "./session";
  * OpenAI-compatible STT adapter. (WS is not represented in openapi.json.)
  *
  * Binary audio frames: raw PCM16 little-endian bytes with a 4-byte big-endian
- * seq prefix. JSON `audio` messages with base64 `pcm` are accepted as a
- * fallback. `tts` messages from the server use the same framing so b64 JSON
- * is a universal fallback.
+ * seq prefix, in both directions. JSON `audio`/`tts` messages with base64
+ * `pcm` remain the accepted fallback framing for producers or consumers that
+ * can't do binary — the server never sends both framings for the same chunk.
  */
 
 /** 4-byte BE seq + PCM16LE bytes. */

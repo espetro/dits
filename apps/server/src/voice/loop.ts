@@ -216,7 +216,19 @@ export class VoiceLoop {
     this.kickoffTimer = setTimeout(() => {
       this.kickoffTimer = undefined;
       this.turnLock = this.turnLock
-        .then(() => this.runTextTurn(KICKOFF_UTTERANCE, "text"))
+        .then(async () => {
+          // a REST-posted turn during the kickoff window doesn't reach
+          // handleMessage/cancelKickoff, so re-check persisted turns at
+          // fire time rather than double-greeting.
+          const { turns } = await this.db
+            .selectFrom("turns")
+            .select((eb) => eb.fn.countAll().as("turns"))
+            .where("session_id", "=", this.sessionId)
+            .executeTakeFirstOrThrow();
+          if (Number(turns) > 0) return;
+          await this.postEvent(this.sessionId, "agent.kickoff");
+          return this.runTextTurn(KICKOFF_UTTERANCE, "text");
+        })
         .catch((err) => {
           console.error(`[voice] kickoff turn failed: ${err}`);
           this.send({
@@ -575,18 +587,10 @@ export class VoiceLoop {
         if (off === 0 && metrics && metrics.first_audio_ms === undefined)
           metrics.first_audio_ms = Date.now();
         const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
-        const final = off + TTS_CHUNK_BYTES >= pcm.length;
         const frame = new Uint8Array(AUDIO_HEADER_BYTES + chunk.length);
         new DataView(frame.buffer).setUint32(0, seq, false); // BE seq
         frame.set(chunk, AUDIO_HEADER_BYTES);
         this.sendBinary(frame);
-        // JSON fallback carries the same chunk so b64-only clients still play.
-        this.send({
-          t: "tts",
-          seq,
-          pcm: Buffer.from(chunk).toString("base64"),
-          final,
-        });
       }
     } finally {
       this.send({ t: "agent_speaking", on: false });
@@ -614,6 +618,11 @@ export class VoiceLoop {
       source,
     };
     await this.db.insertInto("turns").values(turn).execute();
+    await this.postEvent(this.sessionId, "turn.persisted", {
+      speaker,
+      seq: turn.seq,
+      source,
+    });
     return turn;
   }
 
@@ -660,8 +669,6 @@ class SentenceSpeechPipeline {
   private done = false;
   /** Tail of the send chain: all synthesis/sends are appended behind this. */
   private tail: Promise<void> = Promise.resolve();
-  /** Last enqueued sentence: its final chunk carries final: true. */
-  private lastSentence = "";
   private readonly opts: {
     tts: VoiceTts;
     send: (msg: VoiceServerMessage) => void;
@@ -727,7 +734,6 @@ class SentenceSpeechPipeline {
     // because each sentence's sends are appended to the same promise chain.
     const task = this.tail.then(() => this.speakSentence(sentence));
     this.tail = task;
-    this.lastSentence = sentence;
   }
 
   private async speakSentence(sentence: string): Promise<void> {
@@ -741,24 +747,15 @@ class SentenceSpeechPipeline {
         this.opts.metrics.first_audio_ms = Date.now();
       }
       const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
-      const final =
-        off + TTS_CHUNK_BYTES >= pcm.length && this.done && sentence === this.lastSentence;
-      this.sendChunk(chunk, final);
+      this.sendChunk(chunk);
     }
   }
 
-  private sendChunk(chunk: Uint8Array, final: boolean): void {
+  private sendChunk(chunk: Uint8Array): void {
     const seq = this.seq++;
     const frame = new Uint8Array(AUDIO_HEADER_BYTES + chunk.length);
     new DataView(frame.buffer).setUint32(0, seq, false); // BE seq
     frame.set(chunk, AUDIO_HEADER_BYTES);
     this.opts.sendBinary(frame);
-    // JSON fallback carries the same chunk so b64-only clients still play.
-    this.opts.send({
-      t: "tts",
-      seq,
-      pcm: Buffer.from(chunk).toString("base64"),
-      final,
-    });
   }
 }

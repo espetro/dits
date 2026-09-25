@@ -132,7 +132,6 @@ describe("voice websocket endpoint", () => {
       "user_transcript",
       "agent_transcript",
       "agent_speaking",
-      "tts",
       "agent_speaking",
       "metrics",
     ]);

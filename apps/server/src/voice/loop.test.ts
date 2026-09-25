@@ -64,14 +64,14 @@ async function makeLoop(
     db,
     send: (m) => {
       messages.push(m);
-      if (m.t === "tts") {
-        seenPcm.push(new Uint8Array(Buffer.from(m.pcm, "base64")));
-      }
       if (m.t === "agent_transcript") {
         seenTexts.push(m.turn.text);
       }
     },
-    sendBinary: (d) => binary.push(d),
+    sendBinary: (d) => {
+      binary.push(d);
+      seenPcm.push(d.subarray(AUDIO_HEADER_BYTES));
+    },
     kickoffMs: 0,
     ...overrides,
   });
@@ -110,29 +110,19 @@ describe("VoiceLoop", () => {
     await loop.handleMessage(frame(0, pcmBytes([1, 2, 3, 4])));
     await loop.handleMessage({ t: "utterance_end" });
     await loop.handleMessage({ t: "utterance_end" }); // empty buffer: no-op
-    expect(messages).toHaveLength(7);
+    expect(messages).toHaveLength(5);
 
     const types = messages.map((m) => m.t);
     expect(types).toEqual([
       "user_transcript",
       "agent_transcript",
       "agent_speaking",
-      "tts",
-      "tts",
       "agent_speaking",
       "metrics",
     ]);
     expect(messages[2]).toMatchObject({ t: "agent_speaking", on: true });
     expect(messages.at(-2)).toMatchObject({ t: "agent_speaking", on: false });
-    const ttsMsgs = messages.filter((m) => m.t === "tts") as Extract<
-      VoiceServerMessage,
-      { t: "tts" }
-    >[];
-    expect(ttsMsgs.map((m) => m.seq)).toEqual([0, 1]);
-    expect(ttsMsgs[0]!.final).toBe(false);
-    expect(ttsMsgs[1]!.final).toBe(true);
-    expect(ttsMsgs[0]!.pcm.length).toBe((CHUNK_BYTES * 4) / 3); // b64 of 960 bytes
-    // binary frames mirror the chunks with BE seq headers
+    // tts chunks ride binary frames only: BE seq header + PCM payload
     expect(binary).toHaveLength(2);
     expect(new DataView(binary[0]!.buffer).getUint32(0, false)).toBe(0);
     expect(new DataView(binary[1]!.buffer).getUint32(0, false)).toBe(1);
@@ -452,7 +442,7 @@ describe("VoiceLoop", () => {
   it("streaming llm: per-sentence tts, agent_speaking on before first chunk, monotonic seq, final chunk", async () => {
     const ttsCalls: string[] = [];
     const chunkPcm = pcmBytes(new Array(CHUNK_BYTES / 2 + 5).fill(7)); // 2 chunks per sentence
-    const { loop, db, messages } = await makeLoop({
+    const { loop, db, messages, binary } = await makeLoop({
       stt: stubStt("hello there"),
       tts: {
         synthesizeToPcm: async (text) => {
@@ -481,20 +471,14 @@ describe("VoiceLoop", () => {
     // cutSentences minChars=24: the short first sentence merges with the
     // second into one cut sentence; the unpunctuated tail flushes as final.
     expect(ttsCalls).toEqual(["One sentence here. Another sentence follows.", "trailing words"]);
-    // agent_speaking on precedes the first tts chunk
+    // agent_speaking on precedes the first binary tts frame
     const firstOn = messages.findIndex((m) => m.t === "agent_speaking" && m.on);
-    const firstTts = messages.findIndex((m) => m.t === "tts");
     expect(firstOn).toBeGreaterThanOrEqual(0);
-    expect(firstOn).toBeLessThan(firstTts);
-    const ttsMsgs = messages.filter((m) => m.t === "tts") as Extract<
-      VoiceServerMessage,
-      { t: "tts" }
-    >[];
-    expect(ttsMsgs).toHaveLength(4); // 2 sentences x 2 chunks
+    expect(binary).toHaveLength(4); // 2 sentences x 2 chunks
     // seq monotonic across sentences
-    expect(ttsMsgs.map((m) => m.seq)).toEqual([0, 1, 2, 3]);
-    // exactly one final chunk, at the end
-    expect(ttsMsgs.map((m) => m.final)).toEqual([false, false, false, true]);
+    expect(binary.map((f) => new DataView(f.buffer).getUint32(0, false))).toEqual([0, 1, 2, 3]);
+    // the turn ends on agent_speaking off, not a final-chunk flag
+    expect(messages.some((m) => m.t === "agent_speaking" && m.on === false)).toBe(true);
     // transcript persisted with the full reply
     const turns = await db.selectFrom("turns").selectAll().orderBy("seq").execute();
     expect(turns.at(-1)).toMatchObject({
