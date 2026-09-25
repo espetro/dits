@@ -1,115 +1,83 @@
-# Stack runbook (native, non-Docker)
+# Stack runbook
+
+Bun monorepo, no Docker required for dev. Two runtimes ship from the same
+code: the `di` server (sidecar/desktop mode) and the static SPA
+(client-only/browser mode, also what deploys to static hosts).
+
+## Layout
+
+| Path              | What                                                              |
+| ----------------- | ----------------------------------------------------------------- |
+| `apps/web`        | TanStack Start SPA -> builds to `apps/web/dist/client`            |
+| `apps/server`     | `di`: Hono API + WS voice loop + SQLite store, entry `src/cli.ts` |
+| `packages/shared` | `@di/shared` valibot contracts (the anti-corruption layer)        |
+| `packages/evals`  | vitest evals + `mock-provider` (OpenAI-compatible, CORS-enabled)  |
+| `tests/e2e`       | Playwright specs; prose source of truth in `specs/*.md`           |
+| `tools/dscheck`   | nested env for the design-token linter (TS6; repo pins TS7)       |
 
 ## Services and ports
 
-| Service              | Port  | Notes                   |
-| -------------------- | ----- | ----------------------- |
-| web (TanStack Start) | 3000  | served by the di server |
-| lightrag             | 9621  | RAG / grounding         |
-| whisper / speaches   | 8001  | STT                     |
-| kokoro               | 8890  | TTS                     |
-| Ollama               | 11434 | local LLM               |
+| Service                         | Port | Notes                                            |
+| ------------------------------- | ---- | ------------------------------------------------ |
+| `di` server                     | 3000 | `server.port`: SPA + `/v1/*` + voice WS + sqlite |
+| mock provider                   | 9000 | `mise run dev:mock`, zero API keys needed        |
+| parakeet STT (local real voice) | 9003 | via `scripts/local-voice-stack.sh`               |
+| pocket-tts (local real voice)   | 9004 | behind the OpenAI-compatible shim :9005          |
+| web dev server (vite)           | 5173 | `mise run dev` when iterating on the SPA alone   |
 
-## Env files
-
-- `apps/agent/.env`
-- `apps/web/.env.local`
-
-Copy from teammates / templates if missing; never commit real values.
+All providers (`llm`, `stt`, `tts`, `embeddings`) are OpenAI-compatible HTTP
+endpoints in `config.yaml` — any compatible server works (hosted APIs,
+Ollama, vLLM, the mock). `embeddings` is optional; without it document
+uploads are off.
 
 ## Config
 
-- `apps/agent/config/ui.toml` - UI-facing config for **languages, voices,
-  and difficulties** (`[languages] offered / stt_supported`, per-language
-  `[voices.<lang>]` with default + options, `[difficulties]` levels + clamps).
-  The setup screen reads its voice dropdown, language chips, and difficulty
-  options from here via the agent's `GET /api/config/ui` (proxied by the web
-  route `apps/web/app/api/config/ui/route.ts`). The loader is
-  `src/deepinterview_agent/core/ui_config.py`; set `UI_CONFIG_PATH` to
-  override the file location (useful for tests and local experiments). The
-  live interviewer's difficulty clamp (easy 2, medium 3, hard 4) also reads
-  this file. When you add a language or voice, update this file, and update
-  `.agents/docs/screens/setup.md` in the same commit.
+`config.yaml` validated by `ConfigSchema` (`packages/shared/src/config.ts`),
+env overrides `DI_` + `__` (`DI_LLM__MODEL=gpt-4o`). See
+[config-reference.md](config-reference.md) for the full key table.
+
+- `files.*` is optional: defaults land in the platform app-support dir
+  (`~/Library/Application Support/di`, `%APPDATA%/di`, `$XDG_DATA_HOME/di` or
+  `~/.local/share/di`).
+- Zero-conf demo LLM in dev: `mise run dev:server:demo-llm` sources
+  `scripts/dev-env-demo-llm.sh` (`DI_DEMO_LLM_*` -> `DI_LLM__*` overrides; the
+  SPA's one-click "demo endpoint" fill reads `VITE_DEMO_LLM_*`). The shared
+  managed endpoint URL lives in `DEMO_LLM_BASE_URL`
+  (`apps/web/src/lib/demo-llm.ts`) pending the rate-limited VPS proxy.
+- `DI_TEST_MODE=1` mounts `/v1/test/*` (ping/state/events/pipeline/smoke).
 
 ## Start order
 
-1. Infra services (lightrag :9621, whisper/speaches :8001,
-   kokoro :8890, Ollama :11434) - start these first; the app
-   depends on them.
-2. Agent API:
-   ```bash
-   uv --directory apps/agent sync
-   # then run the agent API (serves :8000) with env from apps/agent/.env
-   ```
-3. Web app (turbo dev):
-   ```bash
-   pnpm dev
-   ```
+1. Optional providers: `mise run dev:mock` (key-free) or
+   `scripts/local-voice-stack.sh` (real local STT/TTS via process-compose).
+2. `bun run apps/server/src/cli.ts --config config.yaml`
+   (`--check` first to validate config + probe providers).
+3. SPA is served by the server from `apps/web/dist/client` (`mise run build`
+   once), or `mise run dev` for vite dev.
+4. Client-only path needs no server at all: serve `apps/web/dist/client`
+   statically — the health probe resolves to browser mode and BYO/demo LLM
+   settings take over.
 
-`pnpm dev` runs via turbo; web listens on :3000 and proxies agent calls to
-:8000.
+## Common tasks (mise.toml)
+
+| Task                           | Purpose                                                               |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `mise run dev`                 | vite dev server for the SPA                                           |
+| `mise run dev:mock`            | mock OpenAI-compatible provider :9000                                 |
+| `mise run dev:server:demo-llm` | server with the zero-conf demo LLM endpoint                           |
+| `mise run build`               | build the SPA into `apps/web/dist/client`                             |
+| `mise run test`                | vitest across shared/server/evals/web                                 |
+| `mise run validate:quick`      | T1 gate: oxfmt/import-paths/agents-md + ast-grep + ratchets + dscheck |
+| `mise run validate`            | T2 pre-push: T1 + affected typecheck/test via task-spooler            |
+| `mise run validate:full`       | T3 milestone/CI: T2 + full repo + knip                                |
+| `mise run e2e`                 | Playwright specs (needs a test-mode server, see e2e AGENTS.md)        |
+| `mise run seed`                | seed a demo session over the API                                      |
+| `mise run smoke`               | `/v1/test/smoke` behavioral probe                                     |
+| `mise run release`             | per-OS release archives into `dist/releases/`                         |
+| `mise run intl`                | locale key-parity check (advisory)                                    |
 
 ## Tests
 
-Agent (pytest):
-
-```bash
-cd apps/agent && uv run pytest -q
-```
-
-Web (vitest):
-
-```bash
-cd apps/web && vitest run
-```
-
-## Client-only runtime: latency notes
-
-See ADR-0003 for the full design. In `local-server` mode, LLM/STT/TTS calls
-round-trip through the `di` server to whatever backend it's configured with
-(often same-host or same-LAN). In `client-only` mode every call — the
-interview loop's `streamText`, TTS synthesis, and report scoring's
-`generateObject` — goes straight from the browser to the user's configured
-BYO `baseUrl`, with no local hop in between:
-
-- **interview turns**: same shape as `local-server` mode's LLM latency, minus
-  one internal hop; SpeechRecognition (Web Speech API) replaces server-side
-  Whisper STT and is typically faster for short utterances but is
-  network-dependent in Chrome regardless of `baseUrl`.
-- **TTS**: only used when a `ttsModel` is configured; otherwise the browser's
-  `speechSynthesis` (instant, on-device, lower quality) is the fallback — see
-  `BrowserVoiceDriver.useTtsEndpoint`.
-- **report generation**: one `generateObject` call scoring the full
-  transcript at once (no streaming), so its latency scales with transcript
-  length and the provider's structured-output overhead. There is no
-  server-side equivalent to compare against — `local-server` mode has never
-  generated a report either (see ADR-0003's report-prompt note).
-- **persistence**: OPFS read-modify-write per turn (`opfs-store.ts`) is local
-  disk I/O, not network — negligible next to any of the above.
-
-No numbers are captured here yet; this is a latency _shape_ map (what talks
-to what), not a benchmark. Recommended follow-up in `04-m3-rag-ingestion`
-scope: measure with the mock provider (`packages/evals/src/mock-provider`) once one
-exists.
-
-## Static deploy (Cloudflare Pages)
-
-The static bundle (`apps/web/dist/client` after `cd apps/web && bun run build`) is a
-plain SPA — no CF Worker, no server code — so `client-only` mode is the only
-mode a static deploy can offer (there is no `di` binary to reach, so
-`$effectiveRuntime` always resolves to `client-only` per the probe logic in
-`apps/web/src/lib/runtime.ts`).
-
-- **Build output**: `apps/web/dist/client`, one prerendered `index.html` per
-  locale directory plus a root fallback. Point the Pages project's build
-  output directory at `apps/web/dist/client`.
-- **Build command**: `cd apps/web && bun run build` (bun, not npm/pnpm — see root
-  `AGENTS.md` package-manager rule).
-- **No secrets to configure**: BYO provider `baseUrl`/`apiKey` are entered by
-  the end user at runtime (`$providerProfile`, persisted client-side) and
-  never touch the deploy pipeline.
-- Deploys run through the Cloudflare Pages dashboard's Git integration
-  (push to `main` = build + publish). There is deliberately no
-  `deploy-web.yml` workflow: it never worked (`Script not found
-"wrangler"` — no `CLOUDFLARE_API_TOKEN` secret) and was removed as
-  redundant with the Git integration.
+- Unit: `mise run test` (vitest per package; bun runtime for shared/server/evals).
+- E2E: start the server in test mode first — `DI_TEST_MODE=1 bun run apps/server/src/cli.ts --config config.example.yaml` — then `mise run e2e` (`DI_URL` to override the target).
+- Evals: `mise run evals`.

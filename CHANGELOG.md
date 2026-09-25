@@ -2,7 +2,33 @@
 
 All notable changes, newest first. The README's [News](README.md#news) section
 carries the latest handful of entries; everything lands here permanently.
-Tagged releases: [GitHub Releases](https://github.com/ngoanpv/DeepInterview/releases).
+Tagged releases: [GitHub Releases](https://github.com/espetro/dits/releases).
+
+## Unreleased — Bun monorepo rewrite (2026-09)
+
+The app was rewritten as a Bun monorepo (`apps/web`, `apps/server`,
+`packages/shared`, `packages/evals`). Entries below this one describe the
+former Python/LiveKit codebase and are kept as upstream history.
+
+- **Two runtimes, one contract.** The `di` server (Hono API + WS voice loop +
+  SQLite via Kysely) and a client-only static SPA (OPFS persistence, browser
+  voice driver, BYO or demo LLM) share valibot schemas in `@di/shared`
+  (ADR-0003). Browser mode covers everything the sandbox allows; the server
+  adds ingestion, managed providers and the voice pipeline.
+- **In-process voice pipeline.** Client-side VAD delimits utterances; the
+  server streams PCM16 over the voice WebSocket through OpenAI-compatible
+  STT/LLM/TTS endpoints (binary framing; b64 JSON remains the accept-side
+  fallback). Mic or model failure tears the socket down instead of leaving
+  zombie loops; text turns take the same agent path in both modes (ADR-0002).
+- **Working E2E loop.** Report generation (`POST /v1/sessions/:id/report`),
+  agent kickoff, question tracking, transcript hydration on reload, and a
+  finish screen that auto-builds the report. The health probe requires the
+  API's real payload so static deploys resolve to browser mode.
+- **Restructured UI.** Scenario-card setup (narrative + goals + toolset),
+  optional validate step, AgentStage/ControlBar/ToolDock interview layout,
+  transcript demoted to rail, history as a settings pane, coach unlocked by
+  a first report. Stack verdicts and tokens locked via ADR-0004, `DESIGN.md`
+  and a `dscheck` gate.
 
 ## v0.3.0 — 2026-08-02
 

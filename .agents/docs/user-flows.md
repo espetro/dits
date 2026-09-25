@@ -1,92 +1,88 @@
 # User flows
 
-## Main flow (landing -> setup -> prep poll -> interview -> report -> prep coach)
+Two runtimes share one flow: **server mode** (the `di` Hono server — voice WS
+
+- REST + SQLite) and **client-only mode** (static SPA — OPFS storage, browser
+  voice driver, BYO or demo LLM). The capability line: browser mode covers
+  everything the sandbox allows; the server adds ingestion, managed providers
+  and the voice pipeline on top.
+
+## Main flow (landing -> setup -> interview -> finish -> report)
 
 ```mermaid
 flowchart LR
-    L[landing] -->|Start| S[/setup]
-    S -->|POST /api/prep?fast=true| P[/session/{id} poll]
-    P -->|ready| I[/interview/{id} live room]
-    I -->|ended| R[/report/{id}]
-    R -->|Coach me| C[/prep?session={id}]
-    C -->|Socratic CTA|
+    L[/landing/] -->|start| S[/setup/]
+    S -->|scenario card start| I[/interview/id/]
+    S -->|advanced: validate| V[/validate/id/]
+    V -->|looks good, start| I
+    I -->|end interview| F[/finish/id/]
+    F -->|auto-builds report| R[/report/id/]
+    F -->|discard| H[settings: history pane]
+    R -->|coach unlocked once a report exists| C[coach scenario card]
 ```
 
-Steps:
+1. Landing `/`: start -> `/setup`.
+2. Setup `/setup`: scenario cards carry the narrative, a 3-goal checklist and
+   the toolset chips; each card has its own start CTA that creates the
+   session and goes straight to `/interview/[id]` (skips validate, p3).
+   Advanced options (collapsed): title, duration, mode `interview|coach`,
+   tool toggles, custom prompt, file upload (server mode only — the drop
+   zone is replaced by a "needs the server runtime" note in browser mode),
+   and an opt-in `/validate/[id]` step.
+3. Validate `/validate/[id]` (optional): chat-style plan refinement against
+   the agent — left pane questions the user, right pane shows the draft
+   interview plan; skip or "looks good, start".
+4. Interview `/interview/[id]`: AgentStage (presence orb + state word + live
+   caption) on top, sticky ControlBar (mic, mute, type, end) pinned bottom,
+   transcript in a rail/bottom-sheet, tools in the registry-driven ToolDock.
+   Turns work over voice or text; text turns take the same pipeline in both
+   runtimes. Server mode streams PCM over the voice WS (client VAD delimits
+   utterances); client-only runs the BrowserVoiceDriver against the
+   configured or demo LLM. Kickoff: if nobody speaks first, the agent greets
+   after a short delay.
+5. Finish `/finish/[id]`: auto-builds the report on mount (server mode POSTs
+   `/v1/sessions/:id/report`; client-only generates in-browser against the
+   configured LLM) and auto-advances to `/report/[id]`. Failure shows an
+   error with try-again, never an infinite spinner. Discard marks the
+   session `discarded` and opens the history pane.
+6. Report `/report/[id]`: overall score, coverage, per-competency evidence.
+   First report existing unlocks coach-mode scenario cards.
+7. History is a settings-dialog pane (`?settings=1&pane=history`), not a
+   route; sessions can be reopened (report viewer) from it.
 
-1. Landing `/`: user clicks Start -> `/setup`.
-2. Setup `/setup`: user uploads CV/paste, picks difficulty, voice, language,
-   duration, passes device check, hits Start. Client calls `startSession`
-   server action which POSTs to `/api/prep?fast=true` (facts + difficulty +
-   voice + duration_min), then navigates to `/session/{id}` (no persona
-   param; the live room renders the default persona).
-3. Session poll `/session/{id}`: `PrepSummary` polls
-   `GET /api/session/{id}` every `POLL_MS` until status is a ready state.
-4. Live room `/interview/{id}`: server verifies session, mints LiveKit token
-   with metadata `{session_id, duration_min, difficulty, voice}` (difficulty
-   and voice preferred from the persisted session context; `?duration=`
-   override clamped to 5-60); voice interview runs. The interviewer prompt
-   injects the language and difficulty framing, and the live difficulty
-   clamp comes from `apps/agent/config/ui.toml` (easy 2, medium 3, hard 4).
-5. Report `/report/{id}`: ScoringPoll waits for scores, then renders the
-   full report.
-6. Prep coach `/prep?session={id}`: grounded coaching on the weak spots.
-
-## Fast flow (NEW: setup -> ready immediately)
+## Runtime selection
 
 ```mermaid
 flowchart LR
-    S[/setup] -->|"POST /api/prep?fast=true (facts file + difficulty + voice + duration)"| P[/session/{id}]
-    P -->|status ready immediately, pass-through| I[/interview/{id}]
+    R[runtime chip] -->|server reachable| SV[server driver]
+    R -->|server unreachable or client-only pinned| CB[browser driver]
 ```
 
-Steps:
-
-1. Setup posts the facts file plus difficulty, voice, and duration to
-   `POST /api/prep?fast=true`. `run_fast_prep` (in
-   `src/deepinterview_agent/prep/__init__.py`) ingests the facts into the KB
-   - context and marks the session ready immediately; no graph run, no
-     long-running prep wait.
-2. `/session/{id}` renders the poll screen but passes through instantly
-   (ready on first poll); the user proceeds straight to Start interview.
-3. Heavy prep/grounding continues asynchronously; the interview and report
-   read whatever context is available.
+- The runtime-mode chip (header) shows the effective runtime: `server`,
+  `in-browser`, or `server unreachable — using in-browser`.
+- A static deploy's health probe 200 on SPA-fallback HTML used to false-
+  positive into server mode; the probe now requires the API's real payload
+  shape, so static hosts resolve to client-only (p0.4).
+- Switching modes persists to `di.runtime-mode` in localStorage and re-probes.
 
 ## Error / recovery paths
 
-```mermaid
-flowchart LR
-    P[/session/{id} poll] -->|rejected| X[/setup retry]
-    P -->|error| X
-    P -->|stalled| X
-    P -->|ready| I[/interview/{id}]
-```
+- **Voice fails to connect / drops**: reconnect with exp backoff (5 tries);
+  the error tells the user the transcript is saved and offers retry.
+- **Mic denied or VAD/capture fails**: the WS is closed rather than leaving
+  a zombie VoiceLoop; the interview continues via the text path ("type").
+- **Agent speaks but user hears nothing / voice degrades**: fallback hint
+  surfaces the type-instead input immediately.
+- **Report generation fails**: finish shows `finish.buildFailed` + try again;
+  it never spins forever.
+- **Provider config incomplete in settings**: the settings dialog flags the
+  incomplete section instead of silently dropping it; in browser mode the
+  demo LLM one-click fill covers zero-conf.
+- **Back nav mid-interview**: guarded — leaving requires confirming end.
 
-Statuses surfaced by `GET /api/session/{id}` via PrepSummary:
+## Where each piece persists
 
-- `rejected`: uploaded material failed validation (bad file type, empty
-  facts, unreadable doc). Show reason; link back to `/setup` to re-upload.
-- `error`: agent crashed during prep. Show error banner; back to `/setup`
-  to retry. Session id is dead; a new session must be created.
-- `stalled`: polling exceeded the timeout with no status change. Prompt the
-  user to retry; optionally keep polling once more on user action.
-- `ready-no-context`: prep finished but extracted no usable context.
-  Proceed to interview with a warning; report may be thin.
-
-## Coach loop (report -> prep -> back to setup)
-
-```mermaid
-flowchart LR
-    R[/report/{id}] -->|"Coach me"| C[/prep?session={id}]
-    C -->|"Socratic CTA (quiz me instead)"| S[/setup]
-    S -->|new session| P[/session/{id}] --> R
-```
-
-Steps:
-
-1. Report `/report/{id}` shows gaps; user clicks "Coach me" ->
-   `/prep?session={id}`.
-2. Prep coach loads grounded context from that session (study plan,
-   flashcards, chat focused on the gaps).
-3. Socratic CTA invites the user to test the new knowledge with a fresh mock
-   interview -> `/setup` -> new session -> report. Loop repeats.
+- Server mode: `sessions`/`turns`/`tool_states`/`reports`/`events`/`documents`
+  tables in the SQLite db at `files.db_path` (default platform app-support dir).
+- Client-only: OPFS mirror under `sessions/[id].json`, `sessions/turns/[id].json`,
+  reports and tool state — same shapes via `@di/shared` schemas.
