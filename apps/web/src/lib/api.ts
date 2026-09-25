@@ -19,6 +19,8 @@ export interface SessionDto {
   duration_min: number;
   /** Dock toolset, Record<toolId, variant> (p3); absent on old sessions. */
   tools?: Record<string, string>;
+  /** Candidate-provided brief from setup (p3 scenario cards). */
+  prompt?: string;
 }
 
 export interface TurnDto {
@@ -37,6 +39,8 @@ export async function createSession(body: {
   duration_min: number;
   /** Dock toolset the scenario card seeds (p3); absent = default pair. */
   tools?: Record<string, string>;
+  /** Candidate-provided brief; lands in the agent's system prompt. */
+  prompt?: string;
 }): Promise<SessionDto> {
   const res = await fetch(`${BASE}/v1/sessions`, {
     method: "POST",

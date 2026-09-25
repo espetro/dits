@@ -52,6 +52,8 @@ export const SessionSchema = v.object({
   /** planned duration in minutes */
   duration_min: v.pipe(v.number(), v.integer(), v.minValue(5), v.maxValue(120)),
   plan: v.optional(v.string()),
+  /** Candidate-provided brief (scenario card / custom prompt textarea). */
+  prompt: v.optional(v.string()),
   tools: v.optional(SessionToolsSchema),
 });
 export type Session = v.InferOutput<typeof SessionSchema>;

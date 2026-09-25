@@ -13,6 +13,8 @@ export interface DbSchema {
     status: string;
     duration_min: number;
     plan: string | null;
+    /** Candidate-provided brief from setup (p3 scenario cards). */
+    prompt: string | null;
     /** JSON Record<toolId, variant> — the session's dock toolset (p3). */
     tools: string;
   };
@@ -77,6 +79,7 @@ const MIGRATIONS = [
     status TEXT NOT NULL DEFAULT 'created',
     duration_min INTEGER NOT NULL,
     plan TEXT,
+    prompt TEXT,
     tools TEXT NOT NULL DEFAULT '{}'
   )`,
   `CREATE TABLE IF NOT EXISTS turns (
@@ -176,6 +179,10 @@ export async function migrate(db: Db): Promise<void> {
     const cols = await sql<{ name: string }>`pragma table_info(sessions)`.execute(db);
     if (!cols.rows.some((c) => c.name === "tools")) {
       await sql.raw(`ALTER TABLE sessions ADD COLUMN tools TEXT NOT NULL DEFAULT '{}'`).execute(db);
+    }
+    // sessions.prompt: the setup "custom prompt" brief (p3 scenario cards).
+    if (!cols.rows.some((c) => c.name === "prompt")) {
+      await sql.raw("ALTER TABLE sessions ADD COLUMN prompt TEXT").execute(db);
     }
   }
   // tool_state -> tool_states: the p3 record-shaped tool store. Copy the
