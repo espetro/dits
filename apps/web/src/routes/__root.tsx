@@ -12,7 +12,7 @@ import {
 import { FormattedMessage } from "react-intl";
 import { AlertTriangle } from "lucide-react";
 
-import { AppIntlProvider, useIsRtl } from "../locales/i18n";
+import { AppIntlProvider, useHtmlLang, useIsRtl } from "../locales/i18n";
 import { Button } from "../components/vendor/button";
 import { AppHeader } from "../components/app-header";
 import { SettingsDialogHost } from "../components/settings-dialog";
@@ -37,6 +37,7 @@ export const Route = createRootRoute({
 
 function RootDocument() {
   const isRtl = useIsRtl();
+  const htmlLang = useHtmlLang();
 
   // RTL support at the html level (e.g. for ar).
   useEffect(() => {
@@ -49,7 +50,7 @@ function RootDocument() {
   }, []);
 
   return (
-    <html lang="en" dir={isRtl ? "rtl" : "ltr"}>
+    <html lang={htmlLang} dir={isRtl ? "rtl" : "ltr"}>
       <head>
         <HeadContent />
       </head>

@@ -15,7 +15,7 @@ import { DEMO_LLM, isDemoLlm } from "../lib/demo-llm";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
-import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../lib/ssr";
 import { Button } from "./vendor/button";
 import {
   Dialog,
@@ -70,11 +70,10 @@ export function clearSettings(): void {
  * keeps the params in the address bar for QA agents and deep links.
  */
 function useSettingsSearch(): SettingsSearch {
-  const [search, setSearch] = React.useState<SettingsSearch>(() =>
-    typeof window === "undefined" ? {} : parseSettingsSearch(window.location.search),
-  );
+  const [search, setSearch] = React.useState<SettingsSearch>({});
   React.useEffect(() => {
     const update = () => setSearch(parseSettingsSearch(window.location.search));
+    update();
     window.addEventListener("popstate", update);
     return () => window.removeEventListener("popstate", update);
   }, []);
@@ -205,7 +204,7 @@ function PaneHeading(props: { title: string }) {
 
 function AiProviderPane() {
   const intl = useIntl();
-  const profile = useStore($providerProfile);
+  const profile = useSsrStore($providerProfile, null);
   const [tab, setTab] = React.useState<SectionKey>("llm");
   const [drafts, setDrafts] = React.useState<Record<SectionKey, SectionDraft>>(() => ({
     stt: draftFromEndpoint(profile?.stt),

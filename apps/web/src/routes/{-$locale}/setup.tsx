@@ -3,6 +3,7 @@ import { useLocaleNav, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../../lib/ssr";
 import { useQuery } from "@tanstack/react-query";
 import { $draft } from "../../stores/session";
 import { $micDeviceId } from "../../stores/devices";
@@ -82,10 +83,10 @@ function Setup() {
   const { locale } = useLocaleNav();
   const intl = useIntl();
   const draft = useStore($draft);
-  const micDeviceId = useStore($micDeviceId);
-  const effectiveRuntime = useStore($effectiveRuntime);
+  const micDeviceId = useSsrStore($micDeviceId, "");
+  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
   const clientOnly = effectiveRuntime !== "server";
-  const profile = useStore($providerProfile);
+  const profile = useSsrStore($providerProfile, null);
   // coach unlock gate (p1): available once any session reached `reported`.
   const { data: hasReport } = useQuery({
     queryKey: ["has-report", effectiveRuntime],

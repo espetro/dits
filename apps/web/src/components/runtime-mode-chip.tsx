@@ -1,6 +1,6 @@
-import { Check, ChevronDown, Server, Smartphone, SlidersHorizontal } from "lucide-react";
+import { Check, ChevronDown, Server, SlidersHorizontal, Smartphone } from "lucide-react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useStore } from "@nanostores/react";
+import { useSsrStore } from "../lib/ssr";
 
 import type { RuntimeMode } from "@di/shared";
 import { $effectiveRuntime, $runtimeMode, $serverReachable, probeServer } from "../lib/runtime";
@@ -34,9 +34,9 @@ function choose(mode: RuntimeMode): void {
 
 export function RuntimeModeChip() {
   const intl = useIntl();
-  const chosen = useStore($runtimeMode);
-  const effective = useStore($effectiveRuntime);
-  const reachable = useStore($serverReachable);
+  const chosen = useSsrStore($runtimeMode, "server");
+  const effective = useSsrStore($effectiveRuntime, "server");
+  const reachable = useSsrStore($serverReachable, null);
   const degraded = chosen !== effective;
   const effectiveLabel = MODES.find((m) => m.key === effective)?.label ?? "runtime.custom";
 

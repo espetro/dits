@@ -50,7 +50,9 @@ prefix via real links, so prerender crawl discovers every locale page.
   across the slots (Fisher-Yates), so the composition varies per reload
   while never overlapping the headline, CTA, or locale pill. This keeps long
   localized sticker text (de/pt/zh) from drifting into the hero as it did
-  with the original hand-tuned offsets.
+  with the original hand-tuned offsets. Slot `x` resolves against
+  `(container - sticker width)` via `calc()`, so the rightmost slot cannot
+  push a card past the band's right edge (the ~1024px overflow regression).
 - Trust micro-line under CTA: single sentence, no stats (v1).
 
 ## Responsive
