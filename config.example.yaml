@@ -25,6 +25,10 @@ embeddings:
   base_url: http://localhost:9000/v1
   model: mock-embed
 
+# optional: paths for the sqlite db, log and data dir. omit `files` entirely
+# (or any single key) to use the platform app-support dir —
+# ~/Library/Application Support/di, %APPDATA%/di, $XDG_DATA_HOME/di or
+# ~/.local/share/di — which is what the desktop sidecar uses by default.
 files:
   db_path: .deepinterview/di.db
   log_path: .deepinterview/di.log

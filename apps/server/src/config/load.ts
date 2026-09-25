@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { parse } from "yaml";
 import {
   CONFIG_ENV_PREFIX,
@@ -39,6 +40,19 @@ function maybeNumber(s: string): string | number {
   return /^\d+$/.test(s) ? Number(s) : s;
 }
 
+/**
+ * Platform app-support dir for sidecar/desktop installs that omit `files.*`
+ * (~/Library/Application Support/di, %APPDATA%/di, $XDG_DATA_HOME/di or
+ * ~/.local/share/di). A bare `bun run server` run from anywhere gets stable
+ * paths instead of littering the cwd.
+ */
+function defaultFilesDir(): string {
+  const home = process.env.HOME ?? process.env.USERPROFILE ?? ".";
+  if (process.platform === "darwin") return join(home, "Library", "Application Support", "di");
+  if (process.platform === "win32") return join(process.env.APPDATA ?? home, "di");
+  return join(process.env.XDG_DATA_HOME ?? join(home, ".local", "share"), "di");
+}
+
 /** Load + validate config. Throws ConfigError naming the exact bad key. */
 export function loadConfig(path: string): Config {
   if (!existsSync(path)) {
@@ -50,7 +64,22 @@ export function loadConfig(path: string): Config {
   } catch (e) {
     throw new ConfigError(`config file is not valid yaml: ${path} (${String(e)})`);
   }
-  const withEnv = applyEnvOverrides(raw as Record<string, unknown>);
+  const obj = raw as Record<string, unknown>;
+  // `files` is optional in config: defaults land in the platform data dir,
+  // explicit keys and DI_FILES__* env overrides still win. A non-object
+  // value is left alone so schema validation still rejects it.
+  const dir = defaultFilesDir();
+  const defaults = {
+    db_path: join(dir, "di.db"),
+    log_path: join(dir, "di.log"),
+    data_dir: join(dir, "data"),
+  };
+  if (obj.files === undefined) {
+    obj.files = defaults;
+  } else if (typeof obj.files === "object" && obj.files !== null) {
+    obj.files = { ...defaults, ...obj.files };
+  }
+  const withEnv = applyEnvOverrides(obj);
   const result = v.safeParse(ConfigSchema, withEnv);
   if (!result.success) {
     throw new ConfigError(`invalid config:\n${describeConfigError(result.issues)}`);

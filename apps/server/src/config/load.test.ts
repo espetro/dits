@@ -49,6 +49,21 @@ describe("loadConfig", () => {
     }
   });
 
+  it("defaults files.* to the platform data dir when omitted", () => {
+    const cfg = loadConfig(writeConfig(minimal.replace(/files:[\s\S]*$/, "")));
+    expect(cfg.files.db_path).toMatch(/di\.db$/);
+    expect(cfg.files.log_path).toMatch(/di\.log$/);
+    expect(cfg.files.data_dir).toMatch(/di\/data$|di[\\/]data$/);
+    expect(cfg.files.db_path).not.toMatch(/^\.deepinterview|^data\//);
+  });
+
+  it("fills only the omitted files.* keys", () => {
+    const partial = minimal.replace(/  log_path.*\n  data_dir.*\n/, "");
+    const cfg = loadConfig(writeConfig(partial));
+    expect(cfg.files.db_path).toBe("data/di.db");
+    expect(cfg.files.log_path).toMatch(/di\.log$/);
+  });
+
   it("applies DI_ env overrides with double-underscore nesting", () => {
     process.env.DI_LLM__PROVIDER = "openai";
     try {
