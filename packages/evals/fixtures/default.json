@@ -8,5 +8,23 @@
     }
   ],
   "transcription": "I have five years of experience building distributed systems.",
-  "models": ["mock-llm", "mock-stt", "mock-tts"]
+  "models": ["mock-llm", "mock-stt", "mock-tts"],
+  "report": {
+    "overall_score": 7.5,
+    "coverage_pct": 60,
+    "competencies": [
+      {
+        "name": "distributed systems",
+        "score": 7,
+        "evidence": [
+          {
+            "quote": "five years of experience building distributed systems",
+            "turn_seq": 0,
+            "verdict": "worked"
+          }
+        ]
+      }
+    ],
+    "model_answers": []
+  }
 }

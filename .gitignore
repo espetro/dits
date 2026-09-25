@@ -53,6 +53,7 @@ apps/web/public/avatars/
 cli/.run-logs/
 !/build/
 .playwright-cli/
+test-results/
 
 # Worker bundle artifacts (built by worker/build.ts)
 worker/*.js

@@ -6,6 +6,8 @@ export interface MockFixture {
   chat: { content: string }[];
   transcription: string;
   models: string[];
+  /** Canned report body returned for report prompts (sentinel: "overall_score"). */
+  report?: Record<string, unknown>;
 }
 
 export function loadFixture(name = "default"): MockFixture {
@@ -86,9 +88,25 @@ const routes: [string, string, Handler][] = [
     "POST",
     "/v1/chat/completions",
     async (req, fx) => {
-      const body = (await req.json().catch(() => ({}))) as { stream?: boolean };
+      const body = (await req.json().catch(() => ({}))) as {
+        stream?: boolean;
+        messages?: { content?: string }[];
+      };
       const created = Math.floor(Date.now() / 1000);
-      const content = fx.chat[0]!.content;
+      // Report prompts carry the `overall_score` rubric and a `session_id:`
+      // line (see buildReportPrompt); echo the fixture report so the e2e
+      // full-loop spec exercises the real generator path.
+      const promptText = (body.messages ?? []).map((m) => m.content ?? "").join("\n");
+      let content = fx.chat[0]!.content;
+      if (promptText.includes("overall_score") && fx.report) {
+        const sessionId =
+          /session_id:\s*([0-9a-f-]{36})/i.exec(promptText)?.[1] ?? crypto.randomUUID();
+        content = JSON.stringify({
+          ...fx.report,
+          session_id: sessionId,
+          generated_at: new Date().toISOString(),
+        });
+      }
       if (!body.stream) {
         return Response.json({
           id: "chatcmpl-mock",
