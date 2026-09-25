@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 // Scenario source of truth lives in specs/e2e-text.spec.md (readable .md);
 // this spec executes it. Requires di running in test mode:
-//   cd server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml --no-supervise
+//   cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml --no-supervise
 
 let sessionId: string;
 
@@ -113,7 +113,7 @@ test("spec md scenarios all have executed counterparts", () => {
 // browser against the web dev server instead of `request`. The BYO
 // provider's /v1/chat/completions is mocked via page.route — this validates
 // the client-only wiring (OPFS, ClientAgent, turn source tagging), not a
-// real LLM. Requires the web dev server running: cd web && bun run dev
+// real LLM. Requires the web dev server running: cd apps/web && bun run dev
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
   const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
