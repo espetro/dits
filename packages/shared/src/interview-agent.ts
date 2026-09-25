@@ -44,6 +44,8 @@ export interface SessionContext {
   mode: string;
   title?: string;
   plan?: string;
+  /** Candidate-provided brief from setup (scenario/custom prompt). */
+  prompt?: string;
   currentQuestion?: string;
   hints?: string[];
   /** Retrieved chunks from the candidate's uploaded documents (RAG, M3). */
@@ -75,6 +77,9 @@ export function buildPrompt(ctx: SessionContext): string {
   lines.push(`Interview mode: ${ctx.mode}.`);
   if (ctx.title) {
     lines.push(`Interview: ${ctx.title}.`);
+  }
+  if (ctx.prompt) {
+    lines.push(`Session brief (candidate-provided context):\n${ctx.prompt}`);
   }
   if (ctx.documents?.length) {
     lines.push(

@@ -184,6 +184,7 @@ export class VoiceLoop {
       mode: session?.mode ?? "interview",
       title: session?.title,
       plan: session?.plan ?? undefined,
+      prompt: session?.prompt ?? undefined,
     };
     this.voiceTools = voiceToolsFor(parseToolsColumn(session?.tools));
     await this.postEvent(this.sessionId, "agent.started", { transport: "ws" });
