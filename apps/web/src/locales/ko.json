@@ -61,7 +61,6 @@
   "finish.getTranscript": "transcript 받기",
   "finish.moreFormats": "다른 transcript 형식",
   "finish.downloadJson": "JSON으로 다운로드",
-  "finish.generateReport": "리포트 생성",
   "finish.discard": "버리기",
   "report.scoring": "세션 채점 중…",
   "report.scoringSlow": "무료 모델에서는 1분 정도 걸릴 수 있습니다.",
@@ -239,5 +238,9 @@
   "setup.difficulty.easy": "쉬움",
   "setup.difficulty.medium": "보통",
   "setup.difficulty.hard": "어려움",
-  "setup.language": "언어"
+  "setup.language": "언어",
+  "finish.building": "리포트 만드는 중",
+  "finish.buildFailed": "리포트를 만들 수 없습니다 — 대화록은 안전하게 저장됐습니다",
+  "finish.tryAgain": "다시 시도",
+  "finish.openReport": "리포트 열기"
 }
