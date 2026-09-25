@@ -1,132 +1,170 @@
 # Screen: Interview (`/interview/[id]`)
 
+> p3 restructure: conversation leads, tools follow. One AgentStage zone
+> carries presence (orb + state word + live caption); the transcript is a
+> demoted rail/sheet; user tools live in a registry-driven dock.
+
 ## ASCII mockup
 
 ```
-+------------------------------------------------------------------+
-|  {session title (fixed)}        27:41    ((o)) voice orb (rail) |
-+------------------------------------------------------------------+
-|                                                     | T transcri.+|
-|  +----------------------------------------------+  | agent: so,  |
-|  |  QUESTION BLOCK (agent-editable tool)        |  | tell me...  |
-|  |                                              |  |             |
-|  |  Q3: "How would you handle cache             |  | user: well, |
-|  |  invalidation across regions?"               |  | I'd start   |
-|  |  hints:                                      |  | with...     |
-|  |  - think about TTLs                          |  |             |
-|  |  - consistency vs availability               |  | user: [the  |
-|  |                                              |  | agent's     |
-|  +----------------------------------------------+  | current     |
-|                                                    | question    |
-|  +-------------------------+-------------------------+ rewrites   |
-|  | EDITOR                  | WHITEBOARD             ||             |
-|  | (CodeMirror w/          | (tldraw canvas —       ||             |
-|  |  syntax highlighting)   |  diagrams; agent can   ||             |
-|  |  def solve(nums):       |  read its contents)    ||             |
-|  |                         |    ...                 || [ type      |
-|  +-------------------------+-------------------------+  here...  ] |
-|                                                    +-------------+|
-|  [mute]  [end early]                                               |
-+------------------------------------------------------------------+
++------------------------------ desktop (>= md) -----------------------------+
+|  {session title}                                   27:41                  |
++---------------------------------------------------------------------------+
+|                                                     |  T transcript       |
+|                    ((o)) voice orb                  |  agent: so,         |
+|                    listening...                     |  tell me...         |
+|   "how would you handle cache invalidation          |                     |
+|    across regions?"  <- live caption                |  user: well,        |
+|                                                     |  I'd start...       |
+|  +----------------------------------------------+   |                     |
+|  | QUESTION 3            [progress chip]         |   |                     |
+|  | "How would you handle cache invalidation      |   |                     |
+|  |  across regions?"                             |   |                     |
+|  |  hints: - think about TTLs                    |   |                     |
+|  |         - consistency vs availability         |   |                     |
+|  +----------------------------------------------+   |                     |
+|                                                     |                     |
+|  [editor] [whiteboard] [+]                          |                     |
+|  +----------------------------------------------+   |                     |
+|  | TOOL PANE (active dock tab)                   |   |                     |
+|  |  def solve(nums): ...        / tldraw canvas  |   |                     |
+|  +----------------------------------------------+   |                     |
+|                                                     |  [ talk or type... ]|
++-----------------------------------------------------+---------------------+
+|  [mute]            [type]              [end early]  |  <- sticky, safe-area|
++---------------------------------------------------------------------------+
+
++------------------------------ mobile (< md) -------------------------------+
+|  {title}                                            27:41                 |
++---------------------------------------------------------------------------+
+|                          ((o))                                            |
+|                       listening...                                        |
+|   "how would you handle cache..."   <- live caption (2-line clamp)        |
+|                                                                           |
+|  +----------------------------------------------+                         |
+|  | QUESTION 3                                    |                         |
+|  | "How would you handle..."                     |                         |
+|  +----------------------------------------------+                         |
+|  [editor] [+]                                                             |
+|  +----------------------------------------------+                         |
+|  | TOOL PANE                                     |                         |
+|  +----------------------------------------------+                         |
+|                                                                           |
++-----------------------------------------------------( [transcript] sheet)-+
+|  [mute]            [type]              [end early]  | <- sticky, safe-area|
++---------------------------------------------------------------------------+
 ```
+
+## Zones
+
+### AgentStage (new)
+
+The single zone that carries the agent's presence, always visible:
+
+- **Voice orb** (`apps/web/src/components/voice-orb.tsx`, ElevenLabs Orb /
+  three.js, css-pulse fallback in client-only mode) centered, `size-20
+  md:size-24`. Driven by `$micAttack`/`$agentAttack` loudness taps
+  (`lib/voice/levels.ts`) with synthetic oscillation fallback. Phase mapping:
+  speaking→talking, listening→listening, thinking→thinking, else null.
+  **The orb leaves the transcript rail**: it renders in AgentStage, not the
+  rail, so the state is semantic and the volume is motion (orb-ui contract).
+- **State word** under the orb: listening / thinking / speaking /
+  reconnecting / error — replaces the top-bar status pill as the always-on
+  voice state readout.
+- **Live caption**: the latest agent utterance as plain text, 2-line clamp
+  (no scroll needed mid-turn; full text stays in the transcript). During
+  user turns the caption holds so the last question remains on screen.
+
+### QuestionCard
+
+- **Progress chip** `QUESTION n` — n counts `update_question` tool calls (and
+  question-replacing agent turns under the text fallback) this session.
+- Question text + optional hints, agent-editable via `update_question` (server
+  mode also pushes a `{t:"question"}` ws message). Fallback when no structured
+  question has landed: latest agent turn text — never empty past kickoff.
+- Renders directly under AgentStage; it is part of the conversation, not the
+  tool dock.
+
+### ToolDock + ToolSpec registry (new)
+
+- `session.tools` becomes `Record<toolId, variant>` (ordered map; variant is
+  per-tool config like the editor's language) — replaces the fixed
+  `{editor, whiteboard}` pair. Schema change lives in `@di/shared`
+  (`ToolStateSchema` widens to a record).
+- Registry (`apps/web/src/lib/tools/registry.ts`) — one `ToolSpec` per tool:
+  `id`, i18n `labelKey`, lucide `icon`, lazy `component`, `agentAccess:
+  "read" | "write" | "read-write"`, `platforms: "all" | "server-only"`.
+  `agentAccess` controls which agent tools the spec exposes (`read_*` /
+  `update_*` generation is per-spec), `platforms` hides heavy tools
+  (whiteboard stays `server-only` while tldraw is bundled).
+- Presets pick the toolset: the scenario card seeds `session.tools`; `custom`
+  starts with editor only. `>4` tools collapses trailing tabs into a `+`
+  overflow picker.
+- The dock renders under the QuestionCard, full width, one active tab.
+- Agent read tools keep the same turn-path integration and the same test
+  contract (unit serializers, evals, `/v1/test/events` assertions).
+
+### Transcript
+
+- **Desktop (`>= md`)**: right rail, translucent (10-20% alpha), peek/collapse
+  via `transcriptOpen`, minimize never fully hides. Contains the turn list and
+  the type input at its bottom.
+- **Mobile (`< md`)**: bottom `Sheet` (vendored, not side Sheet) opened from
+  the ControlBar `type` button; same turn list + input.
+- **Type input is first-class**, not a fallback: placeholder "talk or
+  type...". When voice is up it sends `{t:"text"}` on the ws (same pipeline
+  as speech); in client-only it goes through `BrowserVoiceDriver.sendText`.
+  `POST /v1/sessions/:id/turns` remains the degraded-path write only.
+
+### ControlBar (new, replaces bottom-left mute/end buttons)
+
+- Sticky bottom bar on **every** viewport, `padding-bottom:
+  env(safe-area-inset-bottom)`, all targets `>= 44px`.
+- Left: **mute** toggle (`{t:"mute",muted}` on the wire, mic track kept).
+- Center: **type** — desktop focuses the rail input (opens the rail if
+  collapsed), mobile opens the transcript Sheet with input focused.
+- Right: **end early** — confirm, then `/finish/[id]`.
+- **Back-guard**: while voice is connected or the interview is in progress,
+  browser back/close fires a confirm (`beforeunload` + router blocker) so a
+  swipe/accidental nav can't silently drop the session. Inert once ended.
 
 ## Behavior
 
-- Top bar: fixed session title, countdown timer anchored to `session.created_at` (a reload keeps real elapsed time; mount time is only the fallback before the session row loads; T-2min triggers agent wrap-up; 0 hard-stops to `/finish/[id]`), voice status label. The voice orb lives in the desktop transcript rail (see below), not the top bar.
-- **Voice orb** (desktop): ElevenLabs UI Orb (`apps/web/src/components/voice-orb.tsx` wrapping the vendored `components/vendor/orb.tsx`, three.js/WebGL) sits above the transcript rail, `size-20 md:size-24`. Driven by live mic/agent loudness taps (`apps/web/src/lib/voice/levels.ts`: `$micAttack`/`$agentAttack` nanostores fed by `MicCapture` RMS and `PcmPlayer.write`) with a synthetic oscillation fallback when taps are silent (e.g. browser STT driver). Phase mapping: speaking→talking, listening→listening, thinking→thinking, else null. The vendor file carries three di-local fixes, each marked with a `di fix`/`di:` comment: (1) `flat` Canvas + own rAF `advance()` loop because r3f's global loop deadlocks under React StrictMode's double-mount (`internal.active` stays false after `unmountComponentAtNode`'s delayed teardown reuses the root); (2) `uInverted` flips on the LIGHT theme since the shader ramp is dark-first and washes out on di's cream background; (3) context-restored kick via `forceContextRestore`.
-- **Question block**: agent-editable tool. The agent rewrites the current question + hints live (tool call); in server mode the tool call also pushes a `{t:"question"}` ws message so the block updates without polling. User tools (editor, whiteboard) are never rewritten by the agent, but the agent can READ them. Fallback: when no `update_question` call has landed yet (kickoff replies, text-only providers), the block renders the latest agent turn's text instead of staying empty.
-- **Tabbed tools**: full-width below the question block. Tabs: `Editor | Whiteboard`. Editor = Milkdown (Crepe) WYSIWYG markdown (`apps/web/src/components/milkdown-editor.tsx` + `milkdown-editor-impl.tsx`, lazy-loaded; three.js-free chunk) with a language bar (`python javascript typescript java go rust sql`) that inserts a fenced code block with the chosen language tag; code blocks render via CodeMirror 6 with syntax highlighting inside the document. External buffer sync via `replaceAll`; changes propagate through `markdownUpdated`. Whiteboard = tldraw canvas for diagrams.
-  - **Agent read tools**: `read_editor` (returns current editor buffer text) and `read_whiteboard` (returns serialized shape/snapshot summary). Both feed the same LLM turn path as the transcript, so the agent can reason over code and diagrams the candidate produces.
-  - This is part of the test contract: unit tests for the read-tool serializers, evals asserting the agent incorporates editor/whiteboard content in its turns (mock provider scripted with tool-call fixtures), and e2e assertions via `/v1/test/events` that `read_editor` / `read_whiteboard` tool calls land in the session event log.
-- **Transcript panel**: right side, translucent (10-20% alpha, iOS-26 style so background shows through), 10-20% collapsed-to-expanded width range.
-  - Collapsed state = slim peek rail showing the last turn. **Minimize never fully hides it.**
-  - Bottom of panel: text input box. Text input is a first-class feature: when the voice socket is up the text is sent as a `{t:"text"}` ws message and the server runs it through the same turn pipeline as speech (persist `source: text` turn → llm → agent reply → tts). `POST /v1/sessions/:id/turns` remains only as a degraded-path fallback when the ws is down (writes the turn without invoking the agent).
-- Voice wiring: WebSocket + Web Audio, no SFU/WebRTC. On mount the screen picks a speech driver: the server driver (`apps/web/src/lib/voice/server-driver.ts`) opens `GET /v1/sessions/:id/voice` (WS) and streams mic audio: `AudioWorklet` capture at 16k PCM16 mono (browser resamples via the `AudioContext` rate), client-side Silero VAD (`@ricky0123/vad-web`, assets vendored at `/vad/`) delimits utterances; frames go out as binary WS frames (4-byte BE seq + PCM16LE) only while the VAD says the user is speaking, ending with `{t:"utterance_end"}`. Server messages drive playback and UI: `tts` chunks (b64 or binary with the same seq framing) play through a `PcmPlayer` (`AudioContext` at 24k, back-to-back `AudioBufferSourceNode` scheduling); `agent_speaking` on/off, `user_transcript` / `agent_transcript` surface for state (transcript display still comes from turns polling). Barge-in: a VAD speech-start during agent playback stops the player and sends `{t:"interrupt"}`. Mute keeps the mic track but drops frames client-side and sends `{t:"mute",muted}`. An xstate v5 FSM (`apps/web/src/lib/voice/machine.ts`: idle→connecting→listening→user_speaking→thinking→agent_speaking→listening, barge-in via interrupted) drives the status label.
-- Driver fallback: `apps/web/src/lib/voice/browser-driver.ts` (Web Speech API: `SpeechRecognition` STT + `speechSynthesis`; Chrome-only in practice). Selection (`apps/web/src/lib/voice/index.ts`): `VITE_VOICE_DEFAULT` pins one; otherwise probe `${BASE}/api/health` — the response must be a 200 with `content-type: application/json` and a truthy `ok` body, so static hosts with SPA fallback (which return index.html for any path) correctly resolve to client-only instead of pretending a server is reachable. Barge-in: an interim speech result while the agent speaks arms a ~300ms grace timer — sustained speech interrupts playback, blips get dropped (otherwise tts crosstalk would keep barge-in firing on the agent's own audio). In server mode turn `seq` is assigned on `POST /v1/sessions/:id/turns` (max existing seq + 1), so concurrent writers (voice, text input) never collide.
-- Controls bottom: mute, end-early. Both end paths lead to `/finish/[id]`.
-- Voice->text degradation: `voice.status === "error"` (mic denied, unsupported
-  browser, ws down) surfaces the type-instead hint immediately instead of
-  waiting the 15s slow-start grace; typed turns persist the same as spoken
-  ones (`source: text` in server mode, OPFS turns in browser mode).
-- **Kickoff on silence (both drivers)**: when a session starts and no real
-  user turn arrives within a 5s grace window, an auto-fired first agent turn
-  opens the interview with a kickoff instruction (`KICKOFF_UTTERANCE` /
-  `KICKOFF_DELAY_MS` in `packages/shared/src/interview-agent.ts`), so the
-  session opens instead of sitting silent. Server mode arms the timer inside
-  the VoiceLoop (`kickoffMs`, cancel on any `text`/`utterance_end`/close);
-  the browser driver keeps its own timer — and now keeps it even after a
-  fatal mic error, so a permission-denied landing still offers the
-  type-instead path to start the interview. At most once per session.
-- **Voice failure toast + retry**: when the voice driver surfaces an error
-  (`onError` → `voice.status === "error"`), a sonner toast
-  (`interview.voiceErrorToast`, raw error as description) fires once per
-  error episode with a retry action (`interview.voiceRetry`), alongside the
-  existing status-pill error state which now shows a retry button too. Retry
-  calls `voice.restart()` (`useVoice`): the driver tears down its transport
-  and rebuilds, returning to connected; the transcript stays intact.
-- **Reconnecting**: an unexpected WS close while connected flips the status
-  pill to `interview.voiceReconnecting`. The server driver retries with
-  exponential backoff (1s base, 15s cap, jitter, 5 attempts) then gives up
-  into the error state above.
-- **No-speech fallback hint**: if no agent question is on screen after 15s
-  (`question.text` still empty), the question block reveals a visible hint
-  ("no speech detected? type instead.") with an autofocused type-instead
-  input that posts through the same text-turn path. It hides as soon as the
-  first question arrives. Available on both desktop and mobile layouts.
-- **Client-only runtime** (ADR-0003, `$effectiveRuntime === "client-only"`):
-  no `di` server, so this screen swaps its data source instead of its voice
-  driver. Session/turns come from OPFS (`apps/web/src/lib/opfs-store.ts`) and the
-  `$clientTurns` nanostore instead of REST polling; the browser driver's
-  `ClientAgent` runs the LLM loop directly against the BYO `baseUrl`, and
-  every turn it emits (`onUserTurn`/`onAgentTurn`) is both pushed onto
-  `$clientTurns` for immediate display and persisted to OPFS
-  (`apps/web/src/lib/voice/use-voice.ts`), since there is no server-side turn
-  store to poll. On mount the screen rehydrates `$clientTurns` from OPFS so a
-  reload restores the transcript, and marks the session `interviewing`
-  (`setClientSessionStatus`; `/finish` marks `finished`, report save marks
-  `reported` — see `report.md`). Turn `seq` is assigned client-side as
-  max-existing-seq + 1 (`session-store.ts` `appendTurn`), so rehydrated and
-  fresh turns interleave without colliding. Typed input reuses the same
-  agent path via `BrowserVoiceDriver.sendText` / `voice.sendText`, rather
-  than `POST /v1/sessions/:id/turns`. The `pushToolState` REST call (editor/
-  whiteboard mirroring) is skipped entirely in this mode — client-only's tool
-  executors read the nanostores in-process, so there is nothing to push.
-  To keep gpu headroom for the in-browser llm, this mode also trims page
-  gpu load: the whiteboard tab is hidden entirely (the `WhiteboardPanel`
-  tldraw canvas never mounts; if the tab were active it would show the
-  `interview.whiteboardLoading` pulse placeholder) and the voice orb renders
-  a css-only pulse dot instead of the three.js/WebGL canvas
-  (`apps/web/src/components/voice-orb.tsx`). The agent's `read_whiteboard` tool
-  degrades gracefully (`$whiteboard` stays `"{}"`).
+- Top bar: session title + countdown anchored to `session.created_at`
+  (T-2min wrap-up, 0 hard-stops to `/finish/[id]`). The status pill moves out
+  of the top bar — AgentStage owns voice state.
+- Voice wiring is unchanged: WebSocket + Web Audio, 16k PCM16 capture, Silero
+  VAD (`/vad/` vendored), binary frames while speaking + `{t:"utterance_end"}`,
+  `{t:"interrupt"}` barge-in (300ms grace on the browser driver), reconnect
+  with backoff, voice->text degradation surfaces the type path immediately.
+- Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
+  no-speech hint now points at the ControlBar `type` button / rail input
+  instead of rendering its own input inside the QuestionCard.
+- **Client-only runtime** (ADR-0003): OPFS-backed session/turns, `$clientTurns`
+  rehydration, browser driver agent loop — all unchanged. Platform filters in
+  the ToolSpec registry replace the hardcoded whiteboard-tab hiding; the orb
+  still renders the css-pulse fallback to keep gpu headroom for in-browser llm.
+- **Ended-session re-entry**: opening `/interview/[id]` for a session whose
+  status is `finished`/`reported`/`discarded` renders a read-only summary
+  (transcript + tools snapshot, no mic) with a `view report` / `new session`
+  CTA instead of booting a dead voice socket.
 
 ## Responsive
 
-Mobile-first: base styles target 375px; `sm:`/`md:`/`lg:` enhance toward the
-desktop layout above. The `md` breakpoint (768px) is the rail/Sheet switch.
+Mobile-first: base styles target 375px; `sm:`/`md:`/`lg:` enhance. `md`
+(768px) is the rail/Sheet switch.
 
-- **Layout**: single column below `md` (header, question block, tabbed tools,
-  controls stacked); the two-column main + transcript rail arrangement applies
-  from `md` up. No horizontal overflow at 375px.
-- **Transcript**: two presentations of the same data:
-  - **Desktop (`>= md`)**: the static translucent aside rail (peek/collapse via
-    `transcriptOpen`), unchanged. Text input lives at its bottom.
-  - **Mobile (`< md`)**: the aside is not rendered. A floating round button
-    (fixed, bottom-right, `PanelRight` icon, `aria-label="transcript"`) opens a
-    vendored `Sheet` (side right) holding the same turn list and text input.
-    The Sheet is controlled by the same turns/text state; the peek rail and
-    `$transcriptOpen` are desktop-only concepts.
-- **Top bar**: title truncates (`min-w-0 truncate`), the voice status label
-  hides below `sm`. The app navbar (logo + settings trigger, see
-  `navbar.md`) renders above the session header on all routes.
-- **Controls**: mute / end-early stretch to full width below `sm`
-  (`flex-1`, `truncate` on the end label), restore fixed widths from `sm` up.
-- **No-speech fallback hint**: rendered inside the question block (single
-  column on mobile, main column on desktop), so it appears on both layouts;
-  the input autofocusses when revealed and hides once the first agent
-  question lands.
+- Single column below `md`: AgentStage, QuestionCard, ToolDock stacked; the
+  transcript rail is not rendered (Sheet only).
+- AgentStage orb shrinks one step (`size-20`), caption clamps to 2 lines.
+- ControlBar buttons never wrap: mute/type keep icon+short-label, `end early`
+  truncates. Height is fixed (single row) so ToolDock height math is stable.
+- `viewport-fit=cover` on the root viewport meta + safe-area padding on the
+  ControlBar handle notched devices.
 
 ## URL / state
 
 - `id` path param: session id.
-- Active tool tab: search param (`?tab=editor`) — URL is the source of truth.
-- Voice WS URL derived from the page origin (`ws:` / `wss:` on `location.host`), honoring `VITE_DI_API_BASE` overrides like the rest of the API client.
+- Active dock tab: search param (`?tool=editor`) — URL is the source of truth.
+- Voice WS URL derived from the page origin (`ws:`/`wss:` on
+  `location.host`), honoring `VITE_DI_API_BASE`.
