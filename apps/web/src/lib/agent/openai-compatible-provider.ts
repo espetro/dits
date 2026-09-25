@@ -54,20 +54,6 @@ interface OpenAiStreamChunk {
   usage?: OpenAiUsage;
 }
 
-interface OpenAiGenerateMessage {
-  content?: string | null;
-  tool_calls?: OpenAiToolCall[];
-}
-
-interface OpenAiGenerateChoice {
-  message?: OpenAiGenerateMessage;
-}
-
-interface OpenAiGenerateResponse {
-  choices?: OpenAiGenerateChoice[];
-  usage?: OpenAiUsage;
-}
-
 /** Normalize a base URL like the server's providerUrl() does: strip trailing /v1. */
 function chatUrl(baseUrl: string): string {
   const trimmed = baseUrl.replace(/\/+$/, "");
@@ -329,56 +315,49 @@ export function createOpenAiCompatibleModel(
       return { stream };
     },
 
+    // Stream-only gateways (e.g. the managed demo endpoint) reject buffered
+    // chat/completions, so doGenerate accumulates a doStream call instead of
+    // issuing a non-streaming request.
     async doGenerate(options) {
-      const res = await doFetch(chatUrl(endpoint.baseUrl), {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${endpoint.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: endpoint.model,
-          messages: toOpenAiMessages(options.prompt),
-          ...(toOpenAiTools(options.tools) ? { tools: toOpenAiTools(options.tools) } : {}),
-        }),
-        signal: options.abortSignal ?? opts.abortSignal,
-      });
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        throw new Error(`llm chat failed: ${res.status} ${body}`);
-      }
-      const data = (await res.json()) as OpenAiGenerateResponse;
-      const message = data.choices?.[0]?.message;
+      const { stream } = await this.doStream(options);
+      const reader = stream.getReader();
       const content: LanguageModelV3Content[] = [];
-      if (message?.content) content.push({ type: "text", text: message.content });
-      for (const call of message?.tool_calls ?? []) {
-        content.push({
-          type: "tool-call",
-          toolCallId: call.id,
-          toolName: call.function.name,
-          input: call.function.arguments,
-        });
-      }
-      const finish = message?.tool_calls?.length ? "tool-calls" : "stop";
-      return {
-        content,
-        finishReason: { unified: finish, raw: finish },
-        usage: {
-          inputTokens: {
-            total: data.usage?.prompt_tokens,
-            noCache: undefined,
-            cacheRead: undefined,
-            cacheWrite: undefined,
-          },
-          outputTokens: {
-            total: data.usage?.completion_tokens,
-            text: undefined,
-            reasoning: undefined,
-          },
-        },
-        warnings: [],
-        response: { headers: Object.fromEntries(res.headers) },
+      let text = "";
+      let finishReason: { unified: "stop" | "tool-calls"; raw: string } = {
+        unified: "stop",
+        raw: "stop",
       };
+      const usage: LanguageModelV3Usage = {
+        inputTokens: {
+          total: undefined,
+          noCache: undefined,
+          cacheRead: undefined,
+          cacheWrite: undefined,
+        },
+        outputTokens: { total: undefined, text: undefined, reasoning: undefined },
+      };
+      for (;;) {
+        const { done, value: part } = await reader.read();
+        if (done) break;
+        if (part.type === "text-delta") text += part.delta;
+        else if (part.type === "tool-call")
+          content.push({
+            type: "tool-call",
+            toolCallId: part.toolCallId,
+            toolName: part.toolName,
+            input: part.input,
+          });
+        else if (part.type === "finish") {
+          finishReason = {
+            unified: part.finishReason.unified === "tool-calls" ? "tool-calls" : "stop",
+            raw: part.finishReason.raw ?? "stop",
+          };
+          usage.inputTokens.total = part.usage.inputTokens.total;
+          usage.outputTokens.total = part.usage.outputTokens.total;
+        }
+      }
+      if (text) content.unshift({ type: "text", text });
+      return { content, finishReason, usage, warnings: [] };
     },
   } satisfies LanguageModelV3;
 }

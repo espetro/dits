@@ -242,5 +242,7 @@
   "finish.building": "création de votre rapport",
   "finish.buildFailed": "rapport impossible à générer — la transcription est sauvegardée",
   "finish.tryAgain": "réessayer",
-  "finish.openReport": "ouvrir le rapport"
+  "finish.openReport": "ouvrir le rapport",
+  "settings.demoLlm.endpointLabel": "API démo",
+  "settings.demoLlm.customize": "utiliser un endpoint personnalisé"
 }

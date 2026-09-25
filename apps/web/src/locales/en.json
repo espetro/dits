@@ -242,5 +242,7 @@
   "finish.building": "building your report",
   "finish.buildFailed": "couldn't build your report — the transcript is safe",
   "finish.tryAgain": "try again",
-  "finish.openReport": "open report"
+  "finish.openReport": "open report",
+  "settings.demoLlm.endpointLabel": "Demo API",
+  "settings.demoLlm.customize": "use a custom endpoint"
 }

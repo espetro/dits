@@ -1,22 +1,23 @@
-import { DEMO_LLM_BASE_URL, isManagedLlmBaseUrl } from "@di/shared";
-
 /**
- * Zero-conf demo LLM (p2). In dev, VITE_DEMO_LLM_* env vars point the entry
- * at a chosen demo endpoint (key included, so no schema relaxation is
- * needed). Without them it defaults to the managed, rate-limited proxy url,
- * which accepts an empty apiKey.
+ * Zero-conf demo LLM (p2). The endpoint is never committed: builds inject it
+ * via VITE_DEMO_LLM_* env vars, so the shipped bundle is the only place the
+ * url exists. The managed endpoint ignores the api key, so the fill plants a
+ * placeholder just to satisfy the profile schema. When VITE_DEMO_LLM_BASE_URL
+ * is unset (local dev without env), the demo affordances stay hidden.
  */
 export const DEMO_LLM = {
-  baseUrl: (import.meta.env.VITE_DEMO_LLM_BASE_URL as string | undefined) ?? DEMO_LLM_BASE_URL,
-  apiKey: (import.meta.env.VITE_DEMO_LLM_API_KEY as string | undefined) ?? "",
+  baseUrl: (import.meta.env.VITE_DEMO_LLM_BASE_URL as string | undefined) ?? "",
+  apiKey: (import.meta.env.VITE_DEMO_LLM_API_KEY as string | undefined) ?? "demo",
   model: (import.meta.env.VITE_DEMO_LLM_MODEL as string | undefined) ?? "demo",
 };
 
-/** True when a configured llm endpoint is the managed/demo one (no key needed). */
+/** Demo fill is offered only when the build carries a demo endpoint. */
+export const DEMO_LLM_ENABLED = DEMO_LLM.baseUrl !== "";
+
+/** True when a configured llm endpoint is the demo one. */
 export function isDemoLlm(baseUrl: string | undefined): boolean {
-  if (!baseUrl) return false;
-  const normalized = baseUrl.replace(/\/+$/, "");
-  return isManagedLlmBaseUrl(normalized) || normalized === DEMO_LLM.baseUrl.replace(/\/+$/, "");
+  if (!baseUrl || !DEMO_LLM_ENABLED) return false;
+  return baseUrl.replace(/\/+$/, "") === DEMO_LLM.baseUrl.replace(/\/+$/, "");
 }
 
 /** Demand-signal click log for the "unlimited zero-conf" CTA — localStorage only, best-effort. */

@@ -242,5 +242,7 @@
   "finish.building": "리포트 만드는 중",
   "finish.buildFailed": "리포트를 만들 수 없습니다 — 대화록은 안전하게 저장됐습니다",
   "finish.tryAgain": "다시 시도",
-  "finish.openReport": "리포트 열기"
+  "finish.openReport": "리포트 열기",
+  "settings.demoLlm.endpointLabel": "데모 API",
+  "settings.demoLlm.customize": "사용자 지정 엔드포인트 사용"
 }

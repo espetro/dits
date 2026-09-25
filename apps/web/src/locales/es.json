@@ -242,5 +242,7 @@
   "finish.building": "creando tu informe",
   "finish.buildFailed": "no se pudo crear el informe — la transcripción está a salvo",
   "finish.tryAgain": "reintentar",
-  "finish.openReport": "abrir informe"
+  "finish.openReport": "abrir informe",
+  "settings.demoLlm.endpointLabel": "API demo",
+  "settings.demoLlm.customize": "usar un endpoint personalizado"
 }

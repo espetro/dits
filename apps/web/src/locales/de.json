@@ -242,5 +242,7 @@
   "finish.building": "bericht wird erstellt",
   "finish.buildFailed": "bericht fehlgeschlagen — das transkript ist sicher",
   "finish.tryAgain": "erneut versuchen",
-  "finish.openReport": "bericht öffnen"
+  "finish.openReport": "bericht öffnen",
+  "settings.demoLlm.endpointLabel": "Demo-API",
+  "settings.demoLlm.customize": "benutzerdefinierten endpoint verwenden"
 }

@@ -242,5 +242,7 @@
   "finish.building": "جارٍ إنشاء التقرير",
   "finish.buildFailed": "تعذر إنشاء التقرير — النص المفرغ محفوظ",
   "finish.tryAgain": "حاول مجددا",
-  "finish.openReport": "فتح التقرير"
+  "finish.openReport": "فتح التقرير",
+  "settings.demoLlm.endpointLabel": "Demo API",
+  "settings.demoLlm.customize": "استخدام نقطة نهاية مخصصة"
 }

@@ -242,5 +242,7 @@
   "finish.building": "レポートを作成しています",
   "finish.buildFailed": "レポートを作成できませんでした — 文字起こしは保存されています",
   "finish.tryAgain": "再試行",
-  "finish.openReport": "レポートを開く"
+  "finish.openReport": "レポートを開く",
+  "settings.demoLlm.endpointLabel": "デモ API",
+  "settings.demoLlm.customize": "カスタムエンドポイントを使う"
 }

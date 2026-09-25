@@ -47,32 +47,10 @@ export interface BrowserLlmSection {
   readonly modelId?: string;
 }
 
-/**
- * Managed demo endpoint (p2 zero-conf): the rate-limited anonymous proxy.
- * Placeholder until the vps deploy lands; keep it the single source of
- * truth so the schema check, the settings demo entry and the demo chip
- * all agree on the same url.
- */
-export const DEMO_LLM_BASE_URL = "https://llm.dits.illo.fyi/v1";
-const MANAGED_LLM_BASE_URLS = new Set([DEMO_LLM_BASE_URL]);
-
-export function isManagedLlmBaseUrl(baseUrl: string): boolean {
-  return MANAGED_LLM_BASE_URLS.has(baseUrl.replace(/\/+$/, ""));
-}
-
-export const RemoteLlmSectionSchema = v.pipe(
-  v.object({
-    ...ProviderEndpointSchema.entries,
-    // managed demo urls may carry an empty key — the object-level check
-    // below enforces it; arbitrary endpoints still require a key.
-    apiKey: v.string(),
-    mode: v.literal("remote"),
-  }),
-  v.check(
-    (o) => o.apiKey.length > 0 || isManagedLlmBaseUrl(o.baseUrl),
-    "apiKey is required unless baseUrl is a managed demo endpoint",
-  ),
-);
+export const RemoteLlmSectionSchema = v.object({
+  ...ProviderEndpointSchema.entries,
+  mode: v.literal("remote"),
+});
 
 export const BrowserLlmSectionSchema = v.object({
   mode: v.literal("browser"),

@@ -3,9 +3,13 @@ import { ReportSchema, buildReportPrompt } from "@di/shared/report";
 import type { Report, ReportPromptContext } from "@di/shared";
 import type { LlmMessage, LlmResult } from "../voice/llm";
 
-/** Narrow port: the generator only needs a non-streaming chat round-trip. */
+/**
+ * Narrow port for report generation. `streamChat` is preferred: some
+ * OpenAI-compatible gateways only support streaming; `chat` is the fallback.
+ */
 export interface ReportLlm {
   chat(messages: LlmMessage[]): Promise<LlmResult>;
+  streamChat?(messages: LlmMessage[]): Promise<LlmResult>;
 }
 
 const PARSE_RETRY_HINT =
@@ -22,7 +26,8 @@ export async function generateReport(llm: ReportLlm, ctx: ReportPromptContext): 
   for (let attempt = 0; attempt < 2; attempt++) {
     const prompt = attempt === 0 ? base : base + PARSE_RETRY_HINT;
     try {
-      const result = await llm.chat([{ role: "user", content: prompt }]);
+      const messages: LlmMessage[] = [{ role: "user", content: prompt }];
+      const result = await (llm.streamChat ?? llm.chat.bind(llm))(messages);
       return v.parse(ReportSchema, extractJson(result.content));
     } catch (err) {
       lastErr = err;

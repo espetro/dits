@@ -39,11 +39,13 @@ env overrides `DI_` + `__` (`DI_LLM__MODEL=gpt-4o`). See
 - `files.*` is optional: defaults land in the platform app-support dir
   (`~/Library/Application Support/di`, `%APPDATA%/di`, `$XDG_DATA_HOME/di` or
   `~/.local/share/di`).
-- Zero-conf demo LLM in dev: `mise run dev:server:demo-llm` sources
+- Zero-conf demo LLM: `mise run dev:server:demo-llm` sources
   `scripts/dev-env-demo-llm.sh` (`DI_DEMO_LLM_*` -> `DI_LLM__*` overrides; the
-  SPA's one-click "demo endpoint" fill reads `VITE_DEMO_LLM_*`). The shared
-  managed endpoint URL lives in `DEMO_LLM_BASE_URL`
-  (`apps/web/src/lib/demo-llm.ts`) pending the rate-limited VPS proxy.
+  SPA's one-click "demo endpoint" fill reads `VITE_DEMO_LLM_*`, baked into the
+  bundle at build time). The demo endpoint url is never committed — set
+  `DI_DEMO_LLM_*`/`VITE_DEMO_LLM_*` as env/secrets in dev and deploy. Note the
+  managed gateway only allows browser calls from its origin allowlist, so the
+  browser demo path works on the deployed site, not localhost.
 - `DI_TEST_MODE=1` mounts `/v1/test/*` (ping/state/events/pipeline/smoke).
 
 ## Start order

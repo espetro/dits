@@ -11,7 +11,7 @@ import { smokeTestModel } from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
 import { BrowserLlmManager } from "./browser-llm-manager";
 import { EndpointFields } from "./endpoint-fields";
-import { DEMO_LLM, isDemoLlm } from "../lib/demo-llm";
+import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
@@ -645,7 +645,7 @@ function AiProviderPane() {
                     modelOptions={modelOptions}
                     onChange={(patch) => update(patch)}
                     onDemoFill={
-                      tab === "llm"
+                      tab === "llm" && DEMO_LLM_ENABLED
                         ? () =>
                             update({
                               enabled: true,

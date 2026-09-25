@@ -242,5 +242,7 @@
   "finish.building": "正在生成报告",
   "finish.buildFailed": "报告生成失败 — 文字记录已保存",
   "finish.tryAgain": "重试",
-  "finish.openReport": "打开报告"
+  "finish.openReport": "打开报告",
+  "settings.demoLlm.endpointLabel": "演示 API",
+  "settings.demoLlm.customize": "使用自定义端点"
 }

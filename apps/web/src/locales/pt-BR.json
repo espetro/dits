@@ -242,5 +242,7 @@
   "finish.building": "gerando seu relatório",
   "finish.buildFailed": "não foi possível gerar o relatório — a transcrição está salva",
   "finish.tryAgain": "tentar novamente",
-  "finish.openReport": "abrir relatório"
+  "finish.openReport": "abrir relatório",
+  "settings.demoLlm.endpointLabel": "API demo",
+  "settings.demoLlm.customize": "usar um endpoint personalizado"
 }
