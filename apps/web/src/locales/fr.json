@@ -190,5 +190,8 @@
   "runtime.unreachable": "serveur injoignable — utilisation de {fallback}",
   "settings.incomplete": "activé mais incomplet — remplis les champs ci-dessous ou désactive pour garder ta config enregistrée",
   "setup.filesServerOnly": "l'envoi de documents nécessite le runtime serveur — les fichiers ne sont pas stockés en mode navigateur",
-  "report.coachSeed": "Entraîne-moi sur {name}. Lance une session de pratique ciblée et creuse les détails."
+  "report.coachSeed": "Entraîne-moi sur {name}. Lance une session de pratique ciblée et creuse les détails.",
+  "settings.demoLlm.fill": "utiliser l'endpoint démo managé — pas de clé requise",
+  "settings.demoLlm.badge": "démo",
+  "settings.demoLlm.upsell": "envie d'un zero-conf illimité ? dis-le-nous"
 }

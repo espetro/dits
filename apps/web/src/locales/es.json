@@ -190,5 +190,8 @@
   "runtime.unreachable": "servidor inalcanzable — usando {fallback}",
   "settings.incomplete": "activado pero incompleto — completa los campos o desactívalo para conservar tu configuración",
   "setup.filesServerOnly": "subir documentos requiere el runtime del servidor — los archivos no se guardan en modo navegador",
-  "report.coachSeed": "Entréname en {name}. Haz una sesión de práctica enfocada y pide detalles concretos."
+  "report.coachSeed": "Entréname en {name}. Haz una sesión de práctica enfocada y pide detalles concretos.",
+  "settings.demoLlm.fill": "usar el endpoint demo gestionado — no hace falta key",
+  "settings.demoLlm.badge": "demo",
+  "settings.demoLlm.upsell": "¿quieres zero-conf ilimitado? avísanos"
 }

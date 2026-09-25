@@ -11,6 +11,7 @@ import { smokeTestModel } from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
 import { BrowserLlmManager } from "./browser-llm-manager";
 import { EndpointFields } from "./endpoint-fields";
+import { DEMO_LLM, isDemoLlm } from "../lib/demo-llm";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
@@ -312,12 +313,14 @@ function AiProviderPane() {
   }, [drafts]);
 
   // p1 truth-telling: an enabled-but-incomplete section never persisted — say
-  // so instead of silently dropping it (buildProfile skips it).
+  // so instead of silently dropping it (buildProfile skips it). A managed
+  // demo llm endpoint legitimately has no key, so it is not incomplete.
   const isUrl = (s: string): boolean => URL.canParse(s);
+  const keyMissing = !draft.apiKey && !(tab === "llm" && isDemoLlm(draft.baseUrl));
   const sectionIncomplete =
     draft.enabled &&
     (tab === "llm" ? draft.llmMode === "remote" : true) &&
-    (!draft.baseUrl || !draft.apiKey || !draft.model || !isUrl(draft.baseUrl));
+    (!draft.baseUrl || keyMissing || !draft.model || !isUrl(draft.baseUrl));
 
   function buildProfile(): ProviderSections {
     const out: ProviderSections = {};
@@ -329,7 +332,12 @@ function AiProviderPane() {
         engine: drafts.llm.engine,
         ...(drafts.llm.browserModelId ? { modelId: drafts.llm.browserModelId } : {}),
       };
-    } else if (drafts.llm.enabled && drafts.llm.baseUrl && drafts.llm.apiKey && drafts.llm.model) {
+    } else if (
+      drafts.llm.enabled &&
+      drafts.llm.baseUrl &&
+      (drafts.llm.apiKey || isDemoLlm(drafts.llm.baseUrl)) &&
+      drafts.llm.model
+    ) {
       out.llm = {
         mode: "remote",
         flavor: drafts.llm.flavor,
@@ -390,7 +398,9 @@ function AiProviderPane() {
     }
     // Client-side guard: an empty baseUrl/model would otherwise hit a
     // relative fetch or an empty completion and look like a false "ok".
-    if (draft.enabled && (!draft.baseUrl || !draft.model || (tab !== "tts" && !draft.apiKey))) {
+    // Managed demo llm endpoints need no key.
+    const needsKey = tab !== "tts" && !(tab === "llm" && isDemoLlm(draft.baseUrl));
+    if (draft.enabled && (!draft.baseUrl || !draft.model || (needsKey && !draft.apiKey))) {
       setTestState((prev) => ({
         ...prev,
         [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
@@ -635,6 +645,18 @@ function AiProviderPane() {
                     }
                     modelOptions={modelOptions}
                     onChange={(patch) => update(patch)}
+                    onDemoFill={
+                      tab === "llm"
+                        ? () =>
+                            update({
+                              enabled: true,
+                              llmMode: "remote",
+                              baseUrl: DEMO_LLM.baseUrl,
+                              apiKey: DEMO_LLM.apiKey,
+                              model: DEMO_LLM.model,
+                            })
+                        : undefined
+                    }
                   />
                 )}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

@@ -190,5 +190,8 @@
   "runtime.unreachable": "الخادم غير متاح — يتم استخدام {fallback}",
   "settings.incomplete": "مفعّل لكنه غير مكتمل — املأ الحقول أدناه أو أطفئه للاحتفاظ بالإعدادات المحفوظة",
   "setup.filesServerOnly": "رفع المستندات يتطلب بيئة الخادم — لا تُحفظ الملفات في وضع المتصفح",
-  "report.coachSeed": "درّبني على {name}. نفّذ جلسة تدريب مركّزة واسأل عن التفاصيل."
+  "report.coachSeed": "درّبني على {name}. نفّذ جلسة تدريب مركّزة واسأل عن التفاصيل.",
+  "settings.demoLlm.fill": "استخدم نقطة النهاية التجريبية المُدارة — لا حاجة لمفتاح",
+  "settings.demoLlm.badge": "تجريبي",
+  "settings.demoLlm.upsell": "تريد zero-conf غير محدود؟ أخبرنا"
 }

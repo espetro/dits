@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Input } from "./vendor/input";
+import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 
 const fieldClass = "block text-xs text-muted-foreground";
 const helperClass = "mt-1 text-xs text-muted-foreground";
@@ -72,6 +73,8 @@ export function EndpointFields(props: {
   onChange: (
     patch: Partial<{ baseUrl: string; apiKey: string; model: string; voice: string }>,
   ) => void;
+  /** llm only: one-click fill with the managed demo endpoint */
+  onDemoFill?: () => void;
 }) {
   const intl = useIntl();
   const tab = props.tab;
@@ -148,6 +151,31 @@ export function EndpointFields(props: {
         {tab === "llm" && (
           <p>
             <FormattedMessage id="settings.freeProvidersLabel" /> <FreeProviderLinks />
+          </p>
+        )}
+        {tab === "llm" && (
+          <p className="flex flex-wrap items-center gap-2">
+            {props.onDemoFill && (
+              <button
+                type="button"
+                onClick={props.onDemoFill}
+                className="underline underline-offset-2 hover:text-persimmon-text"
+              >
+                <FormattedMessage id="settings.demoLlm.fill" />
+              </button>
+            )}
+            {isDemoLlm(draft.baseUrl) && (
+              <span className="rounded-full bg-sage/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-sage">
+                <FormattedMessage id="settings.demoLlm.badge" />
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={logDemoUpsellClick}
+              className="underline underline-offset-2 hover:text-persimmon-text"
+            >
+              <FormattedMessage id="settings.demoLlm.upsell" />
+            </button>
           </p>
         )}
       </div>
