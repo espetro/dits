@@ -9,13 +9,15 @@ LLM.
 ## client-only session creation persists to OPFS
 
 Seed `di.runtime-mode` / `di.provider-profile` in localStorage, start a
-session from `/setup` via "proceed without validation", land on
+session from `/setup` via a scenario card's "start" CTA (cards skip the
+validate step by default, p3), land on
 `/interview/[id]`, and confirm the session record exists in OPFS
 (`sessions/[id].json`) with no server involved.
 
 ## typed turn round-trips through a mocked SSE response and appears in the transcript
 
-Type a message into the "type instead…" box. `BrowserVoiceDriver.sendText`
+Open the transcript rail via the ControlBar "type" button and type a
+message into the "talk or type…" box (p3 transcript-first-class input). `BrowserVoiceDriver.sendText`
 drives `ClientAgent.respond` against the mocked SSE stream; both the user
 and agent turns should appear in the transcript panel tagged `source: text`
 (not `voice`), and both should be persisted to the OPFS turn list.
