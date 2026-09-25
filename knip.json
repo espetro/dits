@@ -4,6 +4,7 @@
   "ignore": [
     "build/release.ts",
     "scripts/check-agents-md-length.ts",
+    "scripts/check-dscheck.ts",
     "scripts/check-import-paths.ts",
     "scripts/check-ratchets.ts",
     "scripts/pocket-shim.ts",
