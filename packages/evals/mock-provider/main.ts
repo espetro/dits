@@ -85,20 +85,56 @@ const routes: [string, string, Handler][] = [
   [
     "POST",
     "/v1/chat/completions",
-    (_req, fx) => {
-      return Response.json({
-        id: "chatcmpl-mock",
-        object: "chat.completion",
-        created: Math.floor(Date.now() / 1000),
-        model: "mock-llm",
-        choices: [
-          {
-            index: 0,
-            message: { role: "assistant", content: fx.chat[0]!.content },
-            finish_reason: "stop",
-          },
-        ],
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+    async (req, fx) => {
+      const body = (await req.json().catch(() => ({}))) as { stream?: boolean };
+      const created = Math.floor(Date.now() / 1000);
+      const content = fx.chat[0]!.content;
+      if (!body.stream) {
+        return Response.json({
+          id: "chatcmpl-mock",
+          object: "chat.completion",
+          created,
+          model: "mock-llm",
+          choices: [
+            {
+              index: 0,
+              message: { role: "assistant", content },
+              finish_reason: "stop",
+            },
+          ],
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        });
+      }
+      // real sse: the browser llm client always requests stream:true, so
+      // evals/e2e exercise the same parse path as a live provider.
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const send = (obj: unknown) =>
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+          const base = {
+            id: "chatcmpl-mock",
+            object: "chat.completion.chunk",
+            created,
+            model: "mock-llm",
+          };
+          send({
+            ...base,
+            choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
+          });
+          for (const piece of content.match(/\S+\s*/g) ?? []) {
+            send({
+              ...base,
+              choices: [{ index: 0, delta: { content: piece }, finish_reason: null }],
+            });
+          }
+          send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] });
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      });
+      return new Response(stream, {
+        headers: { "content-type": "text/event-stream", "cache-control": "no-cache" },
       });
     },
   ],
