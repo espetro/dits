@@ -54,7 +54,8 @@ export async function createDriver(
     const withLlm = profile as ProviderSections & { llm: LlmSection };
     // The session's toolset decides which agent tools exist (p3 ToolSpec
     // registry): content getters stay store-backed per tool id.
-    const toolset = (await getClientSession(sessionId))?.tools ?? DEFAULT_SESSION_TOOLS;
+    const clientSession = await getClientSession(sessionId);
+    const toolset = clientSession?.tools ?? DEFAULT_SESSION_TOOLS;
     const executors = createStoreToolExecutors({
       toolset,
       contentGetters: {
@@ -71,6 +72,7 @@ export async function createDriver(
     await AbortSignalAbortable(loadSignal, () =>
       driver.useClientAgent(withLlm, executors, toolset, () => ({
         mode: "interview",
+        prompt: clientSession?.prompt,
         currentQuestion: $question.get().text,
         hints: $question.get().hints,
       })),

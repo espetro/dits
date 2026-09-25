@@ -65,6 +65,7 @@ export function apiRoutes(
       status: "created",
       duration_min: body.duration_min,
       plan: null,
+      prompt: body.prompt ?? null,
       tools: JSON.stringify(body.tools ?? DEFAULT_SESSION_TOOLS),
     };
     await db.insertInto("sessions").values(session).execute();
@@ -72,6 +73,7 @@ export function apiRoutes(
       v.parse(SessionSchema, {
         ...session,
         plan: undefined,
+        prompt: session.prompt ?? undefined,
         tools: parseSessionTools(session.tools),
       }),
       201,
@@ -88,6 +90,7 @@ export function apiRoutes(
         v.parse(SessionSchema, {
           ...r,
           plan: r.plan ?? undefined,
+          prompt: r.prompt ?? undefined,
           tools: parseSessionTools(r.tools),
         }),
       ),
@@ -105,6 +108,7 @@ export function apiRoutes(
       v.parse(SessionSchema, {
         ...row,
         plan: row.plan ?? undefined,
+        prompt: row.prompt ?? undefined,
         tools: parseSessionTools(row.tools),
       }),
     );
