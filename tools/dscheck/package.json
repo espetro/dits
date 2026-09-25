@@ -1,0 +1,9 @@
+{
+  "name": "dits-dscheck-env",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "dscheck-cli": "0.1.0",
+    "typescript": "~6.0.0"
+  }
+}

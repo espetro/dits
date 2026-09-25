@@ -1,0 +1,11 @@
+{
+  "tokens": ["apps/web/src/theme.css"],
+  "ignore": [
+    "apps/web/src/theme.css",
+    "apps/web/src/components/vendor/**",
+    "apps/web/src/locales/**",
+    "apps/web/src/routeTree.gen.ts",
+    "node_modules/**",
+    "**/dist/**"
+  ]
+}
