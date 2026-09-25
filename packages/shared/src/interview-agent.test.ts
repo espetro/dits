@@ -4,6 +4,7 @@ import {
   buildPrompt,
   cutSentences,
   describeWhiteboardSnapshot,
+  voiceToolsFor,
 } from "./interview-agent.ts";
 
 describe("buildPrompt", () => {
@@ -39,6 +40,33 @@ describe("VOICE_TOOLS", () => {
     for (const t of VOICE_TOOLS) {
       expect((t.parameters as { type: string }).type).toBe("object");
     }
+  });
+});
+
+describe("voiceToolsFor", () => {
+  it("emits update_question + per-tool read defs for the session toolset", () => {
+    expect(voiceToolsFor({ editor: "", srs: "" }).map((t) => t.name)).toEqual([
+      "update_question",
+      "read_editor",
+      "read_srs",
+    ]);
+  });
+
+  it("adds update_ defs for write/read-write tools only", () => {
+    expect(voiceToolsFor({ editor: "", whiteboard: "" }).map((t) => t.name)).not.toContain(
+      "update_editor",
+    );
+    const tools = voiceToolsFor({ whiteboard: "", scratch: "rw" });
+    // scratch is not in TOOL_AGENT_ACCESS -> read-only default, no update_ def
+    expect(tools.map((t) => t.name)).toEqual([
+      "update_question",
+      "read_whiteboard",
+      "read_scratch",
+    ]);
+  });
+
+  it("keeps only update_question for an empty toolset", () => {
+    expect(voiceToolsFor({}).map((t) => t.name)).toEqual(["update_question"]);
   });
 });
 

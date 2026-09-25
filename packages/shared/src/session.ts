@@ -31,6 +31,17 @@ export const TurnSchema = v.object({
 });
 export type Turn = v.InferOutput<typeof TurnSchema>;
 
+/**
+ * Ordered map of dock tool id -> per-tool variant string (e.g. the editor's
+ * language). The scenario card seeds this; `Record` insertion order is the
+ * tab order. p3 ToolDock contract.
+ */
+export const SessionToolsSchema = v.record(v.string(), v.string());
+export type SessionTools = v.InferOutput<typeof SessionToolsSchema>;
+
+/** Toolset for sessions created before presets could pick one. */
+export const DEFAULT_SESSION_TOOLS: SessionTools = { editor: "", whiteboard: "" };
+
 export const SessionSchema = v.object({
   id: SessionIdSchema,
   title: v.pipe(v.string(), v.minLength(1)),
@@ -41,6 +52,7 @@ export const SessionSchema = v.object({
   /** planned duration in minutes */
   duration_min: v.pipe(v.number(), v.integer(), v.minValue(5), v.maxValue(120)),
   plan: v.optional(v.string()),
+  tools: v.optional(SessionToolsSchema),
 });
 export type Session = v.InferOutput<typeof SessionSchema>;
 
@@ -49,14 +61,16 @@ export const CreateSessionRequestSchema = v.object({
   mode: InterviewModeSchema,
   duration_min: v.pipe(v.number(), v.integer(), v.minValue(5), v.maxValue(120)),
   prompt: v.optional(v.string()),
+  tools: v.optional(SessionToolsSchema),
 });
 export type CreateSessionRequest = v.InferOutput<typeof CreateSessionRequestSchema>;
 
-/** Browser-pushed editor/whiteboard state the worker reads via GET /v1/sessions/:id/tools. */
-export const ToolStateSchema = v.object({
-  editor: v.string(),
-  whiteboard: v.string(),
-});
+/**
+ * Browser-pushed per-tool content state the agent reads via
+ * GET /v1/sessions/:id/tools. Keyed by tool id so the set of tools is not
+ * fixed at the contract layer (p3 ToolSpec registry).
+ */
+export const ToolStateSchema = v.record(v.string(), v.string());
 export type ToolState = v.InferOutput<typeof ToolStateSchema>;
 
 /** Worker -> server session event, appended to the event log surfaced at /v1/test/events. */

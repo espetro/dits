@@ -17,6 +17,8 @@ export interface SessionDto {
   created_at: string;
   status: string;
   duration_min: number;
+  /** Dock toolset, Record<toolId, variant> (p3); absent on old sessions. */
+  tools?: Record<string, string>;
 }
 
 export interface TurnDto {
@@ -33,6 +35,8 @@ export async function createSession(body: {
   title: string;
   mode: string;
   duration_min: number;
+  /** Dock toolset the scenario card seeds (p3); absent = default pair. */
+  tools?: Record<string, string>;
 }): Promise<SessionDto> {
   const res = await fetch(`${BASE}/v1/sessions`, {
     method: "POST",
@@ -107,10 +111,8 @@ export async function requestReport(id: string): Promise<unknown> {
   return res.json();
 }
 
-export interface ToolStateDto {
-  editor: string;
-  whiteboard: string;
-}
+/** Per-tool content map keyed by tool id (p3 ToolDock). */
+export type ToolStateDto = Record<string, string>;
 
 export async function pushToolState(id: string, state: ToolStateDto): Promise<void> {
   const res = await fetch(`${BASE}/v1/sessions/${id}/tools`, {

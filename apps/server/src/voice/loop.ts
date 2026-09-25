@@ -1,11 +1,13 @@
 import * as v from "valibot";
 import {
+  DEFAULT_SESSION_TOOLS,
   KICKOFF_DELAY_MS,
   KICKOFF_UTTERANCE,
   VOICE_TOOLS,
   buildPrompt,
   cutSentences,
   describeWhiteboardSnapshot,
+  voiceToolsFor,
 } from "@di/shared";
 import type {
   Config,
@@ -74,6 +76,17 @@ export interface VoiceLoopDeps {
 const TTS_CHUNK_BYTES = (TTS_SAMPLE_RATE * 2 * 20) / 1000;
 const MAX_TOOL_OUTPUT = 4000;
 
+/** sessions.tools is a JSON record column; absent/unparseable means default. */
+function parseToolsColumn(raw: string | null | undefined): Record<string, string> {
+  if (!raw) return { ...DEFAULT_SESSION_TOOLS };
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return Object.keys(parsed).length > 0 ? parsed : { ...DEFAULT_SESSION_TOOLS };
+  } catch {
+    return { ...DEFAULT_SESSION_TOOLS };
+  }
+}
+
 /**
  * Per-connection voice loop: accumulate streamed PCM frames, transcribe per
  * utterance (client VAD delimits), run one LLM turn, persist turns/events,
@@ -99,6 +112,8 @@ export class VoiceLoop {
   private abort: AbortController | undefined;
   private ctx: SessionContext = { mode: "interview" };
   private history: LlmMessage[] = [];
+  /** Toolset from the session row; falls back to the default pair. */
+  private voiceTools: ToolDef[] = VOICE_TOOLS;
   /** Serializes turns so concurrent utterances keep monotonically increasing seqs. */
   private turnLock = Promise.resolve();
   private closed = false;
@@ -170,6 +185,7 @@ export class VoiceLoop {
       title: session?.title,
       plan: session?.plan ?? undefined,
     };
+    this.voiceTools = voiceToolsFor(parseToolsColumn(session?.tools));
     await this.postEvent(this.sessionId, "agent.started", { transport: "ws" });
     // Seed in-memory history from persisted turns so a reconnecting or
     // text-first session keeps context (REST-posted turns included).
@@ -402,7 +418,7 @@ export class VoiceLoop {
     ];
     const llmStart = Date.now();
     for (let hop = 0; hop < 4; hop++) {
-      const result = await this.llm.chat(messages, VOICE_TOOLS, { signal });
+      const result = await this.llm.chat(messages, this.voiceTools, { signal });
       if (metrics && metrics.llm_ttft_ms === undefined) metrics.llm_ttft_ms = Date.now() - llmStart;
       if (result.toolCalls.length === 0) return { content: result.content };
       const toolResults: { name: string; output: string }[] = [];
@@ -453,7 +469,7 @@ export class VoiceLoop {
         signal,
         metrics,
       });
-      const result = await this.llm.streamChat!(messages, VOICE_TOOLS, {
+      const result = await this.llm.streamChat!(messages, this.voiceTools, {
         signal,
         onFirstToken: () => {
           if (metrics && metrics.llm_ttft_ms === undefined)
@@ -514,20 +530,34 @@ export class VoiceLoop {
       this.send({ t: "question", question: q.question, hints: q.hints ?? [] });
       return JSON.stringify({ ok: true, question: q.question });
     }
-    if (name === "read_editor" || name === "read_whiteboard") {
+    if (name.startsWith("read_")) {
+      const tool = name.slice(5);
       const state = await this.readToolState();
-      if (name === "read_editor") {
-        await this.postEvent(this.sessionId, "tool.read_editor", {
-          length: state.editor.length,
-        });
-        return JSON.stringify({ text: truncate(state.editor) });
-      }
-      await this.postEvent(this.sessionId, "tool.read_whiteboard", {
-        length: state.whiteboard.length,
-      });
-      return JSON.stringify({
-        text: truncate(describeWhiteboardSnapshot(state.whiteboard)),
-      });
+      const content = state[tool] ?? "";
+      await this.postEvent(this.sessionId, `tool.${name}`, { length: content.length });
+      const text = tool === "whiteboard" ? describeWhiteboardSnapshot(content) : content;
+      return JSON.stringify({ text: truncate(text) });
+    }
+    if (name.startsWith("update_")) {
+      const tool = name.slice(7);
+      const text = typeof args.text === "string" ? args.text : "";
+      await this.db
+        .insertInto("tool_states")
+        .values({
+          session_id: this.sessionId,
+          tool,
+          state: text,
+          updated_at: new Date().toISOString(),
+        })
+        .onConflict((oc) =>
+          oc.columns(["session_id", "tool"]).doUpdateSet({
+            state: text,
+            updated_at: new Date().toISOString(),
+          }),
+        )
+        .execute();
+      await this.postEvent(this.sessionId, `tool.${name}`, { length: text.length });
+      return JSON.stringify({ ok: true, tool });
     }
     return JSON.stringify({ error: `unknown tool: ${name}` });
   }
@@ -586,16 +616,15 @@ export class VoiceLoop {
     return turn;
   }
 
-  private async readToolState(): Promise<{
-    editor: string;
-    whiteboard: string;
-  }> {
-    const row = await this.db
-      .selectFrom("tool_state")
-      .selectAll()
-      .where("id", "=", this.sessionId)
-      .executeTakeFirst();
-    return { editor: row?.editor ?? "", whiteboard: row?.whiteboard ?? "" };
+  private async readToolState(): Promise<Record<string, string>> {
+    const rows = await this.db
+      .selectFrom("tool_states")
+      .select(["tool", "state"])
+      .where("session_id", "=", this.sessionId)
+      .execute();
+    const state: Record<string, string> = {};
+    for (const r of rows) state[r.tool] = r.state;
+    return state;
   }
 
   /** In-process event write (replaces the worker's HTTP postEvent round-trip). */

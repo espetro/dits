@@ -27,7 +27,7 @@ describe("tool state routes", () => {
     const id = await makeSession(app);
     const res = await app.request(`/v1/sessions/${id}/tools`);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ editor: "", whiteboard: "" });
+    expect(await res.json()).toEqual({});
   });
 
   it("stores and updates tool state via PUT", async () => {
@@ -51,6 +51,19 @@ describe("tool state routes", () => {
     expect(await res3.json()).toEqual({ editor: "updated", whiteboard: "" });
   });
 
+  it("stores arbitrary tool ids beyond editor/whiteboard", async () => {
+    const app = await makeApp();
+    const id = await makeSession(app);
+    const res = await app.request(`/v1/sessions/${id}/tools`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ srs: "cards", editor: "x" }),
+    });
+    expect(res.status).toBe(200);
+    const got = await app.request(`/v1/sessions/${id}/tools`);
+    expect(await got.json()).toEqual({ srs: "cards", editor: "x" });
+  });
+
   it("rejects invalid payloads and unknown sessions", async () => {
     const app = await makeApp();
     const id = await makeSession(app);
@@ -66,6 +79,37 @@ describe("tool state routes", () => {
       body: JSON.stringify({ editor: "", whiteboard: "" }),
     });
     expect(missing.status).toBe(404);
+  });
+
+  it("persists a custom toolset on session create and reads it back", async () => {
+    const app = await makeApp();
+    const res = await app.request("/v1/sessions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "t",
+        mode: "interview",
+        duration_min: 30,
+        tools: { editor: "ts", cards: "" },
+      }),
+    });
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { tools?: Record<string, string> };
+    expect(body.tools).toEqual({ editor: "ts", cards: "" });
+    const listed = await app.request("/v1/sessions");
+    const sessions = (await listed.json()) as { tools?: Record<string, string> }[];
+    expect(sessions[0]!.tools).toEqual({ editor: "ts", cards: "" });
+  });
+
+  it("defaults sessions created without tools to editor+whiteboard", async () => {
+    const app = await makeApp();
+    const res = await app.request("/v1/sessions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "t", mode: "interview", duration_min: 30 }),
+    });
+    const body = (await res.json()) as { tools?: Record<string, string> };
+    expect(body.tools).toEqual({ editor: "", whiteboard: "" });
   });
 });
 

@@ -51,6 +51,7 @@ async function makeLoop(
       status: "created",
       duration_min: 30,
       plan: null,
+      tools: "{}",
     })
     .execute();
   const messages: VoiceServerMessage[] = [];
@@ -284,11 +285,11 @@ describe("VoiceLoop", () => {
       },
     });
     await db
-      .insertInto("tool_state")
+      .insertInto("tool_states")
       .values({
-        id: "s1",
-        editor: "console.log(1)",
-        whiteboard: "",
+        session_id: "s1",
+        tool: "editor",
+        state: "console.log(1)",
         updated_at: new Date().toISOString(),
       })
       .execute();
@@ -368,6 +369,7 @@ describe("VoiceLoop", () => {
         status: "created",
         duration_min: 30,
         plan: null,
+        tools: "{}",
       })
       .execute();
     await db
@@ -551,6 +553,7 @@ describe("VoiceLoop", () => {
         status: "created",
         duration_min: 30,
         plan: null,
+        tools: "{}",
       })
       .execute();
     const messages: VoiceServerMessage[] = [];

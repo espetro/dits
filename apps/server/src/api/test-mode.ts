@@ -104,6 +104,7 @@ export function testRoutes(db: Db): Hono {
         status: "created" as const,
         duration_min: 5,
         plan: null,
+        tools: "{}",
       };
       await db.insertInto("sessions").values(session).execute();
 
