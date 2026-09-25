@@ -82,7 +82,7 @@
   "report.competencies": "competencies",
   "report.turn": "turn {n}",
   "report.practiceWeak": "practice weak areas",
-  "report.practiceHint": "available in a future iteration",
+  "report.practiceHint": "start a coach session seeded from your weakest area",
   "history.title": "history",
   "history.loading": "loading…",
   "history.empty": "no sessions yet — go get grilled.",
@@ -182,5 +182,13 @@
   "settings.llm.geminiReady": "Managed by Chrome; downloads/updates happen automatically.",
   "settings.llm.statusDot": "engine status",
   "settings.llm.testOk": "model responded",
-  "setup.llmMissing": "no LLM configured"
+  "setup.llmMissing": "no LLM configured",
+  "runtime.label": "runtime",
+  "runtime.server": "server",
+  "runtime.custom": "custom endpoint",
+  "runtime.inBrowser": "in-browser",
+  "runtime.unreachable": "server unreachable — using {fallback}",
+  "settings.incomplete": "enabled but incomplete — fill in the fields below or switch off to keep your saved config",
+  "setup.filesServerOnly": "document upload needs the server runtime — files aren't stored in browser mode",
+  "report.coachSeed": "Coach me on {name}. Run a focused practice session and probe for specifics."
 }

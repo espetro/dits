@@ -77,7 +77,7 @@
   "report.competencies": "المهارات",
   "report.turn": "الدور {n}",
   "report.practiceWeak": "تمرّن على نقاط الضعف",
-  "report.practiceHint": "متاح في تكرار مستقبلي",
+  "report.practiceHint": "ابدأ جلسة تدريب مبنية على أضعف نقاطك",
   "history.title": "السجل",
   "history.loading": "جارٍ التحميل…",
   "history.empty": "لا جلسات بعد — اذهب لِتُجرَّب.",
@@ -182,5 +182,13 @@
   "setup.startFailedToast": "تعذّر بدء الجلسة",
   "settings.autosaveNote": "يتم حفظ التغييرات تلقائيًا.",
   "settings.llm.cloudRecommended": "يُنصح بنقطة نهاية سحابية لتجربة أكثر سلاسة.",
-  "settings.llm.geminiEnableLink": "تستخدم Chrome؟ فعّل Gemini Nano ←"
+  "settings.llm.geminiEnableLink": "تستخدم Chrome؟ فعّل Gemini Nano ←",
+  "runtime.label": "بيئة التشغيل",
+  "runtime.server": "خادم",
+  "runtime.custom": "نقطة نهاية مخصصة",
+  "runtime.inBrowser": "داخل المتصفح",
+  "runtime.unreachable": "الخادم غير متاح — يتم استخدام {fallback}",
+  "settings.incomplete": "مفعّل لكنه غير مكتمل — املأ الحقول أدناه أو أطفئه للاحتفاظ بالإعدادات المحفوظة",
+  "setup.filesServerOnly": "رفع المستندات يتطلب بيئة الخادم — لا تُحفظ الملفات في وضع المتصفح",
+  "report.coachSeed": "درّبني على {name}. نفّذ جلسة تدريب مركّزة واسأل عن التفاصيل."
 }
