@@ -121,6 +121,7 @@ export class ServerVoiceDriver implements SpeechDriver {
   }
 
   async restart(): Promise<void> {
+    this.stopped = false;
     this.clearReconnectTimer();
     this.reconnectAttempt = 0;
     await this.teardown();
@@ -200,34 +201,43 @@ export class ServerVoiceDriver implements SpeechDriver {
     });
 
     ws.onmessage = (ev: MessageEvent) => this.handleMessage(ev);
+
+    // vad gates utterances; speech start during agent playback is barge-in.
+    // status stays "connecting" until capture works: if getUserMedia or the
+    // vad model fails here, the ws is torn down rather than leaving a zombie
+    // VoiceLoop waiting for audio that can never arrive.
+    const vadFactory = this.deps.vad ?? ((opts) => createVadGate(opts));
+    try {
+      this.vad = await vadFactory({
+        onSpeechStart: () => {
+          this.speaking = true;
+          this.events.onSpeechStart?.();
+          if (this.agentSpeaking) {
+            this.player.stop();
+            this.sendJson({ t: "interrupt" });
+          }
+        },
+        onSpeechEnd: (audio) => {
+          this.speaking = false;
+          // audio is not transcribed client-side; the server transcribed the
+          // streamed frames. non-empty placeholder so the FSM advances to
+          // thinking instead of the empty-transcript path back to listening;
+          // the real transcript arrives later as user_transcript.
+          void audio;
+          this.sendJson({ t: "utterance_end" });
+          this.events.onSpeechEnd?.("​");
+        },
+      });
+
+      const captureFactory = this.deps.capture ?? (() => startCapture());
+      const capture = await captureFactory();
+      this.capture = capture;
+    } catch (err) {
+      await this.teardown();
+      throw err;
+    }
     this.status = "connected";
     this.reconnectAttempt = 0;
-
-    // vad gates utterances; speech start during agent playback is barge-in
-    const vadFactory = this.deps.vad ?? ((opts) => createVadGate(opts));
-    this.vad = await vadFactory({
-      onSpeechStart: () => {
-        this.speaking = true;
-        this.events.onSpeechStart?.();
-        if (this.agentSpeaking) {
-          this.player.stop();
-          this.sendJson({ t: "interrupt" });
-        }
-      },
-      onSpeechEnd: (audio) => {
-        this.speaking = false;
-        // audio is not transcribed client-side; the server transcribed the
-        // streamed frames. non-empty placeholder so the FSM advances to
-        // thinking instead of the empty-transcript path back to listening;
-        // the real transcript arrives later as user_transcript.
-        void audio;
-        this.sendJson({ t: "utterance_end" });
-        this.events.onSpeechEnd?.("​");
-      },
-    });
-
-    const captureFactory = this.deps.capture ?? (() => startCapture());
-    this.capture = await captureFactory();
     this.capture.onLevel?.((rms) => pushMicLevel(rms));
     this.capture.onFrame((pcm16) => {
       this.vad?.processFrame(pcm16);
@@ -282,6 +292,8 @@ export class ServerVoiceDriver implements SpeechDriver {
   }
 
   async stop(): Promise<void> {
+    this.stopped = true;
+    this.clearReconnectTimer();
     this.capture?.onFrame(() => undefined);
     await this.capture?.stop();
     this.capture = null;
