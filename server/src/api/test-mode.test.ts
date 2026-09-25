@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { deriveStalledAt } from "./test-mode.ts";
 
 // Table-based coverage over the /v1/test/pipeline stalled_at derivation.

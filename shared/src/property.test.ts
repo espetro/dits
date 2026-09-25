@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import * as fc from "fast-check";
 import * as v from "valibot";
-import { SessionSchema, TurnSchema, CreateSessionRequestSchema, SessionIdSchema } from "./session";
+import { CreateSessionRequestSchema, SessionIdSchema, SessionSchema, TurnSchema } from "./session";
 import { InterviewPlanSchema } from "./plan";
-import { ReportSchema, CompetencyScoreSchema } from "./report";
+import { CompetencyScoreSchema, ReportSchema } from "./report";
 import { ConfigSchema, describeConfigError } from "./config";
 
 // Generators for the shared contract shapes. Duration/score bounds mirror the

@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import * as fc from "fast-check";
-import { encodeWav, wavHeader, WavBuffer } from "./wav.ts";
+import { WavBuffer, encodeWav, wavHeader } from "./wav.ts";
 import type { AudioFrameLike } from "./wav.ts";
 import { WhisperStt } from "./whisper-stt.ts";
 

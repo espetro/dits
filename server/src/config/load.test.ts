@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadConfig, ConfigError } from "./load";
+import { ConfigError, loadConfig } from "./load";
 
 const minimal = `
 server:

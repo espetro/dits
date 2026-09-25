@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { createDatabase, migrate } from "../store/db";
 import { apiRoutes } from "../api/routes";

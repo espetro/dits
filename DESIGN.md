@@ -13,14 +13,14 @@ ease-out-expo motion. warm, editorial, low-chrome - not a dashboard.
 
 ## 2. token taxonomy
 
-| layer | examples | who may use |
-|---|---|---|
-| primitives | `--color-cream/-espresso/-persimmon/-sage/-sky-note/-butter` | `theme.css` only - never referenced raw in components |
-| semantic (shadcn) | `--color-background/-foreground/-card/-popover/-primary/-muted/-accent/-destructive/-border/-input/-ring` | components, via utilities: `bg-card`, `text-muted-foreground` |
-| di palette | `bg-cream`, `bg-paper`, `bg-espresso`, `bg-persimmon`, `bg-persimmon-soft/-faint`, `text-espresso-soft/-faint`, `ring-hairline` | components |
-| type | `font-display`, `font-body`, `font-mono` | components |
-| radii | `rounded-card` (1.5rem), `rounded-shell` (2rem) | components |
-| ambient | `.grain`, `.ambient`, `.reveal`, `.rise-in`, `.orb-live` | decorative layers only |
+| layer             | examples                                                                                                                        | who may use                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| primitives        | `--color-cream/-espresso/-persimmon/-sage/-sky-note/-butter`                                                                    | `theme.css` only - never referenced raw in components         |
+| semantic (shadcn) | `--color-background/-foreground/-card/-popover/-primary/-muted/-accent/-destructive/-border/-input/-ring`                       | components, via utilities: `bg-card`, `text-muted-foreground` |
+| di palette        | `bg-cream`, `bg-paper`, `bg-espresso`, `bg-persimmon`, `bg-persimmon-soft/-faint`, `text-espresso-soft/-faint`, `ring-hairline` | components                                                    |
+| type              | `font-display`, `font-body`, `font-mono`                                                                                        | components                                                    |
+| radii             | `rounded-card` (1.5rem), `rounded-shell` (2rem)                                                                                 | components                                                    |
+| ambient           | `.grain`, `.ambient`, `.reveal`, `.rise-in`, `.orb-live`                                                                        | decorative layers only                                        |
 
 rule: style via semantic or palette utility classes. arbitrary values are
 confined to `theme.css`. raw hex in a component = lint error (section 7).
@@ -36,7 +36,7 @@ confined to `theme.css`. raw hex in a component = lint error (section 7).
   `ToggleGroup` pills, never hand-rolled buttons. text inputs = pill-shaped,
   `ring-1 ring-hairline`, `focus-visible:ring-persimmon/50`.
 - **status text**: small-caps mono - `text-[0.65rem] tracking-[0.15em]
-  uppercase text-espresso-soft`.
+uppercase text-espresso-soft`.
 - **icon buttons**: lucide only, ghost variant.
 - **new primitive**: `bunx shadcn@latest add <name>` into
   `src/components/vendor/`, separate commit, `bunx oxfmt` after. never edit

@@ -3,7 +3,7 @@ import { useLocale, withLocale } from "../../lib/locale-href";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@nanostores/react";
 import * as React from "react";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { PanelRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../../components/vendor/sheet";
 import { useVoice } from "../../lib/voice/use-voice";
@@ -19,7 +19,6 @@ import {
 import { getClientSession } from "../../lib/opfs-store";
 import { $clientTurns } from "../../lib/agent/session-store";
 import { $effectiveRuntime } from "../../lib/runtime";
-import { MODEL_LOAD_TIMEOUT_MS } from "../../lib/timeouts";
 import { Button } from "../../components/vendor/button";
 import { Input } from "../../components/vendor/input";
 import { Tabs, TabsList, TabsTrigger } from "../../components/vendor/tabs";

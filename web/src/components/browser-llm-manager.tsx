@@ -8,8 +8,8 @@ import {
   deleteTransformersModel,
   smokeTestModel,
   transformersModelInstalled,
-  type BrowserModelStatus,
 } from "../lib/agent/browser-provider";
+import type { BrowserModelStatus } from "../lib/agent/browser-provider";
 import { Button } from "./vendor/button";
 import { MODEL_DOWNLOAD_TIMEOUT_MS } from "../lib/timeouts";
 

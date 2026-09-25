@@ -2,7 +2,7 @@ import { BrowserVoiceDriver } from "./browser-driver";
 import { ServerVoiceDriver } from "./server-driver";
 import type { SpeechDriver } from "./server-driver";
 import { createStoreToolExecutors } from "../agent/client-agent";
-import { $currentQuestion, $clientTurns } from "../agent/session-store";
+import { $clientTurns, $currentQuestion } from "../agent/session-store";
 import { $editorBuffer, $question, $whiteboard } from "../../stores/session";
 import {
   $effectiveRuntime,

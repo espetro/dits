@@ -3,16 +3,9 @@ import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as v from "valibot";
 
-import { useLocale } from "../lib/locale-href";
 import { HistoryPane } from "./history-pane";
 import { ProviderSectionsSchema } from "@di/shared";
-import type {
-  BrowserLlmSection,
-  LlmSection,
-  ProviderEndpoint,
-  ProviderSections,
-  TtsEndpoint,
-} from "@di/shared";
+import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
 import { $providerProfile, redactKey } from "../lib/runtime";
 import { smokeTestModel } from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
@@ -30,7 +23,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from "./vendor/dialog";
-import { Input } from "./vendor/input";
 import { Label } from "./vendor/label";
 import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./vendor/tabs";
@@ -192,7 +184,10 @@ function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined)
 }
 
 type SectionKey = "stt" | "tts" | "llm";
-type TestState = { status: "idle" | "running" | "ok" | "err"; message?: string };
+interface TestState {
+  status: "idle" | "running" | "ok" | "err";
+  message?: string;
+}
 
 const fieldClass = "block text-xs text-muted-foreground";
 

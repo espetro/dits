@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fixturesMode, hasSeedMarker, maybeSeedFixtures } from "./dev-fixtures";
 
+// vi.mock is hoisted above the import, so the mock still applies even though
+// the import appears first. dev-fixtures reads import.meta.env at call time.
 const seedFixtures = vi.hoisted(() => vi.fn(async () => []));
 
 vi.mock("./dev-fixtures-impl", () => ({ seedFixtures }));
-
-// Import after mock registration; module reads import.meta.env at call time.
-import { fixturesMode, hasSeedMarker, maybeSeedFixtures } from "./dev-fixtures";
 
 describe("dev-fixtures gating", () => {
   beforeEach(() => {
