@@ -1,10 +1,16 @@
 import { toJsonSchema } from "@valibot/to-json-schema";
 import * as v from "valibot";
-import { VOICE_TOOLS, assertNever, buildPrompt, describeWhiteboardSnapshot } from "@di/shared";
+import {
+  DEFAULT_SESSION_TOOLS,
+  TOOL_AGENT_ACCESS,
+  assertNever,
+  buildPrompt,
+  describeWhiteboardSnapshot,
+  voiceToolsFor,
+} from "@di/shared";
 import type {
   LlmSection,
   SessionContext,
-  ToolDef,
   TurnEvents,
   TurnPhase,
   TurnRunner,
@@ -19,16 +25,13 @@ type AnyLanguageModel = LanguageModelV3 | LanguageModelV4;
 
 /**
  * ClientAgent: the client-only interview loop. Mirrors the server's VoiceLoop
- * LLM hop (system prompt from shared buildPrompt + the three VOICE_TOOLS)
+ * LLM hop (system prompt from shared buildPrompt + voiceToolsFor tools)
  * using the AI SDK's streamText + our openai-compatible provider. The `ai`
  * package is imported lazily so local-server builds don't pay for it.
  */
 
-export interface AgentToolExecutors {
-  update_question(args: UpdateQuestionArgs): Promise<string>;
-  read_editor(args: Record<string, never>): Promise<string>;
-  read_whiteboard(args: Record<string, never>): Promise<string>;
-}
+/** Executor per agent tool name (`update_question`, `read_<id>`, `update_<id>`). */
+export type AgentToolExecutors = Record<string, (args: Record<string, unknown>) => Promise<string>>;
 
 /** Internal chat message history (assistant text only; tool hops inline). */
 interface ChatMsg {
@@ -36,11 +39,18 @@ interface ChatMsg {
   content: string;
 }
 
-/** Plain JSON-schema tool spec sent to the model (from shared VOICE_TOOLS). */
-function toolDef(name: string): ToolDef {
-  const def = VOICE_TOOLS.find((t) => t.name === name);
-  if (!def) throw new Error(`unknown voice tool: ${name}`);
-  return def;
+/** Input schema per agent tool name, mirroring the shared def parameters. */
+function toolInputSchema(name: string) {
+  if (name === "update_question") {
+    return v.object({
+      question: v.string(),
+      hints: v.optional(v.array(v.string()), []),
+    });
+  }
+  if (name.startsWith("update_")) {
+    return v.object({ text: v.string() });
+  }
+  return v.object({});
 }
 
 /** Longest suffix of `text` that is a proper prefix of `tag` (for split tags). */
@@ -144,6 +154,7 @@ export class ClientAgent implements TurnRunner {
 
   private readonly llm: LlmSection;
   private readonly tools: AgentToolExecutors;
+  private readonly toolset: Record<string, string>;
   private readonly getContext: () => SessionContext;
   private readonly fetchImpl?: typeof fetch;
 
@@ -152,6 +163,7 @@ export class ClientAgent implements TurnRunner {
     browserHandles: BrowserModelHandles | null,
     llm: LlmSection,
     tools: AgentToolExecutors,
+    toolset: Record<string, string>,
     getContext: () => SessionContext,
     fetchImpl?: typeof fetch,
   ) {
@@ -159,6 +171,7 @@ export class ClientAgent implements TurnRunner {
     this.browserHandles = browserHandles;
     this.llm = llm;
     this.tools = tools;
+    this.toolset = toolset;
     this.getContext = getContext;
     this.fetchImpl = fetchImpl;
   }
@@ -173,6 +186,7 @@ export class ClientAgent implements TurnRunner {
     tools: AgentToolExecutors,
     getContext: () => SessionContext,
     fetchImpl?: typeof fetch,
+    toolset: Record<string, string> = DEFAULT_SESSION_TOOLS,
   ): Promise<ClientAgent> {
     const built = await resolveBrowserLlm(llm, { fetchImpl });
     if (!built) {
@@ -183,7 +197,15 @@ export class ClientAgent implements TurnRunner {
     // Skipping this makes `this.model = model` in the constructor throw
     // "browser llm not loaded yet" on the first agent turn.
     await built.browser?.load();
-    return new ClientAgent(built.model, built.browser ?? null, llm, tools, getContext, fetchImpl);
+    return new ClientAgent(
+      built.model,
+      built.browser ?? null,
+      llm,
+      tools,
+      toolset,
+      getContext,
+      fetchImpl,
+    );
   }
 
   /** Full transcript so far (for persistence/report). */
@@ -268,34 +290,19 @@ export class ClientAgent implements TurnRunner {
         role: m.role,
         content: m.content,
       })),
-      tools: {
-        update_question: {
-          description: toolDef("update_question").description,
-          inputSchema: jsonSchema(
-            toJsonSchema(
-              v.object({
-                question: v.string(),
-                hints: v.optional(v.array(v.string()), []),
-              }),
-            ),
-          ),
-          execute: async (input: { question: string; hints?: string[] }) =>
-            this.tools.update_question({
-              question: input.question,
-              hints: input.hints,
-            }),
-        },
-        read_editor: {
-          description: toolDef("read_editor").description,
-          inputSchema: jsonSchema(toJsonSchema(v.object({}))),
-          execute: async () => this.tools.read_editor({}),
-        },
-        read_whiteboard: {
-          description: toolDef("read_whiteboard").description,
-          inputSchema: jsonSchema(toJsonSchema(v.object({}))),
-          execute: async () => this.tools.read_whiteboard({}),
-        },
-      },
+      tools: Object.fromEntries(
+        voiceToolsFor(this.toolset).map((def) => [
+          def.name,
+          {
+            description: def.description,
+            inputSchema: jsonSchema(toJsonSchema(toolInputSchema(def.name))),
+            execute: async (input: Record<string, unknown>) => {
+              const exec = this.tools[def.name];
+              return exec ? exec(input) : JSON.stringify({ error: `unhandled tool: ${def.name}` });
+            },
+          },
+        ]),
+      ),
       abortSignal: opts.signal,
       maxOutputTokens: 512,
       stopWhen: stepCountIs(MAX_HOPS),
@@ -340,24 +347,32 @@ export class ClientAgent implements TurnRunner {
   }
 }
 
-/** Convenience executor set backed by the client stores (editor/whiteboard/question). */
+/**
+ * Convenience executor set backed by the client stores, generated from the
+ * session toolset (p3 ToolSpec registry): `update_question` plus a
+ * `read_<id>` executor per tool id — whiteboard keeps its snapshot
+ * description, other tools return their raw content getter.
+ */
 export function createStoreToolExecutors(deps: {
-  editorGetter: () => string;
-  whiteboardGetter: () => string;
+  toolset: Record<string, string>;
+  contentGetters: Record<string, () => string>;
   onQuestion: (q: { text: string; hints: string[] }) => void;
 }): AgentToolExecutors {
-  return {
+  const executors: AgentToolExecutors = {
     async update_question(args) {
-      deps.onQuestion({ text: args.question, hints: args.hints ?? [] });
+      const q = args as unknown as UpdateQuestionArgs;
+      deps.onQuestion({ text: q.question, hints: q.hints ?? [] });
       return "ok";
     },
-    async read_editor() {
-      const text = deps.editorGetter();
-      return text.trim() ? text : "(editor is empty)";
-    },
-    async read_whiteboard() {
-      const json = deps.whiteboardGetter();
-      return describeWhiteboardSnapshot(json);
-    },
   };
+  for (const id of Object.keys(deps.toolset)) {
+    const access = TOOL_AGENT_ACCESS[id] ?? "read";
+    if (access === "write") continue;
+    executors[`read_${id}`] = async () => {
+      const raw = deps.contentGetters[id]?.() ?? "";
+      const text = id === "whiteboard" ? describeWhiteboardSnapshot(raw) : raw;
+      return text.trim() ? text : `(${id} is empty)`;
+    };
+  }
+  return executors;
 }

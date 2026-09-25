@@ -193,5 +193,19 @@
   "report.coachSeed": "{name}에 대해 코칭해 줘. 집중 연습 세션을 진행하고 구체적인 내용을 파고들어 줘.",
   "settings.demoLlm.fill": "관리형 데모 엔드포인트 사용 — 키 불필요",
   "settings.demoLlm.badge": "데모",
-  "settings.demoLlm.upsell": "무제한 zero-conf를 원하시면 알려주세요"
+  "settings.demoLlm.upsell": "무제한 zero-conf를 원하시면 알려주세요",
+  "interview.questionN": "질문 {n}",
+  "interview.talkOrType": "말하거나 입력하세요…",
+  "interview.type": "입력",
+  "interview.endedBadge": "종료됨",
+  "interview.endedBody": "이 인터뷰는 종료되었습니다 — 아래 트랜스크립트는 읽기 전용입니다.",
+  "interview.endedEmpty": "이 세션에서 기록된 대화가 없습니다.",
+  "interview.viewReport": "리포트 보기",
+  "interview.newSession": "새 세션",
+  "interview.endConfirmTitle": "인터뷰를 종료할까요?",
+  "interview.endConfirmBody": "지금까지의 트랜스크립트는 보존되며, 리포트도 생성할 수 있습니다.",
+  "interview.stay": "머물기",
+  "interview.leave": "나가기",
+  "interview.leaveTitle": "인터뷰를 나갈까요?",
+  "interview.leaveBody": "인터뷰가 아직 진행 중입니다 — 나가면 조기 종료됩니다."
 }

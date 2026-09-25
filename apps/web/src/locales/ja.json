@@ -193,5 +193,19 @@
   "report.coachSeed": "{name} についてコーチしてください。をったセッションをい、なをりげてください。",
   "settings.demoLlm.fill": "デモエンドポイントを — キー",
   "settings.demoLlm.badge": "デモ",
-  "settings.demoLlm.upsell": "の zero-conf がですか？おらせください"
+  "settings.demoLlm.upsell": "の zero-conf がですか？おらせください",
+  "interview.questionN": "質問 {n}",
+  "interview.talkOrType": "話すか、入力して…",
+  "interview.type": "入力",
+  "interview.endedBadge": "終了",
+  "interview.endedBody": "このインタビューは終了しました — 以下のトランスクリプトは読み取り専用です。",
+  "interview.endedEmpty": "このセッションでは発言が記録されませんでした。",
+  "interview.viewReport": "レポートを見る",
+  "interview.newSession": "新しいセッション",
+  "interview.endConfirmTitle": "インタビューを終了しますか？",
+  "interview.endConfirmBody": "ここまでのトランスクリプトは保持され、レポートも作成できます。",
+  "interview.stay": "残る",
+  "interview.leave": "退出",
+  "interview.leaveTitle": "インタビューを離れますか？",
+  "interview.leaveBody": "インタビューはまだ進行中です — 離れると早期終了します。"
 }

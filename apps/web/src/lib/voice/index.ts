@@ -3,7 +3,8 @@ import { ServerVoiceDriver } from "./server-driver";
 import type { SpeechDriver } from "./server-driver";
 import { createStoreToolExecutors } from "../agent/client-agent";
 import { $clientTurns, $currentQuestion } from "../agent/session-store";
-import { $editorBuffer, $question, $whiteboard } from "../../stores/session";
+import { getClientSession } from "../opfs-store";
+import { $editorBuffer, $question, $whiteboard, setQuestion } from "../../stores/session";
 import {
   $effectiveRuntime,
   $providerProfile,
@@ -12,7 +13,7 @@ import {
   isHealthResponse,
   probeServer,
 } from "../runtime";
-import { describeWhiteboardSnapshot } from "@di/shared";
+import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 import type { LlmSection, ProviderSections } from "@di/shared";
 
 export type VoiceDriverKind = "server" | "browser";
@@ -51,18 +52,24 @@ export async function createDriver(
   const driver = new BrowserVoiceDriver(sessionId);
   if (profile?.llm && $effectiveRuntime.get() !== "server") {
     const withLlm = profile as ProviderSections & { llm: LlmSection };
+    // The session's toolset decides which agent tools exist (p3 ToolSpec
+    // registry): content getters stay store-backed per tool id.
+    const toolset = (await getClientSession(sessionId))?.tools ?? DEFAULT_SESSION_TOOLS;
     const executors = createStoreToolExecutors({
-      editorGetter: () => $editorBuffer.get(),
-      whiteboardGetter: () => describeWhiteboardSnapshot($whiteboard.get()),
+      toolset,
+      contentGetters: {
+        editor: () => $editorBuffer.get(),
+        whiteboard: () => $whiteboard.get(),
+      },
       onQuestion: (q) => {
-        $question.set(q);
+        setQuestion(q);
         $currentQuestion.set(q);
       },
     });
     // model load is caller-abortable (interview route bounds it at 10min); a
     // timeout/abort surfaces as a normal error state (p0.2 retry path)
     await AbortSignalAbortable(loadSignal, () =>
-      driver.useClientAgent(withLlm, executors, () => ({
+      driver.useClientAgent(withLlm, executors, toolset, () => ({
         mode: "interview",
         currentQuestion: $question.get().text,
         hints: $question.get().hints,
