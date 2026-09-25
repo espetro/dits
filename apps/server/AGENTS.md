@@ -31,7 +31,7 @@ bun run apps/server/src/cli.ts --config config.yaml --check    # validate config
 3. Voice over WS: open `GET /v1/sessions/:id/voice` as a WebSocket, send binary frames (4-byte big-endian seq + PCM16LE mono 16k), then `{t:"utterance_end"}`; expect `user_transcript` → `agent_transcript` → `agent_speaking on` → `tts` chunks (binary framing + b64 JSON) → `agent_speaking off`. Control messages: `{t:"mute",muted}`, `{t:"interrupt"}` (b64 `{t:"audio",seq,pcm}` frames accepted as fallback). Contracts: `packages/shared/src/voice.ts`.
 4. Text turns: `POST /v1/sessions/:id/turns` with `{id: uuid, seq, speaker: user|agent, text, created_at: ISO, source: voice|text}`.
 5. Assert via `GET /v1/test/state` (sessions + reports) and `GET /v1/test/events?session_id=...` (voice loop lifecycle + agent turns) or `GET /v1/test/pipeline/:id` (ordered STT/LLM/TTS stage view).
-6. Round-trip checks: `PUT`/`GET /v1/sessions/:id/tools` (editor + whiteboard strings the voice loop's read tools read) and `PUT`/`GET /v1/sessions/:id/report`.
+6. Round-trip checks: `PUT`/`GET /v1/sessions/:id/tools` (per-tool content map, `Record<toolId, state>` — the voice loop's `read_<id>`/`update_<id>` tools resolve against it) and `POST`/`GET /v1/sessions/:id/report`.
 
 Full-stack test with real voice (no cloud STT/TTS): `scripts/local-voice-stack.sh`
 starts parakeet STT (:9003), pocket-tts (:9004) behind an OpenAI-compatible

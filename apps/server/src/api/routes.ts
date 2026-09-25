@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import * as v from "valibot";
 import {
   CreateSessionRequestSchema,
+  DEFAULT_SESSION_TOOLS,
   DocumentSchema,
   ReportSchema,
   SessionContextResponseSchema,
@@ -25,6 +26,19 @@ import {
 import { retrieve } from "../rag/embeddings";
 
 const TurnInputSchema = v.omit(TurnSchema, ["session_id"]);
+
+/** sessions.tools is stored as JSON text; absent pre-p3 rows mean the default toolset. */
+function parseSessionTools(raw: string | null | undefined): Record<string, string> {
+  if (!raw) return { ...DEFAULT_SESSION_TOOLS };
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const result = v.safeParse(ToolStateSchema, parsed);
+    const tools = result.success ? result.output : {};
+    return Object.keys(tools).length > 0 ? tools : { ...DEFAULT_SESSION_TOOLS };
+  } catch {
+    return { ...DEFAULT_SESSION_TOOLS };
+  }
+}
 
 /**
  * /v1/* REST API. Valibot-validated request/response contracts from @di/shared.
@@ -51,16 +65,33 @@ export function apiRoutes(
       status: "created",
       duration_min: body.duration_min,
       plan: null,
+      tools: JSON.stringify(body.tools ?? DEFAULT_SESSION_TOOLS),
     };
     await db.insertInto("sessions").values(session).execute();
-    return c.json(v.parse(SessionSchema, { ...session, plan: undefined }), 201, {
-      Location: `/v1/sessions/${session.id}`,
-    });
+    return c.json(
+      v.parse(SessionSchema, {
+        ...session,
+        plan: undefined,
+        tools: parseSessionTools(session.tools),
+      }),
+      201,
+      {
+        Location: `/v1/sessions/${session.id}`,
+      },
+    );
   });
 
   api.get("/sessions", async (c) => {
     const rows = await db.selectFrom("sessions").selectAll().execute();
-    return c.json(rows.map((r) => v.parse(SessionSchema, { ...r, plan: r.plan ?? undefined })));
+    return c.json(
+      rows.map((r) =>
+        v.parse(SessionSchema, {
+          ...r,
+          plan: r.plan ?? undefined,
+          tools: parseSessionTools(r.tools),
+        }),
+      ),
+    );
   });
 
   api.get("/sessions/:id", async (c) => {
@@ -70,7 +101,13 @@ export function apiRoutes(
       .where("id", "=", c.req.param("id"))
       .executeTakeFirst();
     if (!row) return c.json({ error: "not found" }, 404);
-    return c.json(v.parse(SessionSchema, { ...row, plan: row.plan ?? undefined }));
+    return c.json(
+      v.parse(SessionSchema, {
+        ...row,
+        plan: row.plan ?? undefined,
+        tools: parseSessionTools(row.tools),
+      }),
+    );
   });
 
   api.post("/sessions/:id/turns", vValidator("json", TurnInputSchema), async (c) => {
@@ -127,34 +164,28 @@ export function apiRoutes(
       .where("id", "=", id)
       .executeTakeFirst();
     if (!session) return c.json({ error: "not found" }, 404);
-    const row = {
-      id,
-      editor: body.editor,
-      whiteboard: body.whiteboard,
-      updated_at: new Date().toISOString(),
-    };
-    await db
-      .insertInto("tool_state")
-      .values(row)
-      .onConflict((oc) =>
-        oc.column("id").doUpdateSet({
-          editor: row.editor,
-          whiteboard: row.whiteboard,
-          updated_at: row.updated_at,
-        }),
-      )
-      .execute();
+    const now = new Date().toISOString();
+    for (const [tool, state] of Object.entries(body)) {
+      await db
+        .insertInto("tool_states")
+        .values({ session_id: id, tool, state, updated_at: now })
+        .onConflict((oc) =>
+          oc.columns(["session_id", "tool"]).doUpdateSet({ state, updated_at: now }),
+        )
+        .execute();
+    }
     return c.json({ ok: true });
   });
 
   api.get("/sessions/:id/tools", async (c) => {
-    const row = await db
-      .selectFrom("tool_state")
-      .selectAll()
-      .where("id", "=", c.req.param("id"))
-      .executeTakeFirst();
-    if (!row) return c.json({ editor: "", whiteboard: "" });
-    return c.json(v.parse(ToolStateSchema, row));
+    const rows = await db
+      .selectFrom("tool_states")
+      .select(["tool", "state"])
+      .where("session_id", "=", c.req.param("id"))
+      .execute();
+    const state: Record<string, string> = {};
+    for (const r of rows) state[r.tool] = r.state;
+    return c.json(state);
   });
 
   /**

@@ -13,6 +13,8 @@ export interface DbSchema {
     status: string;
     duration_min: number;
     plan: string | null;
+    /** JSON Record<toolId, variant> — the session's dock toolset (p3). */
+    tools: string;
   };
   turns: {
     id: string;
@@ -37,10 +39,10 @@ export interface DbSchema {
     data: string;
     generated_at: string;
   };
-  tool_state: {
-    id: string;
-    editor: string;
-    whiteboard: string;
+  tool_states: {
+    session_id: string;
+    tool: string;
+    state: string;
     updated_at: string;
   };
   documents: {
@@ -74,7 +76,8 @@ const MIGRATIONS = [
     created_at TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'created',
     duration_min INTEGER NOT NULL,
-    plan TEXT
+    plan TEXT,
+    tools TEXT NOT NULL DEFAULT '{}'
   )`,
   `CREATE TABLE IF NOT EXISTS turns (
     id TEXT PRIMARY KEY,
@@ -92,11 +95,12 @@ const MIGRATIONS = [
     payload TEXT,
     at TEXT NOT NULL
   )`,
-  `CREATE TABLE IF NOT EXISTS tool_state (
-    id TEXT PRIMARY KEY REFERENCES sessions(id),
-    editor TEXT NOT NULL DEFAULT '',
-    whiteboard TEXT NOT NULL DEFAULT '',
-    updated_at TEXT NOT NULL
+  `CREATE TABLE IF NOT EXISTS tool_states (
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    tool TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (session_id, tool)
   )`,
   `CREATE TABLE IF NOT EXISTS reports (
     session_id TEXT PRIMARY KEY REFERENCES sessions(id),
@@ -165,6 +169,31 @@ export async function migrate(db: Db): Promise<void> {
     const table = m.match(/CREATE TABLE IF NOT EXISTS (\w+)/)![1]!;
     if (names.has(table)) continue;
     await sql.raw(m).execute(db);
+  }
+  // sessions.tools: added with the p3 ToolSpec registry; CREATE TABLE above
+  // only covers fresh DBs.
+  if (names.has("sessions")) {
+    const cols = await sql<{ name: string }>`pragma table_info(sessions)`.execute(db);
+    if (!cols.rows.some((c) => c.name === "tools")) {
+      await sql.raw(`ALTER TABLE sessions ADD COLUMN tools TEXT NOT NULL DEFAULT '{}'`).execute(db);
+    }
+  }
+  // tool_state -> tool_states: the p3 record-shaped tool store. Copy the
+  // legacy editor/whiteboard columns as rows, then drop the old table.
+  if (names.has("tool_state")) {
+    await sql
+      .raw(
+        `INSERT OR IGNORE INTO tool_states (session_id, tool, state, updated_at)
+         SELECT id, 'editor', editor, updated_at FROM tool_state`,
+      )
+      .execute(db);
+    await sql
+      .raw(
+        `INSERT OR IGNORE INTO tool_states (session_id, tool, state, updated_at)
+         SELECT id, 'whiteboard', whiteboard, updated_at FROM tool_state`,
+      )
+      .execute(db);
+    await sql.raw(`DROP TABLE tool_state`).execute(db);
   }
 }
 

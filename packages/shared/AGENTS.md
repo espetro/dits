@@ -7,7 +7,7 @@ type change starts here.
 - `session.ts` - session/turn/report/tool-state/event schemas.
 - `plan.ts`, `report.ts` - report payloads: `overall_score` and competency scores are 0..10 (not 0..100); `competencies[].evidence[].verdict` is `worked|improve|drop`.
 - `voice.ts` - WebSocket voice message envelope, discriminated union on `t`. Not reflected in `/v1/openapi.json`.
-- `interview-agent.ts` - system prompt builder, `VOICE_TOOLS`, `cutSentences` — shared by the server voice loop and the browser client-only agent. Pure, must run in both Bun and the browser.
+- `interview-agent.ts` - system prompt builder, `voiceToolsFor`/`VOICE_TOOLS`, `TOOL_AGENT_ACCESS`, `cutSentences` — shared by the server voice loop and the browser client-only agent. Pure, must run in both Bun and the browser.
 
 ## Type style (bites hardest here — this package is the contract layer)
 

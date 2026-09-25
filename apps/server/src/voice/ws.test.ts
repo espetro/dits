@@ -32,6 +32,7 @@ async function makeServer() {
       status: "created",
       duration_min: 30,
       plan: null,
+      tools: "{}",
     })
     .execute();
 

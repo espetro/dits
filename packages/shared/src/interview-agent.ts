@@ -1,4 +1,5 @@
 import type { TurnMetrics } from "./voice";
+import { DEFAULT_SESSION_TOOLS } from "./session";
 
 /**
  * Interview agent definitions shared by the server voice loop and the
@@ -98,44 +99,100 @@ export function buildPrompt(ctx: SessionContext): string {
   return lines.join("\n");
 }
 
-/** Tools the interview agent may call in either loop (server or browser). */
-export const VOICE_TOOLS = [
-  {
-    name: "update_question",
-    description:
-      "Rewrite or replace the current interview question and the evaluation hints shown to the candidate. Call whenever the interview focus moves to a new question.",
-    parameters: {
-      type: "object",
-      properties: {
-        question: {
-          type: "string",
-          description: "The new current question text",
-        },
-        hints: {
-          type: "array",
-          items: { type: "string" },
-          description: "Evaluation hints for the new question",
-        },
+/** The question card tool: always available regardless of the dock toolset. */
+export const UPDATE_QUESTION_TOOL = {
+  name: "update_question",
+  description:
+    "Rewrite or replace the current interview question and the evaluation hints shown to the candidate. Call whenever the interview focus moves to a new question.",
+  parameters: {
+    type: "object",
+    properties: {
+      question: {
+        type: "string",
+        description: "The new current question text",
       },
-      required: ["question"],
+      hints: {
+        type: "array",
+        items: { type: "string" },
+        description: "Evaluation hints for the new question",
+      },
     },
+    required: ["question"],
   },
-  {
+} as const satisfies ToolDef;
+
+/** Whether the agent may read a tool's content, write it, or both. */
+export type AgentAccess = "read" | "write" | "read-write";
+
+/**
+ * Contract-level agent access per dock tool id. The web ToolSpec registry
+ * mirrors this alongside its UI fields (icon/component/platforms); an
+ * unknown tool id defaults to read-only.
+ */
+export const TOOL_AGENT_ACCESS: Record<string, AgentAccess> = {
+  editor: "read",
+  whiteboard: "read",
+};
+
+/** Hand-tuned read defs per tool id; anything else gets the generic def. */
+const TUNED_READ_DEFS: Record<string, ToolDef> = {
+  editor: {
     name: "read_editor",
     description:
       "Read the candidate's current code editor contents from their shared browser workspace. Call when you need to review what they wrote.",
     parameters: { type: "object", properties: {} },
   },
-  {
+  whiteboard: {
     name: "read_whiteboard",
     description:
       "Read the candidate's shared whiteboard (drawn shapes and their text/connections). Call when you need to see what they sketched.",
     parameters: { type: "object", properties: {} },
   },
-] as const satisfies readonly ToolDef[];
+};
+
+function agentReadDef(id: string): ToolDef {
+  return {
+    name: `read_${id}`,
+    description: `Read the candidate's current ${id} contents from their shared browser workspace. Call when you need to see what they produced.`,
+    parameters: { type: "object", properties: {} },
+  };
+}
+
+function agentWriteDef(id: string): ToolDef {
+  return {
+    name: `update_${id}`,
+    description: `Replace the candidate's ${id} contents with new text. Call only when asked to produce or fix content in that tool.`,
+    parameters: {
+      type: "object",
+      properties: {
+        text: { type: "string", description: `The new full ${id} contents` },
+      },
+      required: ["text"],
+    },
+  };
+}
+
+/**
+ * Voice tool defs for a session's toolset: `update_question` plus the
+ * per-tool read/write defs implied by `TOOL_AGENT_ACCESS` (unknown ids get
+ * a generic read def). Used by both the server voice loop and the browser
+ * client-only agent.
+ */
+export function voiceToolsFor(tools: Record<string, string>): ToolDef[] {
+  const defs: ToolDef[] = [UPDATE_QUESTION_TOOL];
+  for (const id of Object.keys(tools)) {
+    const access = TOOL_AGENT_ACCESS[id] ?? "read";
+    if (access !== "write") defs.push(TUNED_READ_DEFS[id] ?? agentReadDef(id));
+    if (access !== "read") defs.push(agentWriteDef(id));
+  }
+  return defs;
+}
+
+/** Tools for sessions on the default toolset (editor + whiteboard). */
+export const VOICE_TOOLS = voiceToolsFor(DEFAULT_SESSION_TOOLS);
 
 /** Tool names, for validation without pulling the full defs. */
-export const VOICE_TOOL_NAMES = VOICE_TOOLS.map((t) => t.name) as VoiceToolName[];
+export const VOICE_TOOL_NAMES = VOICE_TOOLS.map((t) => t.name);
 export type VoiceToolName = (typeof VOICE_TOOLS)[number]["name"];
 
 export interface WhiteboardShape {
