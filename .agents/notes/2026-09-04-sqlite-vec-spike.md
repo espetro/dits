@@ -45,7 +45,7 @@ const rows = db
 // => [{ rowid: 1, distance: 0 }, { rowid: 3, distance: 0.141421377658844 }]
 ```
 
-Full working code: `evals/src/spike-sqlite-vec.ts`. Pass Float32Array directly
+Full working code: `packages/evals/src/spike-sqlite-vec.ts`. Pass Float32Array directly
 to `.run()` (a raw ArrayBuffer is rejected with "Binding expected string,
 TypedArray, ...").
 
@@ -63,7 +63,7 @@ blocker. Kept as a devDependency of `evals` for future evaluation.
 ## Recommendation
 
 For v1 (small corpora, single process): **use the JS brute-force cosine
-fallback** (`evals/src/cosine.ts`, unit tested) storing embeddings as BLOBs in
+fallback** (`packages/evals/src/cosine.ts`, unit tested) storing embeddings as BLOBs in
 the existing kysely/bun:sqlite store. It avoids the Homebrew-SQLite runtime
 dependency and the extension-loading fragility, and at interview-scale row
 counts (<10k chunks) brute force is sub-millisecond in Bun.

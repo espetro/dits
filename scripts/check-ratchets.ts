@@ -12,7 +12,7 @@ const ratchets = JSON.parse(readFileSync(join(root, ".ratchets.json"), "utf8"));
 
 async function countTscErrors(): Promise<number> {
   let total = 0;
-  for (const ws of ["shared", "server", "web", "evals"]) {
+  for (const ws of ["packages/shared", "apps/server", "apps/web", "packages/evals"]) {
     const proc = Bun.spawn(["bunx", "tsc", "--noEmit", "--incremental", "false"], {
       cwd: join(root, ws),
       stdout: "pipe",
@@ -29,11 +29,21 @@ async function countTscErrors(): Promise<number> {
 }
 
 async function countOxlintErrors(): Promise<number> {
-  const proc = Bun.spawn(["bunx", "oxlint", "web/src", "shared/src", "server/src", "evals/src"], {
-    cwd: root,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  const proc = Bun.spawn(
+    [
+      "bunx",
+      "oxlint",
+      "apps/web/src",
+      "packages/shared/src",
+      "apps/server/src",
+      "packages/evals/src",
+    ],
+    {
+      cwd: root,
+      stdout: "pipe",
+      stderr: "pipe",
+    },
+  );
   const [out, err] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),
@@ -43,7 +53,7 @@ async function countOxlintErrors(): Promise<number> {
 }
 
 async function countCycles(): Promise<number> {
-  const proc = Bun.spawn(["bunx", "rev-dep", "circular", "web/src/router.tsx"], {
+  const proc = Bun.spawn(["bunx", "rev-dep", "circular", "apps/web/src/router.tsx"], {
     cwd: root,
     stdout: "pipe",
     stderr: "pipe",
@@ -68,7 +78,12 @@ function maxFileLoc(): number {
       }
     }
   };
-  for (const ws of ["shared/src", "server/src", "web/src", "evals/src"]) {
+  for (const ws of [
+    "packages/shared/src",
+    "apps/server/src",
+    "apps/web/src",
+    "packages/evals/src",
+  ]) {
     const dir = join(root, ws);
     try {
       walk(dir);

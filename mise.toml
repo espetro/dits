@@ -8,34 +8,34 @@ turbo = "latest"
 _.file = ".env"
 
 # Web dev server (TanStack Start/vite). Server + mock provider:
-#   cd server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml
+#   cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml
 #   mise run dev:mock
 [tasks.dev]
-description = "Run web dev server (vite dev) in web/"
+description = "Run web dev server (vite dev) in apps/web/"
 run = "bun run dev"
-dir = "web"
+dir = "apps/web"
 
 [tasks."dev:mock"]
 description = "Run the OpenAI-compatible mock provider on :9000 (CORS-enabled for browser dev)"
-run = "bun run evals/mock-provider/main.ts --port 9000"
+run = "bun run packages/evals/mock-provider/main.ts --port 9000"
 
 [tasks.build]
 description = "Build web SPA"
 run = """
 set -e
-cd web && bun run build
+cd apps/web && bun run build
 """
 
 [tasks.test]
 description = "Run vitest across server, worker, web, evals, shared"
 run = """
 set -e
-for pkg in shared server evals; do
+for pkg in packages/shared apps/server packages/evals; do
   echo "== $pkg =="
   (cd $pkg && bun run --bun vitest run)
 done
 echo "== web =="
-(cd web && bunx vitest run)
+(cd apps/web && bunx vitest run)
 """
 
 [tasks."validate:staged"]
@@ -66,7 +66,7 @@ run = "bun run scripts/check-locales.ts"
 [tasks.evals]
 description = "Run evals vitest suite"
 run = "bun run --bun vitest run"
-dir = "evals"
+dir = "packages/evals"
 
 [tasks.logs]
 description = "Tail .di/logs/*.log, pretty-printing JSON lines via jq (no logger dependency — the server just writes ndjson)"
@@ -86,7 +86,7 @@ curl -sf -m 10 "${DI_URL:-http://localhost:3000}/v1/test/smoke" | jq -e '.ok == 
 '''
 
 # Precondition: a DI server must already be running in test mode:
-#   cd server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml
+#   cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml
 # Override the target with DI_URL (default http://localhost:3000).
 [tasks.e2e]
 description = "Run Playwright e2e specs in tests/e2e (requires DI server in test mode running; DI_URL to override)"

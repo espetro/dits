@@ -28,7 +28,7 @@
 
 - **Client-only runtime** (ADR-0003, `$effectiveRuntime === "client-only"`):
   session summary and transcript come from OPFS
-  (`web/src/lib/opfs-store.ts#getClientSession` /
+  (`apps/web/src/lib/opfs-store.ts#getClientSession` /
   `#getClientTurns`) instead of `GET /v1/sessions/[id]` /
   `GET /v1/sessions/[id]/turns`. Transcript download and report navigation
   behave the same either way.

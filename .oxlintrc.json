@@ -25,5 +25,5 @@
       }
     ]
   },
-  "ignorePatterns": ["web/src/components/vendor/**"]
+  "ignorePatterns": ["apps/web/src/components/vendor/**"]
 }

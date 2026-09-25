@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * Resolves every relative import/export specifier in shared/server/web/evals
+ * Resolves every relative import/export specifier in packages/shared, apps/server, apps/web, packages/evals
  * src against the filesystem. oxlint 1.80 has no import/no-unresolved, so
- * this is the T0 guard for a wrong relative path (e.g. web/src/lib/voice
+ * this is the T0 guard for a wrong relative path (e.g. apps/web/src/lib/voice
  * importing "../stores/session" when the file lives at "../../stores/session").
  */
 import { existsSync, readdirSync, statSync } from "node:fs";
@@ -38,7 +38,7 @@ const explicitFiles = process.argv.slice(2).filter((a) => !a.startsWith("-"));
 const files =
   explicitFiles.length > 0
     ? explicitFiles.map((f) => resolve(root, f)).filter(existsSync)
-    : ["shared/src", "server/src", "web/src", "evals/src"]
+    : ["packages/shared/src", "apps/server/src", "apps/web/src", "packages/evals/src"]
         .map((ws) => join(root, ws))
         .filter(existsSync)
         .flatMap(listSourceFiles);

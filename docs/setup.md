@@ -31,7 +31,7 @@ curl -fsSL https://mise.jdx.dev/install.sh | sh
 git clone https://github.com/espetro/dits.git dits
 cd dits
 bun install
-mise run build   # builds the web SPA into web/dist/client
+mise run build   # builds the web SPA into apps/web/dist/client
 ```
 
 ## 2. Configure a provider
@@ -46,7 +46,7 @@ By default it points `llm`, `stt`, `tts`, and `embeddings` at the in-repo mock
 provider, so you can try the app with zero API keys:
 
 ```sh
-bun run evals/mock-provider/main.ts --port 9000 &
+bun run packages/evals/mock-provider/main.ts --port 9000 &
 ```
 
 For a real interview, point each provider block at any OpenAI-compatible endpoint.
@@ -94,7 +94,7 @@ Validate config and provider connectivity before starting the server:
 
 ```sh
 ./di --config config.yaml --check
-# or, from source: bun run server/src/cli.ts --config config.yaml --check
+# or, from source: bun run apps/server/src/cli.ts --config config.yaml --check
 ```
 
 Full key-by-key reference: [`.agents/docs/config-reference.md`](../.agents/docs/config-reference.md).
@@ -103,7 +103,7 @@ Full key-by-key reference: [`.agents/docs/config-reference.md`](../.agents/docs/
 
 ```sh
 ./di --config config.yaml
-# or, from source: bun run server/src/cli.ts --config config.yaml
+# or, from source: bun run apps/server/src/cli.ts --config config.yaml
 ```
 
 Open `http://localhost:3000` (or whatever `server.port` you set), pick a preset or
@@ -123,7 +123,7 @@ history.
 - **LiveKit connection fails**: voice needs a LiveKit server matching
   `livekit.url` / `api_key` / `api_secret`. For local dev, `livekit-server --dev`
   with the default `devkey`/`secret` works.
-- **Blank UI**: the server only serves the SPA if `web/dist/client` exists. If
+- **Blank UI**: the server only serves the SPA if `apps/web/dist/client` exists. If
   you built from source, run `mise run build` first.
 - **Config errors name the exact key** (e.g. `config.llm.model: ...`). Bad env
   overrides report the effective key path too.

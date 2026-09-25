@@ -2,7 +2,7 @@
  * Release archive builder. Produces dist/releases/di-<version>-<target>.tar.gz
  * containing:
  *   di                       compiled binary (bun build --compile)
- *   web/dist/client/         SPA assets
+ *   apps/web/dist/client/         SPA assets
  *   config.example.yaml      reference config
  *   install.sh               first-run installer (also curl-able standalone)
  *   README.md                archive-specific quickstart
@@ -54,7 +54,7 @@ for (const t of targets) {
 // ---------------------------------------------------------------------------
 // Prerequisites: web SPA (mise run build does it).
 // ---------------------------------------------------------------------------
-const spaDir = join(ROOT, "web", "dist", "client");
+const spaDir = join(ROOT, "apps", "web", "dist", "client");
 if (!existsSync(join(spaDir, "index.html"))) {
   console.error("missing build artifacts; run `mise run build` first");
   process.exit(1);
@@ -95,7 +95,7 @@ voice pipeline runs in-process over WebSocket; no SFU or worker needed.
 
 ## Layout
 - \`di\`                      server binary (also the CLI)
-- \`web/dist/client/\`        SPA assets (served by \`di\`)
+- \`apps/web/dist/client/\`        SPA assets (served by \`di\`)
 - \`config.example.yaml\`     reference configuration
 - \`install.sh\`              runtime installer (bun/node check)
 
@@ -126,13 +126,13 @@ for (const target of targets) {
 
   console.log(`==> compiling di for ${target}`);
   const binTmp = join(stage, "di.bin");
-  await $`bun build --compile --target ${target} ${join(ROOT, "server", "src", "cli.ts")} --outfile ${binTmp}`;
+  await $`bun build --compile --target ${target} ${join(ROOT, "apps", "server", "src", "cli.ts")} --outfile ${binTmp}`;
 
   await $`mv ${binTmp} ${join(stage, "di")}`;
   await $`chmod +x ${join(stage, "di")}`;
 
   console.log(`==> staging web assets`);
-  cpSync(spaDir, join(stage, "web", "dist", "client"), { recursive: true });
+  cpSync(spaDir, join(stage, "apps", "web", "dist", "client"), { recursive: true });
 
   console.log(`==> staging config, installer, README`);
   cpSync(join(ROOT, "config.example.yaml"), join(stage, "config.example.yaml"));

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="web/public/icon-192.png" width="96" height="96" alt="di. icon" />
+  <img src="apps/web/public/icon-192.png" width="96" height="96" alt="di. icon" />
 </p>
 
 <h1 align="center">di.</h1>
@@ -40,11 +40,11 @@ See [docs/setup.md](docs/setup.md) for the full step-by-step guide: download a r
 
 ## Stack
 
-| Path      | What it owns                                                  |
-| --------- | ------------------------------------------------------------- |
-| `shared/` | Contracts (`@di/shared`): config, session/turn/report schemas |
-| `server/` | Hono API on Bun, in-process WebSocket voice pipeline          |
-| `web/`    | TanStack Start SPA                                            |
-| `evals/`  | vitest suite + offline mock provider                          |
+| Path               | What it owns                                                  |
+| ------------------ | ------------------------------------------------------------- |
+| `packages/shared/` | Contracts (`@di/shared`): config, session/turn/report schemas |
+| `apps/server/`     | Hono API on Bun, in-process WebSocket voice pipeline          |
+| `apps/web/`        | TanStack Start SPA                                            |
+| `packages/evals/`  | vitest suite + offline mock provider                          |
 
 Full config reference and API table: [`.agents/docs/config-reference.md`](.agents/docs/config-reference.md).

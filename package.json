@@ -2,10 +2,8 @@
   "name": "dits",
   "private": true,
   "workspaces": [
-    "shared",
-    "server",
-    "web",
-    "evals"
+    "apps/*",
+    "packages/*"
   ],
   "type": "module",
   "scripts": {

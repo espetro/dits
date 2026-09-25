@@ -57,10 +57,10 @@
 
 - **Client-only runtime** (ADR-0003, `$effectiveRuntime === "client-only"`):
   no server-side scoring exists to poll. This screen first checks
-  `web/src/lib/opfs-store.ts#getClientReport`; on a miss it scores the OPFS
-  transcript itself via `web/src/lib/agent/report-generator.ts#generateReport`
+  `apps/web/src/lib/opfs-store.ts#getClientReport`; on a miss it scores the OPFS
+  transcript itself via `apps/web/src/lib/agent/report-generator.ts#generateReport`
   (one `generateObject` call against the BYO provider, constrained to
-  `ReportSchema` from `shared/src/report.ts`) and persists the result with
+  `ReportSchema` from `packages/shared/src/report.ts`) and persists the result with
   `saveClientReport` before rendering — same "pending -> scored" UI either
   way, just a different producer. The call is bounded by a 90s
   `AbortSignal.timeout`; on timeout/abort the failure state above renders

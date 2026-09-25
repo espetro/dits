@@ -22,7 +22,7 @@ Replace the media plane with plain WebSockets and Web Audio:
   VAD (`@ricky0123/vad-web`, assets vendored locally), and streams frames over
   `GET /v1/sessions/:id/voice` (WS upgrade). Transport is streaming;
   recognition stays utterance-buffered (parakeet has no streaming endpoint).
-- the voice loop lives in the server process (`server/src/voice/`): accumulate
+- the voice loop lives in the server process (`apps/server/src/voice/`): accumulate
   frames -> buffered STT -> LLM -> persist turns -> TTS WAV -> decode/resample
   -> stream PCM chunks back. Barge-in is an `interrupt` control message that
   aborts in-flight LLM/TTS and stops client playback.
@@ -52,7 +52,7 @@ A separate lightweight WebRTC implementation (P2P + STUN, Hono signaling) per
 The repo stays a bun monorepo with ports/adapters inside each module; no
 microservices. `VoiceLoop` (domain) depends on injected `SttPort`/`TtsPort`/
 `LlmPort`/`EventSink` interfaces; provider adapters speak OpenAI-compatible
-HTTP. The web client mirrors this with the `SpeechDriver` interface. `shared/`
+HTTP. The web client mirrors this with the `SpeechDriver` interface. `packages/shared/`
 valibot contracts are the anti-corruption layer between the two runtimes.
 A service-oriented split would add process and deployment overhead with no
 benefit for a local-first single-user app.

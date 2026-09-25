@@ -28,7 +28,7 @@ bun install
 mise run build
 ```
 
-`mise run build` must finish without errors. It produces `web/dist/client` (the SPA the server serves) and the worker bundle. If the build fails, stop and report the error; do not try to patch code.
+`mise run build` must finish without errors. It produces `apps/web/dist/client` (the SPA the server serves) and the worker bundle. If the build fails, stop and report the error; do not try to patch code.
 
 ## 3. Generate a config with the mock provider
 
@@ -67,9 +67,9 @@ No API keys are needed: everything points at the in-repo mock provider.
 Start the mock provider, then validate:
 
 ```sh
-bun run evals/mock-provider/main.ts --port 9000 &
+bun run packages/evals/mock-provider/main.ts --port 9000 &
 sleep 1
-bun run server/src/cli.ts --config config.yaml --check
+bun run apps/server/src/cli.ts --config config.yaml --check
 ```
 
 Expected output ends with `[di --check] all good` (db plus llm, stt, tts probes all ok). If a probe fails, check that port 9000 is actually listening: `curl -s localhost:9000/v1/models`.
@@ -77,7 +77,7 @@ Expected output ends with `[di --check] all good` (db plus llm, stt, tts probes 
 ## 5. Start the stack in test mode
 
 ```sh
-DI_TEST_MODE=1 bun run server/src/cli.ts --config config.yaml &
+DI_TEST_MODE=1 bun run apps/server/src/cli.ts --config config.yaml &
 sleep 2
 curl -s localhost:8090/v1/test/ping
 ```
@@ -125,5 +125,5 @@ Summarize: versions installed, build result, `--check` output, the session id, a
 - `config file not found` / `invalid config`: the yaml path or a key is wrong. Errors name the exact key (`config.llm.model: ...`).
 - Port 8090 or 9000 in use: `lsof -ti :8090 | xargs kill`, or change `server.port` in config.yaml.
 - `/v1/test/ping` 404: server was started without `DI_TEST_MODE=1`.
-- Blank page on `http://localhost:8090`: `web/dist/client` missing, rerun `mise run build`.
+- Blank page on `http://localhost:8090`: `apps/web/dist/client` missing, rerun `mise run build`.
 - Voice: the WS voice loop runs in-process against the mock provider; no extra services needed.

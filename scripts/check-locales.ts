@@ -1,5 +1,5 @@
 /**
- * Advisory locale consistency checker: every locale file in web/src/locales
+ * Advisory locale consistency checker: every locale file in apps/web/src/locales
  * must have the exact same key set as en.json, non-empty values, and matching
  * {interpolation} placeholders. Run: bun run scripts/check-locales.ts
  * Exit code 1 on any error (advisory in CI — see .github/workflows/intl.yml).
@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const dir = new URL("../web/src/locales/", import.meta.url).pathname;
+const dir = new URL("../apps/web/src/locales/", import.meta.url).pathname;
 const en = JSON.parse(readFileSync(join(dir, "en.json"), "utf8")) as Record<string, string>;
 const enKeys = Object.keys(en).sort();
 
