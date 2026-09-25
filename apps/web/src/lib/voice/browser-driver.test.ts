@@ -63,6 +63,7 @@ describe("BrowserVoiceDriver barge-in", () => {
         read_editor: async () => "",
         read_whiteboard: async () => "",
       },
+      { editor: "", whiteboard: "" },
       () => ({ mode: "interview" }),
       hangingFetch(),
     );
@@ -137,6 +138,7 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
         read_editor: async () => "",
         read_whiteboard: async () => "",
       },
+      { editor: "", whiteboard: "" },
       () => ({ mode: "interview" }),
     );
     const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
@@ -203,6 +205,7 @@ describe("BrowserVoiceDriver phantom final gating", () => {
         read_editor: async () => "",
         read_whiteboard: async () => "",
       },
+      { editor: "", whiteboard: "" },
       () => ({ mode: "interview" }),
     );
     const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
@@ -263,6 +266,7 @@ describe("BrowserVoiceDriver recognition errors", () => {
         read_editor: async () => "",
         read_whiteboard: async () => "",
       },
+      { editor: "", whiteboard: "" },
       () => ({ mode: "interview" }),
     );
     const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
@@ -318,6 +322,7 @@ describe("BrowserVoiceDriver retry-once on llm failure", () => {
         read_editor: async () => "",
         read_whiteboard: async () => "",
       },
+      { editor: "", whiteboard: "" },
       () => ({ mode: "interview" }),
     );
     const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };

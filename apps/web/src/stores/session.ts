@@ -39,6 +39,21 @@ export const $question = map<{ text: string; hints: string[] }>({
   hints: [],
 });
 
+/** Count of question updates this session — drives the QUESTION n chip (p3-20). */
+export const $questionCount = atom(0);
+
+/** Set the live question and bump the counter. */
+export function setQuestion(q: { text: string; hints: string[] }): void {
+  $question.set(q);
+  if (q.text) $questionCount.set($questionCount.get() + 1);
+}
+
+/** Reset question state on (re)hydration without counting it. */
+export function resetQuestion(): void {
+  $question.set({ text: "", hints: [] });
+  $questionCount.set(0);
+}
+
 /** Transcript panel expanded state. Minimize never hides the panel (peek rail). */
 export const $transcriptOpen = atom(true);
 

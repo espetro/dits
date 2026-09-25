@@ -193,5 +193,19 @@
   "report.coachSeed": " {name} 。，。",
   "settings.demoLlm.fill": "使用托管演示端点 — 无需密钥",
   "settings.demoLlm.badge": "演示",
-  "settings.demoLlm.upsell": "想要无限制的 zero-conf？告诉我们"
+  "settings.demoLlm.upsell": "想要无限制的 zero-conf？告诉我们",
+  "interview.questionN": "问题 {n}",
+  "interview.talkOrType": "说话或输入…",
+  "interview.type": "输入",
+  "interview.endedBadge": "已结束",
+  "interview.endedBody": "本次面试已结束 — 以下转录为只读。",
+  "interview.endedEmpty": "本次会话未记录任何对话。",
+  "interview.viewReport": "查看报告",
+  "interview.newSession": "新会话",
+  "interview.endConfirmTitle": "结束面试？",
+  "interview.endConfirmBody": "目前的转录已保留，仍可生成报告。",
+  "interview.stay": "留下",
+  "interview.leave": "离开",
+  "interview.leaveTitle": "离开面试？",
+  "interview.leaveBody": "面试仍在进行中 — 离开将提前结束。"
 }

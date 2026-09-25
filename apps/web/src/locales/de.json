@@ -193,5 +193,19 @@
   "report.coachSeed": "Trainiere mich zu {name}. Führe eine gezielte Übungssession durch und hake bei Details nach.",
   "settings.demoLlm.fill": "managed-demo-endpoint verwenden — kein key nötig",
   "settings.demoLlm.badge": "demo",
-  "settings.demoLlm.upsell": "unbegrenztes zero-conf gewünscht? sag uns bescheid"
+  "settings.demoLlm.upsell": "unbegrenztes zero-conf gewünscht? sag uns bescheid",
+  "interview.questionN": "frage {n}",
+  "interview.talkOrType": "sprich oder tippe…",
+  "interview.type": "tippen",
+  "interview.endedBadge": "beendet",
+  "interview.endedBody": "dieses interview ist beendet — das transkript unten ist schreibgeschützt.",
+  "interview.endedEmpty": "in dieser sitzung wurden keine beiträge aufgezeichnet.",
+  "interview.viewReport": "bericht ansehen",
+  "interview.newSession": "neue sitzung",
+  "interview.endConfirmTitle": "interview beenden?",
+  "interview.endConfirmBody": "das bisherige transkript bleibt erhalten, und du kannst noch einen bericht daraus erstellen.",
+  "interview.stay": "bleiben",
+  "interview.leave": "verlassen",
+  "interview.leaveTitle": "interview verlassen?",
+  "interview.leaveBody": "das interview läuft noch — verlassen beendet es vorzeitig."
 }

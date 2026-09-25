@@ -193,5 +193,19 @@
   "report.coachSeed": "Coach me on {name}. Run a focused practice session and probe for specifics.",
   "settings.demoLlm.fill": "use the managed demo endpoint — no key needed",
   "settings.demoLlm.badge": "demo",
-  "settings.demoLlm.upsell": "want unlimited zero-conf? let us know"
+  "settings.demoLlm.upsell": "want unlimited zero-conf? let us know",
+  "interview.questionN": "question {n}",
+  "interview.talkOrType": "talk or type…",
+  "interview.type": "type",
+  "interview.endedBadge": "ended",
+  "interview.endedBody": "this interview has ended — the transcript below is read-only.",
+  "interview.endedEmpty": "no turns were recorded in this session.",
+  "interview.viewReport": "view report",
+  "interview.newSession": "new session",
+  "interview.endConfirmTitle": "end the interview?",
+  "interview.endConfirmBody": "the transcript so far is kept, and you can still build a report from it.",
+  "interview.stay": "stay",
+  "interview.leave": "leave",
+  "interview.leaveTitle": "leave the interview?",
+  "interview.leaveBody": "the interview is still in progress — leaving ends it early."
 }
