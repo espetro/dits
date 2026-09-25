@@ -77,7 +77,7 @@
   "report.competencies": "コンピテンシー",
   "report.turn": "ターン {n}",
   "report.practiceWeak": "弱点を練習",
-  "report.practiceHint": "今後のイテレーションで提供予定",
+  "report.practiceHint": "もいをもとにコーチセッションを",
   "history.title": "履歴",
   "history.loading": "読み込み中…",
   "history.empty": "セッションはまだありません — 鋭く聞かれに行きましょう。",
@@ -182,5 +182,13 @@
   "setup.startFailedToast": "セッションを開始できませんでした",
   "settings.autosaveNote": "変更は自動的に保存されます。",
   "settings.llm.cloudRecommended": "最も快適な体験にはクラウドエンドポイントを推奨します。",
-  "settings.llm.geminiEnableLink": "Chromeを使っていますか？Gemini Nanoを有効にする →"
+  "settings.llm.geminiEnableLink": "Chromeを使っていますか？Gemini Nanoを有効にする →",
+  "runtime.label": "ランタイム",
+  "runtime.server": "サーバー",
+  "runtime.custom": "カスタムエンドポイント",
+  "runtime.inBrowser": "ブラウザ",
+  "runtime.unreachable": "サーバーにできません — {fallback} を",
+  "settings.incomplete": "ですがです — のフィールドをするか、オフにしてみのをしてください",
+  "setup.filesServerOnly": "ドキュメントのアップロードにはサーバーランタイムがです — ブラウザモードではファイルはされません",
+  "report.coachSeed": "{name} についてコーチしてください。をったセッションをい、なをりげてください。"
 }

@@ -77,7 +77,7 @@
   "report.competencies": "能力项",
   "report.turn": "第 {n} 轮",
   "report.practiceWeak": "练习薄弱环节",
-  "report.practiceHint": "将在未来迭代中提供",
+  "report.practiceHint": "从最薄弱的领域开始教练会话",
   "history.title": "历史",
   "history.loading": "加载中…",
   "history.empty": "还没有会话——去被拷问吧。",
@@ -182,5 +182,13 @@
   "setup.startFailedToast": "无法启动会话",
   "settings.autosaveNote": "更改会自动保存。",
   "settings.llm.cloudRecommended": "为获得最流畅的体验，建议使用云端端点。",
-  "settings.llm.geminiEnableLink": "在使用 Chrome？启用 Gemini Nano →"
+  "settings.llm.geminiEnableLink": "在使用 Chrome？启用 Gemini Nano →",
+  "runtime.label": "运行时",
+  "runtime.server": "服务器",
+  "runtime.custom": "自定义端点",
+  "runtime.inBrowser": "浏览器内",
+  "runtime.unreachable": " —  {fallback}",
+  "settings.incomplete": " — ，",
+  "setup.filesServerOnly": " — ",
+  "report.coachSeed": " {name} 。，。"
 }

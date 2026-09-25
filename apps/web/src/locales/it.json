@@ -77,7 +77,7 @@
   "report.competencies": "competenze",
   "report.turn": "turno {n}",
   "report.practiceWeak": "esercita i punti deboli",
-  "report.practiceHint": "disponibile in una futura iterazione",
+  "report.practiceHint": "avvia una sessione di coach basata sulla tua area più debole",
   "history.title": "cronologia",
   "history.loading": "caricamento…",
   "history.empty": "nessuna sessione — vai a farti pressare.",
@@ -182,5 +182,13 @@
   "setup.startFailedToast": "Impossibile avviare la sessione",
   "settings.autosaveNote": "Le modifiche vengono salvate automaticamente.",
   "settings.llm.cloudRecommended": "Si consiglia un endpoint cloud per l'esperienza più fluida.",
-  "settings.llm.geminiEnableLink": "Usi Chrome? Attiva Gemini Nano →"
+  "settings.llm.geminiEnableLink": "Usi Chrome? Attiva Gemini Nano →",
+  "runtime.label": "runtime",
+  "runtime.server": "server",
+  "runtime.custom": "endpoint personalizzato",
+  "runtime.inBrowser": "nel browser",
+  "runtime.unreachable": "server non raggiungibile — uso {fallback}",
+  "settings.incomplete": "attivato ma incompleto — compila i campi sotto o disattiva per mantenere la configurazione salvata",
+  "setup.filesServerOnly": "il caricamento dei documenti richiede il runtime server — i file non vengono salvati in modalità browser",
+  "report.coachSeed": "Allenami su {name}. Fai una sessione di pratica mirata e chiedi dettagli concreti."
 }
