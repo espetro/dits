@@ -2,7 +2,7 @@ import { parseArgs } from "node:util";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { createDatabase, migrate, ping } from "./store/db";
-import { loadConfig, ConfigError } from "./config/load";
+import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
 import { createApp, serveApp } from "./api/app";
 

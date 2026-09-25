@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { WhisperStt, encodePcmWav } from "./whisper-stt.ts";
 import { decodeWav } from "./wav.ts";
 

@@ -21,18 +21,18 @@ interfaces, two adapters per port, single code path for every screen.
 
 ## 1. the line - capability matrix
 
-| capability | browser (core) | sidecar (enhanced) |
-|---|---|---|
-| session storage | opfs store | sqlite (app-support dir) |
-| llm | managed demo endpoint (zero-conf) or byo | same + native anthropic flavor |
-| stt | web speech api (chromium; degrade elsewhere) | managed .cpp preset or byo endpoint |
-| tts | speechsynthesis + byo endpoint | managed .cpp preset or byo endpoint |
-| barge-in | web speech interim results + grace | vad-driven (exists) |
-| typed turns | yes | yes (route into live voiceloop) |
-| report gen | client-side via llm port | server-side via llm port |
-| history / coach / editor / whiteboard | yes | yes |
-| document ingestion / rag | no - marked "sidecar only" in copy | yes |
-| file tools / local paths | no | yes |
+| capability                            | browser (core)                               | sidecar (enhanced)                  |
+| ------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| session storage                       | opfs store                                   | sqlite (app-support dir)            |
+| llm                                   | managed demo endpoint (zero-conf) or byo     | same + native anthropic flavor      |
+| stt                                   | web speech api (chromium; degrade elsewhere) | managed .cpp preset or byo endpoint |
+| tts                                   | speechsynthesis + byo endpoint               | managed .cpp preset or byo endpoint |
+| barge-in                              | web speech interim results + grace           | vad-driven (exists)                 |
+| typed turns                           | yes                                          | yes (route into live voiceloop)     |
+| report gen                            | client-side via llm port                     | server-side via llm port            |
+| history / coach / editor / whiteboard | yes                                          | yes                                 |
+| document ingestion / rag              | no - marked "sidecar only" in copy           | yes                                 |
+| file tools / local paths              | no                                           | yes                                 |
 
 rule: a capability is "enhanced" only if it needs a process or the
 filesystem. everything else ships in core. ui copy states sidecar-only
@@ -220,7 +220,7 @@ persist: `adr-0004-frontend-stack.md` records these + the measured data.
     recipes/do's-and-don'ts; `theme.css @theme` stays the normative token
     source (no value duplication).
 27. **enforcement** - `dscheck` in T1 (decided): reads `@theme`, `--format
-    agent` output naming the right token.
+agent` output naming the right token.
 28. **fix `web/AGENTS.md` route list** - lists `/history` and `/editor`
     routes that do not exist (history is a settings pane; whiteboard is a
     tab). screens/ specs stay the convention.

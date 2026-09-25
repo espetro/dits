@@ -4,7 +4,7 @@ import type {
   LanguageModelV4CallOptions,
   LanguageModelV4StreamPart,
 } from "@ai-sdk/provider";
-import { type BrowserLlmSection, type LlmSection, type RemoteLlmSection } from "@di/shared";
+import type { BrowserLlmSection, LlmSection, RemoteLlmSection } from "@di/shared";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
 
 /**

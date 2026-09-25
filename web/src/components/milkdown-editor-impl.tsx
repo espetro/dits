@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Crepe, CrepeFeature } from "@milkdown/crepe";
-import { replaceAll, callCommand } from "@milkdown/kit/utils";
+import { callCommand, replaceAll } from "@milkdown/kit/utils";
 import { editorViewCtx } from "@milkdown/kit/core";
 import { createCodeBlockCommand } from "@milkdown/kit/preset/commonmark";
 

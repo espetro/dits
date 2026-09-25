@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import {
+  HeadContent,
   Link,
   Outlet,
-  createRootRoute,
-  HeadContent,
   Scripts,
+  createRootRoute,
   useLocation,
   useRouter,
 } from "@tanstack/react-router";
@@ -15,9 +15,10 @@ import { AlertTriangle } from "lucide-react";
 import { AppIntlProvider, useIsRtl } from "../locales/i18n";
 import { Button } from "../components/vendor/button";
 import { AppHeader } from "../components/app-header";
-import { SettingsDialogHost, type SettingsPane } from "../components/settings-dialog";
+import { SettingsDialogHost } from "../components/settings-dialog";
 import { localeFromPathname, withLocale } from "../lib/locale-href";
 import { maybeSeedFixtures } from "../lib/dev-fixtures";
+import { Toaster } from "sonner";
 import "../theme.css";
 
 export const Route = createRootRoute({
@@ -28,8 +29,6 @@ export const Route = createRootRoute({
     meta: [{ name: "viewport", content: "width=device-width, initial-scale=1.0" }],
   }),
 });
-
-import { Toaster } from "sonner";
 
 function RootDocument() {
   const isRtl = useIsRtl();

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { BrowserVoiceDriver, type RecognitionLike } from "./browser-driver";
+import { BrowserVoiceDriver } from "./browser-driver";
+import type { RecognitionLike } from "./browser-driver";
 import { createPcmPlayer } from "./pcm-player";
 import type { AudioContextLike } from "./pcm-player";
 

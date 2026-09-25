@@ -11,8 +11,8 @@ import type {
   UpdateQuestionArgs,
 } from "@di/shared";
 import type { LanguageModelV3, LanguageModelV4 } from "@ai-sdk/provider";
-import { type BrowserModelHandles, createLlmModel, resolveBrowserLlm } from "./browser-provider";
-import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
+import { resolveBrowserLlm } from "./browser-provider";
+import type { BrowserModelHandles } from "./browser-provider";
 
 /** Model spec version accepted by ai v7's model union. */
 type AnyLanguageModel = LanguageModelV3 | LanguageModelV4;

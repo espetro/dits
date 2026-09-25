@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useLocale, withLocale } from "../../lib/locale-href";
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";

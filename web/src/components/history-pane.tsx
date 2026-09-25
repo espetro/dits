@@ -2,7 +2,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 
-import { withLocale, useLocale } from "../lib/locale-href";
+import { useLocale, withLocale } from "../lib/locale-href";
 import { listClientSessions } from "../lib/opfs-store";
 import type { Session } from "@di/shared/session";
 

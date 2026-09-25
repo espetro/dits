@@ -1,5 +1,5 @@
-import { describe, it, expect, afterAll } from "vitest";
-import { startServer, loadFixture } from "../mock-provider/main";
+import { afterAll, describe, expect, it } from "vitest";
+import { loadFixture, startServer } from "../mock-provider/main";
 
 const fixture = loadFixture();
 const server = startServer(0, fixture);

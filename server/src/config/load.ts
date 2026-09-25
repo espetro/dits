@@ -1,10 +1,10 @@
 import * as v from "valibot";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parse } from "yaml";
 import {
-  ConfigSchema,
   CONFIG_ENV_PREFIX,
   CONFIG_ENV_SEPARATOR,
+  ConfigSchema,
   describeConfigError,
 } from "@di/shared";
 import type { Config } from "@di/shared";

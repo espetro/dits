@@ -11,7 +11,7 @@ Agent-facing operational documentation for the deep-interview monorepo.
 | [stack.md](stack.md)                       | Native stack runbook: ports, start order, env files, config, tests                 |
 | [config-reference.md](config-reference.md) | Full `config.yaml` key table, env override rules, `/v1/*` API summary              |
 | [setup-prompt.md](setup-prompt.md)         | Agent-drivable clone-to-interview walkthrough over the `/v1/test/*` HTTP API       |
-| [adr/](adr/)                               | Architecture decisions (0002 ws voice, 0003 client-only, 0004 frontend stack)     |
+| [adr/](adr/)                               | Architecture decisions (0002 ws voice, 0003 client-only, 0004 frontend stack)      |
 | ../plans/                                  | Plans referenced by ADRs (e.g. `2026-09-25-remediation-e2e-and-ui.md`)             |
 
 Repo-root `DESIGN.md` is the visual contract (taxonomy, recipes, rules);

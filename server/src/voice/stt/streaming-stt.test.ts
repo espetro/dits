@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { StreamingWhisperStt } from "./streaming-stt.ts";
 
 function pcm(bytes: number): Uint8Array {

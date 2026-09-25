@@ -2,8 +2,9 @@
  * di API client. The di binary serves the SPA and the /v1 API from one origin,
  * so plain fetch against relative paths is all the web app needs.
  */
-import { enqueuePendingTurn, dequeuePendingTurn, getPendingTurns } from "./opfs-store";
+import { dequeuePendingTurn, enqueuePendingTurn, getPendingTurns } from "./opfs-store";
 import type { PendingTurn } from "./opfs-store";
+
 const BASE = import.meta.env.VITE_DI_API_BASE ?? "";
 
 const PENDING_TURN_RETRIES = 3;

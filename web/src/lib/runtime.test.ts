@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  decodeProviderProfile,
-  LegacyProviderProfileSchema,
-  ProviderSectionsSchema,
-} from "@di/shared";
+import { LegacyProviderProfileSchema, decodeProviderProfile } from "@di/shared";
 import * as v from "valibot";
 import {
   $effectiveRuntime,
@@ -20,8 +16,6 @@ const LLM = {
   apiKey: "sk-test-123456",
   model: "gpt-4o-mini",
 };
-const PROFILE = { llm: LLM };
-
 describe("runtime stores", () => {
   beforeEach(() => {
     localStorage.clear();
