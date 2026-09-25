@@ -1,0 +1,73 @@
+{
+  "$version": 1,
+  "apps/web/src/components/agent-stage.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/endpoint-fields.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/landing-page.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/milkdown-editor.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/question-card.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/scenario-card.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/components/transcript-pane.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/fonts.css": {
+    "dscheck/no-raw-font": {
+      "count": 12
+    }
+  },
+  "apps/web/src/routes/{-$locale}/dev.voice-harness.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 2
+    }
+  },
+  "apps/web/src/routes/{-$locale}/finish.$id.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  },
+  "apps/web/src/routes/{-$locale}/interview.$id.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 3
+    }
+  },
+  "apps/web/src/routes/{-$locale}/report.$id.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 6
+    }
+  },
+  "apps/web/src/routes/{-$locale}/setup.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 11
+    }
+  },
+  "apps/web/src/routes/{-$locale}/validate.$id.tsx": {
+    "dscheck/no-raw-length": {
+      "count": 1
+    }
+  }
+}

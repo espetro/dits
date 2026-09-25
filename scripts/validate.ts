@@ -60,6 +60,7 @@ const t0: Step[] = skipT0
 const t1: Step[] = [
   { title: "ast-grep scan", cmd: "bunx", args: ["ast-grep", "scan"] },
   { title: "ratchets", cmd: "bun", args: ["scripts/check-ratchets.ts"] },
+  { title: "dscheck", cmd: "bun", args: ["scripts/check-dscheck.ts"] },
 ];
 
 const t2: Step[] = [
