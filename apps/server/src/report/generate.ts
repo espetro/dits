@@ -29,11 +29,12 @@ export async function generateReport(llm: ReportLlm, ctx: ReportPromptContext): 
       const messages: LlmMessage[] = [{ role: "user", content: prompt }];
       const result = llm.streamChat ? await llm.streamChat(messages) : await llm.chat(messages);
       const raw = extractJson(result.content);
-      // Server-known fields: don't depend on the model echoing them back.
+      // Server-owned fields: overwrite unconditionally — the model echoes
+      // wrong values (e.g. a canned timestamp) as often as it omits them.
       if (raw !== null && typeof raw === "object") {
         const r = raw as Record<string, unknown>;
-        if (r.session_id === undefined) r.session_id = ctx.sessionId;
-        if (r.generated_at === undefined) r.generated_at = new Date().toISOString();
+        r.session_id = ctx.sessionId;
+        r.generated_at = new Date().toISOString();
       }
       return v.parse(ReportSchema, raw);
     } catch (err) {

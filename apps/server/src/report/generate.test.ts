@@ -45,4 +45,21 @@ describe("generateReport", () => {
     const report = await generateReport(llm, ctx);
     expect(report.overall_score).toBe(7);
   });
+
+  it("overwrites model-supplied session_id and generated_at with server values", async () => {
+    const stale = JSON.stringify({
+      session_id: "00000000-0000-4000-8000-000000000000",
+      overall_score: 5,
+      coverage_pct: 10,
+      competencies: [],
+      model_answers: [],
+      generated_at: "2023-10-27T00:00:00Z",
+    });
+    const llm: ReportLlm = {
+      chat: async () => ({ content: stale, toolCalls: [] }),
+    };
+    const report = await generateReport(llm, ctx);
+    expect(report.session_id).toBe(sessionId);
+    expect(report.generated_at).not.toBe("2023-10-27T00:00:00Z");
+  });
 });
