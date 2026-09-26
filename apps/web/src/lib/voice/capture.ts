@@ -45,12 +45,16 @@ export function floatToPcm16(samples: Float32Array): Uint8Array {
 
 export interface AudioContextLike {
   readonly sampleRate: number;
+  /** real contexts expose a destination node; worklets must connect to it
+   * (pull model: an unconnected node is never processed) */
+  readonly destination?: unknown;
   readonly audioWorklet: { addModule(url: string): Promise<void> };
   createMediaStreamSource(stream: unknown): {
     connect(node: unknown): void;
     disconnect(): void;
   };
-  createAudioWorkletNode(
+  /** test seam; real contexts use AudioWorkletNode (see start()) */
+  createAudioWorkletNode?(
     name: string,
     opts?: unknown,
   ): {
@@ -58,8 +62,13 @@ export interface AudioContextLike {
     connect(dest?: unknown): void;
     disconnect(): void;
   };
+  resume?(): Promise<void>;
   close(): Promise<void>;
 }
+
+type WorkletNodeLike = NonNullable<
+  ReturnType<NonNullable<AudioContextLike["createAudioWorkletNode"]>>
+>;
 
 export interface MicCapture {
   onFrame(cb: (pcm16: Uint8Array) => void): void;
@@ -98,10 +107,7 @@ export class MicCaptureImpl implements MicCapture {
   private muted = false;
   private ctx: AudioContextLike | null = null;
   private source: { disconnect(): void } | null = null;
-  private node: {
-    port: { onmessage: ((ev: { data: unknown }) => void) | null };
-    disconnect(): void;
-  } | null = null;
+  private node: WorkletNodeLike | null = null;
   private stream: { getTracks(): { stop(): void }[] } | null = null;
 
   async start(deps: CaptureDeps = {}): Promise<void> {
@@ -138,8 +144,18 @@ export class MicCaptureImpl implements MicCapture {
     );
     await ctx.audioWorklet.addModule(url);
 
+    // AudioContext starts suspended until a user gesture or an allowed
+    // autoplay policy — resume() is a no-op when already running
+    await ctx.resume?.();
+
     const source = ctx.createMediaStreamSource(stream);
-    const node = ctx.createAudioWorkletNode("di-capture");
+    const node: WorkletNodeLike = ctx.createAudioWorkletNode
+      ? ctx.createAudioWorkletNode("di-capture")
+      : // real AudioContext has no factory method — the DOM constructor is it
+        new (globalThis.AudioWorkletNode as unknown as new (
+          ctx: AudioContextLike,
+          name: string,
+        ) => WorkletNodeLike)(ctx, "di-capture");
     node.port.onmessage = (ev: { data: unknown }) => {
       const samples = ev.data as Float32Array;
       if (!(samples instanceof Float32Array)) return;
@@ -157,6 +173,7 @@ export class MicCaptureImpl implements MicCapture {
       this.frameCb?.(floatToPcm16(samples));
     };
     source.connect(node);
+    if (ctx.destination !== undefined) node.connect(ctx.destination);
     this.source = source;
     this.node = node;
   }

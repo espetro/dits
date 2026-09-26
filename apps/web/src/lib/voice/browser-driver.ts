@@ -137,12 +137,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   /**
-   * Which tts path speak() takes this turn. "wasm" requires the injected
-   * engine or the worker-backed WasmTts (created lazily below); otherwise
-   * the resolved pick falls back to endpoint/builtin.
+   * Which tts path speak() takes this turn. "wasm" is the resolved pick —
+   * getTtsEngine() lazy-creates the worker on first use; readiness was
+   * checked during engine resolution.
    */
   private get ttsMode(): "wasm" | "endpoint" | "builtin" {
-    if (this.engines.tts === "wasm" && (this.wasmTts || this.deps.wasmTtsEngine)) return "wasm";
+    if (this.engines.tts === "wasm") return "wasm";
     return this.profile?.tts !== undefined ? "endpoint" : "builtin";
   }
 
