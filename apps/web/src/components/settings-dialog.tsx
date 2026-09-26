@@ -1,4 +1,4 @@
-import { AlertTriangle, Bot, Check, History, Loader2, X } from "lucide-react";
+import { AlertTriangle, AudioLines, Bot, Check, History, Loader2, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as v from "valibot";
@@ -10,6 +10,7 @@ import { $providerProfile, redactKey } from "../lib/runtime";
 import { smokeTestModel } from "../lib/agent/browser-provider";
 import { SttTestPanel } from "./stt-test-panel";
 import { BrowserLlmManager } from "./browser-llm-manager";
+import { VoiceEnginesPane } from "./voice-engines-pane";
 import { EndpointFields } from "./endpoint-fields";
 import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
 import { synthesizeSpeech } from "../lib/agent/tts";
@@ -37,7 +38,7 @@ import { LLM_SMOKE_TEST_TIMEOUT_MS } from "../lib/timeouts";
  * schema; navigate with the openSettings/clearSettings helpers below.
  */
 
-export type SettingsPane = "history" | "aiProvider";
+export type SettingsPane = "history" | "aiProvider" | "voice";
 
 export interface SettingsSearch {
   settings?: "1";
@@ -84,7 +85,7 @@ function parseSettingsSearch(query: string): SettingsSearch {
   const parsed = v.safeParse(
     v.object({
       settings: v.optional(v.picklist(["1"])),
-      pane: v.optional(v.picklist(["history", "aiProvider"])),
+      pane: v.optional(v.picklist(["history", "aiProvider", "voice"])),
     }),
     Object.fromEntries(new URLSearchParams(query)),
   );
@@ -735,6 +736,11 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
       label: intl.formatMessage({ id: "settings.aiProvider" }),
       icon: <Bot className="size-4" aria-hidden="true" />,
     },
+    {
+      id: "voice",
+      label: intl.formatMessage({ id: "settings.voicePane.nav" }),
+      icon: <AudioLines className="size-4" aria-hidden="true" />,
+    },
   ];
 
   const configTabs = tabs.filter((tab) => tab.id !== "history");
@@ -793,8 +799,8 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           <FormattedMessage id="settings.title" />
         </DialogTitle>
         <DialogDescription className="sr-only">
-          <FormattedMessage id="settings.history" /> and{" "}
-          <FormattedMessage id="settings.aiProvider" />
+          <FormattedMessage id="settings.history" />, <FormattedMessage id="settings.aiProvider" />{" "}
+          and <FormattedMessage id="settings.voicePane.nav" />
         </DialogDescription>
         {isMobile ? (
           <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
@@ -844,6 +850,8 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           {isMobile ? (
             pane === "history" ? (
               <HistoryPane />
+            ) : pane === "voice" ? (
+              <VoiceEnginesPane />
             ) : (
               <AiProviderPane />
             )
@@ -855,10 +863,21 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
             >
               <PaneHeading
                 title={intl.formatMessage({
-                  id: pane === "history" ? "settings.history" : "settings.aiProvider",
+                  id:
+                    pane === "history"
+                      ? "settings.history"
+                      : pane === "voice"
+                        ? "settings.voicePane.nav"
+                        : "settings.aiProvider",
                 })}
               />
-              {pane === "history" ? <HistoryPane /> : <AiProviderPane />}
+              {pane === "history" ? (
+                <HistoryPane />
+              ) : pane === "voice" ? (
+                <VoiceEnginesPane />
+              ) : (
+                <AiProviderPane />
+              )}
             </div>
           )}
         </div>

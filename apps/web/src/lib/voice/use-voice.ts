@@ -4,6 +4,12 @@ import type { Turn } from "@di/shared/session";
 import { appendTurn } from "../agent/session-store";
 import { appendClientTurn } from "../opfs-store";
 import { $providerProfile } from "../runtime";
+import {
+  $voiceDownload,
+  $voiceModelsConsent,
+  $voiceSttEngine,
+  $voiceTtsEngine,
+} from "../../stores/voice";
 import { setQuestion } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { createDriver } from "./index";
@@ -166,6 +172,27 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       prev = next;
       if (driverRef.current instanceof BrowserVoiceDriver) setBootNonce((n) => n + 1);
     });
+  }, []);
+
+  // wasm voice engines: a pick/consent change or a finished model download
+  // flips the engine resolution, so the driver must re-init. Download
+  // progress ticks only rebuild on the idle->ready/error edge.
+  React.useEffect(() => {
+    const rebuild = () => {
+      if (driverRef.current instanceof BrowserVoiceDriver) setBootNonce((n) => n + 1);
+    };
+    const unsubs = [$voiceSttEngine, $voiceTtsEngine, $voiceModelsConsent].map((s) =>
+      s.listen(rebuild),
+    );
+    let prevStatus = $voiceDownload.get().status;
+    unsubs.push(
+      $voiceDownload.listen((d) => {
+        const prev = prevStatus;
+        prevStatus = d.status;
+        if (prev === "downloading" && d.status === "ready") rebuild();
+      }),
+    );
+    return () => unsubs.forEach((unsub) => unsub());
   }, []);
 
   React.useEffect(() => {

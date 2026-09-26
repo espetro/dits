@@ -45,12 +45,16 @@ export function floatToPcm16(samples: Float32Array): Uint8Array {
 
 export interface AudioContextLike {
   readonly sampleRate: number;
+  /** real contexts expose a destination node; worklets must connect to it
+   * (pull model: an unconnected node is never processed) */
+  readonly destination?: unknown;
   readonly audioWorklet: { addModule(url: string): Promise<void> };
   createMediaStreamSource(stream: unknown): {
     connect(node: unknown): void;
     disconnect(): void;
   };
-  createAudioWorkletNode(
+  /** test seam; real contexts use AudioWorkletNode (see start()) */
+  createAudioWorkletNode?(
     name: string,
     opts?: unknown,
   ): {
@@ -58,11 +62,18 @@ export interface AudioContextLike {
     connect(dest?: unknown): void;
     disconnect(): void;
   };
+  resume?(): Promise<void>;
   close(): Promise<void>;
 }
 
+type WorkletNodeLike = NonNullable<
+  ReturnType<NonNullable<AudioContextLike["createAudioWorkletNode"]>>
+>;
+
 export interface MicCapture {
   onFrame(cb: (pcm16: Uint8Array) => void): void;
+  /** raw Float32 16kHz frames (wasm stt path: no pcm16 round-trip) */
+  onFloat32Frame?(cb: ((samples: Float32Array) => void) | null): void;
   /** optional loudness tap (rms per worklet frame) for UI visualizers */
   onLevel?(cb: ((rms: number) => void) | null): void;
   setMuted(muted: boolean): void;
@@ -91,14 +102,12 @@ export interface CaptureDeps {
  */
 export class MicCaptureImpl implements MicCapture {
   private frameCb: ((pcm16: Uint8Array) => void) | null = null;
+  private float32Cb: ((samples: Float32Array) => void) | null = null;
   private levelCb: ((rms: number) => void) | null = null;
   private muted = false;
   private ctx: AudioContextLike | null = null;
   private source: { disconnect(): void } | null = null;
-  private node: {
-    port: { onmessage: ((ev: { data: unknown }) => void) | null };
-    disconnect(): void;
-  } | null = null;
+  private node: WorkletNodeLike | null = null;
   private stream: { getTracks(): { stop(): void }[] } | null = null;
 
   async start(deps: CaptureDeps = {}): Promise<void> {
@@ -135,8 +144,18 @@ export class MicCaptureImpl implements MicCapture {
     );
     await ctx.audioWorklet.addModule(url);
 
+    // AudioContext starts suspended until a user gesture or an allowed
+    // autoplay policy — resume() is a no-op when already running
+    await ctx.resume?.();
+
     const source = ctx.createMediaStreamSource(stream);
-    const node = ctx.createAudioWorkletNode("di-capture");
+    const node: WorkletNodeLike = ctx.createAudioWorkletNode
+      ? ctx.createAudioWorkletNode("di-capture")
+      : // real AudioContext has no factory method — the DOM constructor is it
+        new (globalThis.AudioWorkletNode as unknown as new (
+          ctx: AudioContextLike,
+          name: string,
+        ) => WorkletNodeLike)(ctx, "di-capture");
     node.port.onmessage = (ev: { data: unknown }) => {
       const samples = ev.data as Float32Array;
       if (!(samples instanceof Float32Array)) return;
@@ -149,10 +168,12 @@ export class MicCaptureImpl implements MicCapture {
       }
       const count = n > 0 ? n : 1;
       this.levelCb?.(Math.sqrt(sum / count));
-      if (this.muted || !this.frameCb) return;
-      this.frameCb(floatToPcm16(samples));
+      if (this.muted) return;
+      this.float32Cb?.(samples);
+      this.frameCb?.(floatToPcm16(samples));
     };
     source.connect(node);
+    if (ctx.destination !== undefined) node.connect(ctx.destination);
     this.source = source;
     this.node = node;
   }
@@ -161,12 +182,17 @@ export class MicCaptureImpl implements MicCapture {
     this.frameCb = cb;
   }
 
+  onFloat32Frame(cb: ((samples: Float32Array) => void) | null): void {
+    this.float32Cb = cb;
+  }
+
   setMuted(muted: boolean): void {
     this.muted = muted;
   }
 
   async stop(): Promise<void> {
     this.frameCb = null;
+    this.float32Cb = null;
     this.node?.disconnect();
     this.node = null;
     this.source?.disconnect();

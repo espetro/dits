@@ -137,6 +137,16 @@ env(safe-area-inset-bottom)`, all targets `>= 44px`.
   VAD (`/vad/` vendored), binary frames while speaking + `{t:"utterance_end"}`,
   `{t:"interrupt"}` barge-in (300ms grace on the browser driver), reconnect
   with backoff, voice->text degradation surfaces the type path immediately.
+- **On-device voice (client-only)**: first entry mounts `VoiceConsentDialog`
+  (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models
+  (sha256-verified into CacheStorage, progress on `$voiceDownload`), decline
+  keeps the Web Speech engines and is never re-asked (Settings -> voice
+  re-arms). With consent + cached models the browser driver skips
+  SpeechRecognition: sherpa zipformer worker stt fed by `MicCapture`'s
+  `onFloat32Frame` tap, silero VAD speech-end flushes the utterance (vad
+  speech-start + stt partials both arm the 300ms barge-in), KittenTTS worker
+  tts plays Float32 24kHz via `PcmPlayer.writeFloat32`. Engine boot failure
+  falls back to builtin stt; mic failure keeps the type path.
 - Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
   no-speech hint now points at the ControlBar `type` button / rail input
   instead of rendering its own input inside the QuestionCard.

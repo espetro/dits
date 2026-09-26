@@ -85,11 +85,15 @@ function fakeRecognitionCtor(): {
   emitFinal: (transcript: string, confidence?: number) => void;
   emitInterim: (transcript: string) => void;
   emitError: (error: string) => void;
+  emitEnd: () => void;
+  readonly startCount: number;
 } {
   const listeners: {
     onresult?: (ev: any) => void;
     onerror?: (ev: any) => void;
   } = {};
+  let startCount = 0;
+  const instances: Rec[] = [];
   class Rec implements RecognitionLike {
     continuous = false;
     interimResults = false;
@@ -97,7 +101,11 @@ function fakeRecognitionCtor(): {
     onresult: ((ev: any) => void) | null = null;
     onerror: ((ev: any) => void) | null = null;
     onend: (() => void) | null = null;
+    constructor() {
+      instances.push(this);
+    }
     start() {
+      startCount++;
       const cb = this.onresult;
       if (cb) listeners.onresult = cb;
       if (this.onerror) listeners.onerror = this.onerror;
@@ -119,6 +127,10 @@ function fakeRecognitionCtor(): {
         results: [{ isFinal: false, 0: { transcript } }],
       }),
     emitError: (error: string) => listeners.onerror?.({ error }),
+    emitEnd: () => instances.at(-1)?.onend?.(),
+    get startCount() {
+      return startCount;
+    },
   };
 }
 
@@ -299,6 +311,56 @@ describe("BrowserVoiceDriver recognition errors", () => {
       expect(driver.status).toBe("error");
       expect(driver.onError).toHaveBeenCalledTimes(1);
       expect(driver.onError).toHaveBeenCalledWith("microphone unavailable");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("BrowserVoiceDriver recognition lifecycle", () => {
+  async function setupDriver() {
+    const rec = fakeRecognitionCtor();
+    const driver = new BrowserVoiceDriver("s1", {
+      player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      recognitionCtor: rec.ctor,
+    });
+    driver.onError = vi.fn();
+    await driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      { editor: "", whiteboard: "" },
+      () => ({ mode: "interview" }),
+    );
+    return { driver, rec };
+  }
+
+  it("does not restart recognition when stop() lands inside the onend window", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, rec } = await setupDriver();
+      await driver.start();
+      expect(rec.startCount).toBe(1);
+      rec.emitEnd();
+      await driver.stop();
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(rec.startCount).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("restarts recognition after onend while still connected", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, rec } = await setupDriver();
+      await driver.start();
+      rec.emitEnd();
+      await vi.advanceTimersByTimeAsync(500);
+      expect(rec.startCount).toBe(2);
     } finally {
       vi.useRealTimers();
     }
