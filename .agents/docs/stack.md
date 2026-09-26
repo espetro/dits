@@ -30,6 +30,21 @@ endpoints in `config.yaml` — any compatible server works (hosted APIs,
 Ollama, vLLM, the mock). `embeddings` is optional; without it document
 uploads are off.
 
+## Voice (browser mode)
+
+Server mode voice runs the ws pipeline (server STT/TTS providers above).
+Client-only/static mode defaults to on-device wasm engines behind a
+one-time consent + ~50MB download: sherpa-onnx streaming zipformer (stt)
+and KittenTTS nano (tts) in web workers, mic capture + vendored silero VAD
+(`apps/web/public/vad/`) on the main thread. The manifest + sha256-pinned
+files come from `VITE_VOICE_MODELS_BASE`/manifest.json (or the
+`di.voice.models-base` localStorage override, e.g. a self-hosted mirror),
+verified into CacheStorage (OPFS fallback). Models are never committed to
+git. Decline / missing wasm+simd / engine boot failure all degrade to Web
+Speech (`SpeechRecognition`/`speechSynthesis`); a BYO `/v1/audio/speech`
+endpoint stays a TTS option. Pickers + cache controls live in Settings ->
+voice.
+
 ## Config
 
 `config.yaml` validated by `ConfigSchema` (`packages/shared/src/config.ts`),

@@ -1,7 +1,12 @@
 import { $voiceModelsConsent, $voiceSttEngine, $voiceTtsEngine } from "../../stores/voice";
 import type { SttEnginePick, TtsEnginePick } from "../../stores/voice";
 import { $providerProfile } from "../runtime";
-import { voiceModelBytesInstalled, wasmVoiceSupported } from "./models";
+import {
+  DEFAULT_VOICE_MODEL_MANIFEST,
+  loadVoiceModelManifest,
+  voiceModelBytesInstalled,
+  wasmVoiceSupported,
+} from "./models";
 
 /**
  * Browser-mode voice engines. The BrowserVoiceDriver keeps owning turn
@@ -102,7 +107,18 @@ export function resolveVoiceEngines(input: VoiceEngineInput): ResolvedVoiceEngin
  * api degrade to builtin, never throw.
  */
 export async function resolveInstalledVoiceEngines(): Promise<ResolvedVoiceEngines> {
-  const installed = await voiceModelBytesInstalled().catch(() => ({ stt: false, tts: false }));
+  // the runtime asset root (localStorage override) may serve a different
+  // manifest version than the baked one — but only fetch it when wasm is
+  // even reachable: an unconsented session must not hit the network here
+  const consent = $voiceModelsConsent.get();
+  const manifest =
+    consent === "granted"
+      ? await loadVoiceModelManifest().catch(() => DEFAULT_VOICE_MODEL_MANIFEST)
+      : DEFAULT_VOICE_MODEL_MANIFEST;
+  const installed = await voiceModelBytesInstalled(manifest).catch(() => ({
+    stt: false,
+    tts: false,
+  }));
   return resolveVoiceEngines({
     sttPick: $voiceSttEngine.get(),
     ttsPick: $voiceTtsEngine.get(),
