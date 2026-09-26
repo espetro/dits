@@ -33,6 +33,7 @@ import { QuestionCard } from "../../components/question-card";
 import { ToolDock } from "../../components/tool-dock";
 import { ControlBar } from "../../components/control-bar";
 import { TranscriptPane } from "../../components/transcript-pane";
+import { VoiceConsentDialog } from "../../components/voice-consent-dialog";
 import { dockSpecs } from "../../lib/tools/registry";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 import {
@@ -459,6 +460,9 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
         onType={focusTypeInput}
         onEnd={() => setConfirmEndOpen(true)}
       />
+
+      {/* on-device voice consent: first browser-mode entry only */}
+      {clientOnly && <VoiceConsentDialog />}
 
       {/* end-early confirm (p3-19) */}
       <Dialog open={confirmEndOpen} onOpenChange={setConfirmEndOpen}>
