@@ -31,6 +31,8 @@ export interface RecognitionLike {
   lang: string;
   start(): void;
   stop(): void;
+  /** immediate teardown without waiting for pending finals; absent in tests */
+  abort?(): void;
   onresult: ((ev: SpeechRecognitionEventLike) => void) | null;
   onerror: ((ev: { error?: string }) => void) | null;
   onend: (() => void) | null;
@@ -50,6 +52,8 @@ export interface BrowserDriverDeps {
   tts?: typeof synthesizeSpeech;
   speechSynthesis?: SpeechSynthesis | null;
   onMetrics?: (metrics: TurnMetrics) => void;
+  /** mic acquisition for the anchor stream; tests inject a stub */
+  getUserMedia?: (constraints: MediaStreamConstraints) => Promise<unknown>;
 }
 
 export class BrowserVoiceDriver implements SpeechDriver {
@@ -70,6 +74,15 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
   /** interim-result debounce during agent playback; fires interrupt() (p0.8) */
   private bargeInTimer: ReturnType<typeof setTimeout> | null = null;
+  /** pending SpeechRecognition restart after onend; tracked so stop() cancels it */
+  private restartTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * Anchor stream held for the driver's lifetime: SpeechRecognition spawns
+   * and destroys its own OS capture session on every onend→start() cycle,
+   * which strobes the OS mic indicator. A held getUserMedia track keeps the
+   * indicator (and hardware lock) stable across those internal restarts.
+   */
+  private anchorStream: { getTracks(): { stop(): void }[] } | null = null;
   /** set when interim results arrive during the current utterance */
   private speechSeen = false;
   /** id of the user turn that already consumed the one retry (p0.4 guard) */
@@ -119,6 +132,14 @@ export class BrowserVoiceDriver implements SpeechDriver {
     const rec = new Ctor();
     this.recognition = rec;
     this.speechSeen = false;
+    // mic errors surface through rec.onerror; a failed anchor is not fatal
+    const gum =
+      this.deps.getUserMedia ?? navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+    this.anchorStream = gum
+      ? ((await gum({ audio: true }).catch(() => null)) as {
+          getTracks(): { stop(): void }[];
+        } | null)
+      : null;
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = navigator.language ?? "en-US";
@@ -137,12 +158,16 @@ export class BrowserVoiceDriver implements SpeechDriver {
         );
       }
     };
-    // continuous mode ends on silence in some builds; restart while active
+    // continuous mode ends on silence in some builds; restart while active.
+    // the timer is tracked (restartTimer) and re-gated on identity so a
+    // stop() inside the window never restarts an orphaned recognizer.
     rec.onend = () => {
-      if (this.status === "connected" && !this.restarting) {
+      if (this.status === "connected" && !this.restarting && this.recognition === rec) {
         this.restarting = true;
-        setTimeout(() => {
+        this.restartTimer = setTimeout(() => {
+          this.restartTimer = null;
           this.restarting = false;
+          if (this.status !== "connected" || this.recognition !== rec) return;
           try {
             rec.start();
           } catch {
@@ -405,10 +430,24 @@ export class BrowserVoiceDriver implements SpeechDriver {
       clearTimeout(this.bargeInTimer);
       this.bargeInTimer = null;
     }
-    this.recognition?.stop();
-    this.recognition = null;
-    this.interrupt();
+    if (this.restartTimer !== null) {
+      clearTimeout(this.restartTimer);
+      this.restartTimer = null;
+    }
+    this.restarting = false;
+    // idle before teardown so a queued onend cannot schedule a restart
     this.status = "idle";
+    const rec = this.recognition;
+    this.recognition = null;
+    try {
+      if (rec?.abort) rec.abort();
+      else rec?.stop();
+    } catch {
+      // teardown must not throw
+    }
+    this.interrupt();
+    this.anchorStream?.getTracks().forEach((t) => t.stop());
+    this.anchorStream = null;
     this.agentSpeaking = false;
   }
 }
