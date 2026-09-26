@@ -63,6 +63,8 @@ export interface AudioContextLike {
 
 export interface MicCapture {
   onFrame(cb: (pcm16: Uint8Array) => void): void;
+  /** raw Float32 16kHz frames (wasm stt path: no pcm16 round-trip) */
+  onFloat32Frame?(cb: ((samples: Float32Array) => void) | null): void;
   /** optional loudness tap (rms per worklet frame) for UI visualizers */
   onLevel?(cb: ((rms: number) => void) | null): void;
   setMuted(muted: boolean): void;
@@ -91,6 +93,7 @@ export interface CaptureDeps {
  */
 export class MicCaptureImpl implements MicCapture {
   private frameCb: ((pcm16: Uint8Array) => void) | null = null;
+  private float32Cb: ((samples: Float32Array) => void) | null = null;
   private levelCb: ((rms: number) => void) | null = null;
   private muted = false;
   private ctx: AudioContextLike | null = null;
@@ -149,8 +152,9 @@ export class MicCaptureImpl implements MicCapture {
       }
       const count = n > 0 ? n : 1;
       this.levelCb?.(Math.sqrt(sum / count));
-      if (this.muted || !this.frameCb) return;
-      this.frameCb(floatToPcm16(samples));
+      if (this.muted) return;
+      this.float32Cb?.(samples);
+      this.frameCb?.(floatToPcm16(samples));
     };
     source.connect(node);
     this.source = source;
@@ -161,12 +165,17 @@ export class MicCaptureImpl implements MicCapture {
     this.frameCb = cb;
   }
 
+  onFloat32Frame(cb: ((samples: Float32Array) => void) | null): void {
+    this.float32Cb = cb;
+  }
+
   setMuted(muted: boolean): void {
     this.muted = muted;
   }
 
   async stop(): Promise<void> {
     this.frameCb = null;
+    this.float32Cb = null;
     this.node?.disconnect();
     this.node = null;
     this.source?.disconnect();
