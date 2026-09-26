@@ -5,10 +5,12 @@
  * sends text and gets 24kHz Float32 PCM back.
  *
  * Model bytes arrive over postMessage (already downloaded + sha-verified by
- * the manifest downloader); the ort wasm binary resolves from the vendored
- * /vad/ assets via wasmPaths — same file, same 1.29.0 build.
+ * the manifest downloader); ort itself loads from the vendored
+ * ort.wasm.bundle.min.mjs + ort-wasm-simd-threaded.wasm in /vad/ (both 1.29.0)
+ * rather than the npm bundle — a static import would make vite emit ort's
+ * unused wasm variants into dist/assets and blow past the Pages asset cap.
  */
-import * as ort from "onnxruntime-web";
+import type * as Ort from "onnxruntime-web";
 import { loadNpz } from "./npz";
 import type { NpyArray } from "./npz";
 import { phonemizeText } from "./phonemize";
@@ -36,7 +38,8 @@ export type KittenOutMsg =
 const AUDIO_TRIM = 5_000;
 const DEFAULT_VOICE = "expr-voice-5-m";
 
-let session: ort.InferenceSession | null = null;
+let ort: typeof Ort | null = null;
+let session: Ort.InferenceSession | null = null;
 let voices: Record<string, NpyArray> = {};
 
 function post(msg: KittenOutMsg, transfer?: Transferable[]): void {
@@ -44,6 +47,7 @@ function post(msg: KittenOutMsg, transfer?: Transferable[]): void {
 }
 
 async function init(msg: KittenInitMsg): Promise<void> {
+  ort = (await import(/* @vite-ignore */ `${msg.wasmBase}ort.wasm.bundle.min.mjs`)) as typeof Ort;
   ort.env.wasm.wasmPaths = msg.wasmBase;
   // single-threaded: the app does not require cross-origin isolation, so the
   // threaded pool / proxy worker path is off
@@ -54,7 +58,7 @@ async function init(msg: KittenInitMsg): Promise<void> {
 }
 
 async function speak(id: number, text: string): Promise<void> {
-  if (!session) throw new Error("worker not initialized");
+  if (!session || !ort) throw new Error("worker not initialized");
   const voiceEntry = voices[DEFAULT_VOICE] ?? Object.values(voices)[0];
   if (!voiceEntry) throw new Error("voices.npz is empty");
   const [numStyles = 0, styleDim = 0] = voiceEntry.shape;
