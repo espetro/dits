@@ -20,6 +20,18 @@ export const ProviderSchema = v.object({
       v.transform((x) => x === true || x === "true"),
     ),
   ),
+  /**
+   * Send Z.AI-style `thinking: {type: "disabled"}` on chat completions.
+   * Same purpose as reasoning_exclude (keep thinking out of the output
+   * budget) for providers that speak the Z.AI dialect — they ignore the
+   * OpenRouter param and vice versa, so both can be set at once.
+   */
+  thinking_disabled: v.optional(
+    v.pipe(
+      v.union([v.boolean(), v.picklist(["true", "false"])]),
+      v.transform((x) => x === true || x === "true"),
+    ),
+  ),
 });
 export type Provider = v.InferOutput<typeof ProviderSchema>;
 

@@ -28,6 +28,8 @@ export interface OpenAiChatOptions {
   flavor?: "openai" | "anthropic";
   /** Send `reasoning: {exclude: true}` (OpenRouter-style) on chat requests. */
   reasoningExclude?: boolean;
+  /** Send `thinking: {type: "disabled"}` (Z.AI-style) on chat requests. */
+  thinkingDisabled?: boolean;
   fetchImpl?: typeof fetch;
   /** When set, emit llm.request/llm.result pipeline events. */
   events?: EventSink;
@@ -75,6 +77,7 @@ export class OpenAiChatClient {
           model: this.opts.model,
           messages: toWireMessages(messages),
           ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
+          ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0
             ? { tools: tools.map((t) => ({ type: "function", function: t })) }
             : {}),
@@ -255,6 +258,7 @@ export class OpenAiChatClient {
           messages: toWireMessages(messages),
           stream: true,
           ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
+          ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0
             ? { tools: tools.map((t) => ({ type: "function", function: t })) }
             : {}),

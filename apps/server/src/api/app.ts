@@ -51,6 +51,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
         model: deps.config.llm.model,
         flavor: deps.config.llm.flavor,
         reasoningExclude: deps.config.llm.reasoning_exclude,
+        thinkingDisabled: deps.config.llm.thinking_disabled,
       }),
     }),
   );

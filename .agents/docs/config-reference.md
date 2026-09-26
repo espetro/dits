@@ -15,6 +15,7 @@ yaml file. Case-insensitive key paths after the prefix.
 | `llm.api_key`           | string                            | optional                             | bearer key for the LLM endpoint                                          |
 | `llm.model`             | string                            | required                             | model id                                                                 |
 | `llm.reasoning_exclude` | bool                              | `false`                              | send `reasoning: {exclude: true}` (OpenRouter-style) on chat completions |
+| `llm.thinking_disabled` | bool                              | `false`                              | send `thinking: {type: "disabled"}` (Z.AI-style) on chat completions     |
 | `stt.base_url`          | url                               | required                             | speech-to-text endpoint (OpenAI transcription shape)                     |
 | `stt.api_key`           | string                            | optional                             | bearer key                                                               |
 | `stt.model`             | string                            | required                             | STT model id                                                             |

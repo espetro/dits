@@ -158,6 +158,7 @@ export class VoiceLoop {
         model: this.config.llm.model,
         flavor: this.config.llm.flavor,
         reasoningExclude: this.config.llm.reasoning_exclude,
+        thinkingDisabled: this.config.llm.thinking_disabled,
         events,
         sessionId: this.sessionId,
       });
