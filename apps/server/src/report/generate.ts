@@ -27,8 +27,15 @@ export async function generateReport(llm: ReportLlm, ctx: ReportPromptContext): 
     const prompt = attempt === 0 ? base : base + PARSE_RETRY_HINT;
     try {
       const messages: LlmMessage[] = [{ role: "user", content: prompt }];
-      const result = await (llm.streamChat ?? llm.chat.bind(llm))(messages);
-      return v.parse(ReportSchema, extractJson(result.content));
+      const result = llm.streamChat ? await llm.streamChat(messages) : await llm.chat(messages);
+      const raw = extractJson(result.content);
+      // Server-known fields: don't depend on the model echoing them back.
+      if (raw !== null && typeof raw === "object") {
+        const r = raw as Record<string, unknown>;
+        if (r.session_id === undefined) r.session_id = ctx.sessionId;
+        if (r.generated_at === undefined) r.generated_at = new Date().toISOString();
+      }
+      return v.parse(ReportSchema, raw);
     } catch (err) {
       lastErr = err;
     }

@@ -157,6 +157,7 @@ export class VoiceLoop {
         apiKey: this.config.llm.api_key,
         model: this.config.llm.model,
         flavor: this.config.llm.flavor,
+        reasoningExclude: this.config.llm.reasoning_exclude,
         events,
         sessionId: this.sessionId,
       });
@@ -582,7 +583,18 @@ export class VoiceLoop {
   ): Promise<void> {
     this.send({ t: "agent_speaking", on: true });
     try {
-      const pcm = await this.tts.synthesizeToPcm(text, { signal });
+      let pcm: Uint8Array;
+      try {
+        pcm = await this.tts.synthesizeToPcm(text, { signal });
+      } catch (err) {
+        // Same degradation as the streaming path: no audio, but the
+        // transcript has already been sent and the turn completes.
+        this.send({
+          t: "error",
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
       for (let off = 0, seq = 0; off < pcm.length; off += TTS_CHUNK_BYTES, seq++) {
         if (off === 0 && metrics && metrics.first_audio_ms === undefined)
           metrics.first_audio_ms = Date.now();
@@ -667,6 +679,8 @@ class SentenceSpeechPipeline {
   private seq = 0;
   private speaking = false;
   private done = false;
+  /** Set when synthesis failed once — later sentences don't retry. */
+  private failed = false;
   /** Tail of the send chain: all synthesis/sends are appended behind this. */
   private tail: Promise<void> = Promise.resolve();
   private readonly opts: {
@@ -737,10 +751,24 @@ class SentenceSpeechPipeline {
   }
 
   private async speakSentence(sentence: string): Promise<void> {
-    if (this.opts.signal.aborted) return;
-    const pcm = await this.opts.tts.synthesizeToPcm(sentence, {
-      signal: this.opts.signal,
-    });
+    if (this.opts.signal.aborted || this.failed) return;
+    let pcm: Uint8Array;
+    try {
+      pcm = await this.opts.tts.synthesizeToPcm(sentence, {
+        signal: this.opts.signal,
+      });
+    } catch (err) {
+      // A tts outage degrades a reply to silent text: stop the pipeline but
+      // let the turn finish so the transcript is still persisted and sent.
+      this.failed = true;
+      this.done = true;
+      this.pending = "";
+      this.opts.send({
+        t: "error",
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
     for (let off = 0; off < pcm.length; off += TTS_CHUNK_BYTES) {
       if (this.opts.signal.aborted) return;
       if (this.opts.metrics && this.opts.metrics.first_audio_ms === undefined) {

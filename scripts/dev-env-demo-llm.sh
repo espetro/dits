@@ -9,3 +9,6 @@ export DI_LLM__PROVIDER=openai
 export DI_LLM__BASE_URL="${DI_DEMO_LLM_BASE_URL:?set DI_DEMO_LLM_BASE_URL}"
 export DI_LLM__MODEL="${DI_DEMO_LLM_MODEL:?set DI_DEMO_LLM_MODEL}"
 export DI_LLM__API_KEY="${DI_DEMO_LLM_API_KEY:?set DI_DEMO_LLM_API_KEY}"
+# The demo gateway fronts OpenRouter free-tier reasoning lanes whose thinking
+# eats the small output budget; skip reasoning so replies/report fit.
+export DI_LLM__REASONING_EXCLUDE=true
