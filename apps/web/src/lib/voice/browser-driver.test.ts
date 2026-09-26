@@ -318,11 +318,16 @@ describe("BrowserVoiceDriver recognition errors", () => {
 });
 
 describe("BrowserVoiceDriver recognition lifecycle", () => {
-  async function setupDriver() {
+  async function setupDriver(
+    deps: {
+      getUserMedia?: (constraints: MediaStreamConstraints) => Promise<unknown>;
+    } = {},
+  ) {
     const rec = fakeRecognitionCtor();
     const driver = new BrowserVoiceDriver("s1", {
       player: createPcmPlayer({ createContext: () => fakeCtx() }),
       recognitionCtor: rec.ctor,
+      ...deps,
     });
     driver.onError = vi.fn();
     await driver.useClientAgent(
@@ -364,6 +369,34 @@ describe("BrowserVoiceDriver recognition lifecycle", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("abandons start() and releases the stream if stop() lands while getUserMedia is pending", async () => {
+    const trackStop = vi.fn();
+    let resolveGum: ((s: unknown) => void) | null = null;
+    const { driver, rec } = await setupDriver({
+      getUserMedia: () =>
+        new Promise((resolve) => {
+          resolveGum = resolve;
+        }),
+    });
+    const started = driver.start();
+    await driver.stop();
+    resolveGum!({ getTracks: () => [{ stop: trackStop }] });
+    await started;
+    expect(trackStop).toHaveBeenCalledTimes(1);
+    expect(rec.startCount).toBe(0);
+  });
+
+  it("releases the anchor stream on fatal recognition errors", async () => {
+    const trackStop = vi.fn();
+    const { driver, rec } = await setupDriver({
+      getUserMedia: async () => ({ getTracks: () => [{ stop: trackStop }] }),
+    });
+    await driver.start();
+    expect(trackStop).not.toHaveBeenCalled();
+    rec.emitError("audio-capture");
+    expect(trackStop).toHaveBeenCalledTimes(1);
   });
 });
 
