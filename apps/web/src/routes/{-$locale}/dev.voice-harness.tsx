@@ -164,6 +164,7 @@ function createSilentPlayer(): PcmPlayer {
     write(pcm) {
       bytes += Math.max(0, pcm.byteLength - AUDIO_HEADER_BYTES);
     },
+    writeFloat32() {},
     stop() {},
     onDrained() {},
     get playing() {

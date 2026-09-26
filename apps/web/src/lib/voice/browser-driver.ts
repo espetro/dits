@@ -10,6 +10,9 @@ import type { Turn } from "@di/shared/session";
 import { ClientAgent } from "../agent/client-agent";
 import type { AgentToolExecutors } from "../agent/client-agent";
 import { synthesizeSpeech } from "../agent/tts";
+import { resolveInstalledVoiceEngines } from "./engines";
+import type { ResolvedVoiceEngines, TtsEngine } from "./engines";
+import { WasmTts } from "./wasm-engines";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
 import type { SpeechDriver } from "./server-driver";
@@ -54,6 +57,8 @@ export interface BrowserDriverDeps {
   onMetrics?: (metrics: TurnMetrics) => void;
   /** mic acquisition for the anchor stream; tests inject a stub */
   getUserMedia?: (constraints: MediaStreamConstraints) => Promise<unknown>;
+  /** test seam: replace the worker-backed wasm tts engine */
+  wasmTtsEngine?: TtsEngine;
 }
 
 export class BrowserVoiceDriver implements SpeechDriver {
@@ -69,6 +74,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private player: PcmPlayer;
   private agent: ClientAgent | null = null;
   private profile: ProviderSections | null = null;
+  private engines: ResolvedVoiceEngines = { stt: "builtin", tts: "builtin" };
+  private wasmTts: TtsEngine | null = null;
   private pending = "";
   private abort: AbortController | null = null;
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
@@ -111,11 +118,24 @@ export class BrowserVoiceDriver implements SpeechDriver {
     fetchImpl?: typeof fetch,
   ): Promise<void> {
     this.profile = profile;
+    this.engines = await resolveInstalledVoiceEngines();
     this.agent = await ClientAgent.create(profile.llm, tools, getContext, fetchImpl, toolset);
   }
 
-  private get useTtsEndpoint(): boolean {
-    return this.profile?.tts !== undefined;
+  /**
+   * Which tts path speak() takes this turn. "wasm" requires the injected
+   * engine or the worker-backed WasmTts (created lazily below); otherwise
+   * the resolved pick falls back to endpoint/builtin.
+   */
+  private get ttsMode(): "wasm" | "endpoint" | "builtin" {
+    if (this.engines.tts === "wasm" && (this.wasmTts || this.deps.wasmTtsEngine)) return "wasm";
+    return this.profile?.tts !== undefined ? "endpoint" : "builtin";
+  }
+
+  private getTtsEngine(): TtsEngine | null {
+    if (this.engines.tts !== "wasm") return null;
+    this.wasmTts ??= this.deps.wasmTtsEngine ?? new WasmTts();
+    return this.wasmTts;
   }
 
   async start(): Promise<void> {
@@ -292,9 +312,18 @@ export class BrowserVoiceDriver implements SpeechDriver {
         this.events.onAgentStart?.();
       }
       try {
-        if (!this.useTtsEndpoint) {
-          // no TTS endpoint configured: final text is spoken by the
-          // speechSynthesis fallback in speakAgentTurn instead
+        const mode = this.ttsMode;
+        if (mode === "builtin") {
+          // final text is spoken by the speechSynthesis fallback in
+          // speakAgentTurn instead
+          return;
+        }
+        if (mode === "wasm") {
+          const engine = this.getTtsEngine();
+          if (!engine) return;
+          const pcm = await engine.speak(sentence);
+          if (ctrl.signal.aborted) return;
+          this.player.writeFloat32(pcm);
           return;
         }
         const pcm = await tts(
@@ -376,8 +405,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
         source,
       };
       this.events.onAgentTurn?.(agentTurn);
-      // speechSynthesis fallback when no TTS endpoint is configured
-      if (!this.useTtsEndpoint) this.speakAgentTurn(full);
+      // speechSynthesis fallback when neither wasm tts nor an endpoint runs
+      if (this.ttsMode === "builtin") this.speakAgentTurn(full);
       this.finishSpeaking();
       return "ok";
     } catch (err) {
@@ -413,7 +442,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.player.stop();
     this.abort?.abort();
     this.abort = null;
-    if (!this.useTtsEndpoint) globalThis.speechSynthesis?.cancel();
+    if (this.ttsMode === "builtin") globalThis.speechSynthesis?.cancel();
     this.finishSpeaking();
   }
 
@@ -448,6 +477,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.interrupt();
     this.anchorStream?.getTracks().forEach((t) => t.stop());
     this.anchorStream = null;
+    this.wasmTts?.dispose();
+    this.wasmTts = null;
     this.agentSpeaking = false;
   }
 }

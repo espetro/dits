@@ -1,9 +1,12 @@
+import { $voiceModelsConsent, $voiceSttEngine, $voiceTtsEngine } from "../../stores/voice";
 import type { SttEnginePick, TtsEnginePick } from "../../stores/voice";
+import { $providerProfile } from "../runtime";
+import { voiceModelBytesInstalled, wasmVoiceSupported } from "./models";
 
 /**
  * Browser-mode voice engines. The BrowserVoiceDriver keeps owning turn
  * orchestration; engines only do recognition/synthesis behind these seams:
- * `handleResult`/`runAgentTurn` for stt, `speak()`/`useTtsEndpoint` for tts.
+ * `handleResult`/`runAgentTurn` for stt, `speak()`/`ttsMode` for tts.
  *
  * Engine ids:
  * - stt: "wasm" (sherpa-onnx streaming zipformer, on-device) | "builtin"
@@ -86,4 +89,22 @@ export function resolveVoiceEngines(input: VoiceEngineInput): ResolvedVoiceEngin
     tts = "endpoint";
   }
   return { stt, tts };
+}
+
+/**
+ * Resolve engines from live stores + the model cache. Async because the
+ * installed check touches CacheStorage; cache misses or a missing storage
+ * api degrade to builtin, never throw.
+ */
+export async function resolveInstalledVoiceEngines(): Promise<ResolvedVoiceEngines> {
+  const installed = await voiceModelBytesInstalled().catch(() => ({ stt: false, tts: false }));
+  return resolveVoiceEngines({
+    sttPick: $voiceSttEngine.get(),
+    ttsPick: $voiceTtsEngine.get(),
+    consent: $voiceModelsConsent.get(),
+    sttReady: installed.stt,
+    ttsReady: installed.tts,
+    supported: wasmVoiceSupported(),
+    hasTtsEndpoint: $providerProfile.get()?.tts !== undefined,
+  });
 }

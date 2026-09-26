@@ -50,6 +50,7 @@ function fakePlayer(): PcmPlayer & { written: Uint8Array[] } {
   return {
     written,
     write: (frame) => written.push(frame),
+    writeFloat32: () => undefined,
     stop: vi.fn(),
     onDrained: () => undefined,
     get playing() {
