@@ -175,6 +175,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
           getTracks(): { stop(): void }[];
         } | null)
       : null;
+    // stop() may have run while the mic request was pending: release the
+    // just-acquired stream and bail instead of wiring a dead recognizer
+    if (this.recognition !== rec) {
+      this.releaseAnchor();
+      return;
+    }
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = navigator.language ?? "en-US";
@@ -186,6 +192,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
       // also keeps the onend handler from restarting recognition in a loop.
       if (BrowserVoiceDriver.FATAL_ERRORS.has(kind)) {
         this.status = "error";
+        // mic is gone: holding the anchor would keep the OS indicator lit
+        // through the text-first fallback even though capture is dead
+        this.releaseAnchor();
         // no mic is not the end of the interview: the kickoff stays armed so
         // the agent still opens; the composer keeps the session text-first.
         this.onError(
@@ -528,6 +537,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
     }
   }
 
+  private releaseAnchor(): void {
+    this.anchorStream?.getTracks().forEach((t) => t.stop());
+    this.anchorStream = null;
+  }
+
   async stop(): Promise<void> {
     this.cancelKickoff();
     if (this.bargeInTimer !== null) {
@@ -550,8 +564,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       // teardown must not throw
     }
     this.interrupt();
-    this.anchorStream?.getTracks().forEach((t) => t.stop());
-    this.anchorStream = null;
+    this.releaseAnchor();
     this.wasmTts?.dispose();
     this.wasmTts = null;
     void this.stt?.stop();
