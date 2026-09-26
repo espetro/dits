@@ -2,6 +2,7 @@ import type { SttEngine, SttEngineCallbacks, TtsEngine } from "./engines";
 import { readVoiceModelFile } from "./models";
 import type { VoiceModelStorage } from "./models";
 import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
+import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 
 /**
  * On-device engines (phase c/d). Each lazily spawns a dedicated Worker that
@@ -137,26 +138,91 @@ export class WasmTts implements TtsEngine {
 }
 
 /**
- * sherpa-onnx streaming zipformer stt — lands in phase d; the stub keeps
- * the interface + cached-bytes check so an engine never half-exists.
+ * sherpa-onnx streaming zipformer (int8 ctc) stt in a dedicated worker.
+ * Silero VAD on the main thread decides utterance boundaries — feed() is
+ * fire-and-forget, flush() emits onFinal for the current utterance.
  */
 export class WasmStt implements SttEngine {
+  private worker: WorkerLike | null = null;
+  private readyPromise: Promise<void> | null = null;
+  private cb: SttEngineCallbacks | null = null;
+  /** frames arriving during worker boot are buffered, then replayed */
+  private preboot: Float32Array[] = [];
+
   constructor(private readonly deps: WasmEngineDeps = {}) {}
 
+  /** resolves when the cached stt model files are verified present */
   async prepare(): Promise<void> {
     const model = await readVoiceModelFile("stt", "stt/model.onnx", undefined, this.deps.storage);
     const tokens = await readVoiceModelFile("stt", "stt/tokens.txt", undefined, this.deps.storage);
     if (!model || !tokens) throw new WasmSttNotReadyError();
   }
 
-  async start(_opts: SttEngineCallbacks): Promise<void> {
-    await this.prepare();
-    throw new WasmSttNotReadyError();
+  async start(opts: SttEngineCallbacks): Promise<void> {
+    this.cb = opts;
+    await this.boot();
   }
 
-  feed(_frame: Float32Array): void {
-    // stub: the sherpa-onnx worker lands in phase d
+  private boot(): Promise<void> {
+    this.readyPromise ??= (async () => {
+      const model = await readVoiceModelFile("stt", "stt/model.onnx", undefined, this.deps.storage);
+      const tokens = await readVoiceModelFile(
+        "stt",
+        "stt/tokens.txt",
+        undefined,
+        this.deps.storage,
+      );
+      if (!model || !tokens) throw new WasmSttNotReadyError();
+      const worker =
+        this.deps.workerFactory?.() ??
+        new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "module" });
+      this.worker = worker;
+      const ready = new Promise<void>((resolve, reject) => {
+        worker.onmessage = (ev) => {
+          const msg = ev.data as SttOutMsg;
+          if (msg.type === "ready") return resolve();
+          if (msg.type === "error") return reject(new Error(msg.message));
+          if (msg.type === "partial") this.cb?.onInterim(msg.text);
+          if (msg.type === "final") {
+            if (msg.text.trim()) this.cb?.onFinal(msg.text);
+          }
+        };
+        worker.onerror = (ev) => reject(new Error(`stt worker failed: ${String(ev)}`));
+      });
+      const init: SttInMsg = { type: "init", model, tokens };
+      worker.postMessage(init, [model, tokens]);
+      await ready;
+      for (const f of this.preboot.splice(0)) worker.postMessage({ type: "feed", samples: f });
+    })().catch((err: unknown) => {
+      // a failed boot must not poison future start() calls
+      this.readyPromise = null;
+      this.worker?.terminate();
+      this.worker = null;
+      throw err;
+    });
+    return this.readyPromise;
   }
 
-  async stop(): Promise<void> {}
+  feed(frame: Float32Array): void {
+    const worker = this.worker;
+    if (!worker) {
+      if (this.readyPromise && this.preboot.length < 100) this.preboot.push(frame);
+      return;
+    }
+    worker.postMessage({ type: "feed", samples: frame });
+  }
+
+  /** utterance end (vad speech-end): drain the stream and emit onFinal */
+  async flush(): Promise<void> {
+    await this.boot();
+    this.worker?.postMessage({ type: "flush" });
+  }
+
+  async stop(): Promise<void> {
+    this.readyPromise = null;
+    this.cb = null;
+    this.preboot = [];
+    this.worker?.terminate();
+    this.worker = null;
+  }
 }

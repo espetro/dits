@@ -4,6 +4,7 @@ import { modelFileKey } from "./models";
 import type { KittenInMsg, KittenOutMsg } from "./kitten/kitten-worker";
 import { WasmTts, WasmTtsNotReadyError, WasmStt, WasmSttNotReadyError } from "./wasm-engines";
 import type { WorkerLike } from "./wasm-engines";
+import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 
 function memStorage(): VoiceModelStorage & { map: Map<string, ArrayBuffer> } {
   const map = new Map<string, ArrayBuffer>();
@@ -107,9 +108,75 @@ describe("WasmTts", () => {
   });
 });
 
-describe("WasmStt (stub, phase d)", () => {
+function fakeSttWorker(): WorkerLike & { sent: SttInMsg[] } {
+  const sent: SttInMsg[] = [];
+  let onmessage: WorkerLike["onmessage"] = null;
+  const post = (msg: SttOutMsg) => {
+    queueMicrotask(() => onmessage?.({ data: msg } as MessageEvent<unknown>));
+  };
+  return {
+    sent,
+    get onmessage() {
+      return onmessage;
+    },
+    set onmessage(cb) {
+      onmessage = cb;
+    },
+    onerror: null,
+    postMessage(msg: unknown) {
+      const m = msg as SttInMsg;
+      sent.push(m);
+      if (m.type === "init") post({ type: "ready" });
+      if (m.type === "feed") post({ type: "partial", text: "par" });
+      if (m.type === "flush") post({ type: "final", text: "hello world" });
+    },
+    terminate: () => undefined,
+  };
+}
+
+function installStt(store: VoiceModelStorage) {
+  const version = "zipformer2-ctc-en-small-2024-03-18";
+  return Promise.all([
+    store.put(modelFileKey("stt", version, "stt/model.onnx"), new ArrayBuffer(8)),
+    store.put(modelFileKey("stt", version, "stt/tokens.txt"), new ArrayBuffer(4)),
+  ]);
+}
+
+describe("WasmStt", () => {
   it("prepare rejects when the stt model is not cached", async () => {
     const stt = new WasmStt({ storage: memStorage() });
     await expect(stt.prepare()).rejects.toBeInstanceOf(WasmSttNotReadyError);
+  });
+
+  it("buffers pre-boot frames, then relays partial/final to callbacks", async () => {
+    const storage = memStorage();
+    await installStt(storage);
+    const worker = fakeSttWorker();
+    const stt = new WasmStt({ workerFactory: () => worker, storage });
+    const seen: string[] = [];
+    const started = stt.start({
+      onInterim: (t) => seen.push(`i:${t}`),
+      onFinal: (t) => seen.push(`f:${t}`),
+      onSpeechStart: () => seen.push("start"),
+    });
+    // a frame arriving while the worker boots must not be lost
+    stt.feed(new Float32Array(4));
+    await started;
+    stt.feed(new Float32Array(4));
+    await stt.flush();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(worker.sent.filter((m) => m.type === "feed")).toHaveLength(2);
+    expect(worker.sent.some((m) => m.type === "flush")).toBe(true);
+    expect(seen).toContain("f:hello world");
+  });
+
+  it("stop terminates the worker and drops later finals", async () => {
+    const storage = memStorage();
+    await installStt(storage);
+    const stt = new WasmStt({ workerFactory: () => fakeSttWorker(), storage });
+    await stt.start({ onInterim: () => {}, onFinal: () => {}, onSpeechStart: () => {} });
+    await stt.stop();
+    stt.feed(new Float32Array(4)); // must not throw
+    await expect(stt.prepare()).resolves.toBeUndefined();
   });
 });

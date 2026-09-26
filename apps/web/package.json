@@ -51,6 +51,7 @@
     "react-dom": "^19",
     "react-intl": "^7",
     "recharts": "^3",
+    "sherpa-onnx": "1.13.8",
     "sonner": "^2",
     "tailwind-merge": "^3",
     "three": "^0.185.1",

@@ -11,21 +11,26 @@ import { ClientAgent } from "../agent/client-agent";
 import type { AgentToolExecutors } from "../agent/client-agent";
 import { synthesizeSpeech } from "../agent/tts";
 import { resolveInstalledVoiceEngines } from "./engines";
-import type { ResolvedVoiceEngines, TtsEngine } from "./engines";
-import { WasmTts } from "./wasm-engines";
+import type { ResolvedVoiceEngines, SttEngine, TtsEngine } from "./engines";
+import { WasmStt, WasmTts } from "./wasm-engines";
+import { startCapture } from "./capture";
+import type { MicCapture } from "./capture";
+import { createVadGate } from "./vad";
+import type { VadGate, VadGateOptions } from "./vad";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
 import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 
 /**
- * Browser driver, dual-mode:
- * - client-only runtime (provider profile configured): SpeechRecognition STT
- *   drives ClientAgent; streamed text is cut into sentences, each synthesized
- *   via the BYO TTS endpoint into PcmPlayer (24k PCM16). Barge-in (speech
- *   start during agent playback) aborts the LLM/TTS pipeline and stops audio.
- * - no TTS endpoint configured (ttsModel empty) or no SpeechRecognition:
- *   Web Speech API behavior: speechSynthesis speaks the final agent text.
+ * Browser driver, multi-mode. Engine resolution (lib/voice/engines.ts) picks
+ * per-side: stt = sherpa zipformer worker + silero vad (wasm) or Web Speech
+ * SpeechRecognition (builtin); tts = KittenTTS worker (wasm), BYO endpoint,
+ * or speechSynthesis (builtin). When engines are wasm and consent+download
+ * are in place, no SpeechRecognition is created at all — the mic stream is
+ * captured once via MicCaptureImpl, which also kills the mic-indicator strobe.
+ * Barge-in: vad speech-start or interim results during agent playback abort
+ * the LLM/TTS pipeline and stop audio (p0.8).
  */
 
 export interface RecognitionLike {
@@ -59,6 +64,12 @@ export interface BrowserDriverDeps {
   getUserMedia?: (constraints: MediaStreamConstraints) => Promise<unknown>;
   /** test seam: replace the worker-backed wasm tts engine */
   wasmTtsEngine?: TtsEngine;
+  /** test seam: replace the worker-backed wasm stt engine */
+  wasmSttEngine?: SttEngine;
+  /** test seam: mic capture factory for the wasm stt path */
+  capture?: () => Promise<MicCapture>;
+  /** test seam: vad factory for the wasm stt path */
+  vad?: (opts: VadGateOptions) => Promise<VadGate>;
 }
 
 export class BrowserVoiceDriver implements SpeechDriver {
@@ -76,6 +87,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private profile: ProviderSections | null = null;
   private engines: ResolvedVoiceEngines = { stt: "builtin", tts: "builtin" };
   private wasmTts: TtsEngine | null = null;
+  private stt: SttEngine | null = null;
+  private capture: MicCapture | null = null;
+  private vad: VadGate | null = null;
   private pending = "";
   private abort: AbortController | null = null;
   private kickoffTimer: ReturnType<typeof setTimeout> | null = null;
@@ -139,6 +153,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   async start(): Promise<void> {
+    if (this.engines.stt === "wasm" && (await this.tryWasmStt())) return;
     const w = globalThis as unknown as {
       SpeechRecognition?: RecognitionCtor;
       webkitSpeechRecognition?: RecognitionCtor;
@@ -202,6 +217,73 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.armKickoff();
   }
 
+  /**
+   * Wasm stt path: sherpa worker + own mic capture + silero vad. Returns
+   * false when the engine cannot boot so start() falls back to builtin
+   * SpeechRecognition. Mic/vad failures mirror the builtin fatal-error
+   * path: status "error", kickoff still fires (text-first interview).
+   */
+  private async tryWasmStt(): Promise<boolean> {
+    const stt = this.deps.wasmSttEngine ?? new WasmStt();
+    try {
+      await stt.start({
+        onInterim: () => this.noteSpeech(),
+        onFinal: (text) => this.noteFinal(text),
+        onSpeechStart: () => this.noteSpeech(),
+      });
+    } catch (err) {
+      this.onError(`[stt] ${String(err instanceof Error ? err.message : err)}`);
+      return false;
+    }
+    this.stt = stt;
+    this.status = "connected";
+    try {
+      const capture = await (this.deps.capture ?? (() => startCapture()))();
+      this.capture = capture;
+      const vadFactory = this.deps.vad ?? ((opts) => createVadGate(opts));
+      this.vad = await vadFactory({
+        onSpeechStart: () => this.noteSpeech(),
+        onSpeechEnd: () => void stt.flush().catch(() => undefined),
+      });
+      capture.onFrame((pcm16) => this.vad?.processFrame(pcm16));
+      capture.onFloat32Frame?.((samples) => stt.feed(samples));
+    } catch (err) {
+      this.status = "error";
+      this.onError(
+        `[mic] ${String(err instanceof Error ? err.message : err) || "microphone unavailable"}`,
+      );
+    }
+    this.armKickoff();
+    return true;
+  }
+
+  /** interim speech evidence: marks the utterance and arms barge-in. */
+  private noteSpeech(): void {
+    this.speechSeen = true;
+    if (this.agentSpeaking && this.bargeInTimer === null) {
+      this.bargeInTimer = setTimeout(() => {
+        this.bargeInTimer = null;
+        if (this.agentSpeaking) this.interrupt();
+      }, BrowserVoiceDriver.BARGE_IN_GRACE_MS);
+    }
+  }
+
+  /**
+   * Utterance end with a transcript — vad-verified speech, so the
+   * phantom-final gate the builtin path needs does not apply.
+   */
+  private noteFinal(text: string): void {
+    const trimmed = text.trim();
+    this.speechSeen = false;
+    if (!trimmed || this.muted) return;
+    this.cancelKickoff();
+    this.events.onSpeechStart?.();
+    this.events.onSpeechEnd?.(trimmed);
+    if (this.agent) {
+      void this.runAgentTurn(trimmed, "voice");
+    }
+  }
+
   /** rebuild recognition/agent transport after an error; model handles stay cached. */
   async restart(): Promise<void> {
     if (this.restarting) return;
@@ -245,15 +327,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       if (!result.isFinal) {
         // interim results only appear when the recognizer actually heard
         // audio: record it as speech evidence for the next final
-        this.speechSeen = true;
-        // barge-in: the user is talking over the agent. Give the agent a
-        // short continuation grace, then cut playback + the in-flight turn.
-        if (this.agentSpeaking && this.bargeInTimer === null) {
-          this.bargeInTimer = setTimeout(() => {
-            this.bargeInTimer = null;
-            if (this.agentSpeaking) this.interrupt();
-          }, BrowserVoiceDriver.BARGE_IN_GRACE_MS);
-        }
+        this.noteSpeech();
         continue;
       }
       const alt = result[0];
@@ -448,6 +522,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
 
   setMuted(muted: boolean): void {
     this.muted = muted;
+    this.capture?.setMuted(muted);
     if (muted) {
       this.interrupt();
     }
@@ -479,6 +554,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.anchorStream = null;
     this.wasmTts?.dispose();
     this.wasmTts = null;
+    void this.stt?.stop();
+    this.stt = null;
+    void this.capture?.stop();
+    this.capture = null;
+    void this.vad?.destroy();
+    this.vad = null;
     this.agentSpeaking = false;
   }
 }
