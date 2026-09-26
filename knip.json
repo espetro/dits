@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreFiles": ["spikes/**", "apps/web/public/vad/**", "apps/web/src/lib/voice/wasm-engines.ts"],
+  "ignoreFiles": ["spikes/**", "apps/web/public/vad/**"],
   "ignore": [
     "build/release.ts",
     "scripts/check-agents-md-length.ts",
