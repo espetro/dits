@@ -8,6 +8,30 @@ export const ProviderSchema = v.object({
   model: v.string(),
   /** Wire protocol for LLM calls; "anthropic" targets native /v1/messages. */
   flavor: v.optional(v.picklist(["openai", "anthropic"])),
+  /**
+   * Send OpenRouter-style `reasoning: {exclude: true}` on chat completions.
+   * For gateways fronting reasoning models whose thinking eats the output
+   * token budget. Accepts a boolean or the strings "true"/"false" (env
+   * overrides arrive as strings).
+   */
+  reasoning_exclude: v.optional(
+    v.pipe(
+      v.union([v.boolean(), v.picklist(["true", "false"])]),
+      v.transform((x) => x === true || x === "true"),
+    ),
+  ),
+  /**
+   * Send Z.AI-style `thinking: {type: "disabled"}` on chat completions.
+   * Same purpose as reasoning_exclude (keep thinking out of the output
+   * budget) for providers that speak the Z.AI dialect — they ignore the
+   * OpenRouter param and vice versa, so both can be set at once.
+   */
+  thinking_disabled: v.optional(
+    v.pipe(
+      v.union([v.boolean(), v.picklist(["true", "false"])]),
+      v.transform((x) => x === true || x === "true"),
+    ),
+  ),
 });
 export type Provider = v.InferOutput<typeof ProviderSchema>;
 

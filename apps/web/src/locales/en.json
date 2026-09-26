@@ -243,6 +243,8 @@
   "finish.buildFailed": "couldn't build your report — the transcript is safe",
   "finish.tryAgain": "try again",
   "finish.openReport": "open report",
+  "settings.demoLlm.endpointLabel": "Demo API",
+  "settings.demoLlm.customize": "use a custom endpoint",
   "voiceConsent.title": "better voice, on your device",
   "voiceConsent.body": "the app requires a download (~50 mb) to get an optimal experience: on-device speech recognition and voices, nothing sent to the cloud. say no and the browser's built-in voice keeps working.",
   "voiceConsent.accept": "download & enable",

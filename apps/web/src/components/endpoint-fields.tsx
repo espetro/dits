@@ -83,18 +83,41 @@ export function EndpointFields(props: {
     <div className="space-y-4">
       <SettingsField
         label={intl.formatMessage({ id: "settings.baseUrl" })}
-        helper={intl.formatMessage({
-          id:
-            tab === "llm" && draft.flavor === "anthropic"
-              ? "settings.baseUrlHelpAnthropic"
-              : "settings.baseUrlHelp",
-        })}
+        helper={
+          tab === "llm" && isDemoLlm(draft.baseUrl)
+            ? undefined
+            : intl.formatMessage({
+                id:
+                  tab === "llm" && draft.flavor === "anthropic"
+                    ? "settings.baseUrlHelpAnthropic"
+                    : "settings.baseUrlHelp",
+              })
+        }
       >
-        <Input
-          value={draft.baseUrl}
-          onChange={(e) => props.onChange({ baseUrl: e.target.value })}
-          placeholder="https://api.openai.com/v1"
-        />
+        {tab === "llm" && isDemoLlm(draft.baseUrl) ? (
+          // the demo endpoint url is not shown; "Demo API" stands in for it
+          <div className="flex items-center gap-2">
+            <Input
+              value={intl.formatMessage({ id: "settings.demoLlm.endpointLabel" })}
+              readOnly
+              aria-readonly
+              className="flex-1"
+            />
+            <button
+              type="button"
+              onClick={() => props.onChange({ baseUrl: "", apiKey: "", model: "" })}
+              className="shrink-0 text-xs underline underline-offset-2 hover:text-persimmon-text"
+            >
+              <FormattedMessage id="settings.demoLlm.customize" />
+            </button>
+          </div>
+        ) : (
+          <Input
+            value={draft.baseUrl}
+            onChange={(e) => props.onChange({ baseUrl: e.target.value })}
+            placeholder="https://api.openai.com/v1"
+          />
+        )}
       </SettingsField>
       <SettingsField
         label={intl.formatMessage({ id: "settings.apiKey" })}

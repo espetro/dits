@@ -522,6 +522,55 @@ describe("VoiceLoop", () => {
     expect(messages.filter((m) => m.t === "metrics")).toHaveLength(0);
   });
 
+  it("streaming llm: tts failure degrades to silent text — transcript still persisted and sent", async () => {
+    const ttsCalls: string[] = [];
+    const { loop, db, messages, binary } = await makeLoop({
+      stt: stubStt("hello there"),
+      tts: {
+        synthesizeToPcm: async (text) => {
+          ttsCalls.push(text);
+          throw new Error("tts is down");
+        },
+      },
+      llm: {
+        chat: async () => {
+          throw new Error("chat must not be used when streamChat exists");
+        },
+        streamChat: async (_m, _t, opts) => {
+          for (const d of ["One sentence here. ", "Another sentence follows. ", "trailing words"]) {
+            opts?.onText?.(d);
+          }
+          return {
+            content: "One sentence here. Another sentence follows. trailing words",
+            toolCalls: [],
+          };
+        },
+      },
+    });
+    await loop.handleMessage(frame(0, pcmBytes([1])));
+    await loop.handleMessage({ t: "utterance_end" });
+
+    // first failure ends speech: later sentences are not retried
+    expect(ttsCalls).toHaveLength(1);
+    expect(binary).toHaveLength(0);
+    const types = messages.map((m) => m.t);
+    expect(types).toEqual(
+      expect.arrayContaining([
+        "user_transcript",
+        "agent_speaking",
+        "error",
+        "agent_speaking",
+        "agent_transcript",
+        "metrics",
+      ]),
+    );
+    const turns = await db.selectFrom("turns").selectAll().orderBy("seq").execute();
+    expect(turns.at(-1)).toMatchObject({
+      speaker: "agent",
+      text: "One sentence here. Another sentence follows. trailing words",
+    });
+  });
+
   it("streaming stt mode: frames are fed, finish() resolves the transcript, turn proceeds", async () => {
     const fed: number[] = [];
     let finishCalls = 0;

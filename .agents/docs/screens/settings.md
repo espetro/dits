@@ -156,11 +156,14 @@ button in its own block, inset card with a centered max-w-xl column.
   (`useVoice` re-boots on `$providerProfile` change) so the new
   endpoint takes effect in the live session.
 - Demo LLM (p2 zero-conf): the llm tab's hint block also offers a
-  settings.demoLlm.fill link that one-clicks a managed demo endpoint
-  (VITE_DEMO_LLM_* env in dev, else the DEMO_LLM_BASE_URL managed proxy
-  constant) into baseUrl/model — managed endpoints legitimately carry
-  an empty apiKey, so neither the schema, the incomplete-warning, the
-  persist guard, nor the Test guard requires a key for them. While the
-  draft or saved endpoint is a demo url a settings.demoLlm.badge chip
-  renders next to the link, and a settings.demoLlm.upsell link
-  (demand signal) logs clicks to localStorage `di.demoUpsellClicks`.
+  settings.demoLlm.fill link that one-clicks the demo endpoint into
+  baseUrl/model. The url is never committed — builds inject it via
+  VITE_DEMO_LLM_* env vars, and the fill plants a placeholder apiKey
+  (the managed endpoint ignores it) so the standard schema applies.
+  When the build carries no VITE_DEMO_LLM_BASE_URL the fill link is
+  hidden. While the draft or saved endpoint is the demo one the
+  baseUrl field renders a read-only "Demo API" label (never the url)
+  with a settings.demoLlm.customize link to switch back to a custom
+  endpoint, plus a settings.demoLlm.badge chip and a
+  settings.demoLlm.upsell link (demand signal) that logs clicks to
+  localStorage `di.demoUpsellClicks`.

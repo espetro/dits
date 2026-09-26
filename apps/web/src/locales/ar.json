@@ -243,6 +243,8 @@
   "finish.buildFailed": "تعذر إنشاء التقرير — النص المفرغ محفوظ",
   "finish.tryAgain": "حاول مجددا",
   "finish.openReport": "فتح التقرير",
+  "settings.demoLlm.endpointLabel": "Demo API",
+  "settings.demoLlm.customize": "استخدام نقطة نهاية مخصصة",
   "voiceConsent.title": "صوت أفضل على جهازك",
   "voiceConsent.body": "يحتاج التطبيق إلى تنزيل (~50 م.ب) للحصول على تجربة مثلى: التعرف على الكلام والأصوات يعملان على الجهاز دون إرسال أي شيء إلى السحابة. ارفض للاحتفاظ بصوت المتصفح المدمج.",
   "voiceConsent.accept": "تنزيل وتفعيل",

@@ -128,16 +128,15 @@ describe("openai-compatible provider", () => {
     await expect(model.doStream({ prompt: PROMPT } as never)).rejects.toThrow("500");
   });
 
-  it("doGenerate parses a buffered completion", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          choices: [{ message: { content: "hi there" } }],
-          usage: { prompt_tokens: 1, completion_tokens: 2 },
-        }),
-        { headers: { "content-type": "application/json" } },
-      ),
-    );
+  it("doGenerate accumulates a streamed completion", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        sseResponse([
+          { choices: [{ delta: { content: "hi there" } }] },
+          { usage: { prompt_tokens: 1, completion_tokens: 2 } },
+        ]),
+      );
     const model = createOpenAiCompatibleModel(PROFILE, {
       fetchImpl: fetchMock as unknown as typeof fetch,
     });
@@ -146,33 +145,28 @@ describe("openai-compatible provider", () => {
     expect(out.finishReason.unified).toBe("stop");
     expect(out.usage.outputTokens.total).toBe(2);
     const body = JSON.parse(fetchMock.mock.calls[0]![1].body);
-    expect(body.stream).toBeUndefined();
+    expect(body.stream).toBe(true);
   });
 
   it("doGenerate surfaces tool calls", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
+      sseResponse([
+        {
           choices: [
             {
-              message: {
-                content: null,
+              delta: {
                 tool_calls: [
                   {
+                    index: 0,
                     id: "c9",
-                    type: "function",
-                    function: {
-                      name: "update_question",
-                      arguments: '{"question":"q"}',
-                    },
+                    function: { name: "update_question", arguments: '{"question":"q"}' },
                   },
                 ],
               },
             },
           ],
-        }),
-        { headers: { "content-type": "application/json" } },
-      ),
+        },
+      ]),
     );
     const model = createOpenAiCompatibleModel(PROFILE, {
       fetchImpl: fetchMock as unknown as typeof fetch,

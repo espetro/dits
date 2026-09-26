@@ -243,6 +243,8 @@
   "finish.buildFailed": "리포트를 만들 수 없습니다 — 대화록은 안전하게 저장됐습니다",
   "finish.tryAgain": "다시 시도",
   "finish.openReport": "리포트 열기",
+  "settings.demoLlm.endpointLabel": "데모 API",
+  "settings.demoLlm.customize": "사용자 지정 엔드포인트 사용",
   "voiceConsent.title": "기기에서 더 좋은 음성",
   "voiceConsent.body": "최적의 경험을 위해 다운로드(약 50 mb)가 필요합니다: 음성 인식과 음성이 기기에서 동작하고 클라우드로 전송되지 않습니다. 거절하면 브라우저 내장 음성을 계속 사용합니다.",
   "voiceConsent.accept": "다운로드하고 활성화",

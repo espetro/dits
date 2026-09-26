@@ -6,30 +6,32 @@ numbers. Example: `DI_LLM__MODEL=gpt-4o` overrides `llm.model`;
 `DI_SERVER__PORT=9000` overrides `server.port`. A value in env always wins over the
 yaml file. Case-insensitive key paths after the prefix.
 
-| Key                   | Type                              | Default                              | Description                                                      |
-| --------------------- | --------------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
-| `server.port`         | int 1..65535                      | required                             | HTTP port for the API and SPA                                    |
-| `server.auth`         | `none` \| `token`                 | `none`                               | auth middleware stub, inert in v1                                |
-| `llm.provider`        | `openai` \| `anthropic` \| `mock` | required                             | LLM contract; endpoints are all OpenAI-shaped                    |
-| `llm.base_url`        | url                               | required                             | OpenAI-compatible base URL, e.g. `http://localhost:9000/v1`      |
-| `llm.api_key`         | string                            | optional                             | bearer key for the LLM endpoint                                  |
-| `llm.model`           | string                            | required                             | model id                                                         |
-| `stt.base_url`        | url                               | required                             | speech-to-text endpoint (OpenAI transcription shape)             |
-| `stt.api_key`         | string                            | optional                             | bearer key                                                       |
-| `stt.model`           | string                            | required                             | STT model id                                                     |
-| `stt.mode`            | `buffered`                        | required                             | transport is streaming WS; recognition is per-utterance buffered |
-| `tts.base_url`        | url                               | required                             | text-to-speech endpoint                                          |
-| `tts.api_key`         | string                            | optional                             | bearer key                                                       |
-| `tts.model`           | string                            | required                             | TTS model id                                                     |
-| `tts.voice`           | string                            | required                             | voice id, e.g. `alloy`                                           |
-| `embeddings.base_url` | url                               | optional                             | embeddings endpoint                                              |
-| `embeddings.api_key`  | string                            | optional                             | bearer key                                                       |
-| `embeddings.model`    | string                            | required if embeddings block present | embeddings model id                                              |
-| `phoenix.endpoint`    | url                               | optional                             | Arize Phoenix tracing endpoint                                   |
-| `phoenix.headers`     | map                               | optional                             | headers for the Phoenix endpoint                                 |
-| `files.db_path`       | string                            | optional                             | SQLite database path (default: platform data dir, below)         |
-| `files.log_path`      | string                            | optional                             | log file path (default: platform data dir)                       |
-| `files.data_dir`      | string                            | optional                             | data directory (default: platform data dir)                      |
+| Key                     | Type                              | Default                              | Description                                                              |
+| ----------------------- | --------------------------------- | ------------------------------------ | ------------------------------------------------------------------------ |
+| `server.port`           | int 1..65535                      | required                             | HTTP port for the API and SPA                                            |
+| `server.auth`           | `none` \| `token`                 | `none`                               | auth middleware stub, inert in v1                                        |
+| `llm.provider`          | `openai` \| `anthropic` \| `mock` | required                             | LLM contract; endpoints are all OpenAI-shaped                            |
+| `llm.base_url`          | url                               | required                             | OpenAI-compatible base URL, e.g. `http://localhost:9000/v1`              |
+| `llm.api_key`           | string                            | optional                             | bearer key for the LLM endpoint                                          |
+| `llm.model`             | string                            | required                             | model id                                                                 |
+| `llm.reasoning_exclude` | bool                              | `false`                              | send `reasoning: {exclude: true}` (OpenRouter-style) on chat completions |
+| `llm.thinking_disabled` | bool                              | `false`                              | send `thinking: {type: "disabled"}` (Z.AI-style) on chat completions     |
+| `stt.base_url`          | url                               | required                             | speech-to-text endpoint (OpenAI transcription shape)                     |
+| `stt.api_key`           | string                            | optional                             | bearer key                                                               |
+| `stt.model`             | string                            | required                             | STT model id                                                             |
+| `stt.mode`              | `buffered`                        | required                             | transport is streaming WS; recognition is per-utterance buffered         |
+| `tts.base_url`          | url                               | required                             | text-to-speech endpoint                                                  |
+| `tts.api_key`           | string                            | optional                             | bearer key                                                               |
+| `tts.model`             | string                            | required                             | TTS model id                                                             |
+| `tts.voice`             | string                            | required                             | voice id, e.g. `alloy`                                                   |
+| `embeddings.base_url`   | url                               | optional                             | embeddings endpoint                                                      |
+| `embeddings.api_key`    | string                            | optional                             | bearer key                                                               |
+| `embeddings.model`      | string                            | required if embeddings block present | embeddings model id                                                      |
+| `phoenix.endpoint`      | url                               | optional                             | Arize Phoenix tracing endpoint                                           |
+| `phoenix.headers`       | map                               | optional                             | headers for the Phoenix endpoint                                         |
+| `files.db_path`         | string                            | optional                             | SQLite database path (default: platform data dir, below)                 |
+| `files.log_path`        | string                            | optional                             | log file path (default: platform data dir)                               |
+| `files.data_dir`        | string                            | optional                             | data directory (default: platform data dir)                              |
 
 Omitted `files.*` keys default to the platform app-support dir: `~/Library/Application Support/di` on macOS, `%APPDATA%/di` on Windows, `$XDG_DATA_HOME/di` or `~/.local/share/di` elsewhere. A present-but-non-object `files:` still fails validation.
 

@@ -26,6 +26,10 @@ export interface OpenAiChatOptions {
   model: string;
   /** Wire protocol; "anthropic" posts to /v1/messages instead of chat/completions. */
   flavor?: "openai" | "anthropic";
+  /** Send `reasoning: {exclude: true}` (OpenRouter-style) on chat requests. */
+  reasoningExclude?: boolean;
+  /** Send `thinking: {type: "disabled"}` (Z.AI-style) on chat requests. */
+  thinkingDisabled?: boolean;
   fetchImpl?: typeof fetch;
   /** When set, emit llm.request/llm.result pipeline events. */
   events?: EventSink;
@@ -71,7 +75,9 @@ export class OpenAiChatClient {
         headers,
         body: JSON.stringify({
           model: this.opts.model,
-          messages,
+          messages: toWireMessages(messages),
+          ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
+          ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0
             ? { tools: tools.map((t) => ({ type: "function", function: t })) }
             : {}),
@@ -249,8 +255,10 @@ export class OpenAiChatClient {
         headers,
         body: JSON.stringify({
           model: this.opts.model,
-          messages,
+          messages: toWireMessages(messages),
           stream: true,
+          ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
+          ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0
             ? { tools: tools.map((t) => ({ type: "function", function: t })) }
             : {}),
@@ -387,6 +395,26 @@ export class OpenAiChatClient {
       .catch(() => undefined);
     return { content, toolCalls };
   }
+}
+
+/**
+ * Map the internal assistant `tool_calls` shape onto the OpenAI wire format
+ * ({id, type: "function", function: {name, arguments}}); strict providers
+ * reject the flat form.
+ */
+function toWireMessages(messages: LlmMessage[]) {
+  return messages.map((m) =>
+    m.tool_calls
+      ? {
+          ...m,
+          tool_calls: m.tool_calls.map((c) => ({
+            id: c.id,
+            type: "function" as const,
+            function: { name: c.name, arguments: c.arguments },
+          })),
+        }
+      : m,
+  );
 }
 
 function parseToolArgs(raw: string): Record<string, unknown> {

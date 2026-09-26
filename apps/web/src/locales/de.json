@@ -243,6 +243,8 @@
   "finish.buildFailed": "bericht fehlgeschlagen — das transkript ist sicher",
   "finish.tryAgain": "erneut versuchen",
   "finish.openReport": "bericht öffnen",
+  "settings.demoLlm.endpointLabel": "Demo-API",
+  "settings.demoLlm.customize": "benutzerdefinierten endpoint verwenden",
   "voiceConsent.title": "bessere stimme, auf deinem gerät",
   "voiceConsent.body": "die app braucht einen download (~50 mb) für optimale qualität: spracherkennung und stimmen laufen auf dem gerät, nichts geht in die cloud. lehne ab, um die eingebaute browser-stimme zu behalten.",
   "voiceConsent.accept": "herunterladen & aktivieren",

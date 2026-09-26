@@ -50,6 +50,8 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
         apiKey: deps.config.llm.api_key,
         model: deps.config.llm.model,
         flavor: deps.config.llm.flavor,
+        reasoningExclude: deps.config.llm.reasoning_exclude,
+        thinkingDisabled: deps.config.llm.thinking_disabled,
       }),
     }),
   );
@@ -165,6 +167,9 @@ export function serveApp(
   });
   return Bun.serve({
     port,
+    // LLM-backed routes (e.g. report generation) can take minutes against
+    // reasoning models; the default 10s idle kills them mid-request.
+    idleTimeout: 255,
     websocket: ws as never,
     fetch: async (req, server) => {
       const upgraded = await tryUpgradeVoice(req, server as UpgradeServer, deps.db);

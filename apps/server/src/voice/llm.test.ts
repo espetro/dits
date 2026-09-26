@@ -133,6 +133,38 @@ describe("OpenAiChatClient.chat", () => {
     expect(result.toolCalls[0]!.args).toEqual({ _raw: "not-json{" });
   });
 
+  it("emits reasoning/thinking suppression flags independently", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const make = (opts: { reasoningExclude?: boolean; thinkingDisabled?: boolean }) =>
+      new OpenAiChatClient({
+        baseUrl: "http://fake.local",
+        model: "m",
+        fetchImpl: fetchStub((_url, init) => {
+          bodies.push(JSON.parse(String(init!.body)));
+          return Response.json({ choices: [{ message: { content: "ok" } }] });
+        }),
+        ...opts,
+      });
+
+    await make({}).chat([{ role: "user", content: "x" }]);
+    expect(bodies[0]!.reasoning).toBeUndefined();
+    expect(bodies[0]!.thinking).toBeUndefined();
+
+    await make({ reasoningExclude: true }).chat([{ role: "user", content: "x" }]);
+    expect(bodies[1]!.reasoning).toEqual({ exclude: true });
+    expect(bodies[1]!.thinking).toBeUndefined();
+
+    await make({ thinkingDisabled: true }).chat([{ role: "user", content: "x" }]);
+    expect(bodies[2]!.reasoning).toBeUndefined();
+    expect(bodies[2]!.thinking).toEqual({ type: "disabled" });
+
+    await make({ reasoningExclude: true, thinkingDisabled: true }).chat([
+      { role: "user", content: "x" },
+    ]);
+    expect(bodies[3]!.reasoning).toEqual({ exclude: true });
+    expect(bodies[3]!.thinking).toEqual({ type: "disabled" });
+  });
+
   it("emits llm.request/llm.result events and throws on error status", async () => {
     const events: { type: string; payload?: unknown }[] = [];
     const sink = {
@@ -204,6 +236,29 @@ describe("OpenAiChatClient.streamChat", () => {
     expect(result.toolCalls).toEqual([]);
     expect(deltas).toEqual(["Hello", " there."]);
     expect(firstTokens).toHaveLength(1);
+  });
+
+  it("sends reasoning/thinking suppression flags on the stream body", async () => {
+    let captured: Record<string, unknown> | undefined;
+    const llm = new OpenAiChatClient({
+      baseUrl: "http://fake.local",
+      model: "m",
+      reasoningExclude: true,
+      thinkingDisabled: true,
+      fetchImpl: fetchStub((_url, init) => {
+        captured = JSON.parse(String(init!.body));
+        return sseResponse([
+          'data: {"choices":[{"delta":{"content":"x"}}]}\n\n',
+          "data: [DONE]\n\n",
+        ]);
+      }),
+    });
+    await llm.streamChat([{ role: "user", content: "hi" }]);
+    expect(captured).toMatchObject({
+      stream: true,
+      reasoning: { exclude: true },
+      thinking: { type: "disabled" },
+    });
   });
 
   it("merges incremental tool_calls by index", async () => {

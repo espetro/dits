@@ -243,6 +243,8 @@
   "finish.buildFailed": "impossibile generare il report — la trascrizione è al sicuro",
   "finish.tryAgain": "riprova",
   "finish.openReport": "apri report",
+  "settings.demoLlm.endpointLabel": "API demo",
+  "settings.demoLlm.customize": "usa un endpoint personalizzato",
   "voiceConsent.title": "voce migliore, sul tuo dispositivo",
   "voiceConsent.body": "l'app richiede un download (~50 mb) per un'esperienza ottimale: riconoscimento vocale e voci sul dispositivo, niente va nel cloud. rifiuta per usare la voce integrata del browser.",
   "voiceConsent.accept": "scarica e attiva",

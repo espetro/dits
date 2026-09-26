@@ -243,6 +243,8 @@
   "finish.buildFailed": "no se pudo crear el informe — la transcripción está a salvo",
   "finish.tryAgain": "reintentar",
   "finish.openReport": "abrir informe",
+  "settings.demoLlm.endpointLabel": "API demo",
+  "settings.demoLlm.customize": "usar un endpoint personalizado",
   "voiceConsent.title": "mejor voz, en tu dispositivo",
   "voiceConsent.body": "la app necesita una descarga (~50 mb) para una experiencia óptima: reconocimiento de voz y voces en el dispositivo, nada va a la nube. si rechazas, se usa la voz integrada del navegador.",
   "voiceConsent.accept": "descargar y activar",
