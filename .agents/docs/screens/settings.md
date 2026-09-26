@@ -1,9 +1,10 @@
 # Screen: Settings dialog (account dropdown, centered)
 
-Centered dialog opened from the account dropdown (B3). Two panes:
-History ("previous sessions") and AI Provider. Desktop: borderless left
-sidebar nav + inset rounded content card (ChatGPT-style). Mobile:
-full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`.
+Centered dialog opened from the account dropdown (B3). Three panes:
+History ("previous sessions"), AI Provider and Voice. Desktop: borderless
+left sidebar nav + inset rounded content card (ChatGPT-style). Mobile:
+full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`
+(pane ∈ history | aiProvider | voice).
 
 ## ASCII mockup (desktop, default)
 
@@ -131,6 +132,18 @@ button in its own block, inset card with a centered max-w-xl column.
   browser lacks the feature the button is disabled with a muted
   settings.test.unsupported reason line (role=note) and a matching
   title tooltip.
+- Voice pane (wasm voice engines): per-engine radio pickers for STT
+  (on-device | browser built-in) and TTS (on-device | browser built-in |
+  custom endpoint — shown only when profile.tts exists), plus an
+  "on-device models" card with a status dot + state line (installed
+  {total} mb / downloading {percent}% / not downloaded / failed) and
+  Download | re-download | clear cache controls. Picks persist to
+  `di.voice.sttEngine`/`di.voice.ttsEngine` ("on-device" default);
+  picking an on-device engine while unconsented grants
+  `di.voice.modelsConsent` and starts the model download (the prompt is
+  never re-shown — the pane is the re-arm path). Browsers without
+  wasm+simd show a settings.voicePane.unsupported note and the download
+  button stays disabled.
 - Saving is automatic: every edit is validated and written to
   $providerProfile after a 600ms debounce; a muted settings.autosaveNote
   (role=note) replaces the old Save button. An incomplete LLM draft
