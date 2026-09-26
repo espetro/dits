@@ -3,7 +3,7 @@
 status: pending quim review (2026-09-26)
 source: four research streams + user brief with annotated screenshots
 related: adr-0004 (stack stays: react + tailwind v4 + vendored shadcn),
-  `.agents/docs/screens/*` (updated per phase), `DESIGN.md`
+`.agents/docs/screens/*` (updated per phase), `DESIGN.md`
 
 ## 0. brief recap
 
@@ -101,14 +101,14 @@ with no prompt.
 unified ia (keep the url-driven dialog, change the grammar to
 title + one-line description + right control):
 
-| nav | contents |
-| --- | --- |
-| past interviews | current history pane + clear-all |
-| voice & microphone | mic, "understands you with" (stt), "answers you with" (tts), models row, test call |
-| interviewer ai | the llm pick: demo (recommended) / your own ai account / on-device (experimental); endpoint fields reveal inline under "own account" |
-| downloads | all model caches (voice wasm + browser llm): status, size, re-download, remove |
-| language | app + interview language |
-| advanced | runtime mode ("this browser / desktop app"), api flavor, custom endpoints — "most people never need this" |
+| nav                | contents                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| past interviews    | current history pane + clear-all                                                                                                     |
+| voice & microphone | mic, "understands you with" (stt), "answers you with" (tts), models row, test call                                                   |
+| interviewer ai     | the llm pick: demo (recommended) / your own ai account / on-device (experimental); endpoint fields reveal inline under "own account" |
+| downloads          | all model caches (voice wasm + browser llm): status, size, re-download, remove                                                       |
+| language           | app + interview language                                                                                                             |
+| advanced           | runtime mode ("this browser / desktop app"), api flavor, custom endpoints — "most people never need this"                            |
 
 rules:
 
@@ -133,8 +133,8 @@ markup for a pattern a library ships.
   start cta becomes a real button. kills the current nested-interactive
   `<article role=button>` wrapping a `<Button>` a11y violation.
 - chip grids (duration/mode/tone/difficulty/language) -> labeled `Select`s
-  + `RadioGroup` rows; language select renders `Intl.DisplayNames`, not raw
-  `pt-BR`
+  - `RadioGroup` rows; language select renders `Intl.DisplayNames`, not raw
+    `pt-BR`
 - "more options" -> vendored `Collapsible`
 - coach's disabled reason becomes inline description text, not a `title`
   tooltip; error banner gets `role=alert` + focus move
@@ -143,11 +143,12 @@ markup for a pattern a library ships.
 
 copy-in-code audit: mostly clean (~60 literals remain). worst offenders:
 vendor `mic-selector` (~7), `SCENARIOS[].prompt` in setup.tsx (user-visible
-+ feeds the llm), `lib/**` exception strings surfacing raw english via
-toast (~20), vendor `live-waveform`/`dialog`/`sheet` aria-labels, meta
-`<title>`s, display fallbacks. server errors return english strings —
-add `error.code` and map codes -> keys client-side. `check-locales` runs
-with `continue-on-error: true` — advisory only, and blind to copy-in-code.
+
+- feeds the llm), `lib/**` exception strings surfacing raw english via
+  toast (~20), vendor `live-waveform`/`dialog`/`sheet` aria-labels, meta
+  `<title>`s, display fallbacks. server errors return english strings —
+  add `error.code` and map codes -> keys client-side. `check-locales` runs
+  with `continue-on-error: true` — advisory only, and blind to copy-in-code.
 
 lowercase locales: no runtime breakage (`Intl` canonicalizes `pt-br` ->
 `pt-BR`). rename `pt-BR.json`/`zh-CN.json`, update `LOCALES` (session.ts +
