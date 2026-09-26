@@ -1,6 +1,7 @@
 import type { SttEngine, SttEngineCallbacks, TtsEngine } from "./engines";
-import { readVoiceModelFile } from "./models";
+import { DEFAULT_VOICE_MODEL_MANIFEST, loadVoiceModelManifest, readVoiceModelFile } from "./models";
 import type { VoiceModelStorage } from "./models";
+import type { VoiceModelManifest } from "@di/shared";
 import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
 import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 
@@ -9,6 +10,11 @@ import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
  * owns its runtime (ort wasm for tts, sherpa-onnx for stt); model bytes come
  * from the manifest cache via readVoiceModelFile.
  */
+
+/** The manifest the downloader wrote with — override-aware, baked fallback. */
+async function effectiveManifest(): Promise<VoiceModelManifest> {
+  return loadVoiceModelManifest().catch(() => DEFAULT_VOICE_MODEL_MANIFEST);
+}
 
 export class WasmSttNotReadyError extends Error {
   constructor() {
@@ -55,20 +61,21 @@ export class WasmTts implements TtsEngine {
 
   /** resolves when the cached tts model files are verified present */
   async prepare(): Promise<void> {
-    const model = await readVoiceModelFile("tts", "tts/model.onnx", undefined, this.deps.storage);
-    const voices = await readVoiceModelFile("tts", "tts/voices.npz", undefined, this.deps.storage);
+    const manifest = await effectiveManifest();
+    const [model, voices] = await Promise.all([
+      readVoiceModelFile("tts", "tts/model.onnx", manifest, this.deps.storage),
+      readVoiceModelFile("tts", "tts/voices.npz", manifest, this.deps.storage),
+    ]);
     if (!model || !voices) throw new WasmTtsNotReadyError();
   }
 
   private boot(): Promise<void> {
     this.readyPromise ??= (async () => {
-      const model = await readVoiceModelFile("tts", "tts/model.onnx", undefined, this.deps.storage);
-      const voices = await readVoiceModelFile(
-        "tts",
-        "tts/voices.npz",
-        undefined,
-        this.deps.storage,
-      );
+      const manifest = await effectiveManifest();
+      const [model, voices] = await Promise.all([
+        readVoiceModelFile("tts", "tts/model.onnx", manifest, this.deps.storage),
+        readVoiceModelFile("tts", "tts/voices.npz", manifest, this.deps.storage),
+      ]);
       if (!model || !voices) throw new WasmTtsNotReadyError();
       const worker =
         this.deps.workerFactory?.() ??
@@ -153,8 +160,11 @@ export class WasmStt implements SttEngine {
 
   /** resolves when the cached stt model files are verified present */
   async prepare(): Promise<void> {
-    const model = await readVoiceModelFile("stt", "stt/model.onnx", undefined, this.deps.storage);
-    const tokens = await readVoiceModelFile("stt", "stt/tokens.txt", undefined, this.deps.storage);
+    const manifest = await effectiveManifest();
+    const [model, tokens] = await Promise.all([
+      readVoiceModelFile("stt", "stt/model.onnx", manifest, this.deps.storage),
+      readVoiceModelFile("stt", "stt/tokens.txt", manifest, this.deps.storage),
+    ]);
     if (!model || !tokens) throw new WasmSttNotReadyError();
   }
 
@@ -165,13 +175,11 @@ export class WasmStt implements SttEngine {
 
   private boot(): Promise<void> {
     this.readyPromise ??= (async () => {
-      const model = await readVoiceModelFile("stt", "stt/model.onnx", undefined, this.deps.storage);
-      const tokens = await readVoiceModelFile(
-        "stt",
-        "stt/tokens.txt",
-        undefined,
-        this.deps.storage,
-      );
+      const manifest = await effectiveManifest();
+      const [model, tokens] = await Promise.all([
+        readVoiceModelFile("stt", "stt/model.onnx", manifest, this.deps.storage),
+        readVoiceModelFile("stt", "stt/tokens.txt", manifest, this.deps.storage),
+      ]);
       if (!model || !tokens) throw new WasmSttNotReadyError();
       const worker =
         this.deps.workerFactory?.() ??
