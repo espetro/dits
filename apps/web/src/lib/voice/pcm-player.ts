@@ -29,6 +29,8 @@ export interface AudioContextLike {
 export interface PcmPlayer {
   /** Queue PCM16LE mono bytes for back-to-back playback. Never blocks. */
   write(pcm16: Uint8Array): void;
+  /** Queue Float32 mono samples at the player rate (wasm tts path). */
+  writeFloat32(samples: Float32Array): void;
   /** Stop all scheduled sources (barge-in) and drop queued buffers. */
   stop(): void;
   /** Fired when the last scheduled buffer finishes and nothing is queued. */
@@ -82,29 +84,35 @@ export function createPcmPlayer(opts: { createContext?: () => AudioContextLike }
     }
   }
 
+  function enqueue(samples: Float32Array) {
+    if (samples.length === 0) return;
+    // loudness tap for the voice orb (attack envelope, see lib/voice/levels)
+    let sum = 0;
+    for (let i = 0; i < samples.length; i++) {
+      const s = samples[i];
+      if (s !== undefined) sum += s * s;
+    }
+    pushAgentLevel(Math.sqrt(sum / (samples.length || 1)));
+    const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
+    buffer.getChannelData(0).set(samples);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination as unknown);
+    source.onended = () => {
+      active.delete(source);
+      source.disconnect();
+      if (active.size === 0 && pending.length === 0) drainedCb?.();
+    };
+    pending.push({ source, buffer });
+    scheduleNext();
+  }
+
   return {
     write(pcm16: Uint8Array) {
-      const samples = pcm16ToFloat(pcm16);
-      if (samples.length === 0) return;
-      // loudness tap for the voice orb (attack envelope, see lib/voice/levels)
-      let sum = 0;
-      for (let i = 0; i < samples.length; i++) {
-        const s = samples[i];
-        if (s !== undefined) sum += s * s;
-      }
-      pushAgentLevel(Math.sqrt(sum / (samples.length || 1)));
-      const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
-      buffer.getChannelData(0).set(samples);
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(ctx.destination as unknown);
-      source.onended = () => {
-        active.delete(source);
-        source.disconnect();
-        if (active.size === 0 && pending.length === 0) drainedCb?.();
-      };
-      pending.push({ source, buffer });
-      scheduleNext();
+      enqueue(pcm16ToFloat(pcm16));
+    },
+    writeFloat32(samples: Float32Array) {
+      enqueue(samples);
     },
     stop() {
       for (const { source } of pending.splice(0)) source.disconnect();
