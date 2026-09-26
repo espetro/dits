@@ -17,6 +17,19 @@ const OPFS_DIR = "voice-models";
 
 export const VOICE_MODELS_BASE = import.meta.env.VITE_VOICE_MODELS_BASE as string | undefined;
 
+/**
+ * Runtime asset-root override: `di.voice.models-base` in localStorage wins
+ * over the build-time env. Lets deployments (and e2e) point at a mirror
+ * without a rebuild; anything else falls through to the baked manifest.
+ */
+export function resolveVoiceModelsBase(): string | undefined {
+  try {
+    return localStorage.getItem("di.voice.models-base") ?? VOICE_MODELS_BASE;
+  } catch {
+    return VOICE_MODELS_BASE;
+  }
+}
+
 /** Baked-in manifest: sherpa-onnx zipformer2-ctc small (stt) + KittenTTS nano (tts). */
 export const DEFAULT_VOICE_MODEL_MANIFEST: VoiceModelManifest = {
   version: 1,
@@ -147,7 +160,7 @@ export function defaultVoiceModelStorage(): VoiceModelStorage {
 export async function loadVoiceModelManifest(
   fetchImpl: typeof fetch = fetch,
 ): Promise<VoiceModelManifest> {
-  const base = VOICE_MODELS_BASE;
+  const base = resolveVoiceModelsBase();
   if (!base) return DEFAULT_VOICE_MODEL_MANIFEST;
   const res = await fetchImpl(`${base.replace(/\/+$/, "")}/manifest.json`);
   if (!res.ok) throw new Error(`voice model manifest fetch failed: ${res.status}`);
@@ -207,7 +220,9 @@ export async function downloadVoiceModels(opts: VoiceDownloadOptions = {}): Prom
   report({ status: "downloading", error: undefined });
   try {
     for (const { modelId, version, file } of files) {
-      const res = await doFetch(resolveUrl(file.url, VOICE_MODELS_BASE), { signal: opts.signal });
+      const res = await doFetch(resolveUrl(file.url, resolveVoiceModelsBase()), {
+        signal: opts.signal,
+      });
       if (!res.ok) throw new Error(`download ${file.path} failed: ${res.status}`);
       const bytes = await res.arrayBuffer();
       if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");

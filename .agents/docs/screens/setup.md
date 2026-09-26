@@ -60,7 +60,9 @@
   and server-side; upload failure never blocks the start.
 - Mic selector (advanced): ElevenLabs `mic-selector` registry component in a
   `data-testid="mic-check"` element; device list without permission, real
-  labels on open, live waveform preview. Never gates the start CTA.
+  labels on open, live waveform preview. Never gates the start CTA. The pick
+  applies to capture-based paths (server ws + on-device wasm stt); the
+  browser built-in SpeechRecognition owns its own capture and ignores it.
 - Card **start** creates the session (`POST /v1/sessions` or OPFS in
   client-only) and routes straight to `/interview/[id]` — the validate step
   remains reachable via advanced (`start with plan check` link) but is no

@@ -55,10 +55,11 @@ lucide-react only (project decision). Do not add other icon sets.
 ## Voice client (`src/lib/voice/`)
 
 `SpeechDriver` interface: a WebSocket `ServerVoiceDriver` (default) and a
-`BrowserVoiceDriver` (client-only/static-build fallback, Web Speech API +
-client-side agent loop). xstate v5 turn FSM, Web Audio capture (16k PCM16)
-with client-side Silero VAD, `PcmPlayer` playback.
+`BrowserVoiceDriver` (client-only/static-build fallback). xstate v5 turn
+FSM, Web Audio capture (16k PCM16) with client-side Silero VAD, `PcmPlayer`
+playback.
 
 - Driver selection (`src/lib/voice/index.ts`): runtime mode (`client-only` forces browser driver) → `VITE_VOICE_DEFAULT` env pin → probe `/api/health` (reachable → server driver, unreachable → browser driver).
 - VAD assets (silero onnx + onnxruntime wasm) are vendored in `apps/web/public/vad/` and must stay committed for offline/local-first use.
+- Browser-mode engines (`lib/voice/engines.ts`): stt/tts resolve per session from the `di.voice.*` stores + the model cache — on-device wasm is the default when consent is granted and the models are cached, else builtin Web Speech (stt) / speechSynthesis (tts) / BYO `/v1/audio/speech` endpoint. `models.ts` owns the manifest (`VITE_VOICE_MODELS_BASE`, or `di.voice.models-base` localStorage override) → sha256-verified download → CacheStorage (OPFS fallback); `VoiceConsentDialog` is the one-shot gate, Settings → voice re-arms. Engine workers: `sherpa/stt-worker.ts` (sherpa-onnx zipformer via `importScripts` + vite `?url` assets) and `kitten/kitten-worker.ts` (KittenTTS: phonemizer → tokenizer → ort). `capture.ts` `onFloat32Frame` feeds stt, silero VAD does endpointing + barge-in, `PcmPlayer.writeFloat32` plays the 24kHz tts stream.
 - `src/lib/agent/` — the client-only agent loop (`client-agent.ts`), an OpenAI-compatible provider conforming to `@ai-sdk/provider`'s `LanguageModelV3` (`openai-compatible-provider.ts`), and browser TTS (`tts.ts`). Shares `buildPrompt`/`VOICE_TOOLS`/`describeWhiteboardSnapshot` from `packages/shared/src/interview-agent.ts` with the server loop — errors here must reach `onError`, never resolve silently (ast-grep rule `no-swallowed-agent-errors`).

@@ -12,5 +12,14 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "off",
+    // wasm-voice spec exercises the real mic path: fake device + autoplay
+    // so getUserMedia and AudioContext work headless
+    launchOptions: {
+      args: [
+        "--use-fake-device-for-media-stream",
+        "--use-fake-ui-for-media-stream",
+        "--autoplay-policy=no-user-gesture-required",
+      ],
+    },
   },
 });
