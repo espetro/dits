@@ -93,7 +93,7 @@ function fakeRecognitionCtor(): {
     onerror?: (ev: any) => void;
   } = {};
   let startCount = 0;
-  let last: Rec | null = null;
+  const instances: Rec[] = [];
   class Rec implements RecognitionLike {
     continuous = false;
     interimResults = false;
@@ -102,7 +102,7 @@ function fakeRecognitionCtor(): {
     onerror: ((ev: any) => void) | null = null;
     onend: (() => void) | null = null;
     constructor() {
-      last = this;
+      instances.push(this);
     }
     start() {
       startCount++;
@@ -127,7 +127,7 @@ function fakeRecognitionCtor(): {
         results: [{ isFinal: false, 0: { transcript } }],
       }),
     emitError: (error: string) => listeners.onerror?.({ error }),
-    emitEnd: () => last?.onend?.(),
+    emitEnd: () => instances.at(-1)?.onend?.(),
     get startCount() {
       return startCount;
     },
