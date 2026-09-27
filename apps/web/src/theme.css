@@ -146,6 +146,48 @@ html {
   animation: orb-breathe 2.4s var(--ease-out-expo) infinite;
 }
 
+/* landing peek — decorative interview miniature inside the hero card */
+.peek-orb {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #ffb37e 0%, transparent 45%),
+    radial-gradient(circle at 65% 70%, var(--color-persimmon) 0%, var(--color-persimmon-deep) 70%);
+  box-shadow:
+    0 0 0 4px var(--color-persimmon-soft),
+    0 3px 14px rgba(194, 72, 10, 0.22);
+  animation: peek-orb-breathe 3s ease-in-out infinite;
+}
+
+@keyframes peek-orb-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.peek-wave > i {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-persimmon);
+  animation: peek-wave-bar 1.15s ease-in-out infinite;
+}
+
+@keyframes peek-wave-bar {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -170,6 +212,8 @@ html {
     transition: none;
   }
   .orb-live,
+  .peek-orb,
+  .peek-wave > i,
   .rise-in {
     animation: none;
   }

@@ -7,11 +7,12 @@ import { RuntimeModeChip } from "./runtime-mode-chip";
 import { UserDropdown } from "./user-dropdown";
 
 /**
- * Shared app header mounted in __root for every route. Logo links home (en is
- * canonical for the bare root); center slot carries a localized page title;
- * right slot has the GitHub link and the account dropdown (B3). The language
- * selector is not in the header: it lives in the account dropdown and, on the
- * landing hero, as a floating bottom-right pill.
+ * Shared app header mounted in __root for every route except the landing
+ * index (headerless hero — see .agents/docs/screens/landing.md). Logo links
+ * home (en is canonical for the bare root); center slot carries a localized
+ * page title; right slot has the GitHub link and the account dropdown (B3).
+ * The language selector is not in the header: it lives in the account
+ * dropdown.
  */
 export function AppHeader({ title }: { title?: ReactNode }) {
   const locale = useLocale();
