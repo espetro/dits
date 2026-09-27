@@ -42,17 +42,27 @@
 ## Behavior
 
 - **Scenario cards**: one card per preset (`sys design`, `behavioral`,
-  `frontend`, `ML`, `custom`). A card carries a one-line narrative, a 3-item
-  goal checklist (what the interviewer will probe), a toolset preview chip
-  row (which dock tools the session starts with — seeds `session.tools`),
-  and its own **start** CTA. Clicking a card also fills the custom-prompt
-  textarea with the preset text (editable before starting).
-- **Advanced options** disclosure (collapsed by default, chevron): duration
-  (20/30/45/60), tone, difficulty, language, mode (`interview|coach`), the
-  FILES dropzone, and the mic selector. Defaults are pre-picked so a card's
-  start CTA is a zero-knob path.
+  `frontend`, `ML`, `custom`), rendered as options in one vendored
+  `RadioGroup` (label wraps `RadioGroupItem`, named via `aria-labelledby` →
+  card title) — one tab stop, arrow-key navigation. A card carries a
+  one-line narrative, a 3-item goal checklist (what the interviewer will
+  probe), a toolset preview chip row (which dock tools the session starts
+  with — seeds `session.tools`), and its own **start** CTA (a real `Button`
+  sibling of the label, not nested inside the selectable surface).
+  Selecting a card also fills the custom-prompt textarea with the preset
+  text (editable before starting).
+- **Advanced options** disclosure (vendored `Collapsible`, collapsed by
+  default, chevron): duration (20/30/45/60), mode, tone, difficulty as
+  `RadioPill` rows (`Label` + `RadioGroupItem`, labelled by their `h3` via
+  `aria-labelledby`); language as a vendored `Select` rendering
+  `Intl.DisplayNames` in the active locale; the FILES dropzone, and the mic
+  selector. Defaults are pre-picked so a card's start CTA is a zero-knob
+  path.
 - **Coach mode** stays in advanced: gated on any session reaching `reported`
-  (setup.coachHint tooltip + inline hint while locked).
+  — disabled `RadioPill` with the reason (setup.coachHint) as inline
+  description text, not a `title` tooltip.
+- Errors render as a vendored `Alert` (`role=alert`) above the advanced
+  disclosure, always visible; focus moves to it when it appears.
 - Custom prompt textarea stays visible above advanced — it is the shared
   context field, filled by whichever card was last clicked.
 - File dropzone (advanced): `POST /v1/sessions/:id/documents` right after
