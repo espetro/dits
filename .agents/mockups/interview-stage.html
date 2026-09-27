@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>di — interview, one viewport</title>
+<style>
+  @font-face {
+    font-family: "Fraunces";
+    src: url("../../apps/web/public/fonts/Fraunces-Regular.woff2") format("woff2");
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: "Fraunces";
+    src: url("../../apps/web/public/fonts/Fraunces-Bold.woff2") format("woff2");
+    font-weight: 700;
+  }
+  :root {
+    --cream: #fdfbf9;
+    --cream-deep: #f7f1ea;
+    --paper: #fffdfb;
+    --espresso: #2b2118;
+    --espresso-soft: #6b5d4f;
+    --espresso-faint: #a89a8a;
+    --persimmon: #ff6f1e;
+    --persimmon-deep: #c2480a;
+    --persimmon-soft: #ffe8d9;
+    --persimmon-faint: #fff3ea;
+    --hairline: rgba(43, 33, 24, 0.08);
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    font-family: "Inter var", ui-sans-serif, system-ui, sans-serif;
+    background: var(--cream); color: var(--espresso);
+    height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* 44px in-call bar replaces the global header */
+  .callbar {
+    height: 44px; flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; border-bottom: 1px solid var(--hairline); font-size: 12px; color: var(--espresso-soft);
+  }
+  .callbar .left { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--espresso); }
+  .callbar .logo { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 15px; }
+  .callbar .meta { font-variant-numeric: tabular-nums; }
+  .callbar .endbtn { color: var(--persimmon-deep); font-weight: 600; font-size: 12px; }
+
+  .main { flex: 1; display: grid; grid-template-columns: minmax(360px, 34%) 1fr; gap: 14px; padding: 14px; min-height: 0; }
+
+  .card {
+    background: var(--paper); border: 1px solid var(--hairline); border-radius: 20px;
+    display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  }
+
+  /* left: conversation card */
+  .conv { padding: 16px; }
+  .qchip { display: inline-flex; align-self: flex-start; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--persimmon-deep); background: var(--persimmon-faint); border-radius: 999px; padding: 4px 10px; margin-bottom: 10px; }
+  .stage { display: flex; align-items: center; gap: 12px; padding: 4px 2px 12px; border-bottom: 1px solid var(--hairline); }
+  .orb {
+    width: 52px; height: 52px; border-radius: 50%; flex: none;
+    background:
+      radial-gradient(circle at 35% 30%, #ffb37e 0%, transparent 45%),
+      radial-gradient(circle at 65% 70%, var(--persimmon) 0%, var(--persimmon-deep) 70%);
+    box-shadow: 0 0 0 4px var(--persimmon-soft), 0 4px 16px rgba(194,72,10,0.2);
+    animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { transform: scale(1);} 50% { transform: scale(1.07);} }
+  .stage .status { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--espresso-soft); }
+  .stage .cap { font-family: "Fraunces", Georgia, serif; font-size: 14.5px; line-height: 1.35; color: var(--espresso); }
+  .wave { display: flex; align-items: center; gap: 2.5px; height: 26px; padding: 8px 2px 0; border-top: 1px solid var(--hairline); }
+  .wave i { width: 3px; border-radius: 2px; background: var(--persimmon); animation: wavebar 1.15s ease-in-out infinite; }
+  .wave .miclab { font-size: 10px; color: var(--espresso-faint); margin-left: auto; letter-spacing: 0.1em; text-transform: uppercase; }
+  @keyframes wavebar { 0%,100% { transform: scaleY(0.25);} 50% { transform: scaleY(1);} }
+
+  .tl { flex: 1; overflow: hidden auto; padding: 12px 2px; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 8px; font-size: 13px; line-height: 1.5; }
+  .who { flex: none; width: 44px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--espresso-faint); padding-top: 2px; }
+  .you .txt { color: var(--espresso); }
+  .agent .txt { color: var(--espresso-soft); }
+
+  .composer { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 2px 2px; }
+  .composer .input { flex: 1; border: 1px solid var(--hairline); border-radius: 999px; padding: 8px 14px; font-size: 13px; color: var(--espresso-faint); }
+
+  /* right: workspace card */
+  .work { background: var(--cream-deep); }
+  .work .wtabs { flex: none; display: flex; gap: 6px; padding: 12px 14px 0; }
+  .work .wtab { font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 8px; color: var(--espresso-soft); }
+  .work .wtab.on { background: var(--paper); color: var(--espresso); border: 1px solid var(--hairline); }
+  .work .wbody { flex: 1; margin: 12px 14px 14px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 14px; padding: 16px; font-family: ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: var(--espresso-soft); }
+  .wbody .cm { color: var(--espresso-faint); }
+
+  /* floating control pill */
+  .pillbar {
+    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--espresso); border-radius: 999px; padding: 8px 10px;
+    box-shadow: 0 12px 32px rgba(43,33,24,0.28);
+  }
+  .pillbar .ctrl { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(253,251,249,0.08); }
+  .pillbar .ctrl svg { width: 16px; height: 16px; }
+  .pillbar .end { background: var(--persimmon-deep); }
+
+  @media (max-width: 767px) {
+    .main { grid-template-columns: 1fr; padding: 10px; }
+    .work { display: none; }
+    .callbar .meta { display: none; }
+    .conv { padding-bottom: 70px; }
+  }
+</style>
+</head>
+<body>
+  <div class="callbar">
+    <span class="left"><span class="logo">di.</span> system design · mid-level</span>
+    <span class="meta">07:41 / 20:00</span>
+    <span class="endbtn">end interview</span>
+  </div>
+
+  <div class="main">
+    <section class="card conv">
+      <span class="qchip">question 3 / 5</span>
+      <div class="stage">
+        <div class="orb"></div>
+        <div>
+          <p class="status">listening</p>
+          <p class="cap">take your time — walk me through it.</p>
+        </div>
+      </div>
+      <div class="tl">
+        <div class="row agent"><span class="who">agent</span><span class="txt">How would you handle a spike of 10× votes per second on a single poll?</span></div>
+        <div class="row you"><span class="who">you</span><span class="txt">I'd shard the counter by poll id and batch writes through a queue.</span></div>
+        <div class="row agent"><span class="who">agent</span><span class="txt">What happens when one option becomes a hot partition?</span></div>
+        <div class="row you"><span class="who">you</span><span class="txt">Sub-shard by option id with a local aggregator before the write path…</span></div>
+      </div>
+      <div class="wave" role="img" aria-label="your microphone level">
+        <i style="height:12px;animation-delay:0s"></i><i style="height:20px;animation-delay:.08s"></i><i style="height:14px;animation-delay:.16s"></i><i style="height:22px;animation-delay:.24s"></i><i style="height:10px;animation-delay:.32s"></i><i style="height:18px;animation-delay:.4s"></i><i style="height:22px;animation-delay:.48s"></i><i style="height:12px;animation-delay:.56s"></i><i style="height:16px;animation-delay:.64s"></i>
+        <span class="miclab">you · mic</span>
+      </div>
+      <div class="composer"><span class="input">talk or type…</span></div>
+    </section>
+
+    <section class="card work">
+      <div class="wtabs">
+        <span class="wtab on">editor</span><span class="wtab">whiteboard</span>
+      </div>
+      <div class="wbody">
+        <span class="cm">// design notes</span><br/>
+        ingest: gateway → queue (kinesis)<br/>
+        counts: poll_id → [option_id] shards<br/>
+        <span class="cm">// hot partition: sub-shard + local agg</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="pillbar" role="toolbar" aria-label="interview controls">
+    <span class="ctrl" role="button" aria-label="mute microphone"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+    <span class="ctrl" role="button" aria-label="switch to typing"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+    <span class="ctrl end" role="button" aria-label="end interview"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+  </div>
+</body>
+</html>

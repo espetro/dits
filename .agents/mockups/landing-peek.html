@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>di — landing: product peek</title>
+<style>
+  @font-face {
+    font-family: "Fraunces";
+    src: url("../../apps/web/public/fonts/Fraunces-Regular.woff2") format("woff2");
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: "Fraunces";
+    src: url("../../apps/web/public/fonts/Fraunces-Bold.woff2") format("woff2");
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: "Fraunces";
+    src: url("../../apps/web/public/fonts/Fraunces-Black.woff2") format("woff2");
+    font-weight: 900;
+  }
+  :root {
+    --cream: #fdfbf9;
+    --cream-deep: #f7f1ea;
+    --paper: #fffdfb;
+    --espresso: #2b2118;
+    --espresso-soft: #6b5d4f;
+    --espresso-faint: #a89a8a;
+    --persimmon: #ff6f1e;
+    --persimmon-deep: #c2480a;
+    --persimmon-soft: #ffe8d9;
+    --persimmon-faint: #fff3ea;
+    --hairline: rgba(43, 33, 24, 0.08);
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    font-family: "Inter var", ui-sans-serif, system-ui, sans-serif;
+    background: var(--cream); color: var(--espresso);
+    min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 72px 20px 0;
+  }
+  .pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--cream); background: var(--espresso);
+    border-radius: 999px; padding: 8px 16px; margin-bottom: 30px;
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 900;
+    font-size: clamp(38px, 6.4vw, 78px); line-height: 1.02;
+    max-width: 780px; letter-spacing: -0.015em;
+  }
+  h1 em { color: var(--persimmon-deep); font-style: italic; }
+  .sub {
+    color: var(--espresso-soft); font-size: 16.5px; max-width: 460px;
+    margin: 24px 0 34px; line-height: 1.55;
+  }
+  .cta {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--persimmon); color: var(--cream);
+    border-radius: 999px; padding: 8px 10px 8px 26px;
+    font-size: 16px; font-weight: 600;
+    box-shadow: 0 14px 30px -10px rgba(255,111,30,0.5);
+  }
+  .cta .dot {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(253,251,249,0.18); display: grid; place-items: center;
+  }
+  .cta .dot svg { width: 15px; height: 15px; }
+
+  /* product card peeking above the fold — mirrors the real interview layout */
+  .peek {
+    width: min(860px, 100%);
+    margin: 56px auto 0;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-bottom: none;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -18px 60px -20px rgba(43,33,24,0.16), 0 2px 6px rgba(43,33,24,0.04);
+    text-align: left;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .peek-bar {
+    height: 40px; flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; border-bottom: 1px solid var(--hairline);
+    font-size: 11px; color: var(--espresso-soft);
+  }
+  .peek-bar .left { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--espresso); }
+  .peek-bar .logo { font-family: "Fraunces", Georgia, serif; font-weight: 900; font-size: 14px; }
+  .peek-bar .meta { font-variant-numeric: tabular-nums; }
+  .peek-grid { display: grid; grid-template-columns: minmax(300px, 38%) 1fr; gap: 10px; padding: 10px; }
+
+  .conv {
+    background: var(--paper); border: 1px solid var(--hairline); border-radius: 14px;
+    padding: 12px; display: flex; flex-direction: column; min-height: 0;
+  }
+  .qchip {
+    display: inline-flex; align-self: flex-start;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--persimmon-deep); background: var(--persimmon-faint);
+    border-radius: 999px; padding: 4px 10px; margin-bottom: 8px;
+  }
+  .stage { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--hairline); }
+  .orb {
+    width: 44px; height: 44px; border-radius: 50%; flex: none;
+    background:
+      radial-gradient(circle at 35% 30%, #ffb37e 0%, transparent 45%),
+      radial-gradient(circle at 65% 70%, var(--persimmon) 0%, var(--persimmon-deep) 70%);
+    box-shadow: 0 0 0 4px var(--persimmon-soft), 0 3px 14px rgba(194,72,10,0.22);
+    animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  .stage .status { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--espresso-soft); }
+  .stage .cap { font-family: "Fraunces", Georgia, serif; font-size: 13.5px; line-height: 1.3; color: var(--espresso); }
+  .tl { display: flex; flex-direction: column; gap: 9px; padding: 10px 0; }
+  .row { display: flex; gap: 7px; font-size: 11.5px; line-height: 1.45; }
+  .who { flex: none; width: 36px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--espresso-faint); padding-top: 2px; }
+  .you .txt { color: var(--espresso); }
+  .agent .txt { color: var(--espresso-soft); }
+  .wave { display: flex; align-items: center; gap: 2.5px; height: 22px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+  .wave i { width: 3px; border-radius: 2px; background: var(--persimmon); animation: wavebar 1.15s ease-in-out infinite; }
+  .wave .miclab { font-size: 9px; color: var(--espresso-faint); margin-left: auto; letter-spacing: 0.1em; text-transform: uppercase; }
+  @keyframes wavebar { 0%,100% { transform: scaleY(0.25);} 50% { transform: scaleY(1);} }
+  .composer { display: flex; padding-top: 8px; }
+  .composer .input { flex: 1; border: 1px solid var(--hairline); border-radius: 999px; padding: 7px 13px; font-size: 11.5px; color: var(--espresso-faint); }
+
+  .work { background: var(--cream-deep); border: 1px solid var(--hairline); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .work .wt { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso-faint); }
+  .wcard { background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: 9px 11px; font-size: 11px; color: var(--espresso-soft); }
+  .wcard b { color: var(--espresso); font-weight: 600; }
+
+  .peek-pill {
+    position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px;
+    background: var(--espresso); border-radius: 999px; padding: 6px 8px;
+    box-shadow: 0 10px 26px rgba(43,33,24,0.28);
+  }
+  .peek-pill .ctrl { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(253,251,249,0.08); }
+  .peek-pill .ctrl svg { width: 13px; height: 13px; }
+  .peek-pill .end { background: var(--persimmon-deep); }
+
+  @media (max-width: 700px) {
+    .hero { padding: 48px 18px 0; }
+    h1 { font-size: clamp(34px, 10.5vw, 44px); }
+    .peek-grid { grid-template-columns: 1fr; }
+    .work { display: none; }
+    .peek-bar .meta { display: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="hero">
+    <div class="pill">mock interviews</div>
+    <h1>the AI agent you <em>practice</em> your interviews with.</h1>
+    <p class="sub">voice interviews with an agent that actually pushes back. then get the receipts.</p>
+    <span class="cta" role="button" aria-label="start a mock interview">
+      grill me
+      <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </span>
+
+    <div class="peek" role="img" aria-label="preview of a live interview">
+      <div class="peek-bar">
+        <span class="left"><span class="logo">di.</span> system design · mid-level</span>
+        <span class="meta">07:41 / 20:00</span>
+      </div>
+      <div class="peek-grid">
+        <div class="conv">
+          <span class="qchip">question 2 / 5</span>
+          <div class="stage">
+            <div class="orb"></div>
+            <div>
+              <p class="status">listening</p>
+              <p class="cap">tell me about a time you failed.</p>
+            </div>
+          </div>
+          <div class="tl">
+            <div class="row agent"><span class="who">agent</span><span class="txt">Where on your resume does it say you can handle a prod outage?</span></div>
+            <div class="row you"><span class="who">you</span><span class="txt">At my last job I owned the billing pipeline…</span></div>
+            <div class="row agent"><span class="who">agent</span><span class="txt">What broke, and what did you do first?</span></div>
+          </div>
+          <div class="wave">
+            <i style="height:11px;animation-delay:0s"></i><i style="height:18px;animation-delay:.08s"></i><i style="height:13px;animation-delay:.16s"></i><i style="height:20px;animation-delay:.24s"></i><i style="height:9px;animation-delay:.32s"></i><i style="height:16px;animation-delay:.4s"></i><i style="height:19px;animation-delay:.48s"></i><i style="height:11px;animation-delay:.56s"></i>
+            <span class="miclab">you · mic</span>
+          </div>
+          <div class="composer"><span class="input">talk or type…</span></div>
+        </div>
+        <aside class="work">
+          <span class="wt">notes</span>
+          <div class="wcard"><b>failure story</b> — billing pipeline outage</div>
+          <div class="wcard"><b>probing</b> — first response, not heroics</div>
+        </aside>
+      </div>
+      <div class="peek-pill">
+        <span class="ctrl"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        <span class="ctrl"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+        <span class="ctrl end"><svg viewBox="0 0 24 24" fill="none" stroke="#fdfbf9" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
