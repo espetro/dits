@@ -1,6 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreFiles": ["spikes/**", "apps/web/public/vad/**"],
+  "ignoreFiles": [
+    "spikes/**",
+    "apps/web/public/vad/**",
+    "apps/web/src/components/vendor/**"
+  ],
   "ignore": [
     "build/release.ts",
     "scripts/check-agents-md-length.ts",
@@ -29,7 +33,6 @@
     "@codemirror/lang-sql",
     "@codemirror/language",
     "recharts",
-    "onnxruntime-web",
     "vite-plugin-static-copy",
     "@ast-grep/cli",
     "@testing-library/react",
