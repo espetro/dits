@@ -6,15 +6,15 @@ source_hash = "ca20728d35f00c3a4c21b1fc8b0086b59f89df2d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.agentStage"]
-value = "代理阶段"
+value = "智能体阶段"
 source_hash = "38205b85770356aa063dffe54a9b41d1382b6382"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.close"]
 value = "关闭"
@@ -22,7 +22,7 @@ source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.editor"]
 value = "编辑器"
@@ -30,15 +30,15 @@ source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.github"]
-value = "github"
+value = "GitHub"
 source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.language"]
 value = "语言"
@@ -46,7 +46,7 @@ source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.moreTools"]
 value = "更多工具"
@@ -54,15 +54,15 @@ source_hash = "4915a1a2232aaf565e67e7938c370dc84ffb8faa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."a11y.runtimeMode"]
-value = "运行模式"
+value = "运行时模式"
 source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:29:35Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."account.guest"]
 value = "访客"
@@ -154,7 +154,7 @@ source_hash = "c80857313cde3499977ed6547cc49fdffc0e4d0a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.createSession"]
 value = "无法创建会话"
@@ -162,7 +162,7 @@ source_hash = "64fc79ba40b721d6b5185fff36a06ad52cc0df68"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.document_not_found"]
 value = "未找到文档"
@@ -170,7 +170,7 @@ source_hash = "f427adfad7d04ea82c85747055aaa163cd482502"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.file_cap"]
 value = "文件过多"
@@ -178,7 +178,7 @@ source_hash = "2c0034d5f7407417a34c50ffee42bac6c8b38486"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.getReport"]
 value = "无法加载报告"
@@ -186,7 +186,7 @@ source_hash = "22cb28eddbcb19a63cbd9c53cdad39508ecd28b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.getSession"]
 value = "无法加载会话"
@@ -194,7 +194,7 @@ source_hash = "f92072f9fa56dec21dfa574abb25e51072546e49"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.getTurns"]
 value = "无法加载记录"
@@ -202,7 +202,7 @@ source_hash = "8a0c5aed5a7cf37ed0feccece35044db5039e4f1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.listSessions"]
 value = "无法加载会话列表"
@@ -210,7 +210,7 @@ source_hash = "8a1bf37741848afa8b4300803d9817393065cd5d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.no_embeddings"]
 value = "此服务器未配置嵌入提供商"
@@ -218,15 +218,15 @@ source_hash = "c98252fd8de1c0bece5f3c9cb4dedd6e052c329c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.no_files"]
-value = "未上传任何文件"
+value = "未上传文件"
 source_hash = "a73e4d6dd88fad8a2d9c7f9339ffb6dcd178482b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.not_found"]
 value = "未找到"
@@ -234,7 +234,7 @@ source_hash = "094b763b4cfcc0b05e5d040581cd513c3ca08067"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.postTurn"]
 value = "无法发送消息"
@@ -242,7 +242,7 @@ source_hash = "e6e44156829e9f0a757b23dc4faa82473b006e37"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.pushToolState"]
 value = "无法保存工具状态"
@@ -250,7 +250,7 @@ source_hash = "2df05b2d173442c3d72ab17a68121c1eea701258"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.report_failed"]
 value = "服务器上报告生成失败"
@@ -258,7 +258,7 @@ source_hash = "7a9a5070abb8981740f59f2efd17ccc68c615196"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.report_unconfigured"]
 value = "此服务器未配置报告生成"
@@ -266,7 +266,7 @@ source_hash = "68626c91b7405b4672a86c9c52437fddfe7503bb"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.requestReport"]
 value = "无法构建报告"
@@ -274,7 +274,7 @@ source_hash = "848d8a21b72040b79f0cef290b78d7ba4239c53a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.session_id_mismatch"]
 value = "会话不匹配"
@@ -282,7 +282,7 @@ source_hash = "1cb12602762c4a0e3f95d549cbe65b1415e0c295"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.session_not_found"]
 value = "未找到会话"
@@ -290,7 +290,7 @@ source_hash = "fefdba8f6adb339f3aa485a0e14bb027a0e55cb1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.size_cap"]
 value = "文件过大"
@@ -298,7 +298,7 @@ source_hash = "a76d7453fd59d1583b963a77d5bb74bb705bfc18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.unsupported_type"]
 value = "不支持的文件类型"
@@ -306,7 +306,7 @@ source_hash = "6add681318d86be4c7b95218e63e647fa9fdd72e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.updateSession"]
 value = "无法更新会话"
@@ -314,7 +314,7 @@ source_hash = "f702943dbe3feed976edf4868527c858769cceb0"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.upgrade_required"]
 value = "此端点需要 WebSocket 升级"
@@ -322,7 +322,7 @@ source_hash = "ab58aaec5a9440e2c651ca29cb9b0b130aa4d850"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.api.upload"]
 value = "文件上传失败"
@@ -330,7 +330,7 @@ source_hash = "e854e51f2caeef2083845a196fc86770f3dbfab6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.http"]
 value = "请求失败 ({status})"
@@ -338,7 +338,7 @@ source_hash = "6ca71bddc1a7e14410895157898c5b354c4f8f9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.llm.chat"]
 value = "模型请求失败 ({status})"
@@ -346,7 +346,7 @@ source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.llm.notLoaded"]
 value = "浏览器内模型尚未加载"
@@ -354,7 +354,7 @@ source_hash = "8527789365910ca457a684911fd4296fb74f779a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.llm.timeout"]
 value = "模型加载超时 ({seconds}秒)"
@@ -362,7 +362,7 @@ source_hash = "61fe27fc018b1d3f7922e1adaf954532c8082eb6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.llm.unsupported"]
 value = "此浏览器不支持浏览器内模型"
@@ -370,7 +370,7 @@ source_hash = "888a624eb37fbe932d6e50b859e7b4150ddcc3b5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.disposed"]
 value = "语音引擎已停止"
@@ -378,7 +378,7 @@ source_hash = "06b72ebfb32991595d61e16a2b21cc092e8b8392"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.download"]
 value = "模型下载失败"
@@ -386,7 +386,7 @@ source_hash = "748992e15f9f76d120e79330fd480d7355c32e05"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.manifest"]
 value = "无法获取语音模型清单 ({status})"
@@ -394,15 +394,15 @@ source_hash = "f8f606b7adc54d841a3618fce5f9e44d642e4c53"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.noStorage"]
-value = "没有可用于语音模型的持久存储"
+value = "没有可用的持久存储用于语音模型"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:16Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.sha256"]
 value = "模型下载验证失败"
@@ -410,7 +410,7 @@ source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.size"]
 value = "模型下载被截断"
@@ -418,15 +418,15 @@ source_hash = "686765ea8916904c067463fe44cd8736b7596533"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.sttEngine"]
-value = "设备上的语音模型未安装"
+value = "设备端语音模型未安装"
 source_hash = "8921d69ccf03195911dfdf6e873887a8445bcc4d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.sttWorker"]
 value = "语音引擎启动失败"
@@ -434,15 +434,15 @@ source_hash = "82ac3f17596f9fa64ab253b100ff6d0a46291fd3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.ttsEngine"]
-value = "设备上的语音模型未安装"
+value = "设备端语音模型未安装"
 source_hash = "0108250d0b60b59d59a21c81a7d451c852c5e9ac"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.ttsWorker"]
 value = "语音引擎启动失败"
@@ -450,23 +450,23 @@ source_hash = "057f9ca139cb8f3b5a1faf2aef3d3c446bd8cf0d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.models.unknown"]
-value = "未知语音模型：{id}"
+value = "未知语音模型: {id}"
 source_hash = "3ab1249fb5cf2fd5766b46b7e27465e437d38504"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.report.noSession"]
-value = "没有提供者配置文件或会话"
+value = "无提供商配置文件或会话"
 source_hash = "65f36fde270ce89e21272e2ca1e289bec2de55e1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.langUnsupported"]
 value = "语音服务不支持此语言"
@@ -474,15 +474,15 @@ source_hash = "78327f07b761f005a171472907d939e0f5f16514"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.network"]
-value = "语音服务不可达——桌面 Chrome 会将麦克风音频发送到 Google 的服务器，因此 VPN、防火墙或广告拦截器可能会阻止它（移动版 Chrome 通常可以正常工作）"
+value = "语音服务不可达 — 桌面版 Chrome 将麦克风音频发送到 Google 服务器，因此 VPN、防火墙或广告拦截器可能会阻止它（移动版 Chrome 通常可用）"
 source_hash = "670d2ed5363180f025bcab01b915f862d3ef5c03"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.noMic"]
 value = "未找到麦克风"
@@ -490,7 +490,7 @@ source_hash = "8464fe3e7c99ff2d6050e17c123d769fd39aef3c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.noSpeech"]
 value = "未检测到语音"
@@ -498,7 +498,7 @@ source_hash = "e547e94a30f8e6630cb3da21969d256d03626120"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.notAllowed"]
 value = "麦克风权限被拒绝"
@@ -506,7 +506,7 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.unknown"]
 value = "语音识别失败"
@@ -514,7 +514,7 @@ source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.stt.unsupported"]
 value = "此浏览器不支持语音识别"
@@ -522,7 +522,7 @@ source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.tts.builtin"]
 value = "语音合成失败"
@@ -530,7 +530,7 @@ source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.tts.empty"]
 value = "语音端点未返回音频"
@@ -538,7 +538,7 @@ source_hash = "6e955bf06ab4b725f7a9544dcd63245fc3083f5e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.tts.endpoint"]
 value = "语音端点失败 ({status})"
@@ -546,7 +546,7 @@ source_hash = "b7fcc45b1372cbfa7daa68a42cbfeee8b3376cce"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.tts.pcm"]
 value = "意外的音频格式"
@@ -554,7 +554,7 @@ source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.tts.wav"]
 value = "意外的音频格式"
@@ -562,15 +562,15 @@ source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.unknown"]
-value = "出了些问题"
+value = "出错了"
 source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.voice.boot"]
 value = "语音无法启动"
@@ -578,7 +578,7 @@ source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.voice.captureRate"]
 value = "不支持的麦克风采样率 ({rate})"
@@ -586,7 +586,7 @@ source_hash = "47373a15eb7820c99c604cda277e04c88252c93f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.voice.connect"]
 value = "无法连接到语音"
@@ -594,7 +594,7 @@ source_hash = "a3d414886c5a975c6ad2d1d9949d510af1883224"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:30Z"
 
 [entries."errors.voice.llm"]
 value = "代理模型失败"
@@ -602,7 +602,7 @@ source_hash = "65337ddda34f56f114ac4ae971c43a6ada82ef9a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.mic"]
 value = "无法捕获麦克风"
@@ -610,7 +610,7 @@ source_hash = "bdd31a34ba6bee49d2a3b64a90490dcfe03bdb88"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.micDenied"]
 value = "麦克风权限被拒绝"
@@ -618,7 +618,7 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.micUnavailable"]
 value = "没有可用的麦克风"
@@ -626,7 +626,7 @@ source_hash = "d8d337ca75f5968e4761b35b7935b36db8fc697d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.noResponse"]
 value = "代理停止响应"
@@ -634,7 +634,7 @@ source_hash = "63febd925fc41a73ca6b5a39764a92ad8a74e8a8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.reconnectExhausted"]
 value = "语音连接中断且无法重新连接"
@@ -642,7 +642,7 @@ source_hash = "8273ea33b0d914910d797f9c5dbfa7a988d2db92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.restart"]
 value = "语音无法重启"
@@ -650,7 +650,7 @@ source_hash = "4a77cce47e5139faac25847326cff81d481079a2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.server"]
 value = "语音服务器遇到错误"
@@ -658,7 +658,7 @@ source_hash = "50f6bc11368a95ec2af9dc95cde18bdc3c9a4649"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.socket"]
 value = "语音连接失败"
@@ -666,7 +666,7 @@ source_hash = "47e397fc0f3c039fa918534ed95cef6674a72db4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.socketTimeout"]
 value = "语音连接超时"
@@ -674,7 +674,7 @@ source_hash = "9cebd9ed4b82c51d045c2639d88bfd233ba82a6a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.start"]
 value = "语音无法启动"
@@ -682,7 +682,7 @@ source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.stt"]
 value = "语音识别失败"
@@ -690,7 +690,7 @@ source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.sttUnsupported"]
 value = "此浏览器不支持语音识别"
@@ -698,7 +698,7 @@ source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.tool"]
 value = "工具调用失败"
@@ -706,7 +706,7 @@ source_hash = "9b13b5838afd9401cd1f12783d6be47bd6440af8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."errors.voice.tts"]
 value = "语音合成失败"
@@ -714,7 +714,7 @@ source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:56Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."finish.buildFailed"]
 value = "报告生成失败 — 文字记录已保存"
@@ -848,7 +848,7 @@ source_hash = "21c50805b553b7a40e48394a5d77d442587ddee2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:21Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."history.status.discarded"]
 value = "已丢弃"
@@ -856,7 +856,7 @@ source_hash = "4056ef88d506d5bff7494229c59837f06989f4b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:21Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."history.status.finished"]
 value = "已完成"
@@ -864,7 +864,7 @@ source_hash = "f957097d7a22775f6bea41b46cae4d14274dac9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:21Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."history.status.interviewing"]
 value = "面试中"
@@ -872,7 +872,7 @@ source_hash = "b20b93f57967c066d87b35085c5a5801f38fa1b7"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:21Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."history.status.reported"]
 value = "已报告"
@@ -880,7 +880,7 @@ source_hash = "6d3551d70d7d8b06562ccb87bbdb7261682616fa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:30:21Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."history.title"]
 value = "历史"
@@ -909,6 +909,20 @@ source_hash = "1aa96b8f44f6515a65f3c132ce1b8842a9bd9e87"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."interview.controls"]
+value = "通话控制"
+source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
+
+[entries."interview.conversation"]
+value = "对话"
+source_hash = "78b6f944434eac18e14622952e12e32551b19977"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
 
 [entries."interview.editorLanguages"]
 value = "代码语言"
@@ -944,6 +958,13 @@ source_hash = "dbcf3146b77abb759da4f5d2b62a26c18168d5a7"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."interview.endInterview"]
+value = "结束面试"
+source_hash = "4a21283d21b6b934553a765d27422033cedbb45a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
 
 [entries."interview.endedBadge"]
 value = "已结束"
@@ -987,12 +1008,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."interview.micWaveform"]
+value = "麦克风音量"
+source_hash = "c955b61f28451cdf64809efb9f9b9559f970a37b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
+
 [entries."interview.mute"]
 value = "静音"
 source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:26:54Z"
+
+[entries."interview.muteMic"]
+value = "静音麦克风"
+source_hash = "23ccd3fc107e6c98b5f50778f3bf9a32aa0ccdc7"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:29:31Z"
+updated_at = "2026-09-27T20:12:51Z"
 
 [entries."interview.newSession"]
 value = "新会话"
@@ -1071,6 +1107,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."interview.switchToTyping"]
+value = "切换为输入"
+source_hash = "2b4dcb0e61a6b93062bb8697b9340eb68807c83f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
+
 [entries."interview.tab.editor"]
 value = "编辑器"
 source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
@@ -1092,36 +1135,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
-[entries."interview.transcript"]
-value = "逐字稿"
-source_hash = "ed12c1881239dbb929c4c6f467b2e09f7a2fd7d6"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:30:26Z"
-
-[entries."interview.transcriptClose"]
-value = "逐字稿 —"
-source_hash = "f3e8a4591270881e58cc66f3eefb507a75c4b40e"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:30:26Z"
-
-[entries."interview.transcriptOpen"]
-value = "逐字稿 +"
-source_hash = "c1c96a05d2d4c411a5d910eba5820a0c535f5e24"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:30:26Z"
-
 [entries."interview.type"]
-value = "输入"
+value = "类型"
 source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
-origin = "human"
+origin = "ai"
 reviewed = false
-updated_at = "2026-09-27T19:29:31Z"
+model = "openrouter/free"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."interview.typeInstead"]
 value = "改为输入…"
@@ -1140,9 +1160,17 @@ updated_at = "2026-09-27T19:29:31Z"
 [entries."interview.unmute"]
 value = "取消静音"
 source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:26:54Z"
+
+[entries."interview.unmuteMic"]
+value = "取消麦克风静音"
+source_hash = "c97efc7f8f78a0ff195f3c61fff5473c7b40bc80"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:29:31Z"
+updated_at = "2026-09-27T20:12:51Z"
 
 [entries."interview.viewReport"]
 value = "查看报告"
@@ -1220,6 +1248,13 @@ source_hash = "f821dc56dc72292d9489d61c3f18948b6eb252e9"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."interview.youMic"]
+value = "你 · 麦克风"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:12:51Z"
 
 [entries."landing.badge"]
 value = "模拟面试"
@@ -1360,7 +1395,7 @@ source_hash = "d5721531ceec4ce88fcafa05a47b1d12f079255b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:35Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."meta.title.setup"]
 value = "设置 — di"
@@ -1368,15 +1403,15 @@ source_hash = "e1033f919701dcc3981964ea1047daf4be49b11f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:35Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."meta.title.voiceHarness"]
-value = "语音工具 — di"
+value = "语音控制 — di"
 source_hash = "9727ba98461b727bb907d9188481291063c5a9ec"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:35Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.devicesFailed"]
 value = "无法获取音频设备"
@@ -1384,7 +1419,7 @@ source_hash = "349d719d660415f0be2894ae6ea3e7c622342328"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.fallback"]
 value = "麦克风 {id}"
@@ -1392,7 +1427,7 @@ source_hash = "ef17b0afd967fb33d1a7ae0edcbd4ad7cfe92c16"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.loading"]
 value = "加载中…"
@@ -1400,15 +1435,15 @@ source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.loadingDevices"]
-value = "正在加载设备…"
+value = "加载设备…"
 source_hash = "54a2d73e75d77824c343a1a58ff9c90760946ba5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.mute"]
 value = "静音"
@@ -1416,15 +1451,15 @@ source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.none"]
-value = "无麦克风"
+value = "没有麦克风"
 source_hash = "ca34a76fee685e1a201eb2da3fb4097e299253d9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:26:54Z"
 
 [entries."micSelector.unmute"]
 value = "取消静音"
@@ -1432,7 +1467,7 @@ source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."micSelector.waveform"]
 value = "麦克风电平预览"
@@ -1440,7 +1475,7 @@ source_hash = "28cb7803a767a635a3b07423c80336330ae32727"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:43Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."nav.history"]
 value = "历史"
@@ -1583,12 +1618,12 @@ reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
 [entries."report.weakestFallback"]
-value = "你的弱点"
+value = "您最薄弱的领域"
 source_hash = "0289acb39e22d7747ff711c12366d420f9302011"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:47Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."runtime.custom"]
 value = "自定义端点"
@@ -1598,12 +1633,12 @@ reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
 [entries."runtime.degradedTitle"]
-value = "chosen: {chosen}, effective: {effective}"
+value = "已选: {chosen}, 有效: {effective}"
 source_hash = "9ad3a06c7b25609347be1c627293462eea258c35"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:35:49Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."runtime.inBrowser"]
 value = "浏览器内"
@@ -2892,7 +2927,7 @@ source_hash = "11882f07553cb782e153d3c23276fc5ea3ae2ee6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:05Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."setup.scenario.custom.narrative"]
 value = "使用自己的提示词"
@@ -2930,12 +2965,12 @@ reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
 [entries."setup.scenario.frontend.prompt"]
-value = "进行前端面试。组件设计与 JavaScript 基础相结合。"
+value = "进行前端面试。包含组件设计和 JavaScript 基础。"
 source_hash = "99ec669ad93913b67dd8928c20d55d2083c14b96"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:05Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."setup.scenario.ml.goal1"]
 value = "指标"
@@ -2966,12 +3001,12 @@ reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
 [entries."setup.scenario.ml.prompt"]
-value = "进行机器学习面试。模型选择、评估和数据清洁。"
+value = "进行机器学习面试。包括模型选择、评估和数据清洁。"
 source_hash = "7c525476d3783a8cb9bd2a6fed26646475b2b0b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:05Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."setup.scenario.sysDesign.goal1"]
 value = "需求"
@@ -3002,12 +3037,12 @@ reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
 [entries."setup.scenario.sysDesign.prompt"]
-value = "进行系统设计面试。重点关注扩展、缓存和权衡推理。"
+value = "进行系统设计面试。重点放在扩展性、缓存和权衡推理上。"
 source_hash = "e78498b79a0d8c6a524e660165626070cd7fa09c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:05Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."setup.skipValidation"]
 value = "不验证直接开始"
@@ -3092,7 +3127,7 @@ source_hash = "372ea08cab33e71c02c651dbc83a474d32c676ea"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:14Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."transcript.source.voice"]
 value = "语音"
@@ -3100,15 +3135,15 @@ source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:14Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."transcript.who.agent"]
-value = "智能体"
+value = "代理"
 source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:14Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."transcript.who.user"]
 value = "您"
@@ -3116,7 +3151,7 @@ source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:36:14Z"
+updated_at = "2026-09-27T20:27:12Z"
 
 [entries."validate.comingLater"]
 value = "验证功能稍后推出"

@@ -6,15 +6,15 @@ source_hash = "ca20728d35f00c3a4c21b1fc8b0086b59f89df2d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.agentStage"]
-value = "에이전트 스테이지"
+value = "에이전트 단계"
 source_hash = "38205b85770356aa063dffe54a9b41d1382b6382"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.close"]
 value = "닫기"
@@ -22,7 +22,7 @@ source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.editor"]
 value = "편집기"
@@ -30,7 +30,7 @@ source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.github"]
 value = "깃허브"
@@ -38,7 +38,7 @@ source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.language"]
 value = "언어"
@@ -46,7 +46,7 @@ source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.moreTools"]
 value = "더 많은 도구"
@@ -54,7 +54,7 @@ source_hash = "4915a1a2232aaf565e67e7938c370dc84ffb8faa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."a11y.runtimeMode"]
 value = "런타임 모드"
@@ -62,7 +62,7 @@ source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:00Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."account.guest"]
 value = "게스트"
@@ -154,15 +154,15 @@ source_hash = "c80857313cde3499977ed6547cc49fdffc0e4d0a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.createSession"]
-value = "세션을 생성할 수 없습니다"
+value = "세션을 만들 수 없습니다"
 source_hash = "64fc79ba40b721d6b5185fff36a06ad52cc0df68"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.document_not_found"]
 value = "문서를 찾을 수 없습니다"
@@ -170,7 +170,7 @@ source_hash = "f427adfad7d04ea82c85747055aaa163cd482502"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.file_cap"]
 value = "파일이 너무 많습니다"
@@ -178,47 +178,47 @@ source_hash = "2c0034d5f7407417a34c50ffee42bac6c8b38486"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.getReport"]
-value = "리포트를 로드할 수 없습니다"
+value = "보고서를 불러올 수 없습니다"
 source_hash = "22cb28eddbcb19a63cbd9c53cdad39508ecd28b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.getSession"]
-value = "세션을 로드할 수 없습니다"
+value = "세션을 불러올 수 없습니다"
 source_hash = "f92072f9fa56dec21dfa574abb25e51072546e49"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.getTurns"]
-value = "전사본을 로드할 수 없습니다"
+value = "전사를 불러올 수 없습니다"
 source_hash = "8a0c5aed5a7cf37ed0feccece35044db5039e4f1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.listSessions"]
-value = "세션을 로드할 수 없습니다"
+value = "세션 목록을 불러올 수 없습니다"
 source_hash = "8a1bf37741848afa8b4300803d9817393065cd5d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.no_embeddings"]
-value = "이 서버에 임베딩 제공자가 구성되지 않았습니다"
+value = "이 서버에 구성된 임베딩 제공자가 없습니다"
 source_hash = "c98252fd8de1c0bece5f3c9cb4dedd6e052c329c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.no_files"]
 value = "업로드된 파일이 없습니다"
@@ -226,7 +226,7 @@ source_hash = "a73e4d6dd88fad8a2d9c7f9339ffb6dcd178482b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.not_found"]
 value = "찾을 수 없습니다"
@@ -234,7 +234,7 @@ source_hash = "094b763b4cfcc0b05e5d040581cd513c3ca08067"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.postTurn"]
 value = "메시지를 보낼 수 없습니다"
@@ -242,7 +242,7 @@ source_hash = "e6e44156829e9f0a757b23dc4faa82473b006e37"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.pushToolState"]
 value = "도구 상태를 저장할 수 없습니다"
@@ -250,31 +250,31 @@ source_hash = "2df05b2d173442c3d72ab17a68121c1eea701258"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.report_failed"]
-value = "서버에서 보고서 생성이 실패했습니다"
+value = "서버에서 보고서 생성에 실패했습니다"
 source_hash = "7a9a5070abb8981740f59f2efd17ccc68c615196"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.report_unconfigured"]
-value = "이 서버에 보고서 생성이 구성되지 않았습니다"
+value = "이 서버에 보고서 생성이 구성되어 있지 않습니다"
 source_hash = "68626c91b7405b4672a86c9c52437fddfe7503bb"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.requestReport"]
-value = "리포트를 생성할 수 없습니다"
+value = "보고서를 빌드할 수 없습니다"
 source_hash = "848d8a21b72040b79f0cef290b78d7ba4239c53a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.session_id_mismatch"]
 value = "세션 불일치"
@@ -282,7 +282,7 @@ source_hash = "1cb12602762c4a0e3f95d549cbe65b1415e0c295"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.session_not_found"]
 value = "세션을 찾을 수 없습니다"
@@ -290,7 +290,7 @@ source_hash = "fefdba8f6adb339f3aa485a0e14bb027a0e55cb1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.size_cap"]
 value = "파일이 너무 큽니다"
@@ -298,7 +298,7 @@ source_hash = "a76d7453fd59d1583b963a77d5bb74bb705bfc18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.unsupported_type"]
 value = "지원되지 않는 파일 형식입니다"
@@ -306,7 +306,7 @@ source_hash = "6add681318d86be4c7b95218e63e647fa9fdd72e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.updateSession"]
 value = "세션을 업데이트할 수 없습니다"
@@ -314,7 +314,7 @@ source_hash = "f702943dbe3feed976edf4868527c858769cceb0"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.upgrade_required"]
 value = "이 엔드포인트는 웹소켓 업그레이드를 기대합니다"
@@ -322,7 +322,7 @@ source_hash = "ab58aaec5a9440e2c651ca29cb9b0b130aa4d850"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.api.upload"]
 value = "파일 업로드에 실패했습니다"
@@ -330,23 +330,23 @@ source_hash = "e854e51f2caeef2083845a196fc86770f3dbfab6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.http"]
-value = "요청이 실패했습니다 ({status})"
+value = "요청 실패 ({status})"
 source_hash = "6ca71bddc1a7e14410895157898c5b354c4f8f9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.llm.chat"]
-value = "모델 요청이 실패했습니다 ({status})"
+value = "모델 요청 실패 ({status})"
 source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.llm.notLoaded"]
 value = "브라우저 내 모델이 아직 로드되지 않았습니다"
@@ -354,15 +354,15 @@ source_hash = "8527789365910ca457a684911fd4296fb74f779a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.llm.timeout"]
-value = "모델 로드 시간이 초과되었습니다 ({seconds}초)"
+value = "모델 로드 시간 초과 ({seconds}s)"
 source_hash = "61fe27fc018b1d3f7922e1adaf954532c8082eb6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.llm.unsupported"]
 value = "이 브라우저에서는 브라우저 내 모델을 지원하지 않습니다"
@@ -370,7 +370,7 @@ source_hash = "888a624eb37fbe932d6e50b859e7b4150ddcc3b5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.disposed"]
 value = "음성 엔진이 중지되었습니다"
@@ -378,7 +378,7 @@ source_hash = "06b72ebfb32991595d61e16a2b21cc092e8b8392"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.download"]
 value = "모델 다운로드에 실패했습니다"
@@ -386,7 +386,7 @@ source_hash = "748992e15f9f76d120e79330fd480d7355c32e05"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.manifest"]
 value = "음성 모델 매니페스트를 가져올 수 없습니다 ({status})"
@@ -394,15 +394,15 @@ source_hash = "f8f606b7adc54d841a3618fce5f9e44d642e4c53"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.noStorage"]
-value = "음성 모델을 위한 영구 저장소가 없습니다"
+value = "음성 모델에 대한 영구 저장 공간이 없습니다"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.sha256"]
 value = "모델 다운로드 검증에 실패했습니다"
@@ -410,23 +410,23 @@ source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.size"]
-value = "모델 다운로드가 잘렸습니다"
+value = "모델 다운로드가 잘리었습니다"
 source_hash = "686765ea8916904c067463fe44cd8736b7596533"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.sttEngine"]
-value = "기기 내 음성 모델이 설치되지 않았습니다"
+value = "장치 내 음성 모델이 설치되지 않았습니다"
 source_hash = "8921d69ccf03195911dfdf6e873887a8445bcc4d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.sttWorker"]
 value = "음성 엔진 시작에 실패했습니다"
@@ -434,15 +434,15 @@ source_hash = "82ac3f17596f9fa64ab253b100ff6d0a46291fd3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.ttsEngine"]
-value = "기기 내 음성 모델이 설치되지 않았습니다"
+value = "장치 내 음성 모델이 설치되지 않았습니다"
 source_hash = "0108250d0b60b59d59a21c81a7d451c852c5e9ac"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.ttsWorker"]
 value = "음성 엔진 시작에 실패했습니다"
@@ -450,7 +450,7 @@ source_hash = "057f9ca139cb8f3b5a1faf2aef3d3c446bd8cf0d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.models.unknown"]
 value = "알 수 없는 음성 모델: {id}"
@@ -458,15 +458,15 @@ source_hash = "3ab1249fb5cf2fd5766b46b7e27465e437d38504"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.report.noSession"]
-value = "제공자 프로필 또는 세션이 없습니다"
+value = "공급자 프로필 또는 세션이 없습니다"
 source_hash = "65f36fde270ce89e21272e2ca1e289bec2de55e1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.langUnsupported"]
 value = "음성 서비스가 이 언어를 지원하지 않습니다"
@@ -474,15 +474,15 @@ source_hash = "78327f07b761f005a171472907d939e0f5f16514"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.network"]
-value = "음성 서비스에 연결할 수 없습니다 — 데스크톱 Chrome은 마이크 오디오를 Google 서버로 전송하므로 VPN, 방화벽 또는 애드블록어가 이를 차단할 수 있습니다 (모바일 Chrome은 종종 작동합니다)"
+value = "음성 서비스에 연결할 수 없습니다 — 데스크톱 크롬은 마이크 오디오를 Google 서버로 전송하므로 VPN, 방화벽 또는 광고 차단기가 이를 차단할 수 있습니다 (모바일 크롬은 종종 작동합니다)"
 source_hash = "670d2ed5363180f025bcab01b915f862d3ef5c03"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.noMic"]
 value = "마이크를 찾을 수 없습니다"
@@ -490,15 +490,15 @@ source_hash = "8464fe3e7c99ff2d6050e17c123d769fd39aef3c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.noSpeech"]
-value = "음성이 감지되지 않았습니다"
+value = "감지된 음성이 없습니다"
 source_hash = "e547e94a30f8e6630cb3da21969d256d03626120"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.notAllowed"]
 value = "마이크 권한이 거부되었습니다"
@@ -506,15 +506,15 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.unknown"]
-value = "음성 인식이 실패했습니다"
+value = "음성 인식에 실패했습니다"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.stt.unsupported"]
 value = "이 브라우저에서는 음성 인식을 지원하지 않습니다"
@@ -522,47 +522,47 @@ source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.tts.builtin"]
-value = "음성 합성이 실패했습니다"
+value = "음성 합성에 실패했습니다"
 source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.tts.empty"]
-value = "음성 엔드포인트가 오디오를 반환하지 않았습니다"
+value = "음성 엔드포인트에서 오디오를 반환하지 않았습니다"
 source_hash = "6e955bf06ab4b725f7a9544dcd63245fc3083f5e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.tts.endpoint"]
-value = "음성 엔드포인트가 실패했습니다 ({status})"
+value = "음성 엔드포인트 실패 ({status})"
 source_hash = "b7fcc45b1372cbfa7daa68a42cbfeee8b3376cce"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.tts.pcm"]
-value = "예상치 못한 오디오 형식입니다"
+value = "예상치 못한 오디오 형식"
 source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.tts.wav"]
-value = "예상치 못한 오디오 형식입니다"
+value = "예상치 못한 오디오 형식"
 source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.unknown"]
 value = "문제가 발생했습니다"
@@ -570,23 +570,23 @@ source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.boot"]
-value = "음성이 시작되지 않았습니다"
+value = "음성을 시작할 수 없습니다"
 source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.captureRate"]
-value = "지원되지 않는 마이크 샘플링 레이트 ({rate})입니다"
+value = "지원되지 않는 마이크 샘플 레이트 ({rate})"
 source_hash = "47373a15eb7820c99c604cda277e04c88252c93f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.connect"]
 value = "음성에 연결할 수 없습니다"
@@ -594,15 +594,15 @@ source_hash = "a3d414886c5a975c6ad2d1d9949d510af1883224"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.llm"]
-value = "에이전트 모델이 실패했습니다"
+value = "에이전트 모델에 실패했습니다"
 source_hash = "65337ddda34f56f114ac4ae971c43a6ada82ef9a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.mic"]
 value = "마이크를 캡처할 수 없습니다"
@@ -610,7 +610,7 @@ source_hash = "bdd31a34ba6bee49d2a3b64a90490dcfe03bdb88"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.micDenied"]
 value = "마이크 권한이 거부되었습니다"
@@ -618,7 +618,7 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.micUnavailable"]
 value = "사용 가능한 마이크가 없습니다"
@@ -626,23 +626,23 @@ source_hash = "d8d337ca75f5968e4761b35b7935b36db8fc697d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.noResponse"]
-value = "에이전트가 응답을 중단했습니다"
+value = "에이전트가 응답하지 않았습니다"
 source_hash = "63febd925fc41a73ca6b5a39764a92ad8a74e8a8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.reconnectExhausted"]
-value = "음성 연결이 끊어졌고 다시 연결할 수 없습니다"
+value = "음성 연결이 끊기고 재연결할 수 없습니다"
 source_hash = "8273ea33b0d914910d797f9c5dbfa7a988d2db92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.restart"]
 value = "음성을 다시 시작할 수 없습니다"
@@ -650,7 +650,7 @@ source_hash = "4a77cce47e5139faac25847326cff81d481079a2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.server"]
 value = "음성 서버에서 오류가 발생했습니다"
@@ -658,7 +658,7 @@ source_hash = "50f6bc11368a95ec2af9dc95cde18bdc3c9a4649"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.socket"]
 value = "음성 연결에 실패했습니다"
@@ -666,31 +666,31 @@ source_hash = "47e397fc0f3c039fa918534ed95cef6674a72db4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.socketTimeout"]
-value = "음성 연결이 시간 초과되었습니다"
+value = "음성 연결 시간 초과"
 source_hash = "9cebd9ed4b82c51d045c2639d88bfd233ba82a6a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.start"]
-value = "음성이 시작되지 않았습니다"
+value = "음성을 시작할 수 없습니다"
 source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.stt"]
-value = "음성 인식이 실패했습니다"
+value = "음성 인식에 실패했습니다"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.sttUnsupported"]
 value = "이 브라우저에서는 음성 인식을 지원하지 않습니다"
@@ -698,23 +698,23 @@ source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.tool"]
-value = "도구 호출이 실패했습니다"
+value = "도구 호출에 실패했습니다"
 source_hash = "9b13b5838afd9401cd1f12783d6be47bd6440af8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.voice.tts"]
-value = "음성 합성이 실패했습니다"
+value = "음성 합성에 실패했습니다"
 source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:37Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."finish.buildFailed"]
 value = "리포트를 만들 수 없습니다 — 대화록은 안전하게 저장됐습니다"
@@ -848,15 +848,15 @@ source_hash = "21c50805b553b7a40e48394a5d77d442587ddee2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:42Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."history.status.discarded"]
-value = "폐기됨"
+value = "버려짐"
 source_hash = "4056ef88d506d5bff7494229c59837f06989f4b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:42Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."history.status.finished"]
 value = "완료됨"
@@ -864,7 +864,7 @@ source_hash = "f957097d7a22775f6bea41b46cae4d14274dac9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:42Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."history.status.interviewing"]
 value = "면접 중"
@@ -872,7 +872,7 @@ source_hash = "b20b93f57967c066d87b35085c5a5801f38fa1b7"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:42Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."history.status.reported"]
 value = "보고됨"
@@ -880,7 +880,7 @@ source_hash = "6d3551d70d7d8b06562ccb87bbdb7261682616fa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:42Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."history.title"]
 value = "기록"
@@ -909,6 +909,20 @@ source_hash = "1aa96b8f44f6515a65f3c132ce1b8842a9bd9e87"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
+
+[entries."interview.controls"]
+value = "통화 컨트롤"
+source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
+
+[entries."interview.conversation"]
+value = "대화"
+source_hash = "78b6f944434eac18e14622952e12e32551b19977"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
 
 [entries."interview.editorLanguages"]
 value = "코드 언어"
@@ -944,6 +958,13 @@ source_hash = "dbcf3146b77abb759da4f5d2b62a26c18168d5a7"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
+
+[entries."interview.endInterview"]
+value = "면접 종료"
+source_hash = "4a21283d21b6b934553a765d27422033cedbb45a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
 
 [entries."interview.endedBadge"]
 value = "종료됨"
@@ -987,12 +1008,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."interview.micWaveform"]
+value = "마이크 레벨"
+source_hash = "c955b61f28451cdf64809efb9f9b9559f970a37b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
+
 [entries."interview.mute"]
 value = "음소거"
 source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:07:27Z"
+
+[entries."interview.muteMic"]
+value = "마이크 음소거"
+source_hash = "23ccd3fc107e6c98b5f50778f3bf9a32aa0ccdc7"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:24:55Z"
+updated_at = "2026-09-27T20:06:09Z"
 
 [entries."interview.newSession"]
 value = "새 세션"
@@ -1071,6 +1107,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."interview.switchToTyping"]
+value = "입력으로 전환"
+source_hash = "2b4dcb0e61a6b93062bb8697b9340eb68807c83f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
+
 [entries."interview.tab.editor"]
 value = "에디터"
 source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
@@ -1092,36 +1135,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
-[entries."interview.transcript"]
-value = "트랜스크립트"
-source_hash = "ed12c1881239dbb929c4c6f467b2e09f7a2fd7d6"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:25:47Z"
-
-[entries."interview.transcriptClose"]
-value = "트랜스크립트 —"
-source_hash = "f3e8a4591270881e58cc66f3eefb507a75c4b40e"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:25:47Z"
-
-[entries."interview.transcriptOpen"]
-value = "트랜스크립트 +"
-source_hash = "c1c96a05d2d4c411a5d910eba5820a0c535f5e24"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:25:47Z"
-
 [entries."interview.type"]
-value = "입력"
+value = "유형"
 source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
-origin = "human"
+origin = "ai"
 reviewed = false
-updated_at = "2026-09-27T19:24:55Z"
+model = "openrouter/free"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."interview.typeInstead"]
 value = "입력으로 답하기…"
@@ -1140,9 +1160,17 @@ updated_at = "2026-09-27T19:24:55Z"
 [entries."interview.unmute"]
 value = "음소거 해제"
 source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:07:27Z"
+
+[entries."interview.unmuteMic"]
+value = "마이크 음소거 해제"
+source_hash = "c97efc7f8f78a0ff195f3c61fff5473c7b40bc80"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:24:55Z"
+updated_at = "2026-09-27T20:06:09Z"
 
 [entries."interview.viewReport"]
 value = "리포트 보기"
@@ -1220,6 +1248,13 @@ source_hash = "f821dc56dc72292d9489d61c3f18948b6eb252e9"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
+
+[entries."interview.youMic"]
+value = "나 · 마이크"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T20:06:09Z"
 
 [entries."landing.badge"]
 value = "모의 면접"
@@ -1355,28 +1390,28 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."meta.title.index"]
-value = "DI — 모의 면접"
+value = "di — 모의 면접"
 source_hash = "d5721531ceec4ce88fcafa05a47b1d12f079255b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:54Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."meta.title.setup"]
-value = "설정 — DI"
+value = "설정 — di"
 source_hash = "e1033f919701dcc3981964ea1047daf4be49b11f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:54Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."meta.title.voiceHarness"]
-value = "음성 하네스 — DI"
+value = "음성 하니스 — di"
 source_hash = "9727ba98461b727bb907d9188481291063c5a9ec"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:25:54Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.devicesFailed"]
 value = "오디오 장치를 가져올 수 없습니다"
@@ -1384,7 +1419,7 @@ source_hash = "349d719d660415f0be2894ae6ea3e7c622342328"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.fallback"]
 value = "마이크 {id}"
@@ -1392,23 +1427,23 @@ source_hash = "ef17b0afd967fb33d1a7ae0edcbd4ad7cfe92c16"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.loading"]
-value = "로딩…"
+value = "로딩 중…"
 source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.loadingDevices"]
-value = "장치를 불러오는 중…"
+value = "장치 로딩 중…"
 source_hash = "54a2d73e75d77824c343a1a58ff9c90760946ba5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.mute"]
 value = "음소거"
@@ -1416,7 +1451,7 @@ source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.none"]
 value = "마이크 없음"
@@ -1424,7 +1459,7 @@ source_hash = "ca34a76fee685e1a201eb2da3fb4097e299253d9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.unmute"]
 value = "음소거 해제"
@@ -1432,7 +1467,7 @@ source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."micSelector.waveform"]
 value = "마이크 레벨 미리보기"
@@ -1440,7 +1475,7 @@ source_hash = "28cb7803a767a635a3b07423c80336330ae32727"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:05Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."nav.history"]
 value = "기록"
@@ -1583,12 +1618,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."report.weakestFallback"]
-value = "당신의 약한 영역"
+value = "가장 약한 영역"
 source_hash = "0289acb39e22d7747ff711c12366d420f9302011"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:09Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."runtime.custom"]
 value = "사용자 지정 엔드포인트"
@@ -1598,12 +1633,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."runtime.degradedTitle"]
-value = "선택된: {chosen}, 유효한: {effective}"
+value = "선택됨: {chosen}, 유효: {effective}"
 source_hash = "9ad3a06c7b25609347be1c627293462eea258c35"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:11Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."runtime.inBrowser"]
 value = "브라우저 내"
@@ -2887,12 +2922,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."setup.scenario.behavioral.prompt"]
-value = "STAR 방법을 사용하여 행동 인터뷰를 진행하고, 구체적인 내용을 파헤치세요."
+value = "STAR 방법을 사용하여 행동 면접을 실시하십시오. 구체적인 내용을 파악하십시오."
 source_hash = "11882f07553cb782e153d3c23276fc5ea3ae2ee6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:19Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."setup.scenario.custom.narrative"]
 value = "나만의 프롬프트로 진행"
@@ -2930,12 +2965,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."setup.scenario.frontend.prompt"]
-value = "프론트엔드 인터뷰를 진행하고, 컴포넌트 디자인과 JS 기초를 혼합하여 평가하세요."
+value = "프론트엔드 면접을 실시하십시오. 컴포넌트 디자인과 JS 기본 지식을 섞어보세요."
 source_hash = "99ec669ad93913b67dd8928c20d55d2083c14b96"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:19Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."setup.scenario.ml.goal1"]
 value = "메트릭"
@@ -2966,12 +3001,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."setup.scenario.ml.prompt"]
-value = "머신러닝 인터뷰를 진행하고, 모델 선택, 평가, 데이터 품질 관리를 평가하세요."
+value = "머신러닝 면접을 실시하십시오. 모델 선택, 평가 및 데이터 관리에 초점을 맞추십시오."
 source_hash = "7c525476d3783a8cb9bd2a6fed26646475b2b0b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:19Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."setup.scenario.sysDesign.goal1"]
 value = "요구사항"
@@ -3002,12 +3037,12 @@ reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
 [entries."setup.scenario.sysDesign.prompt"]
-value = "시스템 설계 인터뷰를 진행하고, 확장성, 캐싱, 트레이드오프 추론에 중점을 두세요."
+value = "시스템 설계 면접을 실시하십시오. 확장, 캐싱 및 트레이드오프 추론에 집중하십시오."
 source_hash = "e78498b79a0d8c6a524e660165626070cd7fa09c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:19Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."setup.skipValidation"]
 value = "검증 없이 진행"
@@ -3092,7 +3127,7 @@ source_hash = "372ea08cab33e71c02c651dbc83a474d32c676ea"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:24Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."transcript.source.voice"]
 value = "음성"
@@ -3100,23 +3135,23 @@ source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:24Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."transcript.who.agent"]
-value = "상담원"
+value = "에이전트"
 source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:24Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."transcript.who.user"]
-value = "고객님"
+value = "당신"
 source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:26:24Z"
+updated_at = "2026-09-27T20:07:27Z"
 
 [entries."validate.comingLater"]
 value = "검증은 나중에 제공됩니다"

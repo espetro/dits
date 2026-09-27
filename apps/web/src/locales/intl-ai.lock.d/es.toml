@@ -6,7 +6,7 @@ source_hash = "ca20728d35f00c3a4c21b1fc8b0086b59f89df2d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.agentStage"]
 value = "etapa del agente"
@@ -14,7 +14,7 @@ source_hash = "38205b85770356aa063dffe54a9b41d1382b6382"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.close"]
 value = "cerrar"
@@ -22,7 +22,7 @@ source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.editor"]
 value = "editor"
@@ -30,15 +30,15 @@ source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.github"]
-value = "GitHub"
+value = "github"
 source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.language"]
 value = "idioma"
@@ -46,7 +46,7 @@ source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.moreTools"]
 value = "más herramientas"
@@ -54,7 +54,7 @@ source_hash = "4915a1a2232aaf565e67e7938c370dc84ffb8faa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."a11y.runtimeMode"]
 value = "modo de ejecución"
@@ -62,7 +62,7 @@ source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:05:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."account.guest"]
 value = "Invitado"
@@ -154,7 +154,7 @@ source_hash = "c80857313cde3499977ed6547cc49fdffc0e4d0a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.createSession"]
 value = "no se pudo crear la sesión"
@@ -162,7 +162,7 @@ source_hash = "64fc79ba40b721d6b5185fff36a06ad52cc0df68"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.document_not_found"]
 value = "documento no encontrado"
@@ -170,7 +170,7 @@ source_hash = "f427adfad7d04ea82c85747055aaa163cd482502"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.file_cap"]
 value = "demasiados archivos"
@@ -178,7 +178,7 @@ source_hash = "2c0034d5f7407417a34c50ffee42bac6c8b38486"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.getReport"]
 value = "no se pudo cargar el informe"
@@ -186,7 +186,7 @@ source_hash = "22cb28eddbcb19a63cbd9c53cdad39508ecd28b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.getSession"]
 value = "no se pudo cargar la sesión"
@@ -194,7 +194,7 @@ source_hash = "f92072f9fa56dec21dfa574abb25e51072546e49"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.getTurns"]
 value = "no se pudo cargar la transcripción"
@@ -202,31 +202,31 @@ source_hash = "8a0c5aed5a7cf37ed0feccece35044db5039e4f1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.listSessions"]
-value = "no se pudo cargar las sesiones"
+value = "no se pudieron cargar las sesiones"
 source_hash = "8a1bf37741848afa8b4300803d9817393065cd5d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.no_embeddings"]
-value = "no se ha configurado ningún proveedor de embeddings en este servidor"
+value = "no hay un proveedor de incrustación configurado en este servidor"
 source_hash = "c98252fd8de1c0bece5f3c9cb4dedd6e052c329c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.no_files"]
-value = "no se subieron archivos"
+value = "no se cargaron archivos"
 source_hash = "a73e4d6dd88fad8a2d9c7f9339ffb6dcd178482b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.not_found"]
 value = "no encontrado"
@@ -234,7 +234,7 @@ source_hash = "094b763b4cfcc0b05e5d040581cd513c3ca08067"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.postTurn"]
 value = "no se pudo enviar el mensaje"
@@ -242,7 +242,7 @@ source_hash = "e6e44156829e9f0a757b23dc4faa82473b006e37"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.pushToolState"]
 value = "no se pudo guardar el estado de la herramienta"
@@ -250,7 +250,7 @@ source_hash = "2df05b2d173442c3d72ab17a68121c1eea701258"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.report_failed"]
 value = "falló la generación del informe en el servidor"
@@ -258,7 +258,7 @@ source_hash = "7a9a5070abb8981740f59f2efd17ccc68c615196"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.report_unconfigured"]
 value = "la generación de informes no está configurada en este servidor"
@@ -266,7 +266,7 @@ source_hash = "68626c91b7405b4672a86c9c52437fddfe7503bb"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.requestReport"]
 value = "no se pudo construir el informe"
@@ -274,15 +274,15 @@ source_hash = "848d8a21b72040b79f0cef290b78d7ba4239c53a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.session_id_mismatch"]
-value = "desajuste de sesión"
+value = "discordancia de sesiones"
 source_hash = "1cb12602762c4a0e3f95d549cbe65b1415e0c295"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.session_not_found"]
 value = "sesión no encontrada"
@@ -290,7 +290,7 @@ source_hash = "fefdba8f6adb339f3aa485a0e14bb027a0e55cb1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.size_cap"]
 value = "los archivos son demasiado grandes"
@@ -298,7 +298,7 @@ source_hash = "a76d7453fd59d1583b963a77d5bb74bb705bfc18"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.unsupported_type"]
 value = "tipo de archivo no compatible"
@@ -306,7 +306,7 @@ source_hash = "6add681318d86be4c7b95218e63e647fa9fdd72e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.updateSession"]
 value = "no se pudo actualizar la sesión"
@@ -314,63 +314,63 @@ source_hash = "f702943dbe3feed976edf4868527c858769cceb0"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.upgrade_required"]
-value = "este endpoint espera una actualización de WebSocket"
+value = "este punto de extremo requiere una actualización de websocket"
 source_hash = "ab58aaec5a9440e2c651ca29cb9b0b130aa4d850"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.api.upload"]
-value = "falló la carga del archivo"
+value = "falló la carga de archivo"
 source_hash = "e854e51f2caeef2083845a196fc86770f3dbfab6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.http"]
-value = "la solicitud falló ({status})"
+value = "falló la solicitud ({status})"
 source_hash = "6ca71bddc1a7e14410895157898c5b354c4f8f9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.llm.chat"]
-value = "la solicitud del modelo falló ({status})"
+value = "falló la solicitud del modelo ({status})"
 source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.llm.notLoaded"]
-value = "el modelo en el navegador aún no se ha cargado"
+value = "el modelo del navegador aún no se ha cargado"
 source_hash = "8527789365910ca457a684911fd4296fb74f779a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.llm.timeout"]
-value = "el tiempo de carga del modelo se agotó ({seconds}s)"
+value = "tiempo de espera agotado al cargar el modelo ({seconds}s)"
 source_hash = "61fe27fc018b1d3f7922e1adaf954532c8082eb6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.llm.unsupported"]
-value = "los modelos en el navegador no son compatibles con este navegador"
+value = "los modelos del navegador no son compatibles con este navegador"
 source_hash = "888a624eb37fbe932d6e50b859e7b4150ddcc3b5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.disposed"]
 value = "el motor de voz se detuvo"
@@ -378,7 +378,7 @@ source_hash = "06b72ebfb32991595d61e16a2b21cc092e8b8392"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.download"]
 value = "falló la descarga del modelo"
@@ -386,7 +386,7 @@ source_hash = "748992e15f9f76d120e79330fd480d7355c32e05"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.manifest"]
 value = "no se pudo obtener el manifiesto del modelo de voz ({status})"
@@ -394,7 +394,7 @@ source_hash = "f8f606b7adc54d841a3618fce5f9e44d642e4c53"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.noStorage"]
 value = "no hay almacenamiento persistente disponible para los modelos de voz"
@@ -402,7 +402,7 @@ source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:01Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.sha256"]
 value = "falló la verificación de la descarga del modelo"
@@ -410,47 +410,47 @@ source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.size"]
-value = "la descarga del modelo se truncó"
+value = "la descarga del modelo fue truncada"
 source_hash = "686765ea8916904c067463fe44cd8736b7596533"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.sttEngine"]
-value = "el modelo de voz en el dispositivo no está instalado"
+value = "el modelo de speech-to-text del dispositivo no está instalado"
 source_hash = "8921d69ccf03195911dfdf6e873887a8445bcc4d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.sttWorker"]
-value = "el motor de voz no pudo iniciarse"
+value = "falló al iniciar el motor de speech-to-text"
 source_hash = "82ac3f17596f9fa64ab253b100ff6d0a46291fd3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.ttsEngine"]
-value = "el modelo de voz en el dispositivo no está instalado"
+value = "el modelo de text-to-speech del dispositivo no está instalado"
 source_hash = "0108250d0b60b59d59a21c81a7d451c852c5e9ac"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.ttsWorker"]
-value = "el motor de voz no pudo iniciarse"
+value = "falló al iniciar el motor de voz"
 source_hash = "057f9ca139cb8f3b5a1faf2aef3d3c446bd8cf0d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.models.unknown"]
 value = "modelo de voz desconocido: {id}"
@@ -458,7 +458,7 @@ source_hash = "3ab1249fb5cf2fd5766b46b7e27465e437d38504"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.report.noSession"]
 value = "no hay perfil de proveedor ni sesión"
@@ -466,23 +466,23 @@ source_hash = "65f36fde270ce89e21272e2ca1e289bec2de55e1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.langUnsupported"]
-value = "el servicio de voz no soporta este idioma"
+value = "el servicio de speech-to-text no admite este idioma"
 source_hash = "78327f07b761f005a171472907d939e0f5f16514"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.network"]
-value = "el servicio de voz no está disponible — Chrome de escritorio envía audio del micrófono a los servidores de Google, por lo que una VPN, firewall o bloqueador de anuncios puede bloquearlo (Chrome móvil a menudo funciona)"
+value = "servicio de speech inalcanzable: Chrome de escritorio envía audio del micrófono a los servidores de Google, por lo que una VPN, firewall o bloqueador de anuncios puede bloquearlo (Chrome móvil a menudo funciona)"
 source_hash = "670d2ed5363180f025bcab01b915f862d3ef5c03"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.noMic"]
 value = "no se encontró micrófono"
@@ -490,7 +490,7 @@ source_hash = "8464fe3e7c99ff2d6050e17c123d769fd39aef3c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.noSpeech"]
 value = "no se detectó voz"
@@ -498,7 +498,7 @@ source_hash = "e547e94a30f8e6630cb3da21969d256d03626120"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.notAllowed"]
 value = "permiso de micrófono denegado"
@@ -506,7 +506,7 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.unknown"]
 value = "falló el reconocimiento de voz"
@@ -514,7 +514,7 @@ source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.stt.unsupported"]
 value = "el reconocimiento de voz no es compatible con este navegador"
@@ -522,7 +522,7 @@ source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.tts.builtin"]
 value = "falló la síntesis de voz"
@@ -530,23 +530,23 @@ source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.tts.empty"]
-value = "el endpoint de voz no devolvió audio"
+value = "el extremo de speech no devolvió audio"
 source_hash = "6e955bf06ab4b725f7a9544dcd63245fc3083f5e"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.tts.endpoint"]
-value = "el endpoint de voz falló ({status})"
+value = "falló el extremo de speech ({status})"
 source_hash = "b7fcc45b1372cbfa7daa68a42cbfeee8b3376cce"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.tts.pcm"]
 value = "formato de audio inesperado"
@@ -554,7 +554,7 @@ source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.tts.wav"]
 value = "formato de audio inesperado"
@@ -562,7 +562,7 @@ source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.unknown"]
 value = "algo salió mal"
@@ -570,15 +570,15 @@ source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.boot"]
-value = "la voz no pudo iniciarse"
+value = "no se pudo iniciar la voz"
 source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.captureRate"]
 value = "tasa de muestreo de micrófono no compatible ({rate})"
@@ -586,7 +586,7 @@ source_hash = "47373a15eb7820c99c604cda277e04c88252c93f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.connect"]
 value = "no se pudo conectar a la voz"
@@ -594,15 +594,15 @@ source_hash = "a3d414886c5a975c6ad2d1d9949d510af1883224"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.llm"]
-value = "el modelo del agente falló"
+value = "falló el modelo del agente"
 source_hash = "65337ddda34f56f114ac4ae971c43a6ada82ef9a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.mic"]
 value = "no se pudo capturar el micrófono"
@@ -610,7 +610,7 @@ source_hash = "bdd31a34ba6bee49d2a3b64a90490dcfe03bdb88"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.micDenied"]
 value = "permiso de micrófono denegado"
@@ -618,7 +618,7 @@ source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.micUnavailable"]
 value = "no hay micrófono disponible"
@@ -626,7 +626,7 @@ source_hash = "d8d337ca75f5968e4761b35b7935b36db8fc697d"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.noResponse"]
 value = "el agente dejó de responder"
@@ -634,23 +634,23 @@ source_hash = "63febd925fc41a73ca6b5a39764a92ad8a74e8a8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.reconnectExhausted"]
-value = "la conexión de voz se perdió y no pudo reconectarse"
+value = "la conexión de voz se perdió y no se pudo reconectar"
 source_hash = "8273ea33b0d914910d797f9c5dbfa7a988d2db92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.restart"]
-value = "la voz no pudo reiniciarse"
+value = "no se pudo reiniciar la voz"
 source_hash = "4a77cce47e5139faac25847326cff81d481079a2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.server"]
 value = "el servidor de voz encontró un error"
@@ -658,63 +658,63 @@ source_hash = "50f6bc11368a95ec2af9dc95cde18bdc3c9a4649"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:38:11Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.socket"]
-value = "la conexión de voz falló"
+value = "falló la conexión de voz"
 source_hash = "47e397fc0f3c039fa918534ed95cef6674a72db4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.socketTimeout"]
-value = "la conexión de voz se agotó el tiempo"
+value = "tiempo de espera agotado en la conexión de voz"
 source_hash = "9cebd9ed4b82c51d045c2639d88bfd233ba82a6a"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.start"]
-value = "la voz no pudo iniciarse"
+value = "no se pudo iniciar la voz"
 source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.stt"]
-value = "el reconocimiento de voz falló"
+value = "falló el reconocimiento de voz"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.sttUnsupported"]
-value = "el reconocimiento de voz no está soportado en este navegador"
+value = "el reconocimiento de voz no es compatible con este navegador"
 source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.tool"]
-value = "una llamada de herramienta falló"
+value = "falló una llamada de herramienta"
 source_hash = "9b13b5838afd9401cd1f12783d6be47bd6440af8"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."errors.voice.tts"]
-value = "la síntesis de voz falló"
+value = "falló la síntesis de voz"
 source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:39:15Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."finish.buildFailed"]
 value = "no se pudo crear el informe — la transcripción está a salvo"
@@ -848,7 +848,7 @@ source_hash = "21c50805b553b7a40e48394a5d77d442587ddee2"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:07Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."history.status.discarded"]
 value = "descartado"
@@ -856,7 +856,7 @@ source_hash = "4056ef88d506d5bff7494229c59837f06989f4b4"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:07Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."history.status.finished"]
 value = "finalizado"
@@ -864,23 +864,23 @@ source_hash = "f957097d7a22775f6bea41b46cae4d14274dac9f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:07Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."history.status.interviewing"]
-value = "en entrevista"
+value = "entrevistando"
 source_hash = "b20b93f57967c066d87b35085c5a5801f38fa1b7"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:07Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."history.status.reported"]
-value = "reportado"
+value = "informado"
 source_hash = "6d3551d70d7d8b06562ccb87bbdb7261682616fa"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:07Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."history.title"]
 value = "historial"
@@ -909,6 +909,20 @@ source_hash = "1aa96b8f44f6515a65f3c132ce1b8842a9bd9e87"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
+
+[entries."interview.controls"]
+value = "controles de la llamada"
+source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
+
+[entries."interview.conversation"]
+value = "conversación"
+source_hash = "78b6f944434eac18e14622952e12e32551b19977"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
 
 [entries."interview.editorLanguages"]
 value = "lenguajes de código"
@@ -944,6 +958,13 @@ source_hash = "dbcf3146b77abb759da4f5d2b62a26c18168d5a7"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
+
+[entries."interview.endInterview"]
+value = "terminar la entrevista"
+source_hash = "4a21283d21b6b934553a765d27422033cedbb45a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
 
 [entries."interview.endedBadge"]
 value = "terminada"
@@ -987,12 +1008,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
+[entries."interview.micWaveform"]
+value = "nivel de micrófono en vivo"
+source_hash = "c955b61f28451cdf64809efb9f9b9559f970a37b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
+
 [entries."interview.mute"]
 value = "silenciar"
 source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:00:43Z"
+
+[entries."interview.muteMic"]
+value = "silenciar micrófono"
+source_hash = "23ccd3fc107e6c98b5f50778f3bf9a32aa0ccdc7"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:05:00Z"
+updated_at = "2026-09-27T19:59:29Z"
 
 [entries."interview.newSession"]
 value = "nueva sesión"
@@ -1071,6 +1107,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
+[entries."interview.switchToTyping"]
+value = "cambiar a texto"
+source_hash = "2b4dcb0e61a6b93062bb8697b9340eb68807c83f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
+
 [entries."interview.tab.editor"]
 value = "editor"
 source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
@@ -1092,36 +1135,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
-[entries."interview.transcript"]
-value = "transcripción"
-source_hash = "ed12c1881239dbb929c4c6f467b2e09f7a2fd7d6"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:06:09Z"
-
-[entries."interview.transcriptClose"]
-value = "transcripción —"
-source_hash = "f3e8a4591270881e58cc66f3eefb507a75c4b40e"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:06:09Z"
-
-[entries."interview.transcriptOpen"]
-value = "transcripción +"
-source_hash = "c1c96a05d2d4c411a5d910eba5820a0c535f5e24"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T19:06:09Z"
-
 [entries."interview.type"]
 value = "escribir"
 source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
-origin = "human"
+origin = "ai"
 reviewed = false
-updated_at = "2026-09-27T19:05:00Z"
+model = "openrouter/free"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."interview.typeInstead"]
 value = "escribir mejor…"
@@ -1138,11 +1158,19 @@ reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
 [entries."interview.unmute"]
-value = "activar sonido"
+value = "quitar silencio"
 source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T20:00:43Z"
+
+[entries."interview.unmuteMic"]
+value = "reactivar micrófono"
+source_hash = "c97efc7f8f78a0ff195f3c61fff5473c7b40bc80"
 origin = "human"
 reviewed = false
-updated_at = "2026-09-27T19:05:00Z"
+updated_at = "2026-09-27T19:59:29Z"
 
 [entries."interview.viewReport"]
 value = "ver informe"
@@ -1220,6 +1248,13 @@ source_hash = "f821dc56dc72292d9489d61c3f18948b6eb252e9"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
+
+[entries."interview.youMic"]
+value = "tú · mic"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:59:29Z"
 
 [entries."landing.badge"]
 value = "entrevistas simuladas"
@@ -1360,23 +1395,23 @@ source_hash = "d5721531ceec4ce88fcafa05a47b1d12f079255b"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:12Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."meta.title.setup"]
-value = "setup — di"
+value = "configuración — di"
 source_hash = "e1033f919701dcc3981964ea1047daf4be49b11f"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:12Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."meta.title.voiceHarness"]
-value = "sistema de voz — di"
+value = "herramienta de voz — di"
 source_hash = "9727ba98461b727bb907d9188481291063c5a9ec"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:06:12Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.devicesFailed"]
 value = "no se pudieron obtener los dispositivos de audio"
@@ -1384,7 +1419,7 @@ source_hash = "349d719d660415f0be2894ae6ea3e7c622342328"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.fallback"]
 value = "micrófono {id}"
@@ -1392,7 +1427,7 @@ source_hash = "ef17b0afd967fb33d1a7ae0edcbd4ad7cfe92c16"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.loading"]
 value = "cargando…"
@@ -1400,7 +1435,7 @@ source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.loadingDevices"]
 value = "cargando dispositivos…"
@@ -1408,39 +1443,39 @@ source_hash = "54a2d73e75d77824c343a1a58ff9c90760946ba5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.mute"]
-value = "mudo"
+value = "silenciar"
 source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.none"]
-value = "no hay micrófono"
+value = "sin micrófono"
 source_hash = "ca34a76fee685e1a201eb2da3fb4097e299253d9"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.unmute"]
-value = "desmute"
+value = "quitar silencio"
 source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."micSelector.waveform"]
-value = "vista previa del nivel de micrófono"
+value = "vista previa del nivel del micrófono"
 source_hash = "28cb7803a767a635a3b07423c80336330ae32727"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:14Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."nav.history"]
 value = "historial"
@@ -1588,7 +1623,7 @@ source_hash = "0289acb39e22d7747ff711c12366d420f9302011"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:20Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."runtime.custom"]
 value = "endpoint personalizado"
@@ -1603,7 +1638,7 @@ source_hash = "9ad3a06c7b25609347be1c627293462eea258c35"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:24Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."runtime.inBrowser"]
 value = "en el navegador"
@@ -2887,12 +2922,12 @@ reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
 [entries."setup.scenario.behavioral.prompt"]
-value = "Realizar una entrevista comportamental utilizando el método STAR. Indagar por detalles específicos."
+value = "realiza una entrevista comportamental utilizando el método STAR. indaga sobre detalles específicos."
 source_hash = "11882f07553cb782e153d3c23276fc5ea3ae2ee6"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:37Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."setup.scenario.custom.narrative"]
 value = "trae tu propio prompt"
@@ -2930,12 +2965,12 @@ reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
 [entries."setup.scenario.frontend.prompt"]
-value = "Realizar una entrevista de frontend. Mezcla de diseño de componentes y fundamentos de JS."
+value = "realiza una entrevista de frontend. mezcla de diseño de componentes y fundamentos de JS."
 source_hash = "99ec669ad93913b67dd8928c20d55d2083c14b96"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:37Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."setup.scenario.ml.goal1"]
 value = "métricas"
@@ -2966,12 +3001,12 @@ reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
 [entries."setup.scenario.ml.prompt"]
-value = "Realizar una entrevista de aprendizaje de máquina. Elección de modelo, evaluación e higiene de datos."
+value = "realiza una entrevista de aprendizaje automático. elección de modelo, evaluación e higiene de datos."
 source_hash = "7c525476d3783a8cb9bd2a6fed26646475b2b0b3"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:37Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."setup.scenario.sysDesign.goal1"]
 value = "requisitos"
@@ -3002,12 +3037,12 @@ reviewed = false
 updated_at = "2026-09-27T19:05:00Z"
 
 [entries."setup.scenario.sysDesign.prompt"]
-value = "Realizar una entrevista de diseño de sistemas. Enfocarse en escalado, caché y razonamiento de compensaciones."
+value = "realiza una entrevista de diseño de sistemas. enfoque en escalado, caché y razonamiento de compensaciones."
 source_hash = "e78498b79a0d8c6a524e660165626070cd7fa09c"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:37Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."setup.skipValidation"]
 value = "continuar sin validar"
@@ -3092,7 +3127,7 @@ source_hash = "372ea08cab33e71c02c651dbc83a474d32c676ea"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:52Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."transcript.source.voice"]
 value = "voz"
@@ -3100,7 +3135,7 @@ source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:52Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."transcript.who.agent"]
 value = "agente"
@@ -3108,7 +3143,7 @@ source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:52Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."transcript.who.user"]
 value = "tú"
@@ -3116,7 +3151,7 @@ source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-09-27T19:08:52Z"
+updated_at = "2026-09-27T20:00:43Z"
 
 [entries."validate.comingLater"]
 value = "la validación llegará más tarde"
