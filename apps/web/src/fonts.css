@@ -1,9 +1,12 @@
 /**
- * Display font face declarations. Fraunces (OFL) is self-hosted to match the
- * brioso brand family's --font-display — no third-party CDN, deterministic
- * first paint. woff2 files live in apps/web/public/fonts/, sourced from
+ * Font loading. Body = Plus Jakarta Sans variable (fontsource, bundled by
+ * vite). Display = Fraunces (OFL), self-hosted to match the brioso brand
+ * family's --font-display — no third-party CDN, deterministic first paint.
+ * woff2 files live in apps/web/public/fonts/, sourced from
  * packages/brioso-brand/fonts/ in the brioso repo.
  */
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/plus-jakarta-sans/wght-italic.css";
 
 @font-face {
   font-family: "Fraunces";
