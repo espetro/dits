@@ -1,6 +1,6 @@
 # plan: ux overhaul — landing, interview, settings, i18n, fonts
 
-status: pending quim review (2026-09-26)
+status: approved by quim (2026-09-27); implementation in flight
 source: four research streams + user brief with annotated screenshots
 related: adr-0004 (stack stays: react + tailwind v4 + vendored shadcn),
 `.agents/docs/screens/*` (updated per phase), `DESIGN.md`
@@ -51,9 +51,21 @@ options:
   the hero; chips pinned to far margins only, hidden < 900px. fits one
   viewport everywhere and previews the voice surface.
 
-recommendation: ship a small unbreak now (unitless slot vars or a
-`left: calc(var(--slot-x) - 13rem)` + `pointer-events-none` + mobile strips
-below cta), then the redesign of whichever candidate quim picks.
+**decision (locked, 2026-09-27): b variant — "product peek"**. the sticker
+layout is deleted outright (the rebuild supersedes the unbreak patch).
+locked spec, mockup `.agents/mockups/landing-peek.html`:
+
+- headerless centered hero: dark espresso pill ("mock interviews"),
+  fraunces-black headline with one persimmon italic emphasis word, one-line
+  sub, single persimmon "grill me" pill cta with arrow dot. no top nav on
+  landing.
+- product card `peek` — `width: min(860px,100%)`, rounded top only, extends
+  below the fold (partially hidden). the card is a faithful miniature of the
+  interview screen: 40px callbar (di. + scenario + timer), conversation card
+  (qchip, small orb stage row, transcript rows, waveform strip above
+  composer, "talk or type" input), notes rail on desktop, floating espresso
+  icon pillbar peeking at the fold. workspace hidden on mobile.
+- all new copy lands in locale files, nothing hardcoded.
 
 ## 2. interview — single-viewport redesign
 
@@ -77,6 +89,26 @@ redesign spec (mockups attached):
   stays the existing sheet
 - nothing scrolls at page level; only transcript and tool panes scroll
   internally
+
+locked visuals (2026-09-27, mockup `.agents/mockups/interview-stage.html`):
+
+- stage row: small orb (~44-56px) + uppercase tracking status word + 2-line
+  fraunces caption. no big centered orb.
+- mic waveform strip pinned directly above the composer (`border-top`
+  hairline, `role="img"` + aria-label, "you · mic" caption). uses the
+  already-vendored `live-waveform` (canvas 2d) — also replaces the weak
+  16px pulse dot in client-only mode.
+- floating bottom-center pillbar: `role="toolbar"` `aria-label="interview
+controls"`, icons-only buttons each with an aria-label (mute microphone /
+  switch to typing / end interview). espresso pill, persimmon end button.
+- mobile: ~70px clearance under the conversation card so the pillbar never
+  overlaps the composer.
+
+voice-agent visual decision (2026-09-27): keep the vendored elevenlabs orb
+for agent presence + the vendored `live-waveform` for mic feedback.
+rejected: orb-ui.com npm dep (duplicates vendored orb), orbkit
+(non-commercial license), ai-elements `persona` (rive wasm heft + webgl2
+context limits).
 
 component strategy (vendor, don't hand-roll):
 
@@ -174,27 +206,40 @@ adopt `@fontsource-variable/plus-jakarta-sans` as `--font-body` (replaces
 inter var); `--font-display` stays fraunces for the logotype; berkeley mono
 unchanged.
 
-## 7. phasing
+## 7. phasing (parallelized)
 
-- w1: landing unbreak (small, ships immediately) + redesign per pick
-- w2: interview single-viewport restructure + ai elements transcript
+batch a (parallel, disjoint file sets):
+
+- w0: vendor missing shadcn blocks — `select field item empty progress
+separator collapsible tooltip alert` (lands first; w3/w4 build on it)
+- w1: landing rebuild per locked peek spec (deletes sticker layout)
+- w2: interview single-viewport restructure + ai elements transcript +
+  locked visuals (small orb, waveform above composer, pillbar)
+- w6: font swap — plus jakarta sans variable body, fraunces stays
+
+batch b (after batch a merges):
+
 - w3: unified settings dialog + consent-driven wasm + chip -> status
-- w4: setup standardization + design-system gap components + DESIGN.md rule
+- w4: setup standardization + DESIGN.md component rule
+
+batch c (last — touches every surface):
+
 - w5: i18n — copy extraction, lowercase locales, intl-ai wiring
-- w6: font swap
 
-w2/w3 are the heavy lifts; each lands as its own pr with screen-spec doc
-updates in the same commit.
+each phase lands as its own pr with screen-spec doc updates in the same
+commit.
 
-## 8. open decisions for quim
+## 8. decisions
 
-1. landing direction: a (contained canvas), b (product preview), or
-   c (orb-forward — research pick)?
-2. settings stays a dialog or becomes a dedicated `/settings` page?
-   (research recommends keeping the url-driven dialog)
-3. custom endpoints inline per engine (proposed) vs one endpoints table
-   under advanced?
-4. interview language follows the lowercase ui locale or stays bcp-47 in
-   stored sessions/drafts?
-5. intl-ai flat-shape: 5-line flatten at load vs upstream pr to
-   sigilco/intl-ai?
+resolved:
+
+1. landing direction: **b peek variant** (hero + partially-hidden product
+   card mirroring the interview screen).
+2. settings: stays the url-driven dialog (research recommendation; page
+   adds a route without buying anything).
+3. custom endpoints: inline per engine under "your own ai account" /
+   advanced.
+4. interview language: follows the lowercase ui locale.
+5. intl-ai flat-shape: ~5-line flatten at load in `i18n.tsx` (cheaper than
+   an upstream pr; can still send the pr to sigilco/intl-ai later).
+6. voice visual: orb + waveform composition (vendored pieces only).
