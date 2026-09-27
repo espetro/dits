@@ -11,7 +11,21 @@ import { createSession, listSessions, uploadDocuments } from "../../lib/api";
 import { MicSelector } from "../../components/vendor/mic-selector";
 import { Button } from "../../components/vendor/button";
 import { Textarea } from "../../components/vendor/textarea";
-import { ToggleGroup, ToggleGroupItem } from "../../components/vendor/toggle-group";
+import { RadioGroup } from "../../components/vendor/radio-group";
+import { RadioPill, RadioPills } from "../../components/radio-pills";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/vendor/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../components/vendor/collapsible";
+import { Alert, AlertDescription } from "../../components/vendor/alert";
 import {
   $effectiveRuntime,
   $providerProfile,
@@ -76,8 +90,7 @@ const TONES = ["friendly", "challenging", "neutral"];
 const DIFFICULTIES = ["easy", "medium", "hard"];
 const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "ar"];
 
-const chipClass =
-  "rounded-full bg-white px-3 py-2 min-h-11 text-sm font-medium text-espresso-soft ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] data-[state=on]:bg-espresso data-[state=on]:text-cream data-[state=on]:hover:bg-espresso sm:min-h-8 sm:py-1.5";
+const fieldHeadingClass = "text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft";
 
 function Setup() {
   const { locale } = useLocaleNav();
@@ -109,6 +122,13 @@ function Setup() {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = React.useState(false);
   const fileInput = React.useRef<HTMLInputElement>(null);
+
+  const languageNames = React.useMemo(
+    function makeLanguageNames() {
+      return new Intl.DisplayNames([intl.locale], { type: "language" });
+    },
+    [intl.locale],
+  );
 
   function addFiles(incoming: FileList | null) {
     if (!incoming?.length) return;
@@ -248,31 +268,35 @@ function Setup() {
             )}
 
             <section className="rise-in" style={{ "--rise-delay": "0ms" } as React.CSSProperties}>
-              <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+              <h2 id="setup-scenario-heading" className={fieldHeadingClass}>
                 <FormattedMessage id="setup.pickScenario" />
               </h2>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <RadioGroup
+                value={selectedId ?? ""}
+                onValueChange={(v) => {
+                  setSelectedId(v);
+                  const picked = SCENARIOS.find((s) => s.id === v);
+                  if (picked?.prompt) $draft.set({ ...draft, prompt: picked.prompt });
+                }}
+                aria-labelledby="setup-scenario-heading"
+                className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              >
                 {SCENARIOS.map((s) => (
                   <ScenarioCard
                     key={s.id}
                     scenario={s}
-                    selected={selectedId === s.id}
                     busy={busy}
-                    onSelect={() => {
-                      setSelectedId(s.id);
-                      if (s.prompt) $draft.set({ ...draft, prompt: s.prompt });
-                    }}
                     onStart={() => void start(false, s)}
                   />
                 ))}
-              </div>
+              </RadioGroup>
             </section>
 
             <section
               className="rise-in mt-10"
               style={{ "--rise-delay": "120ms" } as React.CSSProperties}
             >
-              <h2 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
+              <h2 id="setup-prompt-label" className={fieldHeadingClass}>
                 <FormattedMessage id="setup.promptLabel" />
               </h2>
               <Textarea
@@ -282,242 +306,237 @@ function Setup() {
                   id: "setup.promptPlaceholder",
                 })}
                 rows={4}
+                aria-labelledby="setup-prompt-label"
                 className="mt-3 w-full resize-none rounded-card bg-white p-4 text-sm ring-1 ring-hairline outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] placeholder:text-espresso-soft focus-visible:ring-2 focus-visible:ring-persimmon/50"
               />
             </section>
 
+            {error && (
+              <Alert
+                ref={(node) => node?.focus()}
+                tabIndex={-1}
+                variant="destructive"
+                className="rise-in mt-6 border-0 bg-white ring-1 ring-persimmon/40"
+              >
+                <AlertDescription className="text-persimmon-deep">{error}</AlertDescription>
+              </Alert>
+            )}
+
             {/* advanced options: every knob is pre-picked — cards are zero-knob */}
-            <section
+            <Collapsible
+              open={advancedOpen}
+              onOpenChange={setAdvancedOpen}
               className="rise-in mt-10"
               style={{ "--rise-delay": "240ms" } as React.CSSProperties}
             >
-              <button
-                onClick={() => setAdvancedOpen(!advancedOpen)}
-                aria-expanded={advancedOpen}
-                className="flex min-h-11 items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft transition-fluid hover:text-espresso"
-              >
+              <CollapsibleTrigger className="flex min-h-11 items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft transition-fluid hover:text-espresso">
                 <ChevronDown
                   className={`size-4 transition-transform duration-300 ${advancedOpen ? "rotate-180" : ""}`}
                   aria-hidden="true"
                 />
                 <FormattedMessage id="setup.advanced" />
-              </button>
+              </CollapsibleTrigger>
 
-              {advancedOpen && (
-                <div className="mt-4 flex flex-col gap-8 rounded-card bg-white/50 p-5 ring-1 ring-hairline">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                        <FormattedMessage id="setup.duration" />
-                      </h3>
-                      <ToggleGroup
-                        type="single"
-                        value={String(draft.durationMin)}
-                        onValueChange={(v) => {
-                          if (v) $draft.set({ ...draft, durationMin: Number(v) });
-                        }}
-                        className="mt-3 flex w-full flex-wrap gap-2"
-                      >
-                        {DURATIONS.map((d) => (
-                          <ToggleGroupItem key={d} value={String(d)} className={chipClass}>
-                            {d}
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
-                    </div>
-                    <div>
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                        <FormattedMessage id="setup.mode" />
-                      </h3>
-                      <ToggleGroup
-                        type="single"
-                        value={draft.mode}
-                        onValueChange={(v) => {
-                          if (v) $draft.set({ ...draft, mode: v as "interview" | "coach" });
-                        }}
-                        className="mt-3 flex w-full flex-wrap gap-2"
-                      >
-                        <ToggleGroupItem value="interview" className={chipClass}>
-                          <FormattedMessage id="setup.mode.interview" />
-                        </ToggleGroupItem>
-                        <ToggleGroupItem
-                          value="coach"
-                          disabled={!hasReport}
-                          title={
-                            hasReport ? undefined : intl.formatMessage({ id: "setup.coachHint" })
-                          }
-                          className={`${chipClass} disabled:cursor-not-allowed disabled:bg-white/50 disabled:animate-pulse`}
-                        >
-                          <FormattedMessage id="setup.mode.coach" />
-                          {!hasReport && (
-                            <span className="ml-2 text-[10px] uppercase tracking-wide opacity-60">
-                              <FormattedMessage id="setup.coachHint" />
-                            </span>
-                          )}
-                        </ToggleGroupItem>
-                      </ToggleGroup>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-6 md:grid-cols-3">
-                    <div>
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                        <FormattedMessage id="setup.tone" />
-                      </h3>
-                      <ToggleGroup
-                        type="single"
-                        value={draft.tone}
-                        onValueChange={(v) => {
-                          if (v) $draft.set({ ...draft, tone: v });
-                        }}
-                        className="mt-3 flex w-full flex-wrap gap-2"
-                      >
-                        {TONES.map((t) => (
-                          <ToggleGroupItem key={t} value={t} className={chipClass}>
-                            <FormattedMessage id={`setup.tone.${t}`} />
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
-                    </div>
-                    <div>
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                        <FormattedMessage id="setup.difficulty" />
-                      </h3>
-                      <ToggleGroup
-                        type="single"
-                        value={draft.difficulty}
-                        onValueChange={(v) => {
-                          if (v) $draft.set({ ...draft, difficulty: v });
-                        }}
-                        className="mt-3 flex w-full flex-wrap gap-2"
-                      >
-                        {DIFFICULTIES.map((d) => (
-                          <ToggleGroupItem key={d} value={d} className={chipClass}>
-                            <FormattedMessage id={`setup.difficulty.${d}`} />
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
-                    </div>
-                    <div>
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                        <FormattedMessage id="setup.language" />
-                      </h3>
-                      <ToggleGroup
-                        type="single"
-                        value={draft.language}
-                        onValueChange={(v) => {
-                          if (v) $draft.set({ ...draft, language: v });
-                        }}
-                        className="mt-3 flex w-full flex-wrap gap-2"
-                      >
-                        {LANGUAGES.map((l) => (
-                          <ToggleGroupItem key={l} value={l} className={chipClass}>
-                            {l}
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
-                    </div>
-                  </div>
-
+              <CollapsibleContent className="mt-4 flex flex-col gap-8 rounded-card bg-white/50 p-5 ring-1 ring-hairline">
+                <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                      <FormattedMessage id="setup.files" />{" "}
-                      <span className="normal-case tracking-normal text-espresso-soft">
-                        · <FormattedMessage id="setup.filesHint" />
-                      </span>
+                    <h3 id="setup-duration-label" className={fieldHeadingClass}>
+                      <FormattedMessage id="setup.duration" />
                     </h3>
-                    <input
-                      ref={fileInput}
-                      type="file"
-                      multiple
-                      accept={ACCEPTED.join(",")}
-                      className="hidden"
-                      onChange={(e) => {
-                        addFiles(e.target.files);
-                        e.target.value = "";
-                      }}
-                    />
-                    {clientOnly ? (
-                      <div className="mt-3 rounded-card border border-dashed border-espresso-faint/40 bg-white/40 p-6 text-center text-sm text-espresso-soft md:p-8">
-                        <FormattedMessage id="setup.filesServerOnly" />
-                      </div>
-                    ) : (
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        aria-label={intl.formatMessage({ id: "setup.dropHint" })}
-                        onClick={() => fileInput.current?.click()}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") fileInput.current?.click();
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          addFiles(e.dataTransfer.files);
-                        }}
-                        className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8"
-                      >
-                        <FormattedMessage id="setup.dropHint" />
-                      </div>
-                    )}
-                    {files.length > 0 && (
-                      <ul className="mt-3 space-y-1.5">
-                        {files.map((f, i) => (
-                          <li
-                            key={`${f.name}-${i}`}
-                            className="flex min-w-0 items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
-                          >
-                            <span className="truncate text-espresso">{f.name}</span>
-                            <span className="ml-3 flex shrink-0 items-center gap-3 text-xs text-espresso-soft">
-                              {Math.round(f.size / 1024)} kb
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                aria-label={intl.formatMessage(
-                                  { id: "setup.fileRemove" },
-                                  { name: f.name },
-                                )}
-                                onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                                className="text-espresso-soft transition-fluid hover:bg-transparent hover:text-persimmon"
-                              >
-                                ×
-                              </Button>
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                    <RadioPills
+                      value={String(draft.durationMin)}
+                      onValueChange={(v) => $draft.set({ ...draft, durationMin: Number(v) })}
+                      aria-labelledby="setup-duration-label"
+                    >
+                      {DURATIONS.map((d) => (
+                        <RadioPill key={d} value={String(d)}>
+                          {d}
+                        </RadioPill>
+                      ))}
+                    </RadioPills>
+                  </div>
+                  <div>
+                    <h3 id="setup-mode-label" className={fieldHeadingClass}>
+                      <FormattedMessage id="setup.mode" />
+                    </h3>
+                    <RadioPills
+                      value={draft.mode}
+                      onValueChange={(v) =>
+                        $draft.set({ ...draft, mode: v as "interview" | "coach" })
+                      }
+                      aria-labelledby="setup-mode-label"
+                    >
+                      <RadioPill value="interview">
+                        <FormattedMessage id="setup.mode.interview" />
+                      </RadioPill>
+                      <RadioPill value="coach" disabled={!hasReport}>
+                        <FormattedMessage id="setup.mode.coach" />
+                        {!hasReport && (
+                          <span className="text-[10px] uppercase tracking-wide opacity-60">
+                            · <FormattedMessage id="setup.coachHint" />
+                          </span>
+                        )}
+                      </RadioPill>
+                    </RadioPills>
+                    {!hasReport && (
+                      <p className="mt-2 text-xs text-espresso-soft">
+                        <FormattedMessage id="setup.coachHint" />
+                      </p>
                     )}
                   </div>
-
-                  <div>
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft">
-                      <FormattedMessage id="setup.mic" />
-                    </h3>
-                    <div className="mt-3" data-testid="mic-check">
-                      <MicSelector
-                        value={micDeviceId}
-                        onValueChange={(id) => $micDeviceId.set(id)}
-                      />
-                    </div>
-                  </div>
-
-                  {error && (
-                    <p role="alert" className="text-sm text-persimmon-deep">
-                      {error}
-                    </p>
-                  )}
-
-                  {/* the validate step stays reachable, opt-in only (p3) */}
-                  <button
-                    onClick={() => void start(true)}
-                    disabled={busy}
-                    className="flex min-h-11 items-center gap-2 self-start font-body text-sm text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <FormattedMessage id="setup.startWithPlan" />
-                  </button>
                 </div>
-              )}
-            </section>
+
+                <div className="grid gap-6 md:grid-cols-3">
+                  <div>
+                    <h3 id="setup-tone-label" className={fieldHeadingClass}>
+                      <FormattedMessage id="setup.tone" />
+                    </h3>
+                    <RadioPills
+                      value={draft.tone}
+                      onValueChange={(v) => $draft.set({ ...draft, tone: v })}
+                      aria-labelledby="setup-tone-label"
+                    >
+                      {TONES.map((t) => (
+                        <RadioPill key={t} value={t}>
+                          <FormattedMessage id={`setup.tone.${t}`} />
+                        </RadioPill>
+                      ))}
+                    </RadioPills>
+                  </div>
+                  <div>
+                    <h3 id="setup-difficulty-label" className={fieldHeadingClass}>
+                      <FormattedMessage id="setup.difficulty" />
+                    </h3>
+                    <RadioPills
+                      value={draft.difficulty}
+                      onValueChange={(v) => $draft.set({ ...draft, difficulty: v })}
+                      aria-labelledby="setup-difficulty-label"
+                    >
+                      {DIFFICULTIES.map((d) => (
+                        <RadioPill key={d} value={d}>
+                          <FormattedMessage id={`setup.difficulty.${d}`} />
+                        </RadioPill>
+                      ))}
+                    </RadioPills>
+                  </div>
+                  <div>
+                    <h3 id="setup-language-label" className={fieldHeadingClass}>
+                      <FormattedMessage id="setup.language" />
+                    </h3>
+                    <Select
+                      value={draft.language}
+                      onValueChange={(v) => $draft.set({ ...draft, language: v })}
+                    >
+                      <SelectTrigger
+                        aria-labelledby="setup-language-label"
+                        className="mt-3 min-h-11 w-full rounded-full border-0 bg-white px-4 text-sm text-espresso ring-1 ring-hairline transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-persimmon/50 sm:min-h-9"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.map((l) => (
+                          <SelectItem key={l} value={l}>
+                            {languageNames.of(l) ?? l}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className={fieldHeadingClass}>
+                    <FormattedMessage id="setup.files" />{" "}
+                    <span className="normal-case tracking-normal text-espresso-soft">
+                      · <FormattedMessage id="setup.filesHint" />
+                    </span>
+                  </h3>
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED.join(",")}
+                    className="hidden"
+                    onChange={(e) => {
+                      addFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                  {clientOnly ? (
+                    <div className="mt-3 rounded-card border border-dashed border-espresso-faint/40 bg-white/40 p-6 text-center text-sm text-espresso-soft md:p-8">
+                      <FormattedMessage id="setup.filesServerOnly" />
+                    </div>
+                  ) : (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label={intl.formatMessage({ id: "setup.dropHint" })}
+                      onClick={() => fileInput.current?.click()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          fileInput.current?.click();
+                        }
+                      }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        addFiles(e.dataTransfer.files);
+                      }}
+                      className="mt-3 cursor-pointer rounded-card border border-dashed border-espresso-faint/40 bg-white/60 p-6 text-center text-sm text-espresso-soft transition-fluid hover:border-persimmon/50 hover:text-espresso-soft md:p-8"
+                    >
+                      <FormattedMessage id="setup.dropHint" />
+                    </div>
+                  )}
+                  {files.length > 0 && (
+                    <ul className="mt-3 space-y-1.5">
+                      {files.map((f, i) => (
+                        <li
+                          key={`${f.name}-${i}`}
+                          className="flex min-w-0 items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-sm ring-1 ring-hairline"
+                        >
+                          <span className="truncate text-espresso">{f.name}</span>
+                          <span className="ml-3 flex shrink-0 items-center gap-3 text-xs text-espresso-soft">
+                            {Math.round(f.size / 1024)} kb
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={intl.formatMessage(
+                                { id: "setup.fileRemove" },
+                                { name: f.name },
+                              )}
+                              onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                              className="text-espresso-soft transition-fluid hover:bg-transparent hover:text-persimmon"
+                            >
+                              ×
+                            </Button>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className={fieldHeadingClass}>
+                    <FormattedMessage id="setup.mic" />
+                  </h3>
+                  <div className="mt-3" data-testid="mic-check">
+                    <MicSelector value={micDeviceId} onValueChange={(id) => $micDeviceId.set(id)} />
+                  </div>
+                </div>
+
+                {/* the validate step stays reachable, opt-in only (p3) */}
+                <Button
+                  variant="link"
+                  onClick={() => void start(true)}
+                  disabled={busy}
+                  className="h-auto min-h-11 self-start px-0 font-body text-sm font-normal text-espresso-soft underline decoration-hairline underline-offset-4 transition-fluid hover:text-persimmon hover:no-underline disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <FormattedMessage id="setup.startWithPlan" />
+                </Button>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
       </main>

@@ -33,7 +33,9 @@ confined to `theme.css`. raw hex in a component = lint error (section 7).
 - **surface**: card = `bg-paper rounded-card ring-1 ring-hairline`.
   translucent overlay = `bg-paper/15 backdrop-blur` (transcript rail).
 - **form fields**: formisch + `@di/shared` schema validation. option sets =
-  `ToggleGroup` pills, never hand-rolled buttons. text inputs = pill-shaped,
+  vendored `RadioGroup`/`Select` (pill styling via `RadioPill` =
+  `Label` + `RadioGroupItem` in `components/radio-pills.tsx`), never
+  hand-rolled buttons. text inputs = pill-shaped,
   `ring-1 ring-hairline`, `focus-visible:ring-persimmon/50`.
 - **status text**: small-caps mono - `text-[0.65rem] tracking-[0.15em]
 uppercase text-espresso-soft`.
@@ -43,6 +45,9 @@ uppercase text-espresso-soft`.
   vendored files.
 - **new component**: build on vendored primitives in `src/components/`,
   one component per file, props typed with `interface`.
+- **component sourcing**: order is vendor -> shadcn registry
+  (`bunx shadcn add`) -> primitive + tailwind -> custom file on vendored
+  primitives. never raw markup duplicating a pattern a library ships.
 
 ## 4. screen contracts
 
