@@ -41,6 +41,8 @@ export interface SttEngine {
 export interface TtsEngine {
   /** Synthesize one sentence; returns PCM at the engine's native rate. */
   speak(sentence: string): Promise<Float32Array>;
+  /** Drop queued-but-not-started utterances (barge-in); in-flight runs finish. */
+  cancelPending?(): void;
   dispose(): void;
 }
 

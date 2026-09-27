@@ -121,6 +121,11 @@ mobile) stacks, top to bottom:
   VAD (`/vad/` vendored), `{t:"interrupt"}` barge-in (300ms grace on the
   browser driver), reconnect with backoff, voice->text degradation surfaces
   the type path immediately.
+  - Browser-mode echo gate: while agent audio is queued or playing (plus a
+    ~350ms drain tail), mic-derived speech events are ignored — speaker
+    bleed otherwise reads as speech and self-interrupts tts mid-utterance.
+    Typed input still interrupts; voice barge-in resumes once playback
+    ends.
 - **On-device voice (client-only)**: first browser-mode entry arms the
   root-mounted `VoiceConsentDialog` via `requestVoiceConsent()`
   (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models

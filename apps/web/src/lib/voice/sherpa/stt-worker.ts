@@ -3,20 +3,31 @@
  * sherpa-onnx streaming zipformer (int8, ctc) in a dedicated worker.
  *
  * sherpa ships no browser esm build: the emscripten glue + asr api are
- * classic scripts, so they load via importScripts from vite-emitted asset
- * urls (?url) and attach `Module`/`createOnlineRecognizer` to the worker
- * global scope. The 15MB wasm binary resolves via locateFile -> emitted
- * asset url; model + tokens bytes come from the manifest cache over
- * postMessage and land in MEMFS.
+ * classic scripts, so they load via importScripts and attach
+ * `Module`/`createOnlineRecognizer` to the worker global scope.
+ * importScripts only exists in CLASSIC workers, so this file must stay
+ * free of static (non-type) imports — vite only emits a classic worker
+ * bundle when the entry has none. The asset urls (glue/asr/wasm) are
+ * resolved on the main thread via ?url and arrive on the init message;
+ * the 15MB wasm binary resolves via locateFile, and the model + tokens
+ * bytes land in MEMFS.
  */
-import sherpaWasmUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.wasm?url";
-import sherpaGlueUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.js?url";
-import sherpaAsrUrl from "sherpa-onnx/sherpa-onnx-asr.js?url";
+
+/** vite-emitted ?url asset urls, resolved on the main thread. */
+export interface SttAssets {
+  /** emscripten glue (classic script, attaches `Module`) */
+  glueUrl: string;
+  /** sherpa asr api (classic script, attaches `createOnlineRecognizer`) */
+  asrUrl: string;
+  /** wasm binary; resolved via locateFile */
+  wasmUrl: string;
+}
 
 export interface SttInitMsg {
   type: "init";
   model: ArrayBuffer;
   tokens: ArrayBuffer;
+  assets: SttAssets;
 }
 export interface SttFeedMsg {
   type: "feed";
@@ -85,9 +96,9 @@ function post(msg: SttOutMsg, transfer?: Transferable[]): void {
 
 async function init(msg: SttInitMsg): Promise<void> {
   // classic scripts: top-level var/function land on the worker global scope
-  self.importScripts(sherpaGlueUrl, sherpaAsrUrl);
+  self.importScripts(msg.assets.glueUrl, msg.assets.asrUrl);
   const mod = await g.Module({
-    locateFile: (path) => (path.endsWith(".wasm") ? sherpaWasmUrl : path),
+    locateFile: (path) => (path.endsWith(".wasm") ? msg.assets.wasmUrl : path),
   });
   mod.FS.writeFile("model.onnx", new Uint8Array(msg.model));
   mod.FS.writeFile("tokens.txt", new Uint8Array(msg.tokens));

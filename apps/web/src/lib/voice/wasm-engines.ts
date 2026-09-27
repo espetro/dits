@@ -4,6 +4,9 @@ import type { VoiceModelStorage } from "./models";
 import type { VoiceModelManifest } from "@di/shared";
 import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
 import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
+import sherpaWasmUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.wasm?url";
+import sherpaGlueUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.js?url";
+import sherpaAsrUrl from "sherpa-onnx/sherpa-onnx-asr.js?url";
 
 /**
  * On-device engines (phase c/d). Each lazily spawns a dedicated Worker that
@@ -135,6 +138,15 @@ export class WasmTts implements TtsEngine {
     return promise;
   }
 
+  /**
+   * Barge-in: drop queued (not yet started) utterances on the worker. An
+   * in-flight run still completes and resolves its speak(), which the
+   * caller then discards via its own abort check.
+   */
+  cancelPending(): void {
+    this.worker?.postMessage({ type: "clear" });
+  }
+
   dispose(): void {
     this.readyPromise = null;
     this.worker?.terminate();
@@ -181,9 +193,13 @@ export class WasmStt implements SttEngine {
         readVoiceModelFile("stt", "stt/tokens.txt", manifest, this.deps.storage),
       ]);
       if (!model || !tokens) throw new WasmSttNotReadyError();
+      // classic worker, not module: the sherpa glue loads via importScripts,
+      // which module workers do not have. The worker file itself must stay
+      // import-free (asset urls arrive on the init message) for vite to emit
+      // a classic bundle.
       const worker =
         this.deps.workerFactory?.() ??
-        new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "module" });
+        new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "classic" });
       this.worker = worker;
       const ready = new Promise<void>((resolve, reject) => {
         worker.onmessage = (ev) => {
@@ -197,7 +213,12 @@ export class WasmStt implements SttEngine {
         };
         worker.onerror = (ev) => reject(new Error(`stt worker failed: ${String(ev)}`));
       });
-      const init: SttInMsg = { type: "init", model, tokens };
+      const init: SttInMsg = {
+        type: "init",
+        model,
+        tokens,
+        assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
+      };
       worker.postMessage(init, [model, tokens]);
       await ready;
       for (const f of this.preboot.splice(0)) worker.postMessage({ type: "feed", samples: f });

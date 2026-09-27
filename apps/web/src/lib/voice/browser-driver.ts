@@ -108,9 +108,16 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private speechSeen = false;
   /** id of the user turn that already consumed the one retry (p0.4 guard) */
   private retriedTurnId: string | null = null;
+  /** epoch ms until which mic-derived speech is treated as agent echo */
+  private echoGateUntil = 0;
+  /** speak() calls still synthesizing/playing: keeps the gate shut in the
+   * inter-sentence gap between player drain and the next queued write */
+  private pendingSpeaks = 0;
 
   /** continuation grace before interim speech cuts the agent off (p0.8) */
   private static readonly BARGE_IN_GRACE_MS = 300;
+  /** echo gate tail after playback drains: room echo / aec lag outlives it */
+  private static readonly ECHO_GATE_TAIL_MS = 350;
   /** confidence at which an unconfirmed final is trusted without interim evidence */
   private static readonly MIN_CONFIDENCE = 0.6;
   /** recognition errors that must never trigger an onend restart loop */
@@ -121,6 +128,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
     private readonly deps: BrowserDriverDeps = {},
   ) {
     this.player = deps.player ?? createPcmPlayer();
+    this.player.onDrained(() => {
+      this.echoGateUntil = Date.now() + BrowserVoiceDriver.ECHO_GATE_TAIL_MS;
+    });
   }
 
   /** Wire the client-only agent. Called by createDriver when an llm endpoint exists. */
@@ -266,8 +276,27 @@ export class BrowserVoiceDriver implements SpeechDriver {
     return true;
   }
 
+  /**
+   * Half-duplex echo gate: while agent audio is queued or playing (plus a
+   * short drain tail), the mic hears the speaker output, which the vad
+   * reads as speech — self barge-in truncates tts mid-utterance and the
+   * echo transcript spawns phantom user turns. Without a reliable aec
+   * reference there is no way to tell echo from a real barge-in, so all
+   * speech evidence is ignored for the window; interrupts stay reachable
+   * via mute / typed input.
+   */
+  private get playbackGated(): boolean {
+    return (
+      this.agentSpeaking ||
+      this.pendingSpeaks > 0 ||
+      this.player.playing ||
+      Date.now() < this.echoGateUntil
+    );
+  }
+
   /** interim speech evidence: marks the utterance and arms barge-in. */
   private noteSpeech(): void {
+    if (this.playbackGated) return;
     this.speechSeen = true;
     if (this.agentSpeaking && this.bargeInTimer === null) {
       this.bargeInTimer = setTimeout(() => {
@@ -282,8 +311,10 @@ export class BrowserVoiceDriver implements SpeechDriver {
    * phantom-final gate the builtin path needs does not apply.
    */
   private noteFinal(text: string): void {
-    const trimmed = text.trim();
     this.speechSeen = false;
+    // gated window: a transcript here is the agent's own audio, not a turn
+    if (this.playbackGated) return;
+    const trimmed = text.trim();
     if (!trimmed || this.muted) return;
     this.cancelKickoff();
     this.events.onSpeechStart?.();
@@ -330,6 +361,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   private handleResult(ev: SpeechRecognitionEventLike) {
+    // echo gate: results arriving while agent audio plays are speaker bleed
+    if (this.playbackGated) return;
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
       const result = ev.results[i];
       if (!result) continue;
@@ -394,6 +427,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
         this.agentSpeaking = true;
         this.events.onAgentStart?.();
       }
+      this.pendingSpeaks += 1;
       try {
         const mode = this.ttsMode;
         if (mode === "builtin") {
@@ -404,7 +438,17 @@ export class BrowserVoiceDriver implements SpeechDriver {
         if (mode === "wasm") {
           const engine = this.getTtsEngine();
           if (!engine) return;
-          const pcm = await engine.speak(sentence);
+          // same per-sentence budget as the endpoint path (p0.3): a stalled
+          // wasm synth must skip the sentence, not stall the speak queue
+          const pcm = await Promise.race([
+            engine.speak(sentence),
+            new Promise<never>((_resolve, reject) =>
+              setTimeout(
+                () => reject(new Error("wasm tts sentence timed out")),
+                TTS_SENTENCE_TIMEOUT_MS,
+              ),
+            ),
+          ]);
           if (ctrl.signal.aborted) return;
           this.player.writeFloat32(pcm);
           return;
@@ -423,6 +467,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
         this.player.write(pcm);
       } catch (err) {
         if (!ctrl.signal.aborted) reportError(err, "tts");
+      } finally {
+        this.pendingSpeaks -= 1;
       }
     };
 
@@ -523,6 +569,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
    */
   interrupt(): void {
     this.player.stop();
+    this.wasmTts?.cancelPending?.();
+    // keep the gate up briefly: whatever the mic hears next is still echo
+    this.echoGateUntil = Date.now() + BrowserVoiceDriver.ECHO_GATE_TAIL_MS;
     this.abort?.abort();
     this.abort = null;
     if (this.ttsMode === "builtin") globalThis.speechSynthesis?.cancel();

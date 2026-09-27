@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BrowserVoiceDriver } from "./browser-driver";
 import type { RecognitionLike } from "./browser-driver";
 import { createPcmPlayer } from "./pcm-player";
-import type { AudioContextLike } from "./pcm-player";
+import type { AudioContextLike, PcmPlayer } from "./pcm-player";
 
 const LLM = {
   mode: "remote" as const,
@@ -48,6 +48,84 @@ function hangingFetch(): typeof fetch {
       );
     })) as unknown as typeof fetch;
 }
+
+/** Player stub with a controllable `playing` flag for echo-gate tests. */
+function gatePlayer(playing: { v: boolean }): PcmPlayer {
+  return {
+    write() {},
+    writeFloat32() {},
+    stop() {
+      playing.v = false;
+    },
+    onDrained() {},
+    get playing() {
+      return playing.v;
+    },
+  };
+}
+
+describe("BrowserVoiceDriver echo gate", () => {
+  async function setupDriver(playing: { v: boolean }) {
+    const rec = fakeRecognitionCtor();
+    const driver = new BrowserVoiceDriver("s1", {
+      player: gatePlayer(playing),
+      recognitionCtor: rec.ctor,
+    });
+    const respond = vi.fn(async () => "ok");
+    driver.onError = vi.fn();
+    await driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      { editor: "", whiteboard: "" },
+      () => ({ mode: "interview" }),
+    );
+    const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+    agent.respond = respond as unknown as (...args: any[]) => Promise<string>;
+    return { driver, respond, ...rec };
+  }
+
+  it("drops recognition results while agent audio plays, then listens again", async () => {
+    const playing = { v: true };
+    const { driver, respond, emitInterim, emitFinal } = await setupDriver(playing);
+    await driver.start();
+    driver["cancelKickoff"]();
+    // speaker bleed during playback must not become a user turn
+    emitInterim("the agent's own voice");
+    emitFinal("the agent's own voice", 0.99);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).not.toHaveBeenCalled();
+
+    // playback over: real speech flows again
+    playing.v = false;
+    emitInterim("hel");
+    emitFinal("hello");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).toHaveBeenCalledTimes(1);
+    expect((respond.mock.calls as unknown[][])[0]![0]).toBe("hello");
+  });
+
+  it("drops wasm-path stt finals while agent audio plays", async () => {
+    const playing = { v: true };
+    const { driver, respond } = await setupDriver(playing);
+    await driver.start();
+    driver["cancelKickoff"]();
+    driver["noteFinal"]("echo of the agent");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).not.toHaveBeenCalled();
+  });
+
+  it("drops queued wasm utterances on interrupt", async () => {
+    const { driver } = await setupDriver({ v: false });
+    const cancelPending = vi.fn();
+    (driver as any).wasmTts = { speak: vi.fn(), cancelPending, dispose: vi.fn() };
+    driver.interrupt();
+    expect(cancelPending).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("BrowserVoiceDriver barge-in", () => {
   it("does not report an error when the agent turn is aborted mid-flight", async () => {
