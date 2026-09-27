@@ -1,7 +1,9 @@
 # Screen: Navbar (shared AppHeader)
 
-Mounted in `__root` for every route: logo, optional centered page title,
-LocaleSwitcher, GitHub link, and the account dropdown (B3).
+Mounted in `__root` for every route except the landing (`/` and `/{-$locale}`
+index), which is headerless by design: logo, optional centered page title,
+LocaleSwitcher, GitHub link, and the account dropdown (B3). `AppHeaderSlot`
+suppresses it via `useMatch("/{-$locale}/")`.
 
 ## ASCII mockup
 

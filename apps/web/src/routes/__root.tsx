@@ -7,6 +7,7 @@ import {
   Scripts,
   createRootRoute,
   useLocation,
+  useMatch,
   useRouter,
 } from "@tanstack/react-router";
 import { FormattedMessage } from "react-intl";
@@ -160,7 +161,10 @@ const TITLES: Array<[RegExp, string]> = [[/\/setup$/, "setup.title"]];
 
 function AppHeaderSlot() {
   const pathname = useLocation({ select: (l) => l.pathname });
+  // landing hero is headerless by design (see .agents/docs/screens/landing.md)
+  const isLanding = useMatch({ from: "/{-$locale}/", shouldThrow: false });
   const titleKey = TITLES.find(([re]) => re.test(pathname))?.[1];
+  if (isLanding) return null;
   return (
     <AppHeader
       title={
