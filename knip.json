@@ -3,14 +3,16 @@
   "ignoreFiles": ["spikes/**", "apps/web/public/vad/**", "apps/web/src/components/vendor/**"],
   "ignore": [
     "build/release.ts",
+    "packages/evals/src/spike-sqlite-vec.ts",
     "scripts/check-agents-md-length.ts",
     "scripts/check-dscheck.ts",
     "scripts/check-import-paths.ts",
+    "scripts/check-locales.ts",
     "scripts/check-ratchets.ts",
+    "scripts/flatten-locales.ts",
     "scripts/pocket-shim.ts",
-    "packages/evals/src/spike-sqlite-vec.ts",
-    "tests/e2e/playwright.config.ts",
-    "scripts/seed-demo.ts"
+    "scripts/seed-demo.ts",
+    "tests/e2e/playwright.config.ts"
   ],
   "ignoreDependencies": [
     "@aeriondyseti/drizzle-sqlite-vec",

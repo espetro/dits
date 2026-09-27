@@ -1,0 +1,21 @@
+# Standalone fill config (extends can't drop the base's replay `file` field).
+# Used by `mise run i18n:fill` — needs the OpenAI-compatible provider env vars.
+version = 1
+locale_dir = "apps/web/src/locales"
+source = "en"
+targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn"]
+
+[provider]
+kind = "http"
+model = "${env:CAUCE_AI_MODEL}"
+api_key = "${env:CAUCE_AI_API_KEY}"
+base_url = "${env:CAUCE_AI_BASE_URL}"
+
+[check]
+fail_on = ["missing", "stale", "invalid"]
+
+[[checks]]
+id = "icu"
+
+[[checks]]
+id = "placeholder-parity"

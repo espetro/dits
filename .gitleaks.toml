@@ -1,0 +1,9 @@
+title = "dits gitleaks config"
+
+# Extends the default ruleset.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "intl-ai local stat cache: key->translation maps, not secrets"
+paths = ['''\.intl-ai/''']

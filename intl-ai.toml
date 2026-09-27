@@ -3,13 +3,13 @@ locale_dir = "apps/web/src/locales"
 source = "en"
 targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn"]
 
-# `bunx intl-ai fill` uses the org's OpenAI-compatible endpoint (managed demo
-# provider env vars are already provisioned for sessions).
+
+# `check` is offline; `fill` needs a real provider. This replay stub keeps the
+# schema satisfied without env vars — `mise run i18n:fill` uses the standalone
+# intl-ai.fill.toml (http provider, env-interpolated creds) instead.
 [provider]
-kind = "http"
-model = "${env:CAUCE_AI_MODEL}"
-api_key = "${env:CAUCE_AI_API_KEY}"
-base_url = "${env:CAUCE_AI_BASE_URL}"
+kind = "replay"
+file = "intl-ai.cassette.json"
 
 [check]
 fail_on = ["missing", "stale", "invalid"]
