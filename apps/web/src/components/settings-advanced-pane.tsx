@@ -44,10 +44,6 @@ export function AdvancedPane() {
 
   return (
     <div className="space-y-1">
-      <p className="pb-3 text-xs text-muted-foreground">
-        <FormattedMessage id="settings.advanced.intro" />
-      </p>
-
       <SettingsRow
         title={intl.formatMessage({ id: "settings.advanced.runtime" })}
         description={

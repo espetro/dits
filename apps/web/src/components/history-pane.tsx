@@ -7,7 +7,7 @@ import { useLocale, withLocale } from "../lib/locale-href";
 import { clearClientSessions, listClientSessions } from "../lib/opfs-store";
 import type { Session } from "@di/shared/session";
 import { Button } from "./vendor/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "./vendor/empty";
+import { Empty, EmptyDescription, EmptyHeader } from "./vendor/empty";
 
 /**
  * Cached-session list pane (settings -> past interviews). This is user data,
@@ -57,9 +57,6 @@ export function HistoryPane() {
     return (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>
-            <FormattedMessage id="history.title" />
-          </EmptyTitle>
           <EmptyDescription>
             <FormattedMessage id="history.empty" />
           </EmptyDescription>
