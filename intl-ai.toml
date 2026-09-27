@@ -1,0 +1,21 @@
+version = 1
+locale_dir = "apps/web/src/locales"
+source = "en"
+targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn"]
+
+# `bunx intl-ai fill` uses the org's OpenAI-compatible endpoint (managed demo
+# provider env vars are already provisioned for sessions).
+[provider]
+kind = "http"
+model = "${env:CAUCE_AI_MODEL}"
+api_key = "${env:CAUCE_AI_API_KEY}"
+base_url = "${env:CAUCE_AI_BASE_URL}"
+
+[check]
+fail_on = ["missing", "stale", "invalid"]
+
+[[checks]]
+id = "icu"
+
+[[checks]]
+id = "placeholder-parity"

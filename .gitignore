@@ -62,3 +62,4 @@ worker/silero_vad.onnx
 
 # Local voice stack: process-compose.yaml is checked in, logs are not.
 .di/logs/
+.intl-ai/

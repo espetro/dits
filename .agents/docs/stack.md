@@ -92,6 +92,7 @@ env overrides `DI_` + `__` (`DI_LLM__MODEL=gpt-4o`). See
 | `mise run smoke`               | `/v1/test/smoke` behavioral probe                                     |
 | `mise run release`             | per-OS release archives into `dist/releases/`                         |
 | `mise run intl`                | locale key-parity check (advisory)                                    |
+| `mise run i18n:fill`           | intl-ai fill missing keys via the configured provider (manual)        |
 
 ## Tests
 

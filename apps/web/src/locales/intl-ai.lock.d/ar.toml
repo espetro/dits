@@ -1,0 +1,3203 @@
+version = 1
+
+[entries."a11y.account"]
+value = "الحساب"
+source_hash = "ca20728d35f00c3a4c21b1fc8b0086b59f89df2d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.agentStage"]
+value = "مرحلة الوكيل"
+source_hash = "38205b85770356aa063dffe54a9b41d1382b6382"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.close"]
+value = "إغلاق"
+source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.editor"]
+value = "المحرر"
+source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.github"]
+value = "GitHub"
+source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.language"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.moreTools"]
+value = "المزيد من الأدوات"
+source_hash = "4915a1a2232aaf565e67e7938c370dc84ffb8faa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."a11y.runtimeMode"]
+value = "وضع التشغيل"
+source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:00:56Z"
+
+[entries."account.guest"]
+value = "زائر"
+source_hash = "face83ee3014bdc8f98203cc94e2e89222452e90"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."account.guestEmail"]
+value = "جلسة محلية · بدون حساب"
+source_hash = "7735a832cbb5244c99add6ac5eb984dddef8415d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."account.history"]
+value = "الجلسات السابقة"
+source_hash = "b7b7c25bc3bb53f3f6e790f9623e9010bb0498c0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."account.language"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."account.settings"]
+value = "الإعدادات"
+source_hash = "c7f73bb54d928922c3838bb789ee9fb8a5b1eb37"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."common.github"]
+value = "github"
+source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."editor.language"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."editor.theme"]
+value = "سمة المحرر"
+source_hash = "33860dfca35401715a368ddbeb5306cbf2841664"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."error.home"]
+value = "العودة إلى الرئيسية"
+source_hash = "877ba514defadf05453d8b9bc258c2b3f000f53f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."error.message"]
+value = "حدث خطأ غير متوقع أثناء عرض هذه الصفحة."
+source_hash = "7dc1fff62efd103289adbac42bc86383f8719dea"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."error.retry"]
+value = "حاول مجددًا"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."error.title"]
+value = "حدث خطأ ما"
+source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."errors.api.cap"]
+value = "تم رفض الرفع"
+source_hash = "c80857313cde3499977ed6547cc49fdffc0e4d0a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.createSession"]
+value = "لم يتم إنشاء الجلسة"
+source_hash = "64fc79ba40b721d6b5185fff36a06ad52cc0df68"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.document_not_found"]
+value = "لم يتم العثور على المستند"
+source_hash = "f427adfad7d04ea82c85747055aaa163cd482502"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.file_cap"]
+value = "الملفات كثيرة جدًا"
+source_hash = "2c0034d5f7407417a34c50ffee42bac6c8b38486"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.getReport"]
+value = "لم يتم تحميل التقرير"
+source_hash = "22cb28eddbcb19a63cbd9c53cdad39508ecd28b4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.getSession"]
+value = "لم يتم تحميل الجلسة"
+source_hash = "f92072f9fa56dec21dfa574abb25e51072546e49"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.getTurns"]
+value = "لم يتم تحميل النص"
+source_hash = "8a0c5aed5a7cf37ed0feccece35044db5039e4f1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.listSessions"]
+value = "لم يتم تحميل الجلسات"
+source_hash = "8a1bf37741848afa8b4300803d9817393065cd5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.no_embeddings"]
+value = "لم يتم تكوين موفر تضمين على هذا الخادم"
+source_hash = "c98252fd8de1c0bece5f3c9cb4dedd6e052c329c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.no_files"]
+value = "لم يتم رفع أي ملفات"
+source_hash = "a73e4d6dd88fad8a2d9c7f9339ffb6dcd178482b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.not_found"]
+value = "غير موجود"
+source_hash = "094b763b4cfcc0b05e5d040581cd513c3ca08067"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.postTurn"]
+value = "لم يتم إرسال الرسالة"
+source_hash = "e6e44156829e9f0a757b23dc4faa82473b006e37"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.pushToolState"]
+value = "لم يتم حفظ حالة الأداة"
+source_hash = "2df05b2d173442c3d72ab17a68121c1eea701258"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.report_failed"]
+value = "فشل إنشاء التقرير على الخادم"
+source_hash = "7a9a5070abb8981740f59f2efd17ccc68c615196"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.report_unconfigured"]
+value = "لم يتم تكوين إنشاء التقرير على هذا الخادم"
+source_hash = "68626c91b7405b4672a86c9c52437fddfe7503bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.requestReport"]
+value = "لم يتم بناء التقرير"
+source_hash = "848d8a21b72040b79f0cef290b78d7ba4239c53a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.session_id_mismatch"]
+value = "عدم تطابق الجلسة"
+source_hash = "1cb12602762c4a0e3f95d549cbe65b1415e0c295"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.session_not_found"]
+value = "لم يتم العثور على الجلسة"
+source_hash = "fefdba8f6adb339f3aa485a0e14bb027a0e55cb1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.size_cap"]
+value = "الملفات كبيرة جدًا"
+source_hash = "a76d7453fd59d1583b963a77d5bb74bb705bfc18"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.unsupported_type"]
+value = "نوع الملف غير مدعوم"
+source_hash = "6add681318d86be4c7b95218e63e647fa9fdd72e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.updateSession"]
+value = "لم يتم تحديث الجلسة"
+source_hash = "f702943dbe3feed976edf4868527c858769cceb0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.upgrade_required"]
+value = "نقطة النهاية هذه تتوقع ترقية WebSocket"
+source_hash = "ab58aaec5a9440e2c651ca29cb9b0b130aa4d850"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.api.upload"]
+value = "فشل رفع الملف"
+source_hash = "e854e51f2caeef2083845a196fc86770f3dbfab6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.http"]
+value = "فشل الطلب ({status})"
+source_hash = "6ca71bddc1a7e14410895157898c5b354c4f8f9f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.llm.chat"]
+value = "فشل طلب النموذج ({status})"
+source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.llm.notLoaded"]
+value = "لم يتم تحميل نموذج المتصفح بعد"
+source_hash = "8527789365910ca457a684911fd4296fb74f779a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.llm.timeout"]
+value = "انتهت مهلة تحميل النموذج ({seconds}s)"
+source_hash = "61fe27fc018b1d3f7922e1adaf954532c8082eb6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.llm.unsupported"]
+value = "نماذج المتصفح غير مدعومة في هذا المتصفح"
+source_hash = "888a624eb37fbe932d6e50b859e7b4150ddcc3b5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.models.disposed"]
+value = "تم إيقاف محرك الصوت"
+source_hash = "06b72ebfb32991595d61e16a2b21cc092e8b8392"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.models.download"]
+value = "فشل تنزيل النموذج"
+source_hash = "748992e15f9f76d120e79330fd480d7355c32e05"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.models.manifest"]
+value = "لم يتم جلب بيان نموذج الصوت ({status})"
+source_hash = "f8f606b7adc54d841a3618fce5f9e44d642e4c53"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.models.noStorage"]
+value = "لا يوجد تخزين دائم متاح لنماذج الصوت"
+source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:34Z"
+
+[entries."errors.models.sha256"]
+value = "فشل التحقق من تحميل النموذج"
+source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.size"]
+value = "تم تقليم تحميل النموذج"
+source_hash = "686765ea8916904c067463fe44cd8736b7596533"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.sttEngine"]
+value = "نموذج المحادثة على الجهاز غير مثبت"
+source_hash = "8921d69ccf03195911dfdf6e873887a8445bcc4d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.sttWorker"]
+value = "فشلت بدء محرك الكلام"
+source_hash = "82ac3f17596f9fa64ab253b100ff6d0a46291fd3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.ttsEngine"]
+value = "نموذج الصوت على الجهاز غير مثبت"
+source_hash = "0108250d0b60b59d59a21c81a7d451c852c5e9ac"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.ttsWorker"]
+value = "فشلت بدء محرك الصوت"
+source_hash = "057f9ca139cb8f3b5a1faf2aef3d3c446bd8cf0d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.models.unknown"]
+value = "نموذج صوت غير معروف: {id}"
+source_hash = "3ab1249fb5cf2fd5766b46b7e27465e437d38504"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.report.noSession"]
+value = "لا يوجد ملف تعريف أو جلسة مزود"
+source_hash = "65f36fde270ce89e21272e2ca1e289bec2de55e1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.langUnsupported"]
+value = "لا يدعم خدمة الكلام هذه اللغة"
+source_hash = "78327f07b761f005a171472907d939e0f5f16514"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.network"]
+value = "خدمة الكلام غير متاحة - متصفح Chrome على الكمبيوتر يرسل صوت الميكروفون إلى خوادم جوجل، لذا يمكن أن يحظرها VPN أو جدار الحماية أو مانع الإعلانات (Chrome على الهاتف يعمل غالباً)"
+source_hash = "670d2ed5363180f025bcab01b915f862d3ef5c03"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.noMic"]
+value = "لم يتم العثور على ميكروفون"
+source_hash = "8464fe3e7c99ff2d6050e17c123d769fd39aef3c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.noSpeech"]
+value = "لم يكتشف أي كلام"
+source_hash = "e547e94a30f8e6630cb3da21969d256d03626120"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.notAllowed"]
+value = "تم رفض إذن الميكروفون"
+source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.unknown"]
+value = "فشلت التعرف على الكلام"
+source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.stt.unsupported"]
+value = "التعرف على الكلام غير مدعوم في هذا المتصفح"
+source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.tts.builtin"]
+value = "فشلت تركيب الكلام"
+source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.tts.empty"]
+value = "أرجعت نقطة النهاية للكلام لا يوجد صوت"
+source_hash = "6e955bf06ab4b725f7a9544dcd63245fc3083f5e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.tts.endpoint"]
+value = "فشلت نقطة النهاية للكلام ({status})"
+source_hash = "b7fcc45b1372cbfa7daa68a42cbfeee8b3376cce"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.tts.pcm"]
+value = "تنسيق صوتي غير متوقع"
+source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.tts.wav"]
+value = "تنسيق صوتي غير متوقع"
+source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.unknown"]
+value = "حدث خطأ ما"
+source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.boot"]
+value = "لم يتمكن الصوت من البدء"
+source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.captureRate"]
+value = "معدل عينة الميكروفون غير مدعوم ({rate})"
+source_hash = "47373a15eb7820c99c604cda277e04c88252c93f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.connect"]
+value = "لم يتم الاتصال بالصوت"
+source_hash = "a3d414886c5a975c6ad2d1d9949d510af1883224"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.llm"]
+value = "فشلت نموذج الوكيل"
+source_hash = "65337ddda34f56f114ac4ae971c43a6ada82ef9a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.mic"]
+value = "لم يتم التقاط الميكروفون"
+source_hash = "bdd31a34ba6bee49d2a3b64a90490dcfe03bdb88"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.micDenied"]
+value = "تم رفض إذن الميكروفون"
+source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.micUnavailable"]
+value = "لا يوجد ميكروفون متاح"
+source_hash = "d8d337ca75f5968e4761b35b7935b36db8fc697d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.noResponse"]
+value = "توقف الوكيل عن الاستجابة"
+source_hash = "63febd925fc41a73ca6b5a39764a92ad8a74e8a8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.reconnectExhausted"]
+value = "انقطع اتصال الصوت ولم يستطع إعادة الاتصال"
+source_hash = "8273ea33b0d914910d797f9c5dbfa7a988d2db92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.restart"]
+value = "لم يتمكن الصوت من إعادة التشغيل"
+source_hash = "4a77cce47e5139faac25847326cff81d481079a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.server"]
+value = "واجه خادم الصوت خطأ"
+source_hash = "50f6bc11368a95ec2af9dc95cde18bdc3c9a4649"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.socket"]
+value = "فشلت اتصال الصوت"
+source_hash = "47e397fc0f3c039fa918534ed95cef6674a72db4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.socketTimeout"]
+value = "انتهى مهلة اتصال الصوت"
+source_hash = "9cebd9ed4b82c51d045c2639d88bfd233ba82a6a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.start"]
+value = "لم يتمكن الصوت من البدء"
+source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.stt"]
+value = "فشلت التعرف على الكلام"
+source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.sttUnsupported"]
+value = "التعرف على الكلام غير مدعوم في هذا المتصفح"
+source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.tool"]
+value = "فشلت استدعاء الأداة"
+source_hash = "9b13b5838afd9401cd1f12783d6be47bd6440af8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."errors.voice.tts"]
+value = "فشلت تركيب الكلام"
+source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:36:34Z"
+
+[entries."finish.buildFailed"]
+value = "تعذر إنشاء التقرير — النص المفرغ محفوظ"
+source_hash = "ed1d42d6246b147849d1008f0dbc7bd55befc7a7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.building"]
+value = "جارٍ إنشاء التقرير"
+source_hash = "802b0b7905c308fabedcc2841c96e15ac00539b7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.complete"]
+value = "اكتملت المقابلة"
+source_hash = "3663e2dd20881caafc1121761e13103cff51b26c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.discard"]
+value = "تجاهل"
+source_hash = "f57e38069445fdec820e61935325ba944c1c8fe4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.downloadJson"]
+value = "تنزيل بصيغة JSON"
+source_hash = "a1d275877b2701e98c3a6c1cb855e5476894d425"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.fallbackTitle"]
+value = "جلسة"
+source_hash = "fcbdc4c271c889825d8338d2d8f10b6e5e95c171"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.getTranscript"]
+value = "احصل على transcript"
+source_hash = "6f9c4d5953c094aac95fdc382994e890c3f81ef9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.moreFormats"]
+value = "صيغ أخرى لـ transcript"
+source_hash = "370da964f110cfb2f87eab72debd752e8f968922"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.openReport"]
+value = "فتح التقرير"
+source_hash = "721f5ee4bf88d25bd30e1e63884be0f51731492d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.summary"]
+value = "{duration} دقيقة · {turns} أدوار"
+source_hash = "77232618be68a4ab45f1c082922b35926c2f74be"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."finish.tryAgain"]
+value = "حاول مجددا"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.clear"]
+value = "مسح الكل"
+source_hash = "8151d29bc4072a5a7d904dd1aa0aadbafc36fff5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.clearCancel"]
+value = "إلغاء"
+source_hash = "4fd0653c4f2aef3b19a3c145bbdc5f4740715a09"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.clearConfirm"]
+value = "حذف كل الجلسات المحفوظة على هذا الجهاز؟"
+source_hash = "bd924a62db7347223b660feea61da8bb905efefb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.clearDo"]
+value = "حذف الكل"
+source_hash = "d32ab1daabcf0664e151d437006e5711eca69a9e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.daysAgo"]
+value = "قبل {n} يوم"
+source_hash = "e827dc07e2114e0f231de315608b40679388af0e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.empty"]
+value = "لا جلسات بعد — اذهب لِتُجرَّب."
+source_hash = "a693a66c1841c4c3e74713183b96b266b436f892"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.loading"]
+value = "جارٍ التحميل…"
+source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.status.created"]
+value = "تم الإنشاء"
+source_hash = "21c50805b553b7a40e48394a5d77d442587ddee2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:36Z"
+
+[entries."history.status.discarded"]
+value = "تم التخلص منه"
+source_hash = "4056ef88d506d5bff7494229c59837f06989f4b4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:36Z"
+
+[entries."history.status.finished"]
+value = "تم الانتهاء"
+source_hash = "f957097d7a22775f6bea41b46cae4d14274dac9f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:36Z"
+
+[entries."history.status.interviewing"]
+value = "في مرحلة المقابلة"
+source_hash = "b20b93f57967c066d87b35085c5a5801f38fa1b7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:36Z"
+
+[entries."history.status.reported"]
+value = "تم الإبلاغ"
+source_hash = "6d3551d70d7d8b06562ccb87bbdb7261682616fa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:36Z"
+
+[entries."history.title"]
+value = "السجل"
+source_hash = "66f79d8a6327c82c9033e6d65ff03322a3766c87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.today"]
+value = "اليوم"
+source_hash = "2dd2bed725678b4f963f27d5e847a4f21db31cd1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.weeksAgo"]
+value = "قبل {n} أسبوع"
+source_hash = "09ba505895afb74ec5625eb1de879f86893ae286"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."history.yesterday"]
+value = "أمس"
+source_hash = "1aa96b8f44f6515a65f3c132ce1b8842a9bd9e87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.editorLanguages"]
+value = "لغات البرمجة"
+source_hash = "3b30e04281e21f41bea9d0dc2c44f8ee472224d7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.editorPlaceholder"]
+value = "اكتب أو الصق حلك هنا…"
+source_hash = "5e0210d0842f50fa54707218746fdc4f979587b7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endConfirmBody"]
+value = "النص المسجل حتى الآن محفوظ، ولا يزال بإمكانك إنشاء تقرير."
+source_hash = "b57b681b270346fad72e4c09c7fce8a214d2380d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endConfirmTitle"]
+value = "إنهاء المقابلة؟"
+source_hash = "bff1775dd9d113e993e4f1c9620e87f0c1358ce8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endEarly"]
+value = "إنهاء مبكر"
+source_hash = "dbcf3146b77abb759da4f5d2b62a26c18168d5a7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endedBadge"]
+value = "منتهية"
+source_hash = "ba92ed73c97b30bcc4639724ab6aa8ae87f92601"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endedBody"]
+value = "انتهت هذه المقابلة — النص أدناه للقراءة فقط."
+source_hash = "d4f6f302eb19daf188b3a1e5302a9da151d26abe"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.endedEmpty"]
+value = "لم يتم تسجيل أي أدوار في هذه الجلسة."
+source_hash = "d4478151af5da32494a85a8fd6f2065bae26a91d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.leave"]
+value = "مغادرة"
+source_hash = "31aed9e37eb93350fa0862e61ae686529394cfa7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.leaveBody"]
+value = "المقابلة لا تزال جارية — المغادرة ستنهيها مبكرًا."
+source_hash = "ec476282cc3a66733241714dd20c8873347abc1c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.leaveTitle"]
+value = "مغادرة المقابلة؟"
+source_hash = "c0ce31a3fa9976a6107cfbf33c3ab5e089cffdfa"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.mute"]
+value = "كتم"
+source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.newSession"]
+value = "جلسة جديدة"
+source_hash = "e2df0567f0f8da5e75b0218fe08043833cc909d7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.noSpeechDetected"]
+value = "لم يتم رصد صوت؟ اكتب بدلاً من ذلك."
+source_hash = "d09fc49bdeac2340f12125fbbc4f4bc1a241f53b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.phase.agentSpeaking"]
+value = "الوكيل يتحدث"
+source_hash = "1c977dfa25bdb4902f955d10745df5a0bd4e8786"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.phase.interrupted"]
+value = "تمت المقاطعة"
+source_hash = "d897bf481c6d3038f32cd50b3a8b5f6cf56b6348"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.phase.listening"]
+value = "يستمع"
+source_hash = "2db9d9c80ff405af3e38d8b2a405252df2693b08"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.phase.thinking"]
+value = "يفكر"
+source_hash = "beac9eac1cee74c35b4209abeb168938202b092d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.phase.userSpeaking"]
+value = "أنت تتحدث"
+source_hash = "ce24fae1158b00d3ef3f7f5f69aaf9328712a98e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.preparing"]
+value = "الوكيل يحضّر سؤالك الأول…"
+source_hash = "499c8222b326ee95f0037a75e35b8a22b8883b98"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.question"]
+value = "السؤال الحالي"
+source_hash = "40a498963210e6d61ba1a02f0fda1950322509a3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.questionN"]
+value = "سؤال {n}"
+source_hash = "469fefd6d32a49ffba78c31fcabb2c849cb31b47"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.stay"]
+value = "البقاء"
+source_hash = "396f9974da4e60ff2d8ccc90121dbaf5d58ef9e6"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.tab.editor"]
+value = "محرر"
+source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.tab.whiteboard"]
+value = "whiteboard"
+source_hash = "d70ea575012f340f84f713ef4de453ab27a6fac1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.talkOrType"]
+value = "تحدث أو اكتب…"
+source_hash = "ea3d8d636f927d139d5f46074c77a1d4a65d64cc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.transcript"]
+value = "نسخة"
+source_hash = "ed12c1881239dbb929c4c6f467b2e09f7a2fd7d6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:44Z"
+
+[entries."interview.transcriptClose"]
+value = "نسخة —"
+source_hash = "f3e8a4591270881e58cc66f3eefb507a75c4b40e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:44Z"
+
+[entries."interview.transcriptOpen"]
+value = "نسخة +"
+source_hash = "c1c96a05d2d4c411a5d910eba5820a0c535f5e24"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:44Z"
+
+[entries."interview.type"]
+value = "اكتب"
+source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.typeInstead"]
+value = "اكتب بدلاً من ذلك…"
+source_hash = "b060d5ec1b0a8d64209b4514b153c9f63161c5e0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.typeInsteadHint"]
+value = "اكتب إجابتك بدلاً من ذلك"
+source_hash = "6ad7308bc544204c667075edc69a0aaaa696666c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.unmute"]
+value = "إلغاء الكتم"
+source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.viewReport"]
+value = "عرض التقرير"
+source_hash = "96109ce947f8d80834aaffb931ebbc7035dfa82c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceActive"]
+value = "صوت الوكيل نشط"
+source_hash = "72b5ae6d20b3964264efbf93274c48270e963abc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceConnected"]
+value = "الصوت متصل"
+source_hash = "a8ceb8bdbd7672017ddea5ed3d1bf54f9dc08cc2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceConnecting"]
+value = "جارٍ الاتصال…"
+source_hash = "f8f4714587575060f58c44a8eb833ed4dcfef366"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceError"]
+value = "خطأ في الصوت"
+source_hash = "e663f93e9728a03ea760bae625932939a69051ab"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceErrorToast"]
+value = "حدث خطأ في الصوت"
+source_hash = "992d001606d503c20ea696b46720e89de31b3c72"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceIdle"]
+value = "الصوت غير نشط"
+source_hash = "034d1791213453a16dd85ce89a8ea3a72383d237"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceMuted"]
+value = "صوت الوكيل مكتوم"
+source_hash = "f5c921cab6e6d18b2991c6b98c49281d84855f26"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceReconnecting"]
+value = "جارٍ إعادة الاتصال…"
+source_hash = "6b1600447eb8f356235c28f31f7d6a32af4cd839"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.voiceRetry"]
+value = "إعادة الصوت"
+source_hash = "a74b34751ed93a877fa72e4f3d8e5ad60f6894c0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."interview.whiteboardLoading"]
+value = "جارٍ تحميل whiteboard"
+source_hash = "f821dc56dc72292d9489d61c3f18948b6eb252e9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.badge"]
+value = "مقابلات تجريبية"
+source_hash = "663e93166b09edcdc5815f3a03909205e308bba0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.cta"]
+value = "جرّبني"
+source_hash = "522e6dbc7b1e4e97cbd9ef7e2b3cacf946353368"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.heading"]
+value = "الوكيل الذكي الذي <em>تتمرّن</em> عليه للمقابلات."
+source_hash = "b62f1a5cadc63d39625f1e62ab324ae2b2c196b9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.aria"]
+value = "معاينة لمقابلة جارية"
+source_hash = "bbcefd17c1db605bae2affde968f601a3ecddf0c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.caption"]
+value = "حدّثني عن وقتٍ فشلت فيه."
+source_hash = "370306ac43ea563f2ec5e2f3a9832d0fc1150e89"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.line.agent1"]
+value = "أين في سيرتك الذاتية مكتوب أنك تستطيع التعامل مع عطل في الإنتاج؟"
+source_hash = "3e274960acdf7da193cbca6cdc66910214cc9590"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.line.agent2"]
+value = "ما الذي تعطّل، وماذا فعلت أولاً؟"
+source_hash = "5d1078aa92cec4e678e4dd6022b0b9d12ad92cbd"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.line.you1"]
+value = "في وظيفتي الأخيرة كنت مسؤولاً عن مسار الفوترة…"
+source_hash = "19de73eb8328bb2d8376072a1dcf81addb2ac82f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.micLabel"]
+value = "أنت · ميكروفون"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.note1"]
+value = "<b>قصة فشل</b> — عطل في مسار الفوترة"
+source_hash = "50c768a2d6935c2cdb20d53c8bf1867b80d04ea3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.note2"]
+value = "<b>تعمّق</b> — أول ردّة فعل، لا بطولة"
+source_hash = "759809bc616214ef640ad6184dc9e4e428f9960b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.notes"]
+value = "ملاحظات"
+source_hash = "3add7b9612102f2a7dbe4ed4fe886e07e847c24d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.qchip"]
+value = "سؤال 2 / 5"
+source_hash = "cd69a8d1df19e208fced5aaf896bee29b77dbbd8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.scenario"]
+value = "تصميم أنظمة · مستوى متوسط"
+source_hash = "fc0e610a518fd438a1ea88ee2b674b86e818f3ff"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.time"]
+value = "07:41 / 20:00"
+source_hash = "3a6986d13d57de594058ef3d7a10169ec53acee3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.who.agent"]
+value = "الوكيل"
+source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.peek.who.you"]
+value = "أنت"
+source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."landing.subtitle"]
+value = "مقابلات صوتية مع وكيل يتابع بجدية، ثم يقدّم لك الأدلة."
+source_hash = "b4cd8fb80386ecc2c08188765fcf2b5abde7fa58"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."locale.label"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."meta.title.index"]
+value = "di — مقابلات تجريبية"
+source_hash = "d5721531ceec4ce88fcafa05a47b1d12f079255b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:54Z"
+
+[entries."meta.title.setup"]
+value = "الإعداد — di"
+source_hash = "e1033f919701dcc3981964ea1047daf4be49b11f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:54Z"
+
+[entries."meta.title.voiceHarness"]
+value = "استغلال الصوت — di"
+source_hash = "9727ba98461b727bb907d9188481291063c5a9ec"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:54Z"
+
+[entries."micSelector.devicesFailed"]
+value = "تعذر الحصول على أجهزة الصوت"
+source_hash = "349d719d660415f0be2894ae6ea3e7c622342328"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.fallback"]
+value = "مايكروفون {id}"
+source_hash = "ef17b0afd967fb33d1a7ae0edcbd4ad7cfe92c16"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.loading"]
+value = "جارٍ التحميل…"
+source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.loadingDevices"]
+value = "جارٍ تحميل الأجهزة…"
+source_hash = "54a2d73e75d77824c343a1a58ff9c90760946ba5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.mute"]
+value = "كتم الصوت"
+source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.none"]
+value = "لا يوجد مايكروفون"
+source_hash = "ca34a76fee685e1a201eb2da3fb4097e299253d9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.unmute"]
+value = "إلغاء الكتم"
+source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."micSelector.waveform"]
+value = "معاينة مستوى الميكروفون"
+source_hash = "28cb7803a767a635a3b07423c80336330ae32727"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:56Z"
+
+[entries."nav.history"]
+value = "السجل"
+source_hash = "66f79d8a6327c82c9033e6d65ff03322a3766c87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."notfound.home"]
+value = "العودة إلى الرئيسية"
+source_hash = "877ba514defadf05453d8b9bc258c2b3f000f53f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."notfound.message"]
+value = "هذه الصفحة غير موجودة — قد يكون الرابط قديمًا أو العنوان مكتوبًا بشكل خاطئ."
+source_hash = "2320b588062bfd85ed716d9cb1720de7d5137db8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."notfound.title"]
+value = "404"
+source_hash = "c35a9fc52bb556c79f8fa540df587a2bf465b940"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.backToTranscript"]
+value = "العودة إلى transcript"
+source_hash = "b9d3a0ab2912eafc8820795e1abf7db451427de0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.coachSeed"]
+value = "درّبني على {name}. نفّذ جلسة تدريب مركّزة واسأل عن التفاصيل."
+source_hash = "776586d2757db14459d56affe4ee45c942e47e0c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.competencies"]
+value = "المهارات"
+source_hash = "5fa70ac96d57944f4ee1930a3c0e0aaed302f158"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.coverage"]
+value = "التغطية"
+source_hash = "6dafbcf610e9f81897b65ee9142715ab2e793f9e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.failed"]
+value = "فشل الوكيل في تقييم هذه الجلسة"
+source_hash = "d0fc26dcf9a7b160fc5f5dbe2c6ec8e1ebb0ca27"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.failedBody"]
+value = "فشل الوكيل في تقييم هذه الجلسة — تحقق من إعدادات مزود الذكاء الاصطناعي لديك ثم أعد المحاولة."
+source_hash = "216a400ab1fa1f01d009d703bd6b05f670887ce1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.header"]
+value = "تقرير: {title}"
+source_hash = "9798c5753df23b3f652917c2365d323ed415ca1a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.noReportYet"]
+value = "لا يوجد تقرير بعد"
+source_hash = "6ebef6dae8f3d819b2d1a2bb5716b408ac71194b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.overall"]
+value = "الإجمالي"
+source_hash = "63a711c71609725e5c25334ad085d65ad431414a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.practiceHint"]
+value = "ابدأ جلسة تدريب مبنية على أضعف نقاطك"
+source_hash = "700cae6649f34472f7518a243d050e909e2be283"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.practiceWeak"]
+value = "تمرّن على نقاط الضعف"
+source_hash = "9b39844223257d3fb709f1d36cfb26bb5ff55848"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.scoring"]
+value = "جارٍ تقييم جلستك…"
+source_hash = "2d107b721d509e0b04e723294933291269bc83e7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.scoringSlow"]
+value = "قد يستغرق هذا دقيقة على النماذج المجانية."
+source_hash = "fdeac11369c77d3620977ee1cab76dc14a6a3d75"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.session"]
+value = "جلسة"
+source_hash = "fcbdc4c271c889825d8338d2d8f10b6e5e95c171"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.tryAgain"]
+value = "حاول مجددًا"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.turn"]
+value = "الدور {n}"
+source_hash = "f2aebf246f58ceb17f91990b6a2223fc7d2a2f83"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."report.weakestFallback"]
+value = "مناطقك الأضعف"
+source_hash = "0289acb39e22d7747ff711c12366d420f9302011"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:01:58Z"
+
+[entries."runtime.custom"]
+value = "نقطة نهاية مخصصة"
+source_hash = "17b767eb4b24ba319cc836c7a7f88f79a0eaf4f2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."runtime.degradedTitle"]
+value = "المختار: {chosen}, الفعّال: {effective}"
+source_hash = "9ad3a06c7b25609347be1c627293462eea258c35"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:02:01Z"
+
+[entries."runtime.inBrowser"]
+value = "داخل المتصفح"
+source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."runtime.label"]
+value = "بيئة التشغيل"
+source_hash = "f2e18ffc17e2595362b5468aac34221e09934bf8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."runtime.server"]
+value = "خادم"
+source_hash = "3de4f901fffb30ac720b0e7eb654b4faa2dd03fa"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."runtime.unreachable"]
+value = "الخادم غير متاح — يتم استخدام {fallback}"
+source_hash = "276faa08367bbf36e374f99edffb1c2caf71f863"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.endpointBuiltin"]
+value = "المدمج في المتصفح"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.endpoints"]
+value = "نقاط النهاية المخصصة"
+source_hash = "1ad0b3cf0f91b5149aa11a3a82ca08993a88db9a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.endpoints.stt"]
+value = "خدمة تحويل الصوت إلى نص"
+source_hash = "0b6d69eda54868a387ee7b2450873df163d829de"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.endpoints.tts"]
+value = "خدمة تحويل النص إلى صوت"
+source_hash = "43173e8b115210fe524c33cb6840b608989bec59"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.intro"]
+value = "معظم الناس لا يحتاجونه أبدًا."
+source_hash = "1d2096224cde7b1c1c2c87311021f8383b1b78ea"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.runtime"]
+value = "وضع التشغيل"
+source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.runtime.custom"]
+value = "المتصفح + نقاط نهاية مخصصة"
+source_hash = "ddc9ccf8894e6265d8d68344ccbd1abdcc490c2e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.runtime.in-browser"]
+value = "هذا المتصفح"
+source_hash = "a1cac7d8d6b76a1b86062f87ccdc9868b26708f1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.runtime.server"]
+value = "تطبيق سطح المكتب"
+source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.advanced.runtimeDesc"]
+value = "من يشغّل المقابلة: تطبيق سطح المكتب أو خدماتك أو هذا المتصفح فقط."
+source_hash = "2c5adab5b12d948dcfed9950a22f1c6980c3e6b0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.demo"]
+value = "ذكاء تجريبي"
+source_hash = "94fa378053f958f0159deabefad90d5782c3af01"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.demoDesc"]
+value = "مقابِل مستضاف مجاني بحدود. بلا حساب أو إعداد."
+source_hash = "c362f8afc129fb13b6f2e175a956459d078873bb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.experimental"]
+value = "تجريبي"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.onDevice"]
+value = "على هذا الجهاز"
+source_hash = "9fa6762eeafca4a05bfa17ba49605613fec17d7f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.onDeviceDesc"]
+value = "نموذج صغير يعيش في هذا المتصفح. خاص لكنه أبطأ وأقل دقة."
+source_hash = "77335f95a6143ee1da97a0d77232e16c593e40c7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.own"]
+value = "حساب الذكاء الاصطناعي الخاص بك"
+source_hash = "f0298d1a9317f085c0ca99c3a7648f692682fd20"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.ownDesc"]
+value = "وصّل مفتاح api من خدمة تدفع لها."
+source_hash = "e8e05e132bdede009b11c121b4a8fcb0f1222e47"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.recommended"]
+value = "موصى به"
+source_hash = "13941e19549508716dacf14d5672ccd8b66f58dd"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.test"]
+value = "اختبار"
+source_hash = "5e64185f90b7a501b497d5c12ecb637693ed3bb8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.ai.testDesc"]
+value = "يرسل تحية للمقابِل ويتحقق من الرد."
+source_hash = "c6e7455ef674fbfa4d44f24bec0766d0ab00d2bc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.aiProvider"]
+value = "مزود الذكاء الاصطناعي"
+source_hash = "f81714b57309b6c32065a1d1c2804f1c4658bb33"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.apiKey"]
+value = "مفتاح API"
+source_hash = "cf678cab87dc1f7d1b95b964f15375e088461679"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.apiKeyHelp"]
+value = "تُرسل كرمز Bearer؛ تُحفظ في هذا المتصفح فقط."
+source_hash = "ce287cc50d872abd9fe105e5ba1bd4a22616a4f1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.apiKeySaved"]
+value = "محفوظ: {key}"
+source_hash = "474a31b09c5abe5801f5967b6b7d073c7c24c048"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.autosaveNote"]
+value = "يتم حفظ التغييرات تلقائيًا."
+source_hash = "b3fdb8cbae2acc0bd60bc46fcf2d951115b70742"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.baseUrl"]
+value = "العنوان الأساسي"
+source_hash = "1dbd61f556fe3f920e0c1bc1a21ce34dd73099d6"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.baseUrlHelp"]
+value = "عنوان واجهة API المتوافقة مع OpenAI، مثل https://api.openai.com/v1"
+source_hash = "440127bdc80bd2d8e8e253dbfec1e5f542022f8c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.baseUrlHelpAnthropic"]
+value = "عنوان API الأساسي لـ Anthropic، مثال: https://api.anthropic.com"
+source_hash = "32f36b25745d159996a4530e70161f8748edc6cd"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.close"]
+value = "إغلاق"
+source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.customEndpoint"]
+value = "نقطة نهاية مخصصة"
+source_hash = "15ed9a3dc5f6aaf908f3378df358b1a28c12396c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.demoLlm.badge"]
+value = "تجريبي"
+source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.demoLlm.customize"]
+value = "استخدام نقطة نهاية مخصصة"
+source_hash = "e792a41e1c404e93d5452601f571a7d84d47d6e3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.demoLlm.endpointLabel"]
+value = "Demo API"
+source_hash = "b1ea5ce46fbcb467932fa1e25921d2a7316d8a6c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.demoLlm.fill"]
+value = "استخدم نقطة النهاية التجريبية المُدارة — لا حاجة لمفتاح"
+source_hash = "0a459c914a6c114179ab3e8f07f0f15c012da553"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.demoLlm.upsell"]
+value = "تريد zero-conf غير محدود؟ أخبرنا"
+source_hash = "715ffd1b5221fc4a19b1b71e89b9294c08d6da29"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.installedSize"]
+value = "{size} م.ب على هذا الجهاز"
+source_hash = "21122c876745da95d5573bd7f0a837ded8c1fbb2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.intro"]
+value = "كل ما يحفظه التطبيق على هذا الجهاز. أعد التنزيل أو احذف ما تشاء."
+source_hash = "e1dc86a56dfd15fe840290b90b59496caf201c08"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.llm"]
+value = "نماذج المقابِل على هذا الجهاز"
+source_hash = "bb211f5b0e15897d75d404896b2c27791453920b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.llmInstalled"]
+value = "مثبت ({size} م.ب)"
+source_hash = "114bc63349a4f15cdb009d4772bf6e1a161179b4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.llmNotInstalled"]
+value = "غير منزّل ({size} م.ب)"
+source_hash = "cfbe72c456522f12162fc481cb0b4fce80074782"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.remove"]
+value = "إزالة"
+source_hash = "db99845855b2ecbfecca9a095062b96c3e27703f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.voice"]
+value = "حزمة الصوت على هذا الجهاز"
+source_hash = "df276c5b55c116ccc7a77fbeae2bd62eb690ea74"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.downloads.voiceDesc"]
+value = "نماذج صوتية (~50 م.ب) تعمل على هذا الجهاز."
+source_hash = "4d87f98773b0b1a04e33922bc3273c76220cff08"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.flavor"]
+value = "نوع الـ API"
+source_hash = "3b12f9806de959d3c6b2fa924afe079b15d9bfe0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.flavor.anthropic"]
+value = "متوافق مع Anthropic"
+source_hash = "8b9b1b04a0b7fb69f816178469c9c6ecfaa14877"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.flavor.openai"]
+value = "متوافق مع OpenAI"
+source_hash = "b10d74b5bb37c5ca2fda6aa4bac22f8a6a9018a0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.flavorHelp"]
+value = "بروتوكول نقطة النهاية. اختر Anthropic المتوافق لـ api.anthropic.com أو بوابات /v1/messages."
+source_hash = "8c0a8c0f44794f1eff5f73367eeda1fc49dfa440"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.freeProvidersLabel"]
+value = "No key yet? Free providers:"
+source_hash = "bf6313390c0ec65748373a19c978816c013a02a4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.history"]
+value = "الجلسات السابقة"
+source_hash = "d8eeeccca789c74d163c8cf0f5536bc590c620cb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.inBrowser"]
+value = "داخل المتصفح"
+source_hash = "57788e654e6002efd00722e87379ed19b7460cb3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.incomplete"]
+value = "مفعّل لكنه غير مكتمل — املأ الحقول أدناه أو أطفئه للاحتفاظ بالإعدادات المحفوظة"
+source_hash = "399d4e7df71dc6c80aee32c7031b176e0ad6898b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.invalid"]
+value = "بعض حقول نقطة النهاية غير صالحة (تحقق من العنوان أو المفتاح أو النموذج)."
+source_hash = "68ea6a7eb0a66e3866c2a13f58e4d3d4f287b093"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.language.app"]
+value = "لغة التطبيق"
+source_hash = "20696edf43c8b7fcd65d52169410a31a1df9e6ff"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.language.appDesc"]
+value = "لغة القوائم والأزرار."
+source_hash = "3e2cfe52ee22624d7f6d76c9617238326c348d31"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.language.interview"]
+value = "لغة المقابلة"
+source_hash = "f1c3fde369af5896af2c831078e24ca791a7bc07"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.language.interviewDesc"]
+value = "اللغة التي يتكلم بها المقابِل ويقيّم بها."
+source_hash = "f4909afc475339ffd1d66cacc0a404b7bd40695f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm"]
+value = "نموذج لغوي"
+source_hash = "370515d5b19f82bba11495fd9229cf64fb15aec0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.browserEngine"]
+value = "المحرك"
+source_hash = "c1f65ddb75ed7d97e701168af35171410be8f9e7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.browserModel"]
+value = "النموذج"
+source_hash = "68c2cc7f0ceaa3e499ecb4db331feb4debbbcc23"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.cloudRecommended"]
+value = "يُنصح بنقطة نهاية سحابية لتجربة أكثر سلاسة."
+source_hash = "72e7f3d4ac5f6f5b127d167c35621a74404a6ad2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.delete"]
+value = "حذف"
+source_hash = "f6fdbe48dc54dd86f63097a03bd24094dedd713a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.download"]
+value = "تنزيل"
+source_hash = "a479c9c34e878d07b4d67a73a48f432ad7dc53c8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.downloading"]
+value = "جارٍ التنزيل… {percent}%"
+source_hash = "1ac3747cd357ca3897ce70db4f33b39118e8e4a5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.engineGemini"]
+value = "Gemini Nano (مدمج في Chrome)"
+source_hash = "ffc82a80a1d5bd45d79976db9187d2faaf07b857"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.engineTransformers"]
+value = "Transformers.js (WebGPU، نماذج قابلة للتنزيل)"
+source_hash = "a2b1258553e9b06d4006e458d62d4aafef037d4e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.geminiEnableLink"]
+value = "تستخدم Chrome؟ فعّل Gemini Nano ←"
+source_hash = "f994ea2d228572dbd118f5d28ddabaabbad81b82"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.geminiReady"]
+value = "يديره Chrome؛ التنزيلات والتحديثات تتم تلقائيًا."
+source_hash = "81e352082ccaff67ad3e10254e3564229613379e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.geminiUnavailable"]
+value = "Gemini Nano غير متوفر في هذا المتصفح. استخدم Chrome 148+ أو اختر محرك Transformers.js."
+source_hash = "70001b1887cad1a71e7b7b961a3ff7aefec6ae43"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.inBrowserWarning"]
+value = "النماذج داخل المتصفح تعمل عبر WebGPU على جهازك: تستهلك ذاكرة/معالجة كبيرة وتكون أقل موثوقية بوضوح في اتباع تعليمات المقابلة من النماذج السحابية."
+source_hash = "d7fd725f785317d1eaf71eccfc7571a67554dd6f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.installed"]
+value = "مثبت"
+source_hash = "85841abddb12dc3591a5990c6527df65a5e63c87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.reDownload"]
+value = "إعادة التنزيل"
+source_hash = "7cd09bcda1b8fb8ec6b0760adf1687fa17771252"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.removeAll"]
+value = "إزالة جميع النماذج"
+source_hash = "faa8cfe91e87aec31aef0b9ce5ba9bf23d96afa5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.statusDot"]
+value = "حالة المحرك"
+source_hash = "d8f4585716e0a763a5fec3f562770be6f49c8d3b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llm.testOk"]
+value = "استجاب النموذج"
+source_hash = "e91e6d874ab5b0dd3e17cd308417e2ac16913e09"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.llmRequired"]
+value = "An LLM endpoint is required. In-browser LLMs are rare: only Chrome 148+ ships one (Gemini Nano, high hardware requirements)."
+source_hash = "534b246055deb05512143d12cb1123131bd7d90d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.model"]
+value = "النموذج"
+source_hash = "68c2cc7f0ceaa3e499ecb4db331feb4debbbcc23"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.modelHelp"]
+value = "معرّف النموذج كما يوفره نقطة النهاية، مثل gpt-4o-mini."
+source_hash = "f692c9350bee139c97e3ff5f2aac847e055c6182"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.modelId"]
+value = "معرّف النموذج"
+source_hash = "c7eb22a300dfb99911806d81a8bc2c25166b01db"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.modelPlaceholder"]
+value = "اختر من القائمة أو اكتب المعرّف"
+source_hash = "7a24d9aa4394f2b1fe8593801bb6a6697fc2a48f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.advanced"]
+value = "متقدم"
+source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.ai"]
+value = "ذكاء المقابِل"
+source_hash = "e924e62211be65b4dcbb861f68cca3a1eb2ccadc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.downloads"]
+value = "التنزيلات"
+source_hash = "a2a55e68a147ddb026454c38213bc01a3979f52c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.history"]
+value = "المقابلات السابقة"
+source_hash = "fdc7bb745dc22fd922a7b2ef72b57efb12814f92"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.language"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.nav.voice"]
+value = "الصوت والميكروفون"
+source_hash = "a2b2d2bde072bef7e2d661e181f017b428441ad1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.llm.providers"]
+value = "نقاط نهاية متوافقة مع OpenAI (OpenAI وOpenRouter وGroq وCerebras وGoogle AI Studio وOllama وllama.cpp) أو مع Anthropic."
+source_hash = "8db357bad26d456064d25718aa91151cbb2c24c6"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.llm.title"]
+value = "خيارات LLM"
+source_hash = "5c0e55a514c0183df3f61510e3baa8c1792f6cb9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.stt.providers"]
+value = "أي نقطة نهاية transcription متوافقة مع OpenAI تعمل: whisper.cpp server أو Speaches أو Groq whisper."
+source_hash = "99fc9543b717acebf2cf0b2d0391f1d8f9bc464a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.stt.title"]
+value = "خيارات تحويل الكلام إلى نص"
+source_hash = "7bbd3a3c58d70a8d3bfd3092c684e4a28ee86ae7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.tts.providers"]
+value = "أي نقطة نهاية /audio/speech متوافقة مع OpenAI تعمل: Piper (عبر shim متوافق مع OpenAI) أو Kokoro أو Speaches."
+source_hash = "6b86dd938c699fc6d8154bff4bc251b7e9ae447a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.section.tts.title"]
+value = "خيارات تحويل النص إلى كلام"
+source_hash = "03880944af3b05eb0ec3f1b5b22ad044dbc31fca"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt"]
+value = "تحويل الكلام إلى نص"
+source_hash = "eaf1450c665c16e051fa898568278cb816f7031f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.micHelp"]
+value = "مشترك مع فحص الميكروفون في صفحة الإعداد."
+source_hash = "65f46458617d303144a7bbdaf1396b26caa684bb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.micLabel"]
+value = "الميكروفون"
+source_hash = "242805378404a310345cf70839197bf474f74005"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.noSpeech"]
+value = "لم يتم التقاط أي كلام — تحقق من الميكروفون المحدد"
+source_hash = "b1de9da413849eacbbdf95b72ceb93cdd962d037"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.readHelp"]
+value = "اضغط اختبار واقرأ الجملة النموذجية وستظهر كلماتك أدناه."
+source_hash = "f486f550e4c6ae2ca97f0fdab6dd992cc96e1f87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.readPlaceholder"]
+value = "يظهر كلامك هنا…"
+source_hash = "6079e20392413968e740bf98a812390b307ba3c3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.stt.readTitle"]
+value = "اقرأ النص التالي بصوت عال"
+source_hash = "6a4eb67112abc72dd5ee093f2a0961f1932f4c0f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.test"]
+value = "اختبار"
+source_hash = "640ab2bae07bedc4c163f679a746f7ab7fb5d1fa"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.test.inBrowser"]
+value = "وضع المتصفح، لا شيء لاختباره"
+source_hash = "daa69ebb9e395fd192c2deb000dc41e895bec8da"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.test.unsupported"]
+value = "غير مدعوم في هذا المتصفح"
+source_hash = "7fa9453e8681907029de21de523e2175c05858bd"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.testFailed"]
+value = "Failed: {message}"
+source_hash = "53c3b86b8e2313060d6ac2c530604823deb89c0a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.testOk"]
+value = "Working"
+source_hash = "3b4dfc9713939494fccae84898c2f135073206de"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.testing"]
+value = "Testing…"
+source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.title"]
+value = "الإعدادات"
+source_hash = "3cc1d5a427a45820b04fe30f78a972b784952460"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.tts"]
+value = "تحويل النص إلى كلام"
+source_hash = "d0f1029e2cacf9b69b972fc1ccafb34bec081e80"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice"]
+value = "الصوت"
+source_hash = "3091c8446f8d3a942bef5cf971f537e62fdefab8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.builtin"]
+value = "المدمج في المتصفح"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.consentDeclined"]
+value = "يستخدم المدمج في المتصفح — بدّل متى شئت"
+source_hash = "87621c1e4d15f3aa09059c7bacc595ecb1b7eacf"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.endpoint"]
+value = "خدمتك الخاصة"
+source_hash = "d2416d8ad806f87b934e849d6d50ea2ec3aa6cfb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.manage"]
+value = "إدارة"
+source_hash = "3f282fcba8933e03a65a6dc92a27de8396961e2f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.mic"]
+value = "الميكروفون"
+source_hash = "17d396020d8a4d80d4d4f29227e3b7e2a610ece1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.micDesc"]
+value = "الميكروفون الذي يسمعك المقابِل منه."
+source_hash = "5e1da5dc2b7fe3018ccc18ac8157b831da00bb61"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.models"]
+value = "حزمة الصوت على هذا الجهاز"
+source_hash = "df276c5b55c116ccc7a77fbeae2bd62eb690ea74"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.modelsDesc"]
+value = "تنزيل ~50 م.ب يشغّل الأصوات على هذا الجهاز."
+source_hash = "0da4b9e9d9a77b5b51052985cad139bbda6a54b1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.onDevice"]
+value = "على هذا الجهاز"
+source_hash = "9fa6762eeafca4a05bfa17ba49605613fec17d7f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.stt"]
+value = "يفهمك عبر"
+source_hash = "3eb1483a01ab1666f07b304c80c247f1562846a5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.sttDesc"]
+value = "كيف يسمع التطبيق إجاباتك. على هذا الجهاز أدق، والمدمج لا يحتاج تنزيلًا."
+source_hash = "bfaccf68448ffaee8a7ae6b90c4a0d0d95b2ac53"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.test"]
+value = "مكالمة تجريبية"
+source_hash = "96fd4eac95e0d1cc5907d265e32e4cccadccee0d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.testCta"]
+value = "تشغيل الاختبار"
+source_hash = "b7d52fe2087061a822cd8d7667ed6c27cc50626b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.testDesc"]
+value = "يرد عليك بالتحية ثم يستمع وأنت تقرأ سطرًا بصوت عالٍ."
+source_hash = "9c41dce3f892d33c45f75f32bfce438d5e9e72ea"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.tts"]
+value = "يجيبك عبر"
+source_hash = "af214d3c3cc4df7d7fc72bd038af49a1ac0cfd45"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voice.ttsDesc"]
+value = "صوت المقابِل. على هذا الجهاز يبدو أفضل، والمدمج لا يحتاج تنزيلًا."
+source_hash = "880fdbdf434ae909642c5fb457558d4846e36845"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voiceHelp"]
+value = "اسم الصوت المدعوم من نقطة النهاية، مثل alloy."
+source_hash = "fb2fa90115603a2d2dae0d4c1aa448cfeead9932"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.builtin"]
+value = "المدمج في المتصفح"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.clear"]
+value = "مسح ذاكرة التخزين"
+source_hash = "c004cc3343fdf44773fff77fc6ccb3d3b209b238"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.consentDeclinedHint"]
+value = "محركات الجهاز معطلة؛ اختيار على الجهاز ينزّل النماذج ويفعّلها."
+source_hash = "54d0841e661736cada4b0271a357b028999fa2d3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.customEndpoint"]
+value = "نقطة نهاية مخصصة"
+source_hash = "17b767eb4b24ba319cc836c7a7f88f79a0eaf4f2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.download"]
+value = "تنزيل"
+source_hash = "817248fb77fb5c2cef3f2c732ad257cb1fb9c5e4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.downloadFailed"]
+value = "فشل تنزيل النموذج، حاول مجدداً"
+source_hash = "559a39aab1350a5d5f72c8a4bd170b644f622973"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.downloading"]
+value = "جارٍ التنزيل {percent}% ({done} / {total} م.ب)"
+source_hash = "09ade323d9bf57c9ad2f0d9a6c205ed829f38e13"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.error"]
+value = "فشل التنزيل: {message}"
+source_hash = "405e7ebb05407ce69f072c092309353baadf60c0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.installed"]
+value = "مثبتة ({total} م.ب)"
+source_hash = "0412d706adb3118a5c8fad0aa924fdab9b4c0ee9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.models"]
+value = "نماذج الجهاز"
+source_hash = "dc26dfa3ee6d0c59485f1633cf2363573fa19c1c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.nav"]
+value = "الصوت"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.notInstalled"]
+value = "لم يُنزّل"
+source_hash = "90e7ca8212a799ad01ec6ac54555c2f585739cbc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.onDevice"]
+value = "على الجهاز (ينزّل نموذجاً)"
+source_hash = "bcd3bdd22780716ae9f5552064838b9ee3abf017"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.redownload"]
+value = "إعادة التنزيل"
+source_hash = "62685a87426ebc4c5abafa2fb742e09999b6e3d5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.stt"]
+value = "الكلام إلى نص"
+source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.tts"]
+value = "النص إلى كلام"
+source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."settings.voicePane.unsupported"]
+value = "هذا المتصفح لا يدعم الصوت على الجهاز (يحتاج wasm + simd)."
+source_hash = "02231375adaa269f8d21af8a111264907a881382"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.advanced"]
+value = "خيارات متقدمة"
+source_hash = "4ebc4058b083d2fb47d5ebaf6cbf298e44ef1f08"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.coachHint"]
+value = "متاح بعد أول تقرير لك"
+source_hash = "7dae169c4ed58575839e0f0a050af4ee76f4f819"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.defaultTitle"]
+value = "جلسة تدريب"
+source_hash = "c28555c96e8bd9dc12bec96dd6ab3dce5a97573a"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.difficulty"]
+value = "الصعوبة"
+source_hash = "bf1a879257521137fc6dc619b89ed11951c319c4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.difficulty.easy"]
+value = "سهلة"
+source_hash = "861c4f67e887dec85292d36ab05cd7a1a7275228"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.difficulty.hard"]
+value = "صعبة"
+source_hash = "cae5970fc939e302346d8b50d4fb711b7e515c4b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.difficulty.medium"]
+value = "متوسطة"
+source_hash = "20af418657698863db8d966f4b42ed8dc7d0bd54"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.dropHint"]
+value = "أسقط الملفات أو انقر للاستعراض"
+source_hash = "441eab1733179f2a4d4c866d0a679b1af81a2633"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.duration"]
+value = "المدة"
+source_hash = "5d3f344b5bd21e9500c69ca575a3286c85b28f1c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.fileRemove"]
+value = "إزالة {name}"
+source_hash = "1c5b7670d4cb373a2cddbe8e196ad231bfa7176f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.files"]
+value = "ملفات"
+source_hash = "a1f13b3bc20a296e08c212be9c56c706c10abc4f"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.filesBadType"]
+value = "{name}: نوع غير مدعوم (pdf وmd وtxt وdocx فقط)"
+source_hash = "7ccc32ecfdb7fb60380bce94aefbe660520619bb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.filesHint"]
+value = "نص فقط: pdf md txt docx — 10 ملفات / 20 ميغابايت كحد أقصى"
+source_hash = "c013f51c8a52a48b2226f9e8b2f6920aa0758c2e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.filesServerOnly"]
+value = "رفع المستندات يتطلب بيئة الخادم — لا تُحفظ الملفات في وضع المتصفح"
+source_hash = "5223e7743ac2ce6f17dab8dc78fdca401a6b2ae4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.filesTooBig"]
+value = "الحجم الإجمالي يتجاوز 20MB"
+source_hash = "2ce00d3786ac21e189f3a8147e42923c9ecd5a23"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.filesTooMany"]
+value = "الحد الأقصى {max} ملفات"
+source_hash = "dda6ffe1bdeec363eb4e92df80cf2ac346bd38e1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.language"]
+value = "اللغة"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.llmMissing"]
+value = "لم يتم إعداد LLM"
+source_hash = "1a8154d80681d00f36a3210e33d638c0cfb8b841"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.mic"]
+value = "الميكروفون"
+source_hash = "17d396020d8a4d80d4d4f29227e3b7e2a610ece1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.mode"]
+value = "الوضع"
+source_hash = "e78fe7049341b36116d8054f5a3e00d01f245fcc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.mode.coach"]
+value = "مدرب"
+source_hash = "c63c8ec7f6e2308874076f269e863af55d2cc22e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.mode.interview"]
+value = "مقابلة"
+source_hash = "af537eebeeb24855a28737cdc62c8125a0c0916d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.needsProvider"]
+value = "لم يتم تكوين مزود الذكاء الاصطناعي بعد. أضف نقطة نهاية للنموذج اللغوي في الإعدادات لإجراء جلسة بدون خادم di."
+source_hash = "e42618263c73889e7c47f8370ed78753425ff5bb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.needsProviderToast"]
+value = "مطلوب نقطة نهاية LLM"
+source_hash = "177b13f7839f74b88831b833db2a38c07a8145de"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.openProviderSettings"]
+value = "افتح إعدادات المزود"
+source_hash = "ed48b43a0619007a5e405ced7e27d7b841f1ed87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.pickScenario"]
+value = "اختر سيناريو"
+source_hash = "93d3eb3c1337766c44ce08a939c612369c525732"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.preset.behavioral"]
+value = "سلوكية"
+source_hash = "0149c71b3ea4cad4de3529681e9cd38974802f49"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.preset.custom"]
+value = "مخصص"
+source_hash = "f9ac14b63a75faf57d8db6f919bfabb2502d273c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.preset.frontend"]
+value = "واجهات"
+source_hash = "9ecc8459ea5f39f9da55cb4d71a70b5d1e0f0b80"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.preset.ml"]
+value = "تعلّم آلة"
+source_hash = "7058849d4ff0e3150b247cf2d3e39bb52e9ec9a1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.preset.sysDesign"]
+value = "تصميم أنظمة"
+source_hash = "27b4ea3fb9e5c6fa1304337421000124b7a331fc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.presets"]
+value = "إعدادات جاهزة"
+source_hash = "75ab5a83ff30f713ad3c4387f1de374b5418add3"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.promptLabel"]
+value = "أمر مخصص"
+source_hash = "0a4fc467199187c5769499cdac89662b060d4481"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.promptPlaceholder"]
+value = "الصق وصفًا وظيفيًا أو سياق سيرتك الذاتية أو أي شيء يجب أن يعرفه الوكيل…"
+source_hash = "21538a4114e1049b1376213784639b0ac79772ce"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.behavioral.goal1"]
+value = "قصة صراع"
+source_hash = "f0792a4ecbeca6974dae13c44f7e755b7852d44b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.behavioral.goal2"]
+value = "المسؤولية"
+source_hash = "9fea7940736058d4511e313a4c31ec8a07f660b5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.behavioral.goal3"]
+value = "الفشل"
+source_hash = "d68049bb85454c0b8c56ffbb73c45e8adee41b21"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.behavioral.narrative"]
+value = "قصص STAR مع متابعة"
+source_hash = "a17a69c449bfc7d5c26b4d691fa65fe677c80ad1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.behavioral.prompt"]
+value = "أجرِ مقابلة سلوكية باستخدام طريقة استار. ابحث عن تفاصيل محددة."
+source_hash = "11882f07553cb782e153d3c23276fc5ea3ae2ee6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:02:43Z"
+
+[entries."setup.scenario.custom.narrative"]
+value = "أحضر موجهك الخاص"
+source_hash = "ff2bc8fbe325d3463aaf570f8ce9727cdd115fab"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.frontend.goal1"]
+value = "التخطيط"
+source_hash = "207b877e13437b35b3fbae5c20219eecd6c828f1"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.frontend.goal2"]
+value = "a11y"
+source_hash = "758908d4c222164172f53e764caeebb73e9a2048"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.frontend.goal3"]
+value = "الأداء"
+source_hash = "f47039fbb1f7f212938b642944291fc3b2e603c6"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.frontend.narrative"]
+value = "dom, css, react"
+source_hash = "b247974805de9ea5623a59e84861366d9a085e3c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.frontend.prompt"]
+value = "أجرِ مقابلة فرونت إند. مزيج من تصميم المكونات وأساسيات JavaScript."
+source_hash = "99ec669ad93913b67dd8928c20d55d2083c14b96"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:02:43Z"
+
+[entries."setup.scenario.ml.goal1"]
+value = "المقاييس"
+source_hash = "966b9734015a6d617d09dae170c907a100bded72"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.ml.goal2"]
+value = "التسريب"
+source_hash = "8f071fb158cbeced7cac621189311a5f541e935c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.ml.goal3"]
+value = "أنماط الفشل"
+source_hash = "5fb6293f4921b8ca79200ce44e1b237c4bfe261e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.ml.narrative"]
+value = "من اختيار النموذج إلى نظافة البيانات"
+source_hash = "fa05a11fe8ea91ca116449f7a39bbfd053ddf56d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.ml.prompt"]
+value = "أجرِ مقابلة تعلم آلة. اختيار النموذج، التقييم، ونظافة البيانات."
+source_hash = "7c525476d3783a8cb9bd2a6fed26646475b2b0b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:02:43Z"
+
+[entries."setup.scenario.sysDesign.goal1"]
+value = "المتطلبات"
+source_hash = "ed2eb3742618bb10d3b2ba0231ab69fecc8d716b"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.sysDesign.goal2"]
+value = "حساب السعة"
+source_hash = "00ace74915a8ffe84cbbda42d6fbe4ff8d3146d6"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.sysDesign.goal3"]
+value = "المفاضلات"
+source_hash = "b76e427542cf71ab2fceca2ee98f3ed450b074f8"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.sysDesign.narrative"]
+value = "وسّع خدمة تحت الضغط"
+source_hash = "45b68f13557fd11422e11338edee435c5c9bffb0"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.scenario.sysDesign.prompt"]
+value = "أجرِ مقابلة تصميم النظام. تركيز على التوسع، التخزين المؤقت، وتحليل التوازنات."
+source_hash = "e78498b79a0d8c6a524e660165626070cd7fa09c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:02:43Z"
+
+[entries."setup.skipValidation"]
+value = "المتابعة دون تحقق"
+source_hash = "cd1779a98d1fd3396925d4b55f77de036f7c17ac"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.start"]
+value = "ابدأ"
+source_hash = "2b020927d3c6eb407223a1baa3d6ce3597a3f88d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.startFailedToast"]
+value = "تعذّر بدء الجلسة"
+source_hash = "382408e405f1652fa0bfdfe6b1153de11fa40476"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.startWithPlan"]
+value = "ابدأ مع فحص الخطة"
+source_hash = "331c8ec7694ff03db61026275012039b1bb2298e"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.title"]
+value = "إعداد المقابلة"
+source_hash = "a9877243e65764a896e6fe0ad017381cb8d1d6f7"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.tone"]
+value = "النبرة"
+source_hash = "4429f68570da76c21d9b01323ea1cc4332085616"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.tone.challenging"]
+value = "صعبة"
+source_hash = "c7d9332297a0b0397c1708f47e53b0fbfe4d20e4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.tone.friendly"]
+value = "ودودة"
+source_hash = "41209342f36141100dd8dc887e9ab9dae2f71f87"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.tone.neutral"]
+value = "محايدة"
+source_hash = "e7fb41a6a0544d8a8aa178232034311f9d725555"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.toolsLabel"]
+value = "أدوات:"
+source_hash = "ee8c6631b587828b546d180e7ccd1d15672d634d"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."setup.validate"]
+value = "ابدأ المقابلة"
+source_hash = "f801cf4c1d8ca3d20c284fa1321688cdcf37beee"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."transcript.source.text"]
+value = "نص"
+source_hash = "372ea08cab33e71c02c651dbc83a474d32c676ea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:03:06Z"
+
+[entries."transcript.source.voice"]
+value = "صوت"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:03:06Z"
+
+[entries."transcript.who.agent"]
+value = "وكيل"
+source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:03:06Z"
+
+[entries."transcript.who.user"]
+value = "أنت"
+source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-09-27T19:03:06Z"
+
+[entries."validate.comingLater"]
+value = "التحقق يصبح متاحًا لاحقًا"
+source_hash = "3bd927562da138fa329d1484539ecae6f37c9dc4"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.comingLaterBody"]
+value = "محادثة التخطيط قبل المقابلة ستتوفر في تكرار قادم. جلستك مهيأة وجاهزة."
+source_hash = "1e4d5fd81e16c384567424811050a3288c441ecb"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.duration"]
+value = "المدة"
+source_hash = "5d3f344b5bd21e9500c69ca575a3286c85b28f1c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.header"]
+value = "تحقق: {title}"
+source_hash = "c00a12c1b0b06a81e57c9e9b80b88a9610e2c538"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.mode"]
+value = "الوضع"
+source_hash = "e78fe7049341b36116d8054f5a3e00d01f245fcc"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.plan"]
+value = "خطة المقابلة"
+source_hash = "ed76e8681dec90ae5ef342e84aae645210834aba"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.start"]
+value = "يبدو جيدًا، ابدأ"
+source_hash = "5d9a842054bf2b86857358340a0431896c54e995"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."validate.type"]
+value = "النوع"
+source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."voiceConsent.accept"]
+value = "تنزيل وتفعيل"
+source_hash = "11a73b1701a923ec1b33d282424a57c2a29893a9"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."voiceConsent.body"]
+value = "يحتاج التطبيق إلى تنزيل (~50 م.ب) للحصول على تجربة مثلى: التعرف على الكلام والأصوات يعملان على الجهاز دون إرسال أي شيء إلى السحابة. ارفض للاحتفاظ بصوت المتصفح المدمج."
+source_hash = "b626559f0e2e2023b0cab22d702e92ff926e86a5"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."voiceConsent.decline"]
+value = "استخدام المدمج"
+source_hash = "305fbcbf0a28768edb1e05e2e65162dcf03d2806"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"
+
+[entries."voiceConsent.title"]
+value = "صوت أفضل على جهازك"
+source_hash = "8b1c2a593cb4f35b39f6987738304d44aa57b72c"
+origin = "human"
+reviewed = false
+updated_at = "2026-09-27T19:00:50Z"

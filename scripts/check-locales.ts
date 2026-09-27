@@ -8,7 +8,22 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const dir = new URL("../apps/web/src/locales/", import.meta.url).pathname;
-const en = JSON.parse(readFileSync(join(dir, "en.json"), "utf8")) as Record<string, string>;
+
+/** Collapses nested objects (as emitted by `intl-ai fill`) into dotted keys. */
+const flatten = (obj: Record<string, unknown>, prefix = ""): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(obj).flatMap(([k, v]): [string, string][] => {
+      const key = prefix ? `${prefix}.${k}` : k;
+      if (typeof v === "string") return [[key, v]];
+      if (v && typeof v === "object")
+        return Object.entries(flatten(v as Record<string, unknown>, key));
+      return [];
+    }),
+  );
+
+const en = flatten(
+  JSON.parse(readFileSync(join(dir, "en.json"), "utf8")) as Record<string, unknown>,
+);
 const enKeys = Object.keys(en).sort();
 
 const PLACEHOLDER = /\{(\w+)\}/g;
@@ -26,7 +41,9 @@ const fail = (msg: string) => {
 
 for (const file of readdirSync(dir).filter((f) => f.endsWith(".json") && f !== "en.json")) {
   const loc = file.replace(/\.json$/, "");
-  const msgs = JSON.parse(readFileSync(join(dir, file), "utf8")) as Record<string, string>;
+  const msgs = flatten(
+    JSON.parse(readFileSync(join(dir, file), "utf8")) as Record<string, unknown>,
+  );
   const keys = Object.keys(msgs).sort();
   console.log(`== ${loc} (${keys.length} keys)`);
 
