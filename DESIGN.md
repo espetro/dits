@@ -7,7 +7,7 @@
 ## 1. read
 
 "playful notebook": warm cream ground, espresso ink, persimmon accent.
-serif display (Fraunces) + sans body (Inter var) + mono (Berkeley Mono).
+serif display (Fraunces) + sans body (Plus Jakarta Sans) + mono (Berkeley Mono).
 ambient layers: film grain (`.grain`), radial orbs (`.ambient`),
 ease-out-expo motion. warm, editorial, low-chrome - not a dashboard.
 
