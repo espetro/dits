@@ -88,7 +88,7 @@ const SCENARIOS: Scenario[] = [
 const DURATIONS = [20, 30, 45, 60];
 const TONES = ["friendly", "challenging", "neutral"];
 const DIFFICULTIES = ["easy", "medium", "hard"];
-const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "ar"];
+const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-br", "ja", "ko", "zh-cn", "ar"];
 
 const fieldHeadingClass = "text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft";
 

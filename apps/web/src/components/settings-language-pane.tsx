@@ -10,7 +10,7 @@ import { $draft, $interviewLanguage, LOCALES } from "../stores/session";
 import { useSsrStore } from "../lib/ssr";
 
 /** Interview-language options (the setup page's LANGUAGES list). */
-const INTERVIEW_LANGUAGES = ["en", "es", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "ar"];
+const INTERVIEW_LANGUAGES = ["en", "es", "fr", "de", "it", "pt-br", "ja", "ko", "zh-cn", "ar"];
 
 function languageName(tag: string, locale: string): string {
   try {

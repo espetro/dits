@@ -7,7 +7,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 // Inlined literal (not imported from stores/session.ts): that module also
 // exports persistentAtom-backed stores which touch localStorage at import
 // time, unsafe in this Node-only config context.
-const LOCALES = ["en", "de", "es", "fr", "ja", "pt-BR", "zh-CN", "ko", "it", "ar"] as const;
+const LOCALES = ["en", "de", "es", "fr", "ja", "pt-br", "zh-cn", "ko", "it", "ar"] as const;
 
 export default defineConfig({
   plugins: [

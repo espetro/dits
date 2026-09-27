@@ -5,9 +5,11 @@ import { LOCALES } from "../stores/session";
 const PREFIXED_LOCALES = LOCALES.filter((l) => l !== "en");
 
 /** Locale from the optional first URL segment: `/es/setup` -> es, `/setup` -> en.
- *  Falls back to en for unknown/absent prefixes. */
+ *  Case-insensitive (`/pt-BR/...` -> `pt-br`) — the `{-$locale}` route then
+ *  redirects to the canonical lowercase path. Falls back to en for
+ *  unknown/absent prefixes. */
 export function localeFromPathname(pathname: string): string {
-  const segment = pathname.split("/")[1];
+  const segment = pathname.split("/")[1]?.toLowerCase();
   if (segment && (LOCALES as readonly string[]).includes(segment)) return segment;
   return "en";
 }
@@ -22,7 +24,7 @@ export function withLocale(locale: string, path: string): string {
  *  Works for both prefixed (`/es/setup`) and unprefixed en (`/setup`) paths,
  *  preserving the trailing path. Trailing slash is normalized away. */
 export function replaceLocale(pathname: string, locale: string): string {
-  const first = pathname.split("/")[1] ?? "";
+  const first = (pathname.split("/")[1] ?? "").toLowerCase();
   const hasPrefix = (LOCALES as readonly string[]).includes(first);
   const rest = (hasPrefix ? pathname.split("/").slice(2) : pathname.split("/").slice(1))
     .join("/")

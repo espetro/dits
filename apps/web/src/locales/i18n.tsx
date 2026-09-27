@@ -12,8 +12,8 @@ import fr from "./fr.json";
 import it from "./it.json";
 import ja from "./ja.json";
 import ko from "./ko.json";
-import ptBR from "./pt-BR.json";
-import zhCN from "./zh-CN.json";
+import ptBR from "./pt-br.json";
+import zhCN from "./zh-cn.json";
 
 const MESSAGES: Record<string, Record<string, string>> = {
   en,
@@ -21,8 +21,8 @@ const MESSAGES: Record<string, Record<string, string>> = {
   es,
   fr,
   ja,
-  "pt-BR": ptBR,
-  "zh-CN": zhCN,
+  "pt-br": ptBR,
+  "zh-cn": zhCN,
   ko,
   it,
   ar,
@@ -32,7 +32,7 @@ export { localeFromPathname };
 
 /** Returns true when the active locale is written right-to-left (drives html dir). */
 export function useIsRtl(): boolean {
-  return useUrlLocale() in RTL_LOCALE_SET;
+  return RTL_LOCALE_SET.has(useUrlLocale());
 }
 
 const RTL_LOCALE_SET: ReadonlySet<string> = new Set(RTL_LOCALES);
