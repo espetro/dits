@@ -51,6 +51,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // the shadcn cli emits cross-imports as the literal components.json alias
+  // (`src/components/vendor/x`); resolve `src/` to the app src dir so vendored
+  // files stay unedited.
+  resolve: { alias: { src: "/src" } },
   // silero onnx + ort wasm for the VAD are vendored in apps/web/public/vad/
   // (committed, no CDN); the SPA build copies public/ verbatim, so no
   // vite-plugin-static-copy pass is needed.
