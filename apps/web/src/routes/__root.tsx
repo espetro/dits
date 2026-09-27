@@ -159,12 +159,15 @@ function ErrorShell({ children }: { children: ReactNode }) {
 
 const TITLES: Array<[RegExp, string]> = [[/\/setup$/, "setup.title"]];
 
+/** In-call routes own their chrome (the interview callbar) — no global header. */
+const HEADERLESS = /\/interview\//;
+
 function AppHeaderSlot() {
   const pathname = useLocation({ select: (l) => l.pathname });
   // landing hero is headerless by design (see .agents/docs/screens/landing.md)
   const isLanding = useMatch({ from: "/{-$locale}/", shouldThrow: false });
   const titleKey = TITLES.find(([re]) => re.test(pathname))?.[1];
-  if (isLanding) return null;
+  if (isLanding || HEADERLESS.test(pathname)) return null;
   return (
     <AppHeader
       title={

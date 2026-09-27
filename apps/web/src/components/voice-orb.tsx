@@ -70,12 +70,10 @@ export function VoiceOrb({
 
   if (clientOnly) {
     return (
-      <div aria-hidden="true" className={`flex shrink-0 items-center justify-center ${className}`}>
+      <div aria-hidden="true" className={`shrink-0 ${className}`}>
         <span
-          className={`size-4 animate-pulse rounded-full ${
-            agentState === "listening" || agentState === "talking"
-              ? "bg-persimmon"
-              : "bg-espresso/40"
+          className={`block size-full rounded-full bg-gradient-to-br from-persimmon to-persimmon-deep shadow-[0_0_0_4px_var(--color-persimmon-soft),0_4px_16px_rgba(194,72,10,0.2)] ${
+            agentState ? "orb-live" : "opacity-70"
           }`}
         />
       </div>

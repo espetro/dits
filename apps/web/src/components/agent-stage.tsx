@@ -5,9 +5,10 @@ import type { OrbAgentPhase } from "./voice-orb";
 const VoiceOrb = lazy(() => import("./voice-orb").then((m) => ({ default: m.VoiceOrb })));
 
 /**
- * AgentStage (p3-18): the single zone carrying the agent's presence —
- * orb + state word + live caption. The orb leaves the transcript rail so
- * state stays semantic and volume stays motion.
+ * AgentStage: compact stage row inside the conversation card — small orb
+ * (~48-56px) + uppercase status word + 2-line fraunces live caption. The
+ * caption holds the latest agent utterance so the question stays on screen
+ * during user turns.
  */
 export function AgentStage({
   phase,
@@ -23,21 +24,21 @@ export function AgentStage({
   return (
     <section
       aria-label="agent stage"
-      className="flex flex-col items-center gap-1 px-4 pt-1 text-center"
+      className="flex items-center gap-3 border-b border-hairline px-0.5 pb-3"
     >
       <Suspense
-        fallback={<div className="size-20 animate-pulse rounded-full bg-espresso/5 md:size-24" />}
+        fallback={<div className="size-12 animate-pulse rounded-full bg-espresso/5 md:size-14" />}
       >
-        <VoiceOrb phase={phase} muted={orbMuted} className="size-20 shrink-0 md:size-24" />
+        <VoiceOrb phase={phase} muted={orbMuted} className="size-12 shrink-0 md:size-14" />
       </Suspense>
-      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-espresso-soft">
-        <FormattedMessage id={statusKey} />
-      </p>
-      {caption && (
-        <p className="line-clamp-2 w-full max-w-xl font-display text-sm leading-snug text-espresso-soft md:text-base">
-          {caption}
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-espresso-soft">
+          <FormattedMessage id={statusKey} />
         </p>
-      )}
+        {caption && (
+          <p className="line-clamp-2 font-display text-sm leading-snug text-espresso">{caption}</p>
+        )}
+      </div>
     </section>
   );
 }

@@ -1,176 +1,145 @@
 # Screen: Interview (`/interview/[id]`)
 
-> p3 restructure: conversation leads, tools follow. One AgentStage zone
-> carries presence (orb + state word + live caption); the transcript is a
-> demoted rail/sheet; user tools live in a registry-driven dock.
+> w2 restructure: single viewport, no page scroll. AppHeader is suppressed on
+> `/interview/*`; a 44px callbar replaces it. Desktop is a two-card grid —
+> conversation card (chip -> stage -> transcript -> mic waveform -> composer)
+> on the left, workspace card (ToolDock) on the right — plus a floating
+> bottom-center control pillbar. Mobile keeps the conversation card only.
 
 ## ASCII mockup
 
 ```
 +------------------------------ desktop (>= md) -----------------------------+
-|  {session title}                                   27:41                  |
+|  di. {session title}              12:34 / 30:00            end interview  |
 +---------------------------------------------------------------------------+
-|                                                     |  T transcript       |
-|                    ((o)) voice orb                  |  agent: so,         |
-|                    listening...                     |  tell me...         |
-|   "how would you handle cache invalidation          |                     |
-|    across regions?"  <- live caption                |  user: well,        |
-|                                                     |  I'd start...       |
-|  +----------------------------------------------+   |                     |
-|  | QUESTION 3            [progress chip]         |   |                     |
-|  | "How would you handle cache invalidation      |   |                     |
-|  |  across regions?"                             |   |                     |
-|  |  hints: - think about TTLs                    |   |                     |
-|  |         - consistency vs availability         |   |                     |
-|  +----------------------------------------------+   |                     |
-|                                                     |                     |
-|  [editor] [whiteboard] [+]                          |                     |
-|  +----------------------------------------------+   |                     |
-|  | TOOL PANE (active dock tab)                   |   |                     |
-|  |  def solve(nums): ...        / tldraw canvas  |   |                     |
-|  +----------------------------------------------+   |                     |
-|                                                     |  [ talk or type... ]|
-+-----------------------------------------------------+---------------------+
-|  [mute]            [type]              [end early]  |  <- sticky, safe-area|
+| +-- conversation card ------------------+  +-- workspace card ----------+ |
+| | [QUESTION 3] [hint chip]  [type hint] |  | [editor] [whiteboard] [+]  | |
+| |                                       |  |                            | |
+| | ((o)) LISTENING                       |  | TOOL PANE (active tab)     | |
+| |  "how would you handle cache          |  |  def solve(nums): ...      | |
+| |   invalidation across regions?"       |  |                            | |
+| |                                       |  |                            | |
+| | agent · voice   so, tell me about...  |  |                            | |
+| | user · voice    well, I'd start...    |  |                            | |
+| | (transcript scrolls internally)       |  |                            | |
+| | -----------------------------------   |  |                            | |
+| | ~~~ mic waveform ~~~          you·mic |  |                            | |
+| | ( talk or type...                )    |  |                            | |
+| +---------------------------------------+  +----------------------------+ |
++----------------------------[ (mic) (kb) (x) ]--- floating pillbar ---------+
+|          nothing scrolls at page level — transcript + tools scroll inside |
 +---------------------------------------------------------------------------+
 
-+------------------------------ mobile (< md) -------------------------------+
-|  {title}                                            27:41                 |
++------------------------------ mobile (< md) --------------------------------+
+|  di. {title}                                       end interview          |
 +---------------------------------------------------------------------------+
-|                          ((o))                                            |
-|                       listening...                                        |
-|   "how would you handle cache..."   <- live caption (2-line clamp)        |
-|                                                                           |
-|  +----------------------------------------------+                         |
-|  | QUESTION 3                                    |                         |
-|  | "How would you handle..."                     |                         |
-|  +----------------------------------------------+                         |
-|  [editor] [+]                                                             |
-|  +----------------------------------------------+                         |
-|  | TOOL PANE                                     |                         |
-|  +----------------------------------------------+                         |
-|                                                                           |
-+-----------------------------------------------------( [transcript] sheet)-+
-|  [mute]            [type]              [end early]  | <- sticky, safe-area|
+| +-- conversation card (fills viewport) ---------------------------------+ |
+| | [QUESTION 3] [type hint]                                              | |
+| | ((o)) LISTENING  "how would you handle..."                            | |
+| | agent · voice   so, tell me about...                                  | |
+| | user · voice    well, I'd start...                                    | |
+| | ---------------------------                                           | |
+| | ~~~ waveform ~~~            you·mic                                   | |
+| | ( talk or type... )                                                   | |
+| |                                                                       | |
+| |          <- ~70px clearance under the composer                        | |
+| +-----------------------------------------------------------------------+ |
++----------------------------[ (mic) (kb) (x) ]------------------------------+
 +---------------------------------------------------------------------------+
 ```
 
 ## Zones
 
-### AgentStage (new)
+### CallBar (new, replaces AppHeader on `/interview/*`)
 
-The single zone that carries the agent's presence, always visible:
+- `__root.tsx` suppresses `AppHeader` for `/interview/` paths; the CallBar is
+  the route's own chrome at a fixed `h-11` (44px).
+- Left: `di.` logo link + session title (truncates).
+- Center: `mm:ss / mm:ss` elapsed/total timer (hidden below `md`), anchored
+  to `session.created_at` so a reload keeps real elapsed time; persimmon once
+  inside the 2-minute wrap-up, 0 hard-stops to `/finish/[id]`.
+- Right: voice-retry button (error only) + `end interview` -> confirm ->
+  `/finish/[id]`.
 
-- **Voice orb** (`apps/web/src/components/voice-orb.tsx`, ElevenLabs Orb /
-  three.js, css-pulse fallback in client-only mode) centered, `size-20
-md:size-24`. Driven by `$micAttack`/`$agentAttack` loudness taps
-  (`lib/voice/levels.ts`) with synthetic oscillation fallback. Phase mapping:
-  speaking→talking, listening→listening, thinking→thinking, else null.
-  **The orb leaves the transcript rail**: it renders in AgentStage, not the
-  rail, so the state is semantic and the volume is motion (orb-ui contract).
-- **State word** under the orb: listening / thinking / speaking /
-  reconnecting / error — replaces the top-bar status pill as the always-on
-  voice state readout.
-- **Live caption**: the latest agent utterance as plain text, 2-line clamp
-  (no scroll needed mid-turn; full text stays in the transcript). During
-  user turns the caption holds so the last question remains on screen.
+### Conversation card
 
-### QuestionCard
+The left card (`minmax(360px,34%)` of the desktop grid, full width on
+mobile) stacks, top to bottom:
 
-- **Progress chip** `QUESTION n` — n counts `update_question` tool calls (and
-  question-replacing agent turns under the text fallback) this session.
-- Question text + optional hints, agent-editable via `update_question` (server
-  mode also pushes a `{t:"question"}` ws message). Fallback when no structured
-  question has landed: latest agent turn text — never empty past kickoff.
-- Renders directly under AgentStage; it is part of the conversation, not the
-  tool dock.
+- **Question chip row**: `QUESTION n` progress chip (n counts
+  `update_question` calls this session), optional agent-attached hint chips,
+  and the no-speech type-instead hint when it fires. The structured question
+  text itself no longer renders as a card — it lives in the stage caption.
+- **AgentStage (compact)**: ~48-56px voice orb (three.js Orb; css gradient
+  orb fallback in client-only mode) + uppercase status word + live caption in
+  Fraunces, 2-line clamp. Caption = latest agent utterance, falling back to
+  the structured `update_question` text, then the preparing copy — during
+  user turns the caption holds so the last question stays on screen.
+- **Transcript stream**: vendored AI Elements `Conversation` +
+  `Message` (`use-stick-to-bottom` replaces the bespoke scroll plumbing).
+  Flat `speaker · source` rows, scrolls internally, flex-1.
+- **Mic waveform strip**: vendored `LiveWaveform` canvas pinned directly
+  above the composer on a `border-t` hairline, `role="img"` + i18n
+  aria-label, `you · mic` caption right. `active` while the voice socket is
+  connected and unmuted (its own `getUserMedia` renders real mic level);
+  `processing` while connecting/reconnecting; flat dotted idle otherwise.
+  This also replaces the old 16px pulse-dot client-only fallback — the orb
+  now renders a full-size css gradient orb there.
+- **Composer**: vendored `PromptInput` + `PromptInputTextarea`, rounded-full,
+  pinned at the card bottom. Placeholder `talk or type…`. Enter submits
+  (shift+enter newline, IME-safe); uncontrolled — the form resets itself.
 
-### ToolDock + ToolSpec registry (new)
+### Workspace card
 
-- `session.tools` becomes `Record<toolId, variant>` (ordered map; variant is
-  per-tool config like the editor's language) — replaces the fixed
-  `{editor, whiteboard}` pair. Schema change lives in `@di/shared`
-  (`ToolStateSchema` widens to a record).
-- Registry (`apps/web/src/lib/tools/registry.ts`) — one `ToolSpec` per tool:
-  `id`, i18n `labelKey`, lucide `icon`, lazy `component`, `agentAccess:
-"read" | "write" | "read-write"`, `platforms: "all" | "server-only"`.
-  `agentAccess` controls which agent tools the spec exposes (`read_*` /
-  `update_*` generation is per-spec), `platforms` hides heavy tools
-  (whiteboard stays `server-only` while tldraw is bundled).
-- Presets pick the toolset: the scenario card seeds `session.tools`; `custom`
-  starts with editor only. `>4` tools collapses trailing tabs into a `+`
-  overflow picker.
-- The dock renders under the QuestionCard, full width, one active tab.
-- Agent read tools keep the same turn-path integration and the same test
-  contract (unit serializers, evals, `/v1/test/events` assertions).
+- Right grid column, desktop (`>= md`) only — hidden on mobile.
+- `ToolDock` fills the full column height: cream-deep card, pill tab bar
+  (active tab = paper pill), paper body pane. `session.tools` order is tab
+  order; `>4` tools collapse trailing tabs into a `+` overflow picker; the
+  active tab is the `?tool=` search param.
 
-### Transcript
+### ControlBar (floating pillbar)
 
-- **Desktop (`>= md`)**: right rail, translucent (10-20% alpha), peek/collapse
-  via `transcriptOpen`, minimize never fully hides. Contains the turn list and
-  the type input at its bottom.
-- **Mobile (`< md`)**: bottom `Sheet` (vendored, not side Sheet) opened from
-  the ControlBar `type` button; same turn list + input.
-- **Type input is first-class**, not a fallback: placeholder "talk or
-  type...". When voice is up it sends `{t:"text"}` on the ws (same pipeline
-  as speech); in client-only it goes through `BrowserVoiceDriver.sendText`.
-  `POST /v1/sessions/:id/turns` remains the degraded-path write only.
-
-### ControlBar (new, replaces bottom-left mute/end buttons)
-
-- Sticky bottom bar on **every** viewport, `padding-bottom:
-env(safe-area-inset-bottom)`, all targets `>= 44px`.
-- Left: **mute** toggle (`{t:"mute",muted}` on the wire, mic track kept).
-- Center: **type** — desktop focuses the rail input (opens the rail if
-  collapsed), mobile opens the transcript Sheet with input focused.
-- Right: **end early** — confirm, then `/finish/[id]`.
-- **Back-guard**: while voice is connected or the interview is in progress,
-  browser back/close fires a confirm (`beforeunload` + router blocker) so a
-  swipe/accidental nav can't silently drop the session. Inert once ended.
+- Fixed bottom-center espresso pill on **every** viewport,
+  `role="toolbar"` + i18n aria-label, icons-only lucide buttons (44px) each
+  with an i18n aria-label: mute/unmute microphone, switch to typing (focuses
+  the composer), end interview (persimmon-deep, X icon).
+- `padding-bottom: env(safe-area-inset-bottom)` on the pill; mobile keeps
+  ~78px clearance under the conversation card so the pillbar never overlaps
+  the composer.
 
 ## Behavior
 
-- Top bar: session title + countdown anchored to `session.created_at`
-  (T-2min wrap-up, 0 hard-stops to `/finish/[id]`). The status pill moves out
-  of the top bar — AgentStage owns voice state.
+- **Nothing scrolls at page level** on any viewport — only the transcript and
+  tool panes scroll internally (`document.scrollHeight <= innerHeight` at
+  1440x900 and 390x844).
+- Typed turns are unchanged: `PromptInput` submit -> `voice.sendText` (ws
+  `{t:"text"}`, same pipeline as speech) when connected or client-only, else
+  `POST /v1/sessions/:id/turns` as the degraded-path write.
+- **Back-guard**: while the interview is in progress, browser back/close
+  fires a confirm (`beforeunload` + router blocker). Inert once ended.
 - Voice wiring is unchanged: WebSocket + Web Audio, 16k PCM16 capture, Silero
-  VAD (`/vad/` vendored), binary frames while speaking + `{t:"utterance_end"}`,
-  `{t:"interrupt"}` barge-in (300ms grace on the browser driver), reconnect
-  with backoff, voice->text degradation surfaces the type path immediately.
+  VAD (`/vad/` vendored), `{t:"interrupt"}` barge-in (300ms grace on the
+  browser driver), reconnect with backoff, voice->text degradation surfaces
+  the type path immediately.
 - **On-device voice (client-only)**: first entry mounts `VoiceConsentDialog`
-  (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models
-  (sha256-verified into CacheStorage, progress on `$voiceDownload`), decline
-  keeps the Web Speech engines and is never re-asked (Settings -> voice
-  re-arms). With consent + cached models the browser driver skips
-  SpeechRecognition: sherpa zipformer worker stt fed by `MicCapture`'s
-  `onFloat32Frame` tap, silero VAD speech-end flushes the utterance (vad
-  speech-start + stt partials both arm the 300ms barge-in), KittenTTS worker
-  tts plays Float32 24kHz via `PcmPlayer.writeFloat32`. Engine boot failure
-  falls back to builtin stt; mic failure keeps the type path.
+  (`di.voice.modelsConsent` unset); the waveform's own capture stream is
+  separate from `MicCapture` and closes when muted/inactive.
 - Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
-  no-speech hint now points at the ControlBar `type` button / rail input
-  instead of rendering its own input inside the QuestionCard.
-- **Client-only runtime** (ADR-0003): OPFS-backed session/turns, `$clientTurns`
-  rehydration, browser driver agent loop — all unchanged. Platform filters in
-  the ToolSpec registry replace the hardcoded whiteboard-tab hiding; the orb
-  still renders the css-pulse fallback to keep gpu headroom for in-browser llm.
-- **Ended-session re-entry**: opening `/interview/[id]` for a session whose
-  status is `finished`/`reported`/`discarded` renders a read-only summary
-  (transcript + tools snapshot, no mic) with a `view report` / `new session`
-  CTA instead of booting a dead voice socket.
+  no-speech hint focuses the composer (it is always mounted now — no rail or
+  sheet to open).
+- **Client-only runtime** (ADR-0003): OPFS-backed session/turns,
+  `$clientTurns` rehydration, browser driver agent loop — all unchanged.
+- **Ended-session re-entry**: a `finished`/`reported`/`discarded` session
+  renders the read-only summary (transcript + view report / new session)
+  instead of booting a dead voice socket.
 
 ## Responsive
 
-Mobile-first: base styles target 375px; `sm:`/`md:`/`lg:` enhance. `md`
-(768px) is the rail/Sheet switch.
+Mobile-first: base styles target 375px; `md` (768px) is the grid switch.
 
-- Single column below `md`: AgentStage, QuestionCard, ToolDock stacked; the
-  transcript rail is not rendered (Sheet only).
-- AgentStage orb shrinks one step (`size-20`), caption clamps to 2 lines.
-- ControlBar buttons never wrap: mute/type keep icon+short-label, `end early`
-  truncates. Height is fixed (single row) so ToolDock height math is stable.
-- `viewport-fit=cover` on the root viewport meta + safe-area padding on the
-  ControlBar handle notched devices.
+- Below `md`: single conversation card; workspace hidden; callbar timer
+  hidden; ~78px bottom clearance under the card for the pillbar.
+- At/above `md`: two-card grid `minmax(360px,34%) | 1fr`, 14px gap+padding.
 
 ## URL / state
 

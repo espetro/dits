@@ -5,8 +5,6 @@ import { useStore } from "@nanostores/react";
 import { useSsrStore } from "../../lib/ssr";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { PanelBottom } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "../../components/vendor/sheet";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +26,14 @@ import { getClientSession, getClientTurns, setClientSessionStatus } from "../../
 import { $clientTurns, resetClientSession } from "../../lib/agent/session-store";
 import { $effectiveRuntime } from "../../lib/runtime";
 import { Button } from "../../components/vendor/button";
+import { LiveWaveform } from "../../components/vendor/live-waveform";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+} from "../../components/vendor/prompt-input";
 import { AgentStage } from "../../components/agent-stage";
+import { CallBar } from "../../components/call-bar";
 import { QuestionCard } from "../../components/question-card";
 import { ToolDock } from "../../components/tool-dock";
 import { ControlBar } from "../../components/control-bar";
@@ -41,7 +46,6 @@ import {
   $muted,
   $question,
   $questionCount,
-  $transcriptOpen,
   $whiteboard,
   resetQuestion,
 } from "../../stores/session";
@@ -67,18 +71,6 @@ function useCountdown(durationMin: number, createdAt?: string) {
     return () => clearInterval(t);
   }, [durationMin, createdAt]);
   return secsLeft;
-}
-
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return isMobile;
 }
 
 const phaseKeys: Record<string, string> = {
@@ -204,18 +196,15 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
       $clientTurns.set([...persisted, ...$clientTurns.get()]);
     });
   }, [id, clientOnly]);
-  const transcriptOpen = useStore($transcriptOpen);
   const muted = useStore($muted);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [confirmEndOpen, setConfirmEndOpen] = useState(false);
-  const [text, setText] = useState("");
   const [showSlowHint, setShowSlowHint] = useState(false);
-  const typeInputRef = useRef<HTMLInputElement | null>(null);
-  // question-card fallback: when the agent never calls update_question
+  const typeInputRef = useRef<HTMLTextAreaElement | null>(null);
+  // stage-caption fallback: when the agent never calls update_question
   // (text-only providers, kickoff answers), show the latest agent turn.
   const latestAgentText = [...(turns ?? [])].reverse().find((t) => t.speaker === "agent")?.text;
-  const displayQuestion = question.text || latestAgentText || "";
-  const noQuestionYet = !displayQuestion;
+  const caption = latestAgentText || question.text;
+  const noQuestionYet = !caption;
   // cold-start fallback: if the agent hasn't asked anything after 15s
   // (e.g. mic never picked the candidate up), surface a type-instead hint.
   useEffect(() => {
@@ -226,7 +215,6 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
     const t = setTimeout(() => setShowSlowHint(true), 15_000);
     return () => clearTimeout(t);
   }, [noQuestionYet]);
-  const isMobile = useIsMobile();
   const editor = useStore($editorBuffer);
   const whiteboard = useStore($whiteboard);
   const voice = useVoice(id, muted);
@@ -305,9 +293,12 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
     return () => clearTimeout(t);
   }, [id, editor, whiteboard, clientOnly, sessionTools]);
 
+  const durationSecs = (session?.duration_min ?? 30) * 60;
   const secsLeft = useCountdown(session?.duration_min ?? 30, session?.created_at);
-  const mm = String(Math.floor(secsLeft / 60)).padStart(2, "0");
-  const ss = String(secsLeft % 60).padStart(2, "0");
+  const fmt = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const elapsed = fmt(Math.min(durationSecs, durationSecs - secsLeft));
+  const total = fmt(durationSecs);
   const wrapping = secsLeft <= 120;
 
   // Back-guard + end-early confirmations both navigate to /finish; the
@@ -328,42 +319,34 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
     withResolver: true,
   });
 
-  async function sendText() {
-    if (!text.trim()) return;
+  async function sendText(raw: string) {
+    const t = raw.trim();
+    if (!t) return;
     // typed turns reach the agent: ws message when voice is up (both modes),
     // durable REST write only as a degraded-path fallback in server mode.
     if (clientOnly || voice.status === "connected") {
-      voice.sendText(text.trim());
+      voice.sendText(t);
     } else {
-      await postTextTurn(id, text.trim());
+      await postTextTurn(id, t);
     }
-    setText("");
   }
 
   function focusTypeInput() {
-    if (isMobile) {
-      setSheetOpen(true);
-    } else {
-      $transcriptOpen.set(true);
-    }
-    // rail/sheet mounts async; focus after it has had a tick to render
-    setTimeout(() => typeInputRef.current?.focus(), 150);
+    // the composer is always mounted now — just give it a tick
+    setTimeout(() => typeInputRef.current?.focus(), 50);
   }
 
   return (
     <div className="ambient grain flex h-[100dvh] flex-col overflow-hidden bg-cream">
-      {/* top bar: title + countdown only — AgentStage owns voice state */}
-      <header className="flex items-center justify-between px-4 py-3 md:px-8">
-        <h1 className="min-w-0 truncate font-display text-base font-semibold">
-          {session?.title ?? "…"}
-        </h1>
-        <div className="flex shrink-0 items-center gap-2 md:gap-4">
-          <span
-            className={`font-mono text-sm tabular-nums ${wrapping ? "text-persimmon" : "text-espresso-soft"}`}
-          >
-            {mm}:{ss}
-          </span>
-          {voice.status === "error" && (
+      {/* 44px in-call bar replaces AppHeader on /interview/* */}
+      <CallBar
+        title={session?.title ?? ""}
+        elapsed={elapsed}
+        total={total}
+        wrapping={wrapping}
+        onEnd={() => setConfirmEndOpen(true)}
+        end={
+          voice.status === "error" ? (
             <Button
               variant="outline"
               size="sm"
@@ -373,27 +356,64 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
             >
               <FormattedMessage id="interview.voiceRetry" />
             </Button>
-          )}
-        </div>
-      </header>
+          ) : undefined
+        }
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 px-3 pb-2 sm:px-4 md:flex-row md:px-8">
-        {/* main column: AgentStage -> QuestionCard -> ToolDock */}
-        <main className="flex min-h-0 w-full max-w-3xl min-w-0 flex-1 flex-col gap-3 md:gap-4">
-          <AgentStage
-            phase={voice.phase}
-            orbMuted={muted || voice.status !== "connected"}
-            statusKey={statusKey}
-            caption={latestAgentText ?? ""}
-          />
+      {/* two-card grid on desktop; conversation card only on mobile.
+          ~70px bottom clearance keeps the floating pillbar off the composer. */}
+      <div className="grid min-h-0 flex-1 gap-3.5 p-3.5 md:grid-cols-[minmax(360px,34%)_1fr]">
+        <section
+          aria-label={intl.formatMessage({ id: "interview.conversation" })}
+          className="flex min-h-0 flex-col gap-3 rounded-card bg-paper p-4 pb-[78px] ring-1 ring-hairline md:pb-4"
+        >
           <QuestionCard
             n={questionCount}
-            text={displayQuestion}
             hints={question.hints}
             showTypeHint={showSlowHint && noQuestionYet}
             onType={focusTypeInput}
           />
-          {specs.length > 0 && (
+          <AgentStage
+            phase={voice.phase}
+            orbMuted={muted || voice.status !== "connected"}
+            statusKey={statusKey}
+            caption={caption || intl.formatMessage({ id: "interview.preparing" })}
+          />
+          <TranscriptPane turns={turns} />
+          <div className="flex items-center gap-3 border-t border-hairline pt-2">
+            <LiveWaveform
+              active={voice.status === "connected" && !muted}
+              processing={voice.status === "connecting" || voice.status === "reconnecting"}
+              height={26}
+              barWidth={2}
+              barGap={2}
+              barRadius={1}
+              sensitivity={1.6}
+              aria-label={intl.formatMessage({ id: "interview.micWaveform" })}
+              className="min-w-0 flex-1 text-persimmon"
+            />
+            <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.14em] text-espresso-faint">
+              <FormattedMessage id="interview.youMic" />
+            </span>
+          </div>
+          <PromptInput
+            onSubmit={(m) => void sendText(m.text)}
+            className="[&_[data-slot=input-group]]:rounded-full [&_[data-slot=input-group]]:bg-cream [&_[data-slot=input-group]]:shadow-none"
+          >
+            <PromptInputBody>
+              <PromptInputTextarea
+                ref={typeInputRef}
+                placeholder={intl.formatMessage({ id: "interview.talkOrType" })}
+                aria-label={intl.formatMessage({ id: "interview.talkOrType" })}
+                className="max-h-24 min-h-9 px-4 py-2 text-sm"
+              />
+            </PromptInputBody>
+          </PromptInput>
+        </section>
+
+        {/* workspace card — ToolDock gets the full column height, desktop only */}
+        {specs.length > 0 && (
+          <aside className="hidden min-h-0 md:flex md:flex-col">
             <ToolDock
               specs={specs}
               active={activeTool}
@@ -402,58 +422,11 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
               }
               loadingLabel={intl.formatMessage({ id: "interview.whiteboardLoading" })}
             />
-          )}
-        </main>
-
-        {/* transcript rail — desktop only; mobile uses the bottom Sheet */}
-        <div className="hidden flex-col items-end gap-3 md:flex">
-          <aside
-            className={`flex min-h-0 flex-col rounded-card ring-1 ring-hairline bg-paper/15 backdrop-blur-sm transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-              transcriptOpen ? "h-64 w-80" : "h-14 w-14"
-            }`}
-          >
-            <button
-              onClick={() => $transcriptOpen.set(!transcriptOpen)}
-              className="flex min-h-11 items-center justify-center py-3 text-xs font-medium uppercase tracking-[0.15em] text-espresso-soft"
-              aria-expanded={transcriptOpen}
-            >
-              {transcriptOpen ? "transcript —" : "T +"}
-            </button>
-            {transcriptOpen && (
-              <TranscriptPane
-                turns={turns}
-                text={text}
-                onTextChange={setText}
-                onSend={() => void sendText()}
-                inputRef={typeInputRef}
-              />
-            )}
           </aside>
-        </div>
+        )}
       </div>
 
-      {/* mobile transcript bottom sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="bottom"
-          className="h-[70dvh] gap-0 rounded-t-card border-t bg-paper/95 backdrop-blur-sm"
-        >
-          <SheetTitle className="flex items-center gap-2 px-4 pt-4 text-xs font-medium uppercase tracking-[0.15em] text-espresso-soft">
-            <PanelBottom className="size-4" aria-hidden="true" />
-            transcript
-          </SheetTitle>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <TranscriptPane
-              turns={turns}
-              text={text}
-              onTextChange={setText}
-              onSend={() => void sendText()}
-              inputRef={typeInputRef}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
+      {/* floating pillbar — sits above the conversation card's clearance */}
       <ControlBar
         muted={muted}
         onMute={() => $muted.set(!muted)}

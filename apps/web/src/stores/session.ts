@@ -54,9 +54,6 @@ export function resetQuestion(): void {
   $questionCount.set(0);
 }
 
-/** Transcript panel expanded state. Minimize never hides the panel (peek rail). */
-export const $transcriptOpen = atom(true);
-
 /** Microphone muted state. */
 export const $muted = atom(false);
 
