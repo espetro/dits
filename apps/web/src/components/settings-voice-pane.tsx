@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useStore } from "@nanostores/react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Check, ChevronRight, Loader2, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, Play, X } from "lucide-react";
 
 import { SettingsRow } from "./settings-row";
 import { MicSelector } from "./mic-selector";
@@ -27,6 +27,9 @@ import {
   wasmVoiceSupported,
 } from "../lib/voice/models";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
+import { WasmTts } from "../lib/voice/wasm-engines";
+import { createPcmPlayer } from "../lib/voice/pcm-player";
+import type { PcmPlayer } from "../lib/voice/pcm-player";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { hasBrowserStt, startLiveStt, testBrowserTts } from "../lib/settings-tests";
 import { DiError, codeMessage, errorDetail } from "../lib/errors";
@@ -76,9 +79,21 @@ export function VoicePane() {
 
   const [sttTest, setSttTest] = React.useState<VoiceTestState>({ status: "idle" });
   const [ttsTest, setTtsTest] = React.useState<VoiceTestState>({ status: "idle" });
+  const [voiceSample, setVoiceSample] = React.useState<VoiceTestState>({ status: "idle" });
   const [sttOutput, setSttOutput] = React.useState("");
   const liveStt = React.useRef<{ stop: () => void } | null>(null);
-  React.useEffect(() => () => liveStt.current?.stop(), []);
+  const sampleEngine = React.useRef<WasmTts | null>(null);
+  const samplePlayer = React.useRef<PcmPlayer | null>(null);
+  React.useEffect(
+    () => () => {
+      liveStt.current?.stop();
+      sampleEngine.current?.dispose();
+      sampleEngine.current = null;
+      samplePlayer.current?.stop();
+      samplePlayer.current = null;
+    },
+    [],
+  );
 
   const startDownload = () => {
     void downloadVoiceModels()
@@ -109,6 +124,38 @@ export function VoicePane() {
 
   const effectiveTtsPick: TtsEnginePick =
     ttsPick === "" ? (hasTtsEndpoint ? "endpoint" : "on-device") : ttsPick;
+
+  /** Speak a preset phrase through the resolved tts engine; shows synth ms. */
+  async function runVoiceSample() {
+    const phrase = intl.formatMessage({ id: "settings.voice.testPhrase" });
+    setVoiceSample({ status: "running" });
+    const startedAt = performance.now();
+    try {
+      const engines = await resolveInstalledVoiceEngines();
+      if (engines.tts === "wasm") {
+        const engine = (sampleEngine.current ??= new WasmTts());
+        const pcm = await engine.speak(phrase);
+        (samplePlayer.current ??= createPcmPlayer()).writeFloat32(pcm);
+        setVoiceSample({
+          status: "ok",
+          message: `${Math.round(performance.now() - startedAt)} ms`,
+        });
+      } else if (engines.tts === "endpoint" && profile?.tts) {
+        const pcm = await synthesizeSpeech(profile.tts, phrase);
+        (samplePlayer.current ??= createPcmPlayer()).write(pcm);
+        setVoiceSample({
+          status: "ok",
+          message: `${Math.round(performance.now() - startedAt)} ms`,
+        });
+      } else {
+        await testBrowserTts(phrase);
+        setVoiceSample({ status: "ok" });
+      }
+    } catch (err) {
+      setVoiceSample({ status: "idle" });
+      toast.error(err instanceof Error ? err.message : String(err));
+    }
+  }
 
   /** Test the engines the session will actually use. */
   async function runVoiceTest() {
@@ -285,6 +332,34 @@ export function VoicePane() {
             )}
           </SelectContent>
         </Select>
+      </SettingsRow>
+
+      <SettingsRow
+        title={intl.formatMessage({ id: "settings.voice.sample" })}
+        description={intl.formatMessage({ id: "settings.voice.sampleDesc" })}
+      >
+        <span className="flex items-center gap-2">
+          {voiceSample.status === "ok" && voiceSample.message ? (
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {voiceSample.message}
+            </span>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void runVoiceSample()}
+            disabled={voiceSample.status === "running"}
+            aria-busy={voiceSample.status === "running"}
+          >
+            {voiceSample.status === "running" ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Play className="size-3.5" aria-hidden="true" />
+            )}
+            <FormattedMessage id="settings.voice.sampleCta" />
+          </Button>
+        </span>
       </SettingsRow>
 
       <SettingsRow

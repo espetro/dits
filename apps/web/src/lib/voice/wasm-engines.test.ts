@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { VoiceModelStorage } from "./models";
 import { modelFileKey } from "./models";
 import type { KittenInMsg, KittenOutMsg } from "./kitten/kitten-worker";
-import { WasmTts, WasmTtsNotReadyError, WasmStt, WasmSttNotReadyError } from "./wasm-engines";
+import { WasmStt, WasmSttNotReadyError, WasmTts, WasmTtsNotReadyError } from "./wasm-engines";
 import type { WorkerLike } from "./wasm-engines";
 import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 

@@ -19,6 +19,7 @@ import { createVadGate } from "./vad";
 import type { VadFrameProbabilities, VadGate, VadGateOptions } from "./vad";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
+import { pushVoiceHealth } from "./health";
 import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 
@@ -135,8 +136,18 @@ export class BrowserVoiceDriver implements SpeechDriver {
     private readonly sessionId: string,
     private readonly deps: BrowserDriverDeps = {},
   ) {
-    this.player = deps.player ?? createPcmPlayer();
+    this.player =
+      deps.player ??
+      createPcmPlayer({
+        // a gap while sentences are still synthesizing = playback underrun
+        onGap: (ms) => {
+          if (this.pendingSpeaks > 0) {
+            pushVoiceHealth({ kind: "playback.gap", ok: false, ms });
+          }
+        },
+      });
     this.player.onDrained(() => {
+      pushVoiceHealth({ kind: "playback.drained", ok: true });
       this.echoGateUntil = Date.now() + BrowserVoiceDriver.ECHO_GATE_TAIL_MS;
     });
   }
@@ -599,7 +610,10 @@ export class BrowserVoiceDriver implements SpeechDriver {
    * Barge-in: called from the route's VAD path when the user starts speaking
    * during agent playback. Same semantics as the server interrupt.
    */
-  interrupt(): void {
+  interrupt(cause: "barge-in" | "mute" | "stop" = "barge-in"): void {
+    if (this.player.playing || this.pendingSpeaks > 0) {
+      pushVoiceHealth({ kind: "playback.stop", ok: false, detail: cause });
+    }
     this.player.stop();
     this.wasmTts?.cancelPending?.();
     // the gate drops at barge-in, not at drain: the utterance that
@@ -617,7 +631,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.muted = muted;
     this.capture?.setMuted(muted);
     if (muted) {
-      this.interrupt();
+      this.interrupt("mute");
     }
   }
 
@@ -647,7 +661,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     } catch {
       // teardown must not throw
     }
-    this.interrupt();
+    this.interrupt("stop");
     this.releaseAnchor();
     this.wasmTts?.dispose();
     this.wasmTts = null;

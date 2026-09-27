@@ -5,6 +5,7 @@ import type { VoiceModelManifest } from "@di/shared";
 import { DiError } from "../errors";
 import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
 import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
+import { pushVoiceHealth } from "./health";
 import sherpaWasmUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.wasm?url";
 import sherpaGlueUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.js?url";
 import sherpaAsrUrl from "sherpa-onnx/sherpa-onnx-asr.js?url";
@@ -75,48 +76,60 @@ export class WasmTts implements TtsEngine {
 
   private boot(): Promise<void> {
     this.readyPromise ??= (async () => {
-      const manifest = await effectiveManifest();
-      const [model, voices] = await Promise.all([
-        readVoiceModelFile("tts", "tts/model.onnx", manifest, this.deps.storage),
-        readVoiceModelFile("tts", "tts/voices.npz", manifest, this.deps.storage),
-      ]);
-      if (!model || !voices) throw new WasmTtsNotReadyError();
-      const worker =
-        this.deps.workerFactory?.() ??
-        new Worker(new URL("./kitten/kitten-worker.ts", import.meta.url), {
-          type: "module",
+      const startedAt = Date.now();
+      try {
+        const manifest = await effectiveManifest();
+        const [model, voices] = await Promise.all([
+          readVoiceModelFile("tts", "tts/model.onnx", manifest, this.deps.storage),
+          readVoiceModelFile("tts", "tts/voices.npz", manifest, this.deps.storage),
+        ]);
+        if (!model || !voices) throw new WasmTtsNotReadyError();
+        const worker =
+          this.deps.workerFactory?.() ??
+          new Worker(new URL("./kitten/kitten-worker.ts", import.meta.url), {
+            type: "module",
+          });
+        this.worker = worker;
+        const ready = new Promise<void>((resolve, reject) => {
+          worker.onmessage = (ev) => {
+            const msg = ev.data as KittenOutMsg;
+            if (msg.type === "ready") return resolve();
+            if (msg.type === "error" && msg.id === null) return reject(new Error(msg.message));
+            if (msg.type === "pcm") {
+              const entry = this.pending.get(msg.id);
+              if (entry) {
+                this.pending.delete(msg.id);
+                entry.resolve(msg.pcm);
+              }
+            } else if (msg.type === "error" && msg.id !== null) {
+              const entry = this.pending.get(msg.id);
+              if (entry) {
+                this.pending.delete(msg.id);
+                entry.reject(new Error(msg.message));
+              }
+            }
+          };
+          worker.onerror = (ev) =>
+            reject(new DiError("models.ttsWorker", undefined, `tts worker failed: ${String(ev)}`));
         });
-      this.worker = worker;
-      const ready = new Promise<void>((resolve, reject) => {
-        worker.onmessage = (ev) => {
-          const msg = ev.data as KittenOutMsg;
-          if (msg.type === "ready") return resolve();
-          if (msg.type === "error" && msg.id === null) return reject(new Error(msg.message));
-          if (msg.type === "pcm") {
-            const entry = this.pending.get(msg.id);
-            if (entry) {
-              this.pending.delete(msg.id);
-              entry.resolve(msg.pcm);
-            }
-          } else if (msg.type === "error" && msg.id !== null) {
-            const entry = this.pending.get(msg.id);
-            if (entry) {
-              this.pending.delete(msg.id);
-              entry.reject(new Error(msg.message));
-            }
-          }
+        const init: KittenInMsg = {
+          type: "init",
+          model,
+          voices,
+          wasmBase: this.deps.wasmBase ?? VAD_ASSETS_BASE,
         };
-        worker.onerror = (ev) =>
-          reject(new DiError("models.ttsWorker", undefined, `tts worker failed: ${String(ev)}`));
-      });
-      const init: KittenInMsg = {
-        type: "init",
-        model,
-        voices,
-        wasmBase: this.deps.wasmBase ?? VAD_ASSETS_BASE,
-      };
-      worker.postMessage(init, [model, voices]);
-      await ready;
+        worker.postMessage(init, [model, voices]);
+        await ready;
+      } catch (err) {
+        pushVoiceHealth({
+          kind: "engine.boot",
+          ok: false,
+          ms: Date.now() - startedAt,
+          detail: `tts: ${String(err instanceof Error ? err.message : err)}`,
+        });
+        throw err;
+      }
+      pushVoiceHealth({ kind: "engine.boot", ok: true, ms: Date.now() - startedAt, detail: "tts" });
     })().catch((err: unknown) => {
       // a failed boot must not poison future speak() calls
       this.readyPromise = null;
@@ -136,8 +149,26 @@ export class WasmTts implements TtsEngine {
     const promise = new Promise<Float32Array>((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
     });
+    const startedAt = Date.now();
     worker.postMessage(msg);
-    return promise;
+    try {
+      const pcm = await promise;
+      pushVoiceHealth({
+        kind: "tts.speak",
+        ok: true,
+        ms: Date.now() - startedAt,
+        detail: `${sentence.length} chars`,
+      });
+      return pcm;
+    } catch (err) {
+      pushVoiceHealth({
+        kind: "tts.speak",
+        ok: false,
+        ms: Date.now() - startedAt,
+        detail: String(err instanceof Error ? err.message : err),
+      });
+      throw err;
+    }
   }
 
   /**
@@ -170,6 +201,9 @@ export class WasmStt implements SttEngine {
   private cb: SttEngineCallbacks | null = null;
   /** frames arriving during worker boot are buffered, then replayed */
   private preboot: Float32Array[] = [];
+  /** first frame of the current utterance: anchor for first-partial latency */
+  private fedAt: number | null = null;
+  private partialSent = false;
 
   constructor(private readonly deps: WasmEngineDeps = {}) {}
 
@@ -190,42 +224,66 @@ export class WasmStt implements SttEngine {
 
   private boot(): Promise<void> {
     this.readyPromise ??= (async () => {
-      const manifest = await effectiveManifest();
-      const [model, tokens] = await Promise.all([
-        readVoiceModelFile("stt", "stt/model.onnx", manifest, this.deps.storage),
-        readVoiceModelFile("stt", "stt/tokens.txt", manifest, this.deps.storage),
-      ]);
-      if (!model || !tokens) throw new WasmSttNotReadyError();
-      // classic worker, not module: the sherpa glue loads via importScripts,
-      // which module workers do not have. The worker file itself must stay
-      // import-free (asset urls arrive on the init message) for vite to emit
-      // a classic bundle.
-      const worker =
-        this.deps.workerFactory?.() ??
-        new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "classic" });
-      this.worker = worker;
-      const ready = new Promise<void>((resolve, reject) => {
-        worker.onmessage = (ev) => {
-          const msg = ev.data as SttOutMsg;
-          if (msg.type === "ready") return resolve();
-          if (msg.type === "error") return reject(new Error(msg.message));
-          if (msg.type === "partial") this.cb?.onInterim(msg.text);
-          if (msg.type === "final") {
-            if (msg.text.trim()) this.cb?.onFinal(msg.text);
-          }
+      const startedAt = Date.now();
+      try {
+        const manifest = await effectiveManifest();
+        const [model, tokens] = await Promise.all([
+          readVoiceModelFile("stt", "stt/model.onnx", manifest, this.deps.storage),
+          readVoiceModelFile("stt", "stt/tokens.txt", manifest, this.deps.storage),
+        ]);
+        if (!model || !tokens) throw new WasmSttNotReadyError();
+        // classic worker, not module: the sherpa glue loads via importScripts,
+        // which module workers do not have. The worker file itself must stay
+        // import-free (asset urls arrive on the init message) for vite to emit
+        // a classic bundle.
+        const worker =
+          this.deps.workerFactory?.() ??
+          new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "classic" });
+        this.worker = worker;
+        const ready = new Promise<void>((resolve, reject) => {
+          worker.onmessage = (ev) => {
+            const msg = ev.data as SttOutMsg;
+            if (msg.type === "ready") return resolve();
+            if (msg.type === "error") return reject(new Error(msg.message));
+            if (msg.type === "partial") {
+              if (msg.text.trim() && this.fedAt !== null && !this.partialSent) {
+                pushVoiceHealth({
+                  kind: "stt.firstPartial",
+                  ok: true,
+                  ms: Date.now() - this.fedAt,
+                });
+                this.partialSent = true;
+              }
+              this.cb?.onInterim(msg.text);
+            }
+            if (msg.type === "final") {
+              this.fedAt = null;
+              this.partialSent = false;
+              if (msg.text.trim()) this.cb?.onFinal(msg.text);
+            }
+          };
+          worker.onerror = (ev) =>
+            reject(new DiError("models.sttWorker", undefined, `stt worker failed: ${String(ev)}`));
+        });
+        const init: SttInMsg = {
+          type: "init",
+          model,
+          tokens,
+          assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
         };
-        worker.onerror = (ev) =>
-          reject(new DiError("models.sttWorker", undefined, `stt worker failed: ${String(ev)}`));
-      });
-      const init: SttInMsg = {
-        type: "init",
-        model,
-        tokens,
-        assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
-      };
-      worker.postMessage(init, [model, tokens]);
-      await ready;
-      for (const f of this.preboot.splice(0)) worker.postMessage({ type: "feed", samples: f });
+        worker.postMessage(init, [model, tokens]);
+        await ready;
+        for (const f of this.preboot.splice(0)) worker.postMessage({ type: "feed", samples: f });
+      } catch (err) {
+        pushVoiceHealth({
+          kind: "engine.boot",
+          ok: false,
+          ms: Date.now() - startedAt,
+          detail: `stt: ${String(err instanceof Error ? err.message : err)}`,
+        });
+        throw err;
+      }
+      pushVoiceHealth({ kind: "engine.boot", ok: true, ms: Date.now() - startedAt, detail: "stt" });
     })().catch((err: unknown) => {
       // a failed boot must not poison future start() calls
       this.readyPromise = null;
@@ -237,6 +295,7 @@ export class WasmStt implements SttEngine {
   }
 
   feed(frame: Float32Array): void {
+    this.fedAt ??= Date.now();
     const worker = this.worker;
     if (!worker) {
       if (this.readyPromise && this.preboot.length < 100) this.preboot.push(frame);
@@ -255,6 +314,8 @@ export class WasmStt implements SttEngine {
     this.readyPromise = null;
     this.cb = null;
     this.preboot = [];
+    this.fedAt = null;
+    this.partialSent = false;
     this.worker?.terminate();
     this.worker = null;
   }
