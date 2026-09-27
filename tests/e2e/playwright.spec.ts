@@ -330,9 +330,9 @@ test.describe("client-only runtime (no di server)", () => {
       route.fulfill({ status: 500, body: "no tts in e2e" }),
     );
     const id = await startClientOnlySession(page);
-    // the type input lives in the collapsed transcript rail — the
-    // ControlBar "type" button opens it and focuses the input (p3-22).
-    await page.getByRole("button", { name: "type", exact: true }).click();
+    // the composer lives at the bottom of the conversation card — the
+    // pillbar "switch to typing" button focuses it.
+    await page.getByRole("button", { name: "switch to typing" }).click();
     const input = page.getByPlaceholder("talk or type…");
     await input.fill("hello from e2e");
     await input.press("Enter");
@@ -360,7 +360,7 @@ test.describe("client-only runtime (no di server)", () => {
       await route.fulfill({ status: 500, body: "mock failure" });
     });
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "type", exact: true }).click();
+    await page.getByRole("button", { name: "switch to typing" }).click();
     const input = page.getByPlaceholder("talk or type…");
     await input.fill("this will fail");
     await input.press("Enter");
@@ -427,7 +427,7 @@ test.describe("client-only runtime (no di server)", () => {
     );
 
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "type", exact: true }).click();
+    await page.getByRole("button", { name: "switch to typing" }).click();
     const input = page.getByPlaceholder("talk or type…");
     await input.fill("hello from e2e");
     await input.press("Enter");

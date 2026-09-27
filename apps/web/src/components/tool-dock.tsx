@@ -42,7 +42,7 @@ export function ToolDock({
   const activeSpec = specs.find((s) => s.id === active) ?? specs[0];
   const Pane = activeSpec?.component;
   return (
-    <section className="flex min-h-0 flex-1 flex-col rounded-card bg-paper p-2 ring-1 ring-hairline">
+    <section className="flex min-h-0 flex-1 flex-col rounded-card bg-cream-deep p-3 ring-1 ring-hairline">
       <Tabs value={activeSpec?.id ?? ""} onValueChange={onActive}>
         <div className="flex items-center gap-1">
           <TabsList className="flex min-w-0 flex-1 gap-1 rounded-full bg-transparent p-1">
@@ -52,8 +52,8 @@ export function ToolDock({
                 value={spec.id}
                 className={`min-h-11 flex-none rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] after:hidden ${
                   activeSpec?.id === spec.id
-                    ? "bg-espresso text-cream"
-                    : "text-espresso-soft hover:bg-cream-deep"
+                    ? "bg-paper text-espresso ring-1 ring-hairline"
+                    : "text-espresso-soft hover:bg-paper/60"
                 }`}
               >
                 <spec.icon className="size-4" aria-hidden="true" />
@@ -87,7 +87,7 @@ export function ToolDock({
           )}
         </div>
       </Tabs>
-      <div className="min-h-0 flex-1 rounded-[calc(1.5rem-0.375rem)] bg-cream p-2 sm:p-4">
+      <div className="mt-2 min-h-0 flex-1 rounded-[calc(1.5rem-0.375rem)] bg-paper p-2 ring-1 ring-hairline sm:p-4">
         {Pane && (
           <Suspense fallback={<PaneSkeleton label={loadingLabel} />}>
             <Pane />

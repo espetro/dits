@@ -1,11 +1,12 @@
-import { FormattedMessage } from "react-intl";
-import { Flag, Keyboard, Mic, MicOff } from "lucide-react";
+import { useIntl } from "react-intl";
+import { Keyboard, Mic, MicOff, X } from "lucide-react";
 import { Button } from "./vendor/button";
 
 /**
- * ControlBar (p3-19): sticky bottom cluster on every viewport — mute,
- * type-instead, end early. All targets >= 44px and the bar pads
- * env(safe-area-inset-bottom) for notched devices.
+ * ControlBar: floating bottom-center espresso pillbar — icons-only controls
+ * (mute / switch to typing / end interview). Fixed above content; callers
+ * leave clearance under the composer so it never overlaps (mobile pads the
+ * conversation card ~70px).
  */
 export function ControlBar({
   muted,
@@ -18,39 +19,44 @@ export function ControlBar({
   onType: () => void;
   onEnd: () => void;
 }) {
+  const intl = useIntl();
+  const btn =
+    "size-11 rounded-full bg-white/10 p-0 text-cream shadow-none ring-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/20 active:scale-[0.94]";
   return (
-    <footer
-      className="flex shrink-0 items-stretch gap-2 border-t border-hairline bg-paper/80 px-3 py-2 backdrop-blur-sm sm:gap-3 sm:px-4"
-      style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+    <div
+      role="toolbar"
+      aria-label={intl.formatMessage({ id: "interview.controls" })}
+      className="fixed bottom-[18px] left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-espresso p-2 shadow-[0_12px_32px_rgba(43,33,24,0.28)]"
+      style={{ bottom: "calc(18px + env(safe-area-inset-bottom))" }}
     >
       <Button
         onClick={onMute}
         aria-pressed={muted}
-        className="h-11 min-w-0 flex-1 gap-2 rounded-full bg-white px-4 text-espresso ring-1 ring-hairline shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white hover:ring-persimmon/50 active:scale-[0.97] sm:flex-none sm:px-5"
+        aria-label={intl.formatMessage({
+          id: muted ? "interview.unmuteMic" : "interview.muteMic",
+        })}
+        className={btn}
       >
         {muted ? (
-          <MicOff className="size-4 shrink-0" aria-hidden="true" />
+          <MicOff className="size-4" aria-hidden="true" />
         ) : (
-          <Mic className="size-4 shrink-0" aria-hidden="true" />
+          <Mic className="size-4" aria-hidden="true" />
         )}
-        <FormattedMessage id={muted ? "interview.unmute" : "interview.mute"} />
       </Button>
       <Button
         onClick={onType}
-        className="h-11 min-w-0 flex-1 gap-2 rounded-full bg-white px-4 text-espresso ring-1 ring-hairline shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white hover:ring-persimmon/50 active:scale-[0.97] sm:flex-none sm:px-5"
+        aria-label={intl.formatMessage({ id: "interview.switchToTyping" })}
+        className={btn}
       >
-        <Keyboard className="size-4 shrink-0" aria-hidden="true" />
-        <FormattedMessage id="interview.type" />
+        <Keyboard className="size-4" aria-hidden="true" />
       </Button>
       <Button
         onClick={onEnd}
-        className="h-11 min-w-0 flex-1 gap-2 truncate rounded-full bg-espresso px-4 text-cream shadow-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-persimmon active:scale-[0.97] sm:flex-none sm:px-5"
+        aria-label={intl.formatMessage({ id: "interview.endInterview" })}
+        className={`${btn} bg-persimmon-deep hover:bg-persimmon`}
       >
-        <Flag className="size-4 shrink-0" aria-hidden="true" />
-        <span className="truncate">
-          <FormattedMessage id="interview.endEarly" />
-        </span>
+        <X className="size-4" aria-hidden="true" />
       </Button>
-    </footer>
+    </div>
   );
 }

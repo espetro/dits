@@ -1,9 +1,10 @@
 # Screen: Navbar (shared AppHeader)
 
 Mounted in `__root` for every route except the landing (`/` and `/{-$locale}`
-index), which is headerless by design: logo, optional centered page title,
-LocaleSwitcher, GitHub link, and the account dropdown (B3). `AppHeaderSlot`
-suppresses it via `useMatch("/{-$locale}/")`.
+index, headerless by design via `useMatch("/{-$locale}/")`) and `/interview/*`
+(the interview renders its own 44px CallBar — see interview.md): logo,
+optional centered page title, LocaleSwitcher, GitHub link, and the account
+dropdown (B3).
 
 ## ASCII mockup
 
