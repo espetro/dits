@@ -1,38 +1,39 @@
 # Screen: Settings dialog (account dropdown, centered)
 
-Centered dialog opened from the account dropdown (B3). Three panes:
-History ("previous sessions"), AI Provider and Voice. Desktop: borderless
-left sidebar nav + inset rounded content card (ChatGPT-style). Mobile:
-full-screen with a top tab bar. URL-driven: `?settings=1&pane=…`
-(pane ∈ history | aiProvider | voice).
+One centered dialog is the single settings surface, opened from the
+account dropdown, the runtime status chip, or any `openSettings(pane)`
+call site. Six panes: past interviews, voice & microphone, interviewer
+ai, downloads, language, advanced. Desktop: borderless left sidebar nav +
+inset rounded content card. Mobile: full-screen with a top pane select.
+URL-driven: `?settings=1&pane=…` (pane ∈ history | voice | ai | downloads
+| language | advanced; the legacy `aiProvider` value maps to `ai`).
+
+Row grammar everywhere (spotify-style): each row is title + one-line
+plain-language description + right control, built on the vendored
+Item/Select/Collapsible/Alert/Progress/Empty blocks. Plain words in
+titles ("understands you with", not "stt"); technical terms (endpoint,
+runtime, api flavor) only appear in the advanced pane.
 
 ## ASCII mockup (desktop, default)
-
-ElevenMusic-style geometry: wide dialog, w-60 sidebar with the close
-button in its own block, inset card with a centered max-w-xl column.
 
 ```
                  +------------------------------------------------------------------+
                  |                                             [x]                  |
                  |  +------------------+  +---------------------------------+       |
-                 |  |  (w-60, p-5)     |  |  AI PROVIDER        (card)      |       |
+                 |  |  (w-60, p-5)     |  |  VOICE & MICROPHONE  (card)     |       |
                  |  |                  |  |  ---------------------------------      |
                  |  |  [x] close       |  |   large title + hairline rule   |       |
-                 |  |  (own block,     |  |                                 |       |
-                 |  |   p-5 breathing  |  |  [STT] [TTS] [LLM]              |       |
-                 |  |   room above     |  |  +---------------------------+  |       |
-                 |  |   nav)           |  |  | (o) in-browser            |  |       |
-                 |  |                  |  |  | (*) custom                |  |       |
-                 |  | o previous       |  |  +---------------------------+  |       |
-                 |  |   sessions       |  |   <- centered max-w-xl column -> |       |
-                 |  |                  |  |  base url [_________]           |       |
-                 |  | o AI provider    |  |    one-line muted helper        |       |
-                 |  |   (active)       |  |  api key  [_________]           |       |
-                 |  |                  |  |    one-line muted helper        |       |
-                 |  |  rows py-2.5     |  |  model    [_________]           |       |
-                 |  |  px-3 (~44px)    |  |    one-line muted helper        |       |
-                 |  |  gap-y-1         |  |  free providers (links)         |       |
-                 |  |                  |  |  [Test]  changes save auto      |       |
+                 |  |  (own block)     |  |                                 |       |
+                 |  |                  |  |  microphone            [select] |       |
+                 |  |  -------------   |  |  understands you with  [select] |       |
+                 |  |  o past          |  |  answers you with      [select] |       |
+                 |  |    interviews    |  |  on-device voice pack  st [go>] |       |
+                 |  |  o voice & mic   |  |  test call             [button] |       |
+                 |  |    (active)      |  |   <- centered max-w-xl column -> |       |
+                 |  |  o interviewer ai|  |                                 |       |
+                 |  |  o downloads     |  |                                 |       |
+                 |  |  o language      |  |                                 |       |
+                 |  |  o advanced      |  |                                 |       |
                  |  +------------------+  +---------------------------------+       |
                  +------------------------------------------------------------------+
                     sm:max-w-4xl lg:max-w-5xl, h-[min(40rem,100vh-6rem)];
@@ -44,126 +45,97 @@ button in its own block, inset card with a centered max-w-xl column.
 
 ```
         +---------------------------+
-        | [o prev sessions][AI prov]|   <- top tab bar, 2 tabs,
-        +---------------------------+      full-width flex-1
-        |  [STT]  [TTS]  [LLM]      |   <- sub-tabs (pill list)
-        |  (o) in-browser           |
-        |  (*) custom endpoint      |
-        |  base url [___________]   |
-        |    one-line muted helper  |
-        |  api key  [___________]   |
-        |    one-line muted helper  |
-        |  model    [___________]   |
-        |    one-line muted helper  |
-        |  free provider links      |
-        |  [Test]  changes save auto|   <- footer stacks vertically
+        | [pane select v]      [x]  |   <- top bar: pane Select + close
+        +---------------------------+
+        |  microphone      [select] |
+        |  understands you [select] |
+        |  answers you     [select] |
+        |  on-device pack  st [go>] |
+        |  test call      [button]  |
         |                           |
         +---------------------------+
         full-screen: no rounding, no card chrome, no centered column,
-        content scrolls; fields stretch full width as before
+        content scrolls; fields stretch full width
 ```
 
 ## Behavior
 
 - Desktop: sm:max-w-4xl lg:max-w-5xl flex-row panel, height
   h-[min(40rem,calc(100vh-6rem))] (rounded-2xl, p-0, shadow-2xl).
-  Left sidebar (w-60, p-5): close button in its own top block (pb-5)
-  with breathing room, then the nav rows in a gap-y-1 column; each row
-  is a History / AI Provider ghost button at py-2.5 px-3 (~44px tall),
-  no border; active row bg-accent, hover bg-muted/60; label span is
-  truncate + min-w-0 so the hover pill always contains it.
-  Right pane: inset card (my-3 mr-3, rounded-xl, border, bg-card,
-  shadow-sm), overflow-y-auto — sidebar and card borders never touch.
-  Inside the card the pane content is wrapped in a centered column:
-  max-w-xl mx-auto for AI provider, max-w-2xl mx-auto for history;
-  each pane opens with a large display heading over a full-width
-  border-b hairline, and section groups sit in space-y-10.
-  Endpoint fields render through the SettingsField helper (label +
-  input + one-line muted helper, settings.baseUrlHelp / apiKeyHelp /
-  modelHelp / voiceHelp). Mobile keeps the pre-existing full-screen
-  layout with no centered column.
-- Mobile: full-screen override (inset-0 h-svh w-screen, no rounding,
-  close button hidden) via useIsMobile media-query hook. The sidebar is
-  replaced by a top tab bar (shadcn Tabs, flex-1 triggers, icon +
-  label); content scrolls with overflow-y-auto and drops the card
-  chrome to fit 375px. Footer rows wrap: flex-col gap-2 sm:flex-row.
+  Left sidebar (w-60, p-5): close button in its own top block (pb-5),
+  then nav rows in a gap-y-1 column; a separator splits "past
+  interviews" (user data) from the configuration panes. Active row
+  bg-accent, hover bg-muted/60. Right pane: inset card (my-3 mr-3,
+  rounded-xl, border, bg-card, shadow-sm), overflow-y-auto; content is
+  a centered max-w-xl column (max-w-2xl for history) under a large
+  display heading with border-b hairline. The advanced pane heading
+  adds the "most people never need this" note.
+- Mobile: full-screen override (inset-0 h-svh w-screen, no rounding)
+  via useIsMobile; the sidebar collapses to a top pane Select plus a
+  close button; content scrolls with no card chrome.
 - URL-driven (raw query string, not validateSearch: the prerender
   server canonicalizes `/?settings=1` to `/` before hydration).
-  openSettings/clearSettings pushState + popstate; unknown or missing
-  pane falls back to `history` (the old empty "settings" pane was
-  removed, along with its user-dropdown entry).
-- History pane: client-only load from OPFS via listClientSessions in
-  useEffect (SSR renders "..." then rows or the history.empty empty
-  state). Rows link to /interview/$id, /finish/$id or /report/$id by
-  status, with a status chip and relative date.
-- AI Provider pane: three sub-tabs STT / TTS / LLM. Each chooses
-  In-browser vs Custom endpoint (baseUrl, apiKey redacted when saved via
-  redactKey, model, voice for TTS). STT in-browser = Web Speech fallback.
-  The LLM in-browser radio is always selectable; the browser LLM manager
-  shows per-engine availability (Gemini Nano status dot, transformers
-  install state) so a missing WebGPU or Prompt API surfaces as manager
-  state, not a locked radio. Selecting in-browser shows the browser LLM
-  manager (see below) plus the settings.llm.inBrowserWarning callout
-  (WebGPU cost/reliability), a bold settings.llm.cloudRecommended line
-  and a settings.llm.geminiEnableLink to the Gemini Nano enable guide.
-  LLM custom mode adds a flavor select
-  (OpenAI/Anthropic-compatible) above the endpoint fields. STT/TTS custom
-  mode shows the settings.customProviders helper (whisper.cpp/Speaches for
-  STT, Piper/Kokoro for TTS) and a FreeProviderLinks row (OpenRouter,
-  Groq, Cerebras, Google AI Studio; target=_blank rel=noreferrer).
-- LLM browser manager: engine select (Gemini Nano | Transformers.js).
-  Gemini Nano row shows a status dot (green installed / amber
-  downloadable / red unsupported) plus a muted hint; unsupported shows a
-  "use Chrome 148+ or Transformers.js" note. Transformers.js lists the
-  curated catalog (label + ~size MB + installed chip) as radio rows with
-  Download (shows live {percent}% while busy), per-selected-model Delete,
-  and Remove all models; weights live in the Cache API, deletion purges
-  the matching entries.
-- Test button: disabled while running (Loader2 spinner +
-  settings.testing), client-side guard rejects empty fields with
-  settings.invalid instead of a false ok; result is a check "Working"
-  or "Failed: {message}" line (role=status) that auto-clears after 4s.
-  LLM runs a tiny streamed completion, TTS synthesizes a phrase, STT
-  probes ${base}/v1/models. In-browser STT/TTS (custom endpoint off)
-  the Test button stays enabled when the browser exposes the Web
-  Speech feature (STT: SpeechRecognition; TTS: speechSynthesis):
-  STT starts recognition for ~3s and reports ok on audio events, TTS
-  speaks "hello" and resolves on `end` (5s timeout fallback). When the
-  browser lacks the feature the button is disabled with a muted
-  settings.test.unsupported reason line (role=note) and a matching
-  title tooltip.
-- Voice pane (wasm voice engines): per-engine radio pickers for STT
-  (on-device | browser built-in) and TTS (on-device | browser built-in |
-  custom endpoint — shown only when profile.tts exists), plus an
-  "on-device models" card with a status dot + state line (installed
-  {total} mb / downloading {percent}% / not downloaded / failed) and
-  Download | re-download | clear cache controls. Picks persist to
-  `di.voice.sttEngine`/`di.voice.ttsEngine` ("on-device" default);
-  picking an on-device engine while unconsented grants
-  `di.voice.modelsConsent` and starts the model download (the prompt is
-  never re-shown — the pane is the re-arm path). Browsers without
-  wasm+simd show a settings.voicePane.unsupported note and the download
-  button stays disabled.
-- Saving is automatic: every edit is validated and written to
-  $providerProfile after a 600ms debounce; a muted settings.autosaveNote
-  (role=note) replaces the old Save button. An incomplete LLM draft
-  never overwrites the last valid persisted profile, so the session
-  stays startable mid-edit.
-- Truth-telling: an enabled-but-incomplete section (missing or invalid
-  baseUrl / apiKey / model) is never persisted — a settings.incomplete
-  warning line renders under the mode picker so a skipped section is
-  never silent. Saving a profile rebuilds the browser voice driver
-  (`useVoice` re-boots on `$providerProfile` change) so the new
-  endpoint takes effect in the live session.
-- Demo LLM (p2 zero-conf): the llm tab's hint block also offers a
-  settings.demoLlm.fill link that one-clicks the demo endpoint into
-  baseUrl/model. The url is never committed — builds inject it via
-  VITE_DEMO_LLM_* env vars, and the fill plants a placeholder apiKey
-  (the managed endpoint ignores it) so the standard schema applies.
-  When the build carries no VITE_DEMO_LLM_BASE_URL the fill link is
-  hidden. While the draft or saved endpoint is the demo one the
-  baseUrl field renders a read-only "Demo API" label (never the url)
-  with a settings.demoLlm.customize link to switch back to a custom
-  endpoint, plus a settings.demoLlm.badge chip and a
-  settings.demoLlm.upsell link (demand signal) that logs clicks to
-  localStorage `di.demoUpsellClicks`.
+  openSettings/clearSettings in settings-nav.ts pushState + popstate;
+  unknown or missing pane falls back to `history`.
+- Past interviews pane: client-only OPFS list via listClientSessions
+  (Empty block when none), rows link to /interview/$id, /finish/$id or
+  /report/$id by status, plus a two-step "clear all" footer that wipes
+  every saved session via clearClientSessions.
+- Voice & microphone pane: mic picker (MicSelector, `di.devices.mic`),
+  "understands you with" stt select (on this device | browser
+  built-in), "answers you with" tts select (+ "your own service" only
+  when profile.tts exists), a models status row (installed size /
+  downloading % / not downloaded / failed) linking to downloads, and a
+  test call row that says hello through the resolved tts engine then
+  runs a read-aloud stt capture for the mic check. Picks persist to
+  `di.voice.sttEngine`/`di.voice.ttsEngine`.
+- Consent is point-of-need, never silent: `requestVoiceConsent()` arms
+  the root-mounted VoiceConsentDialog via the `$voiceConsentPrompt`
+  atom. It fires on first browser-mode interview entry (consent unset)
+  and again whenever an on-device engine is picked while consent is not
+  granted; accept grants + starts the ~50 mb download, decline writes
+  "declined" and the voice pane shows "using browser built-in — switch
+  anytime", dismissing leaves consent unset so the next point-of-need
+  re-asks.
+- Interviewer ai pane: radio pick — demo (recommended badge, gated on
+  VITE_DEMO_LLM_*), your own ai account, on this device (experimental
+  badge). "own account" reveals the endpoint fields inline (base url,
+  api key redacted when saved, model with /models datalist, flavor) and
+  an incomplete-config alert when fields are missing; "on this device"
+  mounts the browser llm manager (Gemini Nano status dot, transformers
+  catalog download/delete) with the WebGPU warning; each branch has a
+  test row.
+- Downloads pane: every model cache in one place — the on-device voice
+  pack (status, size, re-download, remove via clearVoiceModels) and the
+  in-browser llm entries (Gemini Nano is Chrome-managed, so status only;
+  each transformers catalog model gets download + remove, plus remove
+  all).
+- Language pane: app language select (drives the url locale prefix via
+  a full navigation) and the interview language (new sessions start
+  with `di.interview-language`, kept in sync with $draft.language).
+- Advanced pane ("most people never need this"): runtime mode select
+  (desktop app / browser + custom endpoints / this browser; a degraded
+  server pick shows the "server unreachable — using {fallback}" note),
+  the llm api flavor select, and collapsible custom-endpoint sections
+  for speech-to-text and text-to-speech (builtin vs endpoint toggle,
+  endpoint fields, per-section test).
+- Saving is automatic: every pane edits a shared SectionDraft context
+  (SettingsDraftsProvider inside the dialog so pane switches keep
+  in-flight edits); valid drafts write to $providerProfile after a
+  600ms debounce, an enabled-but-incomplete llm draft never overwrites
+  the last valid profile, and a save rebuilds the browser voice driver
+  so the new endpoint takes effect live.
+- Runtime chip is a status indicator, not a control: it shows the
+  effective runtime (tinted persimmon when the server pick degraded to
+  a browser mode) and opens settings -> advanced on click. The old
+  three-way voice taxonomy (voice pane pickers + aiProvider in-browser
+  |custom + the chip dropdown) is gone — resolveVoiceEngines() stays
+  the single arbitrator behind the two plain picks.
+- Tests (unchanged semantics): per-section Test uses the same client
+  guards — empty fields rejected with settings.invalid, ok/failed
+  status lines, stt browser test needs SpeechRecognition, tts speaks
+  "hello".
+- Demo LLM (p2 zero-conf): picking demo fills the managed endpoint
+  (VITE_DEMO_LLM_* at build time, url never committed, placeholder
+  apiKey); switching to "own account" blanks the managed fields so real
+  values are entered.

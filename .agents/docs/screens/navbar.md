@@ -34,10 +34,10 @@ dropdown (B3).
   a Language row reusing the LocaleSwitcher pill, then History and Settings items.
 - History / Settings items open the centered settings dialog at the matching pane
   (onSelect preventDefault so the menu state survives the dialog opening).
-- Runtime mode chip (first item in the right cluster, before the locale
+- Runtime status chip (first item in the right cluster, before the locale
   switcher): a pill showing the EFFECTIVE runtime (server / custom endpoint /
-  in-browser). Its dropdown persists the choice to `$runtimeMode`; picking
-  `server` re-probes `/api/health`. When the chosen mode fell back (chosen
-  server but unreachable), the pill carries a butter-warn tint + pulsing dot
-  and the menu shows a runtime.unreachable note — the mode is a user choice,
-  never a silent probe result.
+  in-browser). It is an indicator, not a control — clicking opens
+  settings -> advanced, where the mode is changed (that pick persists to
+  `$runtimeMode` and re-probes `/api/health` when server is chosen). When
+  the chosen mode fell back (chosen server but unreachable), the pill
+  carries a butter-warn tint + pulsing dot.

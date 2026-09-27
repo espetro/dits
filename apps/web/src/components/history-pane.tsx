@@ -1,19 +1,24 @@
 import { FormattedMessage, useIntl } from "react-intl";
 import { Link } from "@tanstack/react-router";
+import { Trash2 } from "lucide-react";
 import * as React from "react";
 
 import { useLocale, withLocale } from "../lib/locale-href";
-import { listClientSessions } from "../lib/opfs-store";
+import { clearClientSessions, listClientSessions } from "../lib/opfs-store";
 import type { Session } from "@di/shared/session";
+import { Button } from "./vendor/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "./vendor/empty";
 
 /**
- * Cached-session list pane. This is user data, not configuration: it reads
- * OPFS client sessions and links to their per-session routes.
+ * Cached-session list pane (settings -> past interviews). This is user data,
+ * not configuration: it reads OPFS client sessions and links to their
+ * per-session routes, with a clear-all that wipes the local store.
  */
 export function HistoryPane() {
   const locale = useLocale();
   const intl = useIntl();
   const [sessions, setSessions] = React.useState<Session[] | null>(null);
+  const [confirmClear, setConfirmClear] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -50,9 +55,16 @@ export function HistoryPane() {
   }
   if (sessions.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        <FormattedMessage id="history.empty" />
-      </p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>
+            <FormattedMessage id="history.title" />
+          </EmptyTitle>
+          <EmptyDescription>
+            <FormattedMessage id="history.empty" />
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
   return (
@@ -81,6 +93,47 @@ export function HistoryPane() {
           </span>
         </Link>
       ))}
+      <div className="flex items-center justify-end gap-2 pt-3">
+        {confirmClear ? (
+          <>
+            <span className="text-xs text-muted-foreground">
+              <FormattedMessage id="history.clearConfirm" />
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmClear(false)}
+            >
+              <FormattedMessage id="history.clearCancel" />
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() =>
+                void clearClientSessions().then(() => {
+                  setSessions([]);
+                  setConfirmClear(false);
+                })
+              }
+            >
+              <FormattedMessage id="history.clearDo" />
+            </Button>
+          </>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground"
+            onClick={() => setConfirmClear(true)}
+          >
+            <Trash2 className="size-3.5" aria-hidden="true" />
+            <FormattedMessage id="history.clear" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

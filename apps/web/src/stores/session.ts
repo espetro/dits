@@ -13,6 +13,9 @@ export interface SessionDraft {
   prompt: string;
 }
 
+/** Default interview language for new sessions (Settings -> language). */
+export const $interviewLanguage = persistentAtom<string>("di.interview-language", "en");
+
 /** Setup form draft — ephemeral, lost on submit by design. */
 export const $draft = map<SessionDraft>({
   title: "",
@@ -20,7 +23,7 @@ export const $draft = map<SessionDraft>({
   durationMin: 30,
   tone: "friendly",
   difficulty: "medium",
-  language: "en",
+  language: $interviewLanguage.get(),
   prompt: "",
 });
 

@@ -26,7 +26,7 @@ import {
  * design and avoid typed-route friction with the `{-$locale}` segment.
  */
 
-const LOCALE_LABELS = {
+export const LOCALE_LABELS = {
   en: { flag: "🇺🇸", native: "English" },
   de: { flag: "🇩🇪", native: "Deutsch" },
   es: { flag: "🇪🇸", native: "Español" },

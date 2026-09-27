@@ -17,6 +17,7 @@ import { AppIntlProvider, useHtmlLang, useIsRtl } from "../locales/i18n";
 import { Button } from "../components/vendor/button";
 import { AppHeader } from "../components/app-header";
 import { SettingsDialogHost } from "../components/settings-dialog";
+import { VoiceConsentDialog } from "../components/voice-consent-dialog";
 import { localeFromPathname, withLocale } from "../lib/locale-href";
 import { maybeSeedFixtures } from "../lib/dev-fixtures";
 import { Toaster } from "sonner";
@@ -60,6 +61,7 @@ function RootDocument() {
           <AppHeaderSlot />
           <Outlet />
           <SettingsDialogHost />
+          <VoiceConsentDialog />
           {/* global, out-of-context events only (voice/report failures) */}
           <Toaster
             position="top-center"

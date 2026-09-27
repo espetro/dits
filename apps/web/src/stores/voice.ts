@@ -34,6 +34,19 @@ export interface VoiceDownloadState {
   error?: string;
 }
 
+/**
+ * Consent-prompt visibility. Set true at a point of need (first browser-mode
+ * interview entry, or picking an on-device engine while unconsented); the
+ * VoiceConsentDialog mounts once at the root and renders while this is true
+ * and consent is not "granted".
+ */
+export const $voiceConsentPrompt = atom(false);
+
+/** Ask for the on-device models download consent (re-arms after a decline). */
+export function requestVoiceConsent(): void {
+  if ($voiceModelsConsent.get() !== "granted") $voiceConsentPrompt.set(true);
+}
+
 /** Session-scoped download progress; not persisted (cache is the truth). */
 export const $voiceDownload = atom<VoiceDownloadState>({
   status: "idle",

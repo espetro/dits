@@ -5,7 +5,7 @@ import * as React from "react";
 import { useStore } from "@nanostores/react";
 import { useSsrStore } from "../../lib/ssr";
 import { useQuery } from "@tanstack/react-query";
-import { $draft } from "../../stores/session";
+import { $draft, $interviewLanguage } from "../../stores/session";
 import { $micDeviceId } from "../../stores/devices";
 import { createSession, listSessions, uploadDocuments } from "../../lib/api";
 import { MicSelector } from "../../components/vendor/mic-selector";
@@ -33,7 +33,7 @@ import {
   ensureRuntimeProbe,
   probeServer,
 } from "../../lib/runtime";
-import { openSettings } from "../../components/settings-dialog";
+import { openSettings } from "../../components/settings-nav";
 import { createClientSession, listClientSessions } from "../../lib/opfs-store";
 import { resetClientSession } from "../../lib/agent/session-store";
 import { toast } from "sonner";
@@ -163,7 +163,7 @@ function Setup() {
       toast.error(intl.formatMessage({ id: "setup.needsProviderToast" }), {
         description: intl.formatMessage({ id: "setup.needsProvider" }),
       });
-      openSettings("aiProvider");
+      openSettings("ai");
       return;
     }
     setBusy(true);
@@ -259,7 +259,7 @@ function Setup() {
                 </p>
                 <Button
                   variant="ghost"
-                  onClick={() => openSettings("aiProvider")}
+                  onClick={() => openSettings("ai")}
                   className="mt-3 h-auto min-h-11 rounded-full bg-white px-5 py-2 font-body text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
                 >
                   <FormattedMessage id="setup.openProviderSettings" />
@@ -425,7 +425,10 @@ function Setup() {
                     </h3>
                     <Select
                       value={draft.language}
-                      onValueChange={(v) => $draft.set({ ...draft, language: v })}
+                      onValueChange={(v) => {
+                        $draft.set({ ...draft, language: v });
+                        $interviewLanguage.set(v);
+                      }}
                     >
                       <SelectTrigger
                         aria-labelledby="setup-language-label"
