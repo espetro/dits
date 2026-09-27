@@ -1,22 +1,16 @@
-import { AlertTriangle, AudioLines, Bot, Check, History, Loader2, X } from "lucide-react";
+import { AudioLines, Bot, Download, History, Languages, Wrench, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import * as v from "valibot";
 
 import { HistoryPane } from "./history-pane";
-import { ProviderSectionsSchema } from "@di/shared";
-import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
-import { $providerProfile, redactKey } from "../lib/runtime";
-import { smokeTestModel } from "../lib/agent/browser-provider";
-import { SttTestPanel } from "./stt-test-panel";
-import { BrowserLlmManager } from "./browser-llm-manager";
-import { VoiceEnginesPane } from "./voice-engines-pane";
-import { EndpointFields } from "./endpoint-fields";
-import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
-import { synthesizeSpeech } from "../lib/agent/tts";
-import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
-import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
-import { useSsrStore } from "../lib/ssr";
+import { VoicePane } from "./settings-voice-pane";
+import { InterviewerAiPane } from "./settings-ai-pane";
+import { DownloadsPane } from "./settings-downloads-pane";
+import { LanguagePane } from "./settings-language-pane";
+import { AdvancedPane } from "./settings-advanced-pane";
+import { SettingsDraftsProvider } from "./settings-drafts";
+import { clearSettings, openSettings, useSettingsSearch } from "./settings-nav";
+import type { SettingsPane } from "./settings-nav";
 import { Button } from "./vendor/button";
 import {
   Dialog,
@@ -25,75 +19,17 @@ import {
   DialogDescription,
   DialogTitle,
 } from "./vendor/dialog";
-import { Label } from "./vendor/label";
-import { RadioGroup, RadioGroupItem } from "./vendor/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./vendor/tabs";
-import { LLM_SMOKE_TEST_TIMEOUT_MS } from "../lib/timeouts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 
 /**
- * Centered settings dialog, ChatGPT-style: borderless left nav
- * (History / AI Provider) and an inset rounded content card. Fully URL-driven:
- * `?settings=1&pane=…` in the root search params opens it at a pane, so any
- * flow (and any QA agent) can reach it by link. Uses the root Route search
- * schema; navigate with the openSettings/clearSettings helpers below.
+ * Unified settings dialog: one url-driven surface with a left nav and
+ * spotify-style rows (title + one-line description + right control) per
+ * pane — past interviews, voice & microphone, interviewer ai, downloads,
+ * language, advanced. `?settings=1&pane=…` opens it; the helpers live in
+ * settings-nav.ts so panes can cross-link without an import cycle.
  */
 
-export type SettingsPane = "history" | "aiProvider" | "voice";
-
-export interface SettingsSearch {
-  settings?: "1";
-  pane?: SettingsPane;
-}
-
-/** Open (or retarget) the settings dialog via URL search params. */
-export function openSettings(pane: SettingsPane = "history"): void {
-  const url = new URL(window.location.href);
-  url.searchParams.set("settings", "1");
-  url.searchParams.set("pane", pane);
-  window.history.pushState(null, "", url);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
-
-/** Close the dialog by dropping its search params (history back if ours). */
-export function clearSettings(): void {
-  const url = new URL(window.location.href);
-  url.searchParams.delete("settings");
-  url.searchParams.delete("pane");
-  window.history.pushState(null, "", url);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
-
-/**
- * Reactive read of the settings search params. Deliberately NOT TanStack
- * validateSearch: the Start dev/prerender server canonicalizes root-route
- * search params and 307s `/?settings=1` to `/` before hydration, so the
- * dialog could never open from a cold URL. Reading the raw query string
- * keeps the params in the address bar for QA agents and deep links.
- */
-function useSettingsSearch(): SettingsSearch {
-  const [search, setSearch] = React.useState<SettingsSearch>({});
-  React.useEffect(() => {
-    const update = () => setSearch(parseSettingsSearch(window.location.search));
-    update();
-    window.addEventListener("popstate", update);
-    return () => window.removeEventListener("popstate", update);
-  }, []);
-  return search;
-}
-
-function parseSettingsSearch(query: string): SettingsSearch {
-  const parsed = v.safeParse(
-    v.object({
-      settings: v.optional(v.picklist(["1"])),
-      pane: v.optional(v.picklist(["history", "aiProvider", "voice"])),
-    }),
-    Object.fromEntries(new URLSearchParams(query)),
-  );
-  return {
-    settings: parsed.success ? parsed.output.settings : undefined,
-    pane: parsed.success ? parsed.output.pane : undefined,
-  };
-}
+export type { SettingsPane };
 
 /** Mount once near the app root: mirrors ?settings&pane onto the dialog. */
 export function SettingsDialogHost() {
@@ -122,666 +58,101 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-/** Per-section editable endpoint state (empty string = not set). */
-interface SectionDraft {
-  enabled: boolean;
-  flavor: "openai" | "anthropic";
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-  voice: string;
-  /** llm only: remote endpoint vs in-browser engine. */
-  llmMode: "remote" | "browser";
-  /** llm only: which in-browser engine. */
-  engine: "gemini-nano" | "transformers";
-  /** llm only: transformers.js model id (catalog default when empty). */
-  browserModelId: string;
-}
-
-const EMPTY_SECTION: SectionDraft = {
-  enabled: false,
-  flavor: "openai",
-  baseUrl: "",
-  apiKey: "",
-  model: "",
-  voice: "",
-  llmMode: "remote",
-  engine: "gemini-nano",
-  browserModelId: "",
-};
-
-function draftFromLlm(llm: LlmSection | undefined): SectionDraft {
-  if (!llm) return { ...EMPTY_SECTION, enabled: true };
-  if (llm.mode === "browser") {
-    return {
-      ...EMPTY_SECTION,
-      enabled: true,
-      llmMode: "browser",
-      engine: llm.engine,
-      browserModelId: llm.modelId ?? "",
-    };
-  }
-  return {
-    ...EMPTY_SECTION,
-    enabled: true,
-    flavor: llm.flavor ?? "openai",
-    baseUrl: llm.baseUrl,
-    apiKey: llm.apiKey,
-    model: llm.model,
-  };
-}
-
-function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined): SectionDraft {
-  if (!endpoint) return { ...EMPTY_SECTION };
-  return {
-    ...EMPTY_SECTION,
-    enabled: true,
-    flavor: endpoint.flavor ?? "openai",
-    baseUrl: endpoint.baseUrl,
-    apiKey: endpoint.apiKey,
-    model: endpoint.model,
-    voice: "voice" in endpoint ? endpoint.voice : "",
-  };
-}
-
-type SectionKey = "stt" | "tts" | "llm";
-interface TestState {
-  status: "idle" | "running" | "ok" | "err";
-  message?: string;
-}
-
-const fieldClass = "block text-xs text-muted-foreground";
-
-const helperClass = "mt-1 text-xs text-muted-foreground";
-
 /** Pane heading: large display title over a full-width hairline rule. */
-function PaneHeading(props: { title: string }) {
+function PaneHeading(props: { title: string; description?: string }) {
   return (
     <div className="border-b border-border pb-4">
       <h2 className="text-xl font-semibold tracking-tight">{props.title}</h2>
+      {props.description && (
+        <p className="mt-1 text-sm text-muted-foreground">{props.description}</p>
+      )}
     </div>
   );
 }
 
-function AiProviderPane() {
-  const intl = useIntl();
-  const profile = useSsrStore($providerProfile, null);
-  const [tab, setTab] = React.useState<SectionKey>("llm");
-  const [drafts, setDrafts] = React.useState<Record<SectionKey, SectionDraft>>(() => ({
-    stt: draftFromEndpoint(profile?.stt),
-    tts: draftFromEndpoint(profile?.tts),
-    llm: draftFromLlm(profile?.llm),
-  }));
-  const [testing, setTesting] = React.useState<SectionKey | null>(null);
-  const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
-  // STT read-aloud block: live transcript shown in a read-only textarea.
-  const [sttOutput, setSttOutput] = React.useState("");
-  const liveStt = React.useRef<{ stop: () => void } | null>(null);
-  React.useEffect(() => () => liveStt.current?.stop(), []);
-  const draft = drafts[tab];
+const NAV: { id: SettingsPane; label: string; icon: React.ReactNode }[] = [
+  {
+    id: "history",
+    label: "settings.nav.history",
+    icon: <History className="size-4" aria-hidden="true" />,
+  },
+  {
+    id: "voice",
+    label: "settings.nav.voice",
+    icon: <AudioLines className="size-4" aria-hidden="true" />,
+  },
+  {
+    id: "ai",
+    label: "settings.nav.ai",
+    icon: <Bot className="size-4" aria-hidden="true" />,
+  },
+  {
+    id: "downloads",
+    label: "settings.nav.downloads",
+    icon: <Download className="size-4" aria-hidden="true" />,
+  },
+  {
+    id: "language",
+    label: "settings.nav.language",
+    icon: <Languages className="size-4" aria-hidden="true" />,
+  },
+  {
+    id: "advanced",
+    label: "settings.nav.advanced",
+    icon: <Wrench className="size-4" aria-hidden="true" />,
+  },
+];
 
-  // Gemini Nano can appear after the flag/module load, so probe the real
-  // availability() API while the llm tab is open instead of a one-time
-  // "LanguageModel in globalThis" check.
-  const [geminiNanoCapable, setGeminiNanoCapable] = React.useState(false);
-  React.useEffect(() => {
-    if (tab !== "llm") return;
-    let cancelled = false;
-    const lm = (
-      globalThis as unknown as {
-        LanguageModel?: { availability(): Promise<string> };
-      }
-    ).LanguageModel;
-    if (!lm) {
-      setGeminiNanoCapable(false);
-      return;
-    }
-    lm.availability()
-      .then((availability) => {
-        if (!cancelled) setGeminiNanoCapable(availability !== "unavailable");
-      })
-      .catch(() => {
-        if (!cancelled) setGeminiNanoCapable(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [tab, draft.llmMode, draft.engine]);
+const PANE_TITLES: Record<SettingsPane, string> = {
+  history: "settings.nav.history",
+  voice: "settings.nav.voice",
+  ai: "settings.nav.ai",
+  downloads: "settings.nav.downloads",
+  language: "settings.nav.language",
+  advanced: "settings.nav.advanced",
+};
 
-  // In-browser sections can only be tested when the browser actually ships
-  // the Web Speech feature; computed per-render (SSR-safe, cheap).
-  const browserCapable =
-    typeof window !== "undefined" &&
-    (tab === "stt"
-      ? hasBrowserStt()
-      : tab === "tts"
-        ? "speechSynthesis" in window
-        : tab === "llm" && draft.llmMode === "browser"
-          ? draft.engine === "gemini-nano"
-            ? geminiNanoCapable
-            : "gpu" in navigator
-          : false);
-
-  // /models poll results for the Model ID datalist (custom endpoint mode).
-  const [modelOptions, setModelOptions] = React.useState<string[]>([]);
-
-  // Once base URL + key are set, poll the endpoint's /models and offer the
-  // ids in the Model ID input's datalist. Failures are silent: the field
-  // stays free-text.
-  React.useEffect(() => {
-    if (!draft.enabled || !draft.baseUrl || !draft.apiKey) {
-      setModelOptions([]);
-      return;
-    }
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-      fetch(`${base}/v1/models`, { headers: { authorization: `Bearer ${draft.apiKey}` } })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json: { data?: Array<{ id?: string }> } | null) => {
-          if (cancelled || !json) return;
-          const ids = (json.data ?? [])
-            .map((m) => m.id ?? "")
-            .filter(Boolean)
-            .sort();
-          setModelOptions(ids);
-        })
-        .catch(() => undefined);
-    }, 600);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [draft.enabled, draft.baseUrl, draft.apiKey]);
-  function update(patch: Partial<SectionDraft>) {
-    setDrafts((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
-    setTestState((prev) => ({ ...prev, [tab]: undefined }));
+function PaneBody({ pane }: { pane: SettingsPane }) {
+  switch (pane) {
+    case "history":
+      return <HistoryPane />;
+    case "voice":
+      return <VoicePane />;
+    case "ai":
+      return <InterviewerAiPane />;
+    case "downloads":
+      return <DownloadsPane />;
+    case "language":
+      return <LanguagePane />;
+    case "advanced":
+      return <AdvancedPane />;
   }
-
-  // Autosave: every edit is validated and persisted after a short debounce,
-  // so there is no Save button to forget. An incomplete llm draft never
-  // overwrites the last valid persisted profile (the stale one keeps the
-  // session startable while the user is mid-edit).
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      const next = buildProfile();
-      if (!next.llm) return;
-      const parsed = v.safeParse(ProviderSectionsSchema, next);
-      if (parsed.success) $providerProfile.set(parsed.output);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [drafts]);
-
-  // p1 truth-telling: an enabled-but-incomplete section never persisted — say
-  // so instead of silently dropping it (buildProfile skips it). A managed
-  // demo llm endpoint legitimately has no key, so it is not incomplete.
-  const isUrl = (s: string): boolean => URL.canParse(s);
-  const keyMissing = !draft.apiKey && !(tab === "llm" && isDemoLlm(draft.baseUrl));
-  const sectionIncomplete =
-    draft.enabled &&
-    (tab === "llm" ? draft.llmMode === "remote" : true) &&
-    (!draft.baseUrl || keyMissing || !draft.model || !isUrl(draft.baseUrl));
-
-  function buildProfile(): ProviderSections {
-    const out: ProviderSections = {};
-    // In-browser mode has no endpoint fields, so `enabled` (which means
-    // "custom endpoint fields shown") is false; gate on llmMode alone.
-    if (drafts.llm.llmMode === "browser") {
-      out.llm = {
-        mode: "browser",
-        engine: drafts.llm.engine,
-        ...(drafts.llm.browserModelId ? { modelId: drafts.llm.browserModelId } : {}),
-      };
-    } else if (
-      drafts.llm.enabled &&
-      drafts.llm.baseUrl &&
-      (drafts.llm.apiKey || isDemoLlm(drafts.llm.baseUrl)) &&
-      drafts.llm.model
-    ) {
-      out.llm = {
-        mode: "remote",
-        flavor: drafts.llm.flavor,
-        baseUrl: drafts.llm.baseUrl,
-        apiKey: drafts.llm.apiKey,
-        model: drafts.llm.model,
-      };
-    }
-    if (drafts.stt.enabled && drafts.stt.baseUrl && drafts.stt.apiKey && drafts.stt.model) {
-      out.stt = {
-        flavor: drafts.stt.flavor,
-        baseUrl: drafts.stt.baseUrl,
-        apiKey: drafts.stt.apiKey,
-        model: drafts.stt.model,
-      };
-    }
-    if (drafts.tts.enabled && drafts.tts.baseUrl && drafts.tts.apiKey && drafts.tts.model) {
-      out.tts = {
-        flavor: drafts.tts.flavor,
-        baseUrl: drafts.tts.baseUrl,
-        apiKey: drafts.tts.apiKey,
-        model: drafts.tts.model,
-        voice: drafts.tts.voice,
-      };
-    }
-    return out;
-  }
-
-  async function runTest() {
-    // Browser-mode LLM test skips the endpoint guards; the manager handles it.
-    if (tab === "llm" && draft.llmMode === "browser") {
-      setTesting(tab);
-      setTestState((prev) => ({ ...prev, llm: { status: "running" } }));
-      try {
-        await smokeTestModel(
-          {
-            mode: "browser",
-            engine: draft.engine,
-            ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
-          },
-          // a cached model loads in seconds; a cold 450MB download belongs
-          // behind the manager's Download button, not the test.
-          { timeoutMs: LLM_SMOKE_TEST_TIMEOUT_MS },
-        );
-        setTestState((prev) => ({
-          ...prev,
-          llm: { status: "ok", message: intl.formatMessage({ id: "settings.llm.testOk" }) },
-        }));
-      } catch (err) {
-        setTestState((prev) => ({
-          ...prev,
-          llm: { status: "err", message: err instanceof Error ? err.message : String(err) },
-        }));
-      } finally {
-        setTesting(null);
-      }
-      return;
-    }
-    // Client-side guard: an empty baseUrl/model would otherwise hit a
-    // relative fetch or an empty completion and look like a false "ok".
-    // Managed demo llm endpoints need no key.
-    const needsKey = tab !== "tts" && !(tab === "llm" && isDemoLlm(draft.baseUrl));
-    if (draft.enabled && (!draft.baseUrl || !draft.model || (needsKey && !draft.apiKey))) {
-      setTestState((prev) => ({
-        ...prev,
-        [tab]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
-      }));
-      return;
-    }
-    if (tab === "stt" && !draft.enabled) {
-      // in-browser STT: run the read-aloud test with the selected mic
-      if (!hasBrowserStt()) {
-        setTestState((prev) => ({
-          ...prev,
-          stt: { status: "err", message: intl.formatMessage({ id: "settings.test.unsupported" }) },
-        }));
-        return;
-      }
-      setTesting(tab);
-      setTestState((prev) => ({ ...prev, stt: { status: "running" } }));
-      setSttOutput("");
-      liveStt.current?.stop();
-      liveStt.current = startLiveStt({
-        onText: (text) => setSttOutput(text),
-        onError: (message) => {
-          liveStt.current = null;
-          setTesting(null);
-          setTestState((prev) => ({
-            ...prev,
-            stt: { status: "err", message },
-          }));
-        },
-        timeoutMs: 15_000,
-      });
-      // the session ends via its own timeout/stop; success is judged by
-      // whether any transcript was captured, checked when it finishes
-      const checkDone = setInterval(() => {
-        if (!liveStt.current) {
-          clearInterval(checkDone);
-          return;
-        }
-      }, 500);
-      setTimeout(() => {
-        clearInterval(checkDone);
-        if (liveStt.current) {
-          liveStt.current.stop();
-          liveStt.current = null;
-          setTesting(null);
-          setSttOutput((output) => {
-            setTestState((prev) => ({
-              ...prev,
-              stt: output.trim()
-                ? { status: "ok" }
-                : { status: "err", message: intl.formatMessage({ id: "settings.stt.noSpeech" }) },
-            }));
-            return output;
-          });
-        }
-      }, 15_500);
-      return;
-    }
-    setTesting(tab);
-    setTestState((prev) => ({ ...prev, [tab]: { status: "running" } }));
-    try {
-      if (tab === "llm") {
-        const d = draft;
-        if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
-        const model = createOpenAiCompatibleModel(
-          { baseUrl: d.baseUrl, apiKey: d.apiKey, model: d.model },
-          {},
-        );
-        const { streamText } = await import("ai");
-        let reply = "";
-        const { textStream } = streamText({
-          model,
-          prompt: "Reply with the single word: ok",
-          maxOutputTokens: 5,
-        });
-        for await (const delta of textStream) reply += delta;
-        setTestState((prev) => ({ ...prev, llm: { status: "ok", message: reply.slice(0, 40) } }));
-      } else if (tab === "tts") {
-        const d = draft;
-        if (!d.enabled) {
-          await testBrowserTts();
-          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
-        } else {
-          const pcm = await synthesizeSpeech(
-            {
-              baseUrl: d.baseUrl,
-              apiKey: d.apiKey,
-              model: d.model || "tts-1",
-              voice: d.voice,
-            },
-            "hello",
-          );
-          if (pcm.length === 0) throw new Error("empty audio");
-          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
-        }
-      } else {
-        await probeModels(draft);
-        setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
-      }
-    } catch (err) {
-      setTestState((prev) => ({
-        ...prev,
-        [tab]: { status: "err", message: err instanceof Error ? err.message : String(err) },
-      }));
-    } finally {
-      setTesting(null);
-    }
-  }
-
-  const tabs: { key: SectionKey; label: string }[] = [
-    { key: "stt", label: intl.formatMessage({ id: "settings.stt" }) },
-    { key: "tts", label: intl.formatMessage({ id: "settings.tts" }) },
-    { key: "llm", label: intl.formatMessage({ id: "settings.llm" }) },
-  ];
-  const state = testState[tab];
-
-  return (
-    <div className="space-y-4">
-      <Tabs value={tab} onValueChange={(value) => setTab(value as SectionKey)}>
-        <TabsList className="rounded-full">
-          {tabs.map((t) => (
-            <TabsTrigger key={t.key} value={t.key} className="rounded-full px-3 text-xs">
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {/* forceMount keeps every content node in the DOM (Radix hides
-            inactive ones with the hidden attribute) so each trigger's
-            aria-controls always resolves to a real id. */}
-        {tabs.map((t) => (
-          <TabsContent key={t.key} value={t.key} forceMount>
-            {tab === t.key && (
-              <div className="space-y-5 rounded-xl border border-border p-4">
-                <RadioGroup
-                  value={
-                    tab === "llm"
-                      ? draft.llmMode === "browser"
-                        ? "browser"
-                        : "custom"
-                      : draft.enabled
-                        ? "custom"
-                        : "browser"
-                  }
-                  onValueChange={(value) =>
-                    update(
-                      value === "custom"
-                        ? { enabled: true, llmMode: "remote" }
-                        : // in-browser on the llm tab also flips llmMode;
-                          // enabled stays false (no endpoint fields to fill)
-                          tab === "llm"
-                          ? { enabled: false, llmMode: "browser" }
-                          : { enabled: false },
-                    )
-                  }
-                  className="flex flex-wrap gap-4"
-                >
-                  <Label className="flex items-center gap-1.5 text-sm font-normal">
-                    <RadioGroupItem value="browser" />
-                    <FormattedMessage id="settings.inBrowser" />
-                  </Label>
-                  <Label className="flex items-center gap-1.5 text-sm font-normal">
-                    <RadioGroupItem value="custom" />
-                    <FormattedMessage id="settings.customEndpoint" />
-                  </Label>
-                </RadioGroup>
-                {sectionIncomplete && (
-                  <p className="text-xs font-medium text-persimmon-deep">
-                    <FormattedMessage id="settings.incomplete" />
-                  </p>
-                )}
-                {tab === "llm" && draft.enabled && draft.llmMode === "remote" && (
-                  <div className="space-y-1.5">
-                    <span className={fieldClass}>
-                      <FormattedMessage id="settings.flavor" />
-                    </span>
-                    <select
-                      value={draft.flavor}
-                      onChange={(e) => update({ flavor: e.target.value as "openai" | "anthropic" })}
-                      className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-persimmon/50"
-                    >
-                      <option value="openai">
-                        {intl.formatMessage({ id: "settings.flavor.openai" })}
-                      </option>
-                      <option value="anthropic">
-                        {intl.formatMessage({ id: "settings.flavor.anthropic" })}
-                      </option>
-                    </select>
-                    <span className={helperClass}>
-                      <FormattedMessage id="settings.flavorHelp" />
-                    </span>
-                  </div>
-                )}
-                {tab === "llm" && draft.llmMode === "browser" && !draft.enabled && (
-                  <BrowserLlmManager
-                    engine={draft.engine}
-                    modelId={draft.browserModelId}
-                    onEngineChange={(engine) => update({ engine })}
-                    onModelIdChange={(browserModelId) => update({ browserModelId })}
-                  />
-                )}
-                {tab === "llm" && !draft.enabled && draft.llmMode !== "browser" && (
-                  <p className="text-xs text-muted-foreground">
-                    <FormattedMessage id="settings.llmRequired" />
-                  </p>
-                )}
-                {tab === "llm" && draft.llmMode === "browser" && (
-                  <div
-                    role="note"
-                    className="flex gap-2 rounded-lg border border-persimmon/30 bg-persimmon/5 p-3 text-xs text-espresso-soft"
-                  >
-                    <AlertTriangle
-                      className="mt-0.5 size-3.5 shrink-0 text-persimmon-deep"
-                      aria-hidden="true"
-                    />
-                    <span>
-                      <FormattedMessage id="settings.llm.inBrowserWarning" />{" "}
-                      <strong className="font-semibold">
-                        <FormattedMessage id="settings.llm.cloudRecommended" />
-                      </strong>{" "}
-                      <a
-                        href="https://huggingface.co/blog/Xenova/run-gemini-nano-in-your-browser"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline underline-offset-2 hover:text-persimmon-text"
-                      >
-                        <FormattedMessage id="settings.llm.geminiEnableLink" />
-                      </a>
-                    </span>
-                  </div>
-                )}
-
-                {tab === "stt" && <SttTestPanel inBrowser={!draft.enabled} output={sttOutput} />}
-                {draft.enabled && (
-                  <EndpointFields
-                    tab={tab}
-                    draft={draft}
-                    savedApiKey={
-                      profile?.[tab]
-                        ? redactKey(("apiKey" in profile[tab] ? profile[tab].apiKey : "") as string)
-                        : null
-                    }
-                    modelOptions={modelOptions}
-                    onChange={(patch) => update(patch)}
-                    onDemoFill={
-                      tab === "llm" && DEMO_LLM_ENABLED
-                        ? () =>
-                            update({
-                              enabled: true,
-                              llmMode: "remote",
-                              baseUrl: DEMO_LLM.baseUrl,
-                              apiKey: DEMO_LLM.apiKey,
-                              model: DEMO_LLM.model,
-                            })
-                        : undefined
-                    }
-                  />
-                )}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void runTest()}
-                      disabled={(!draft.enabled && !browserCapable) || testing === tab}
-                      aria-busy={testing === tab}
-                      title={
-                        !draft.enabled && !browserCapable
-                          ? intl.formatMessage({ id: "settings.test.unsupported" })
-                          : undefined
-                      }
-                    >
-                      {testing === tab ? (
-                        <>
-                          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                          <FormattedMessage id="settings.testing" />
-                        </>
-                      ) : (
-                        <FormattedMessage id="settings.test" />
-                      )}
-                    </Button>
-                    {!draft.enabled && !browserCapable && (
-                      <span role="note" className="text-xs text-muted-foreground">
-                        <FormattedMessage id="settings.test.unsupported" />
-                      </span>
-                    )}
-                    {state?.status === "ok" && (
-                      <span
-                        role="status"
-                        className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
-                      >
-                        <Check className="size-3.5" aria-hidden="true" />
-                        <FormattedMessage id="settings.testOk" />
-                        {state.message ? `: ${state.message}` : ""}
-                      </span>
-                    )}
-                    {state?.status === "err" && (
-                      <span role="status" className="flex items-center gap-1 text-xs text-red-600">
-                        <X className="size-3.5" aria-hidden="true" />
-                        <FormattedMessage
-                          id="settings.testFailed"
-                          values={{ message: state.message ?? "" }}
-                        />
-                      </span>
-                    )}
-                  </div>
-                  <span role="note" className="text-xs text-muted-foreground sm:ml-auto">
-                    <FormattedMessage id="settings.autosaveNote" />
-                  </span>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
-    </div>
-  );
 }
 
 export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: SettingsDialogProps) {
   const isMobile = useIsMobile();
   const intl = useIntl();
 
-  const tabs: { id: SettingsPane; label: string; icon: React.ReactNode }[] = [
-    {
-      id: "history",
-      label: intl.formatMessage({ id: "settings.history" }),
-      icon: <History className="size-4" aria-hidden="true" />,
-    },
-    {
-      id: "aiProvider",
-      label: intl.formatMessage({ id: "settings.aiProvider" }),
-      icon: <Bot className="size-4" aria-hidden="true" />,
-    },
-    {
-      id: "voice",
-      label: intl.formatMessage({ id: "settings.voicePane.nav" }),
-      icon: <AudioLines className="size-4" aria-hidden="true" />,
-    },
-  ];
-
-  const configTabs = tabs.filter((tab) => tab.id !== "history");
-
   const nav = (
     <>
-      {tabs
-        .filter((tab) => tab.id === "history")
-        .map((tab) => (
+      {NAV.map((item, i) => (
+        <React.Fragment key={item.id}>
+          {/* cached session data sits apart from actual configuration */}
+          {i === 1 && <div role="separator" className="mx-1 my-2 border-t border-border" />}
           <Button
-            key={tab.id}
             variant="ghost"
             className={
               "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 py-2.5 text-sm font-normal " +
-              (pane === tab.id
+              (pane === item.id
                 ? "bg-accent font-medium text-accent-foreground"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")
             }
-            onClick={() => onPaneChange(tab.id)}
+            onClick={() => onPaneChange(item.id)}
           >
-            {tab.icon}
-            <span className="truncate">{tab.label}</span>
+            {item.icon}
+            <span className="truncate">{intl.formatMessage({ id: item.label })}</span>
           </Button>
-        ))}
-      {/* cached session data sits apart from actual configuration */}
-      <div role="separator" className="mx-1 my-2 border-t border-border" />
-      {configTabs.map((tab) => (
-        <Button
-          key={tab.id}
-          variant="ghost"
-          className={
-            "h-9 w-full min-w-0 justify-start gap-2.5 rounded-lg px-3 py-2.5 text-sm font-normal " +
-            (pane === tab.id
-              ? "bg-accent font-medium text-accent-foreground"
-              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")
-          }
-          onClick={() => onPaneChange(tab.id)}
-        >
-          {tab.icon}
-          <span className="truncate">{tab.label}</span>
-        </Button>
+        </React.Fragment>
       ))}
     </>
   );
@@ -799,23 +170,32 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
           <FormattedMessage id="settings.title" />
         </DialogTitle>
         <DialogDescription className="sr-only">
-          <FormattedMessage id="settings.history" />, <FormattedMessage id="settings.aiProvider" />{" "}
-          and <FormattedMessage id="settings.voicePane.nav" />
+          {NAV.map((item, i) => (
+            <React.Fragment key={item.id}>
+              {i > 0 && ", "}
+              <FormattedMessage id={item.label} />
+            </React.Fragment>
+          ))}
         </DialogDescription>
         {isMobile ? (
-          <div className="flex shrink-0 items-center justify-between border-b border-border p-2">
-            <Tabs value={pane} onValueChange={(value) => onPaneChange(value as SettingsPane)}>
-              <TabsList className="w-full">
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.id} value={tab.id} className="flex-1 gap-1.5 px-2 text-xs">
-                    {tab.icon}
-                    {tab.label}
-                  </TabsTrigger>
+          <div className="flex shrink-0 items-center gap-2 border-b border-border p-2">
+            <Select value={pane} onValueChange={(value) => onPaneChange(value as SettingsPane)}>
+              <SelectTrigger
+                className="h-9 flex-1"
+                aria-label={intl.formatMessage({ id: "settings.title" })}
+              >
+                <SelectValue>{intl.formatMessage({ id: PANE_TITLES[pane] })}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {NAV.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {intl.formatMessage({ id: item.label })}
+                  </SelectItem>
                 ))}
-              </TabsList>
-            </Tabs>
+              </SelectContent>
+            </Select>
             <DialogClose
-              className="ml-2 flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
               onClick={clearSettings}
             >
               <X className="size-4" aria-hidden="true" />
@@ -847,39 +227,27 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
               : "my-3 mr-3 flex-1 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-sm"
           }
         >
-          {isMobile ? (
-            pane === "history" ? (
-              <HistoryPane />
-            ) : pane === "voice" ? (
-              <VoiceEnginesPane />
+          <SettingsDraftsProvider>
+            {isMobile ? (
+              <PaneBody pane={pane} />
             ) : (
-              <AiProviderPane />
-            )
-          ) : (
-            <div
-              className={
-                pane === "history" ? "mx-auto max-w-2xl space-y-10" : "mx-auto max-w-xl space-y-10"
-              }
-            >
-              <PaneHeading
-                title={intl.formatMessage({
-                  id:
-                    pane === "history"
-                      ? "settings.history"
-                      : pane === "voice"
-                        ? "settings.voicePane.nav"
-                        : "settings.aiProvider",
-                })}
-              />
-              {pane === "history" ? (
-                <HistoryPane />
-              ) : pane === "voice" ? (
-                <VoiceEnginesPane />
-              ) : (
-                <AiProviderPane />
-              )}
-            </div>
-          )}
+              <div
+                className={
+                  pane === "history" ? "mx-auto max-w-2xl space-y-6" : "mx-auto max-w-xl space-y-6"
+                }
+              >
+                <PaneHeading
+                  title={intl.formatMessage({ id: PANE_TITLES[pane] })}
+                  description={
+                    pane === "advanced"
+                      ? intl.formatMessage({ id: "settings.advanced.intro" })
+                      : undefined
+                  }
+                />
+                <PaneBody pane={pane} />
+              </div>
+            )}
+          </SettingsDraftsProvider>
         </div>
       </DialogContent>
     </Dialog>

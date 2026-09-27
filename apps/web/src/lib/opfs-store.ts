@@ -101,6 +101,21 @@ export async function listClientSessions(): Promise<Session[]> {
   return sessions;
 }
 
+/** Delete every client session record (and its queued turns) from OPFS. */
+export async function clearClientSessions(): Promise<void> {
+  const dir = await root();
+  const names: string[] = [];
+  for await (const [name, handle] of dir.entries()) {
+    if (handle.kind === "file" && name.endsWith(".json")) names.push(name);
+  }
+  for (const name of names) await dir.removeEntry(name);
+  try {
+    await dir.removeEntry("meta", { recursive: true });
+  } catch {
+    // absent is fine
+  }
+}
+
 export async function getClientTurns(id: string): Promise<Turn[]> {
   return (await readRecord(id))?.turns ?? [];
 }

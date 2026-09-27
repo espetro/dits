@@ -1,7 +1,7 @@
 import { History, Settings, SlidersHorizontal } from "lucide-react";
 import { FormattedMessage } from "react-intl";
 
-import { openSettings } from "./settings-dialog";
+import { openSettings } from "./settings-nav";
 import { LocaleSwitcher } from "./locale-switcher";
 import { Avatar, AvatarFallback } from "./vendor/avatar";
 import { Button } from "./vendor/button";
@@ -62,7 +62,7 @@ export function UserDropdown() {
             className="cursor-pointer rounded-lg px-2.5 py-2.5"
             onSelect={(event) => {
               event.preventDefault();
-              openSettings("aiProvider");
+              openSettings("voice");
             }}
           >
             <Settings className="size-4" aria-hidden="true" />

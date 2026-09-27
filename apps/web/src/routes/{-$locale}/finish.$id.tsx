@@ -9,7 +9,7 @@ import type { TurnDto } from "../../lib/api";
 import { $effectiveRuntime } from "../../lib/runtime";
 import { ensureReport } from "../../lib/report";
 import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
-import { openSettings } from "../../components/settings-dialog";
+import { openSettings } from "../../components/settings-nav";
 import { Button } from "../../components/vendor/button";
 
 function formatTimestamp(createdAt: string) {

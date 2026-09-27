@@ -38,7 +38,8 @@ import { QuestionCard } from "../../components/question-card";
 import { ToolDock } from "../../components/tool-dock";
 import { ControlBar } from "../../components/control-bar";
 import { TranscriptPane } from "../../components/transcript-pane";
-import { VoiceConsentDialog } from "../../components/voice-consent-dialog";
+import { $voiceModelsConsent, requestVoiceConsent } from "../../stores/voice";
+import { wasmVoiceSupported } from "../../lib/voice/models";
 import { dockSpecs } from "../../lib/tools/registry";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 import {
@@ -196,6 +197,14 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
       $clientTurns.set([...persisted, ...$clientTurns.get()]);
     });
   }, [id, clientOnly]);
+  // point-of-need consent: the first browser-mode interview arms the voice
+  // download prompt (unset only — a decline is not re-asked on entry)
+  useEffect(() => {
+    if (clientOnly && $voiceModelsConsent.get() === "" && wasmVoiceSupported()) {
+      requestVoiceConsent();
+    }
+  }, [clientOnly]);
+
   const muted = useStore($muted);
   const [confirmEndOpen, setConfirmEndOpen] = useState(false);
   const [showSlowHint, setShowSlowHint] = useState(false);
@@ -433,9 +442,6 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
         onType={focusTypeInput}
         onEnd={() => setConfirmEndOpen(true)}
       />
-
-      {/* on-device voice consent: first browser-mode entry only */}
-      {clientOnly && <VoiceConsentDialog />}
 
       {/* end-early confirm (p3-19) */}
       <Dialog open={confirmEndOpen} onOpenChange={setConfirmEndOpen}>

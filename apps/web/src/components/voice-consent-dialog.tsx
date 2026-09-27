@@ -11,24 +11,20 @@ import {
   DialogTitle,
 } from "./vendor/dialog";
 import { Button } from "./vendor/button";
-import { $voiceDownload, $voiceModelsConsent } from "../stores/voice";
-import { downloadVoiceModels, wasmVoiceSupported } from "../lib/voice/models";
+import { $voiceConsentPrompt, $voiceDownload, $voiceModelsConsent } from "../stores/voice";
+import { downloadVoiceModels } from "../lib/voice/models";
 
 /**
- * One-shot consent gate for on-device voice (browser mode): accept starts
- * the wasm model download; decline keeps the built-in engines and is never
- * re-asked — Settings -> voice re-arms it via the on-device pickers.
+ * Consent prompt for on-device voice (~50mb download). Fires at point of
+ * need: the first browser-mode interview entry, or picking "on-device" in
+ * settings -> voice while consent isn't granted. Accept starts the
+ * download; decline keeps the built-in engines (re-arms on the next
+ * on-device pick); dismissing leaves consent unset.
  */
 export function VoiceConsentDialog() {
   const intl = useIntl();
-  const consent = useStore($voiceModelsConsent);
+  const open = useStore($voiceConsentPrompt);
   const download = useStore($voiceDownload);
-  const [open, setOpen] = React.useState(false);
-  const supported = React.useMemo(() => wasmVoiceSupported(), []);
-
-  React.useEffect(() => {
-    if (supported && consent === "") setOpen(true);
-  }, [supported, consent]);
 
   const downloading = download.status === "downloading";
 
@@ -36,23 +32,23 @@ export function VoiceConsentDialog() {
     $voiceModelsConsent.set("granted");
     // phase c wires engines; the download itself is independent of them.
     void downloadVoiceModels().catch(() => {
-      toast.error(intl.formatMessage({ id: "settings.voice.downloadFailed" }));
+      toast.error(intl.formatMessage({ id: "settings.voicePane.downloadFailed" }));
     });
-    setOpen(false);
+    $voiceConsentPrompt.set(false);
   };
 
   const decline = () => {
     $voiceModelsConsent.set("declined");
-    setOpen(false);
+    $voiceConsentPrompt.set(false);
   };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        // dismissing without a decision keeps consent unset; we re-ask on
-        // the next browser-mode entry but never nag within the session.
-        setOpen(next);
+        // closing without a decision keeps consent unset, so the next
+        // point-of-need check re-arms the prompt.
+        if (!next) $voiceConsentPrompt.set(false);
       }}
     >
       <DialogContent className="bg-paper">

@@ -121,9 +121,14 @@ mobile) stacks, top to bottom:
   VAD (`/vad/` vendored), `{t:"interrupt"}` barge-in (300ms grace on the
   browser driver), reconnect with backoff, voice->text degradation surfaces
   the type path immediately.
-- **On-device voice (client-only)**: first entry mounts `VoiceConsentDialog`
-  (`di.voice.modelsConsent` unset); the waveform's own capture stream is
-  separate from `MicCapture` and closes when muted/inactive.
+- **On-device voice (client-only)**: first browser-mode entry arms the
+  root-mounted `VoiceConsentDialog` via `requestVoiceConsent()`
+  (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models
+  (sha256-verified into CacheStorage, progress on `$voiceDownload`), decline
+  keeps the Web Speech engines and is not re-asked on entry — picking
+  on-device in settings -> voice re-arms the prompt instead of silently
+  granting. The waveform's own capture stream is separate from `MicCapture`
+  and closes when muted/inactive.
 - Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
   no-speech hint focuses the composer (it is always mounted now — no rail or
   sheet to open).
