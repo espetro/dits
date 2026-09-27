@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import type { OrbAgentPhase } from "./voice-orb";
 
 const VoiceOrb = lazy(() => import("./voice-orb").then((m) => ({ default: m.VoiceOrb })));
@@ -21,9 +21,10 @@ export function AgentStage({
   statusKey: string;
   caption: string;
 }) {
+  const intl = useIntl();
   return (
     <section
-      aria-label="agent stage"
+      aria-label={intl.formatMessage({ id: "a11y.agentStage" })}
       className="flex items-center gap-3 border-b border-hairline px-0.5 pb-3"
     >
       <Suspense

@@ -34,7 +34,7 @@ export const voiceMachine = setup({
     events: {} as VoiceEvent,
   },
   actions: {
-    setConnectError: assign(() => ({ error: "connect failed" })),
+    setConnectError: assign(() => ({ error: "voice.connect" })),
     setError: assign(({ event }) => ({
       error: event.type === "ERROR" ? event.message : null,
     })),

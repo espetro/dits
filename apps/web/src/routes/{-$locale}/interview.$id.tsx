@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTitle,
-} from "../../components/vendor/dialog";
+} from "../../components/dialog";
 import { useVoice } from "../../lib/voice/use-voice";
 import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "sonner";
@@ -37,7 +37,8 @@ import { CallBar } from "../../components/call-bar";
 import { QuestionCard } from "../../components/question-card";
 import { ToolDock } from "../../components/tool-dock";
 import { ControlBar } from "../../components/control-bar";
-import { TranscriptPane } from "../../components/transcript-pane";
+import { TranscriptPane, turnTag } from "../../components/transcript-pane";
+import { codeMessage } from "../../lib/errors";
 import { $voiceModelsConsent, requestVoiceConsent } from "../../stores/voice";
 import { wasmVoiceSupported } from "../../lib/voice/models";
 import { dockSpecs } from "../../lib/tools/registry";
@@ -103,6 +104,7 @@ function Interview() {
 
 /** Read-only summary for re-entering a session that already ended. */
 function InterviewEnded({ id, clientOnly }: { id: string; clientOnly: boolean }) {
+  const intl = useIntl();
   const locale = useLocale();
   const navigate = useNavigate();
   const { data: session } = useQuery({
@@ -134,7 +136,7 @@ function InterviewEnded({ id, clientOnly }: { id: string; clientOnly: boolean })
               className={`rounded-2xl px-3 py-2 text-sm ${t.speaker === "agent" ? "bg-persimmon-faint" : "bg-white/70"}`}
             >
               <span className="block text-[10px] uppercase tracking-wider text-espresso-soft">
-                {t.speaker} · {t.source}
+                {turnTag(intl, t)}
               </span>
               {t.text}
             </div>
@@ -271,7 +273,7 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
       if (!voiceErroredRef.current) {
         voiceErroredRef.current = true;
         toast.error(intl.formatMessage({ id: "interview.voiceErrorToast" }), {
-          description: voice.error ?? undefined,
+          description: voice.error ? codeMessage(intl, voice.error) : undefined,
           action: {
             label: intl.formatMessage({ id: "interview.voiceRetry" }),
             onClick: () => void retryVoice(),

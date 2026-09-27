@@ -4,6 +4,8 @@ The landing lives under the optional `{-$locale}` route segment: `/` is the en
 landing, `/es`, `/fr`, ... are locale landings. All in-app routes share the
 same optional prefix (`/setup`, `/es/setup`, ...). Locale switching swaps the
 prefix via real links, so prerender crawl discovers every locale page.
+Prefixes are lowercase canonical (`/pt-br`, `/zh-cn`); a mixed-case legacy
+prefix redirects to its lowercase form instead of 404ing.
 
 Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
 `landing-peek-1440.png` / `landing-peek-390.png` reference shots).

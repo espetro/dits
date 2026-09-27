@@ -1,4 +1,5 @@
 import { TTS_TEST_TIMEOUT_MS } from "./timeouts";
+import { DiError } from "./errors";
 /**
  * Capability-aware in-browser speech/endpoint probes used by the AI
  * provider settings pane. Browser-only: all guards assume `window`.
@@ -24,7 +25,7 @@ export function testBrowserStt(): Promise<void> {
   const Ctor =
     (window as unknown as Record<string, unknown>).SpeechRecognition ??
     (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
-  if (typeof Ctor !== "function") return Promise.reject(new Error("unsupported"));
+  if (typeof Ctor !== "function") return Promise.reject(new DiError("stt.unsupported"));
   const recognition = new (Ctor as new () => {
     start(): void;
     stop(): void;
@@ -43,33 +44,33 @@ export function testBrowserStt(): Promise<void> {
     };
     recognition.onerror = (event) => {
       clearTimeout(timer);
-      reject(new Error(event.error));
+      reject(new DiError(sttErrorCode(event.error)));
     };
     recognition.start();
   });
 }
 
 /**
- * Map raw Web Speech error codes to a human-readable sentence. "network"
- * is the common desktop-Chrome trap: SpeechRecognition is server-backed
- * there, so a VPN/firewall/adblocker breaks it even though the page is
- * online (mobile Chrome often routes differently and works).
+ * Map raw Web Speech error codes to `errors.stt.*` locale key suffixes.
+ * "network" is the common desktop-Chrome trap: SpeechRecognition is
+ * server-backed there, so a VPN/firewall/adblocker breaks it even though
+ * the page is online (mobile Chrome often routes differently and works).
  */
-function explainSttError(code: string): string {
+function sttErrorCode(code: string): string {
   switch (code) {
     case "network":
-      return "speech service unreachable: desktop Chrome sends mic audio to Google's servers, so a VPN, firewall, or adblocker can block it (mobile Chrome often works)";
+      return "stt.network";
     case "not-allowed":
     case "service-not-allowed":
-      return "microphone permission denied";
+      return "stt.notAllowed";
     case "no-speech":
-      return "no speech detected";
+      return "stt.noSpeech";
     case "audio-capture":
-      return "no microphone found";
+      return "stt.noMic";
     case "language-not-supported":
-      return `language not supported: ${navigator.language ?? "unknown locale"}`;
+      return "stt.langUnsupported";
     default:
-      return code;
+      return "stt.unknown";
   }
 }
 
@@ -81,14 +82,15 @@ function explainSttError(code: string): string {
  */
 export function startLiveStt(handlers: {
   onText: (text: string) => void;
-  onError: (message: string) => void;
+  /** reports an `errors.stt.*` code suffix — render via `codeMessage` */
+  onError: (code: string) => void;
   timeoutMs?: number;
 }): { stop: () => void } {
   const Ctor =
     (window as unknown as Record<string, unknown>).SpeechRecognition ??
     (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
   if (typeof Ctor !== "function") {
-    handlers.onError("unsupported");
+    handlers.onError("stt.unsupported");
     return { stop: () => undefined };
   }
   const recognition = new (Ctor as new () => {
@@ -131,7 +133,7 @@ export function startLiveStt(handlers: {
   };
   recognition.onerror = (event) => {
     stop();
-    handlers.onError(explainSttError(event.error));
+    handlers.onError(sttErrorCode(event.error));
   };
   recognition.onend = () => stop();
   recognition.start();
@@ -152,7 +154,7 @@ export function testBrowserTts(): Promise<void> {
     };
     utterance.onerror = (event) => {
       clearTimeout(timer);
-      reject(new Error(event.error));
+      reject(new DiError("tts.builtin", undefined, event.error));
     };
     speechSynthesis.speak(utterance);
   });
@@ -170,5 +172,5 @@ export async function probeModels(draft: ProbeDraft): Promise<void> {
   const res = await fetch(`${base}/v1/models`, {
     headers: { authorization: `Bearer ${draft.apiKey}` },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new DiError("http", { status: res.status }, `HTTP ${res.status}`);
 }

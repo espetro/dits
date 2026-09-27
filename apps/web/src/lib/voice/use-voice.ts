@@ -12,6 +12,7 @@ import {
 } from "../../stores/voice";
 import { setQuestion } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
+import { errorCode } from "../errors";
 import { createDriver } from "./index";
 import { voiceMachine } from "./machine";
 import { MODEL_LOAD_TIMEOUT_MS } from "../timeouts";
@@ -78,7 +79,7 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
         driver = await createDriver(sessionId, AbortSignal.timeout(MODEL_LOAD_TIMEOUT_MS));
       } catch (err) {
         if (!cancelled) {
-          setState((s) => ({ ...s, status: "error", error: String(err) }));
+          setState((s) => ({ ...s, status: "error", error: errorCode(err) ?? "voice.boot" }));
         }
         return;
       }
@@ -142,7 +143,7 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
           setState((s) => ({
             ...s,
             status: "error",
-            error: err instanceof Error ? err.message : "voice start failed",
+            error: errorCode(err) ?? "voice.start",
           }));
         }
       }
@@ -210,9 +211,12 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       actorRef.current?.send({ type: "CONNECTED" });
       setState((s) => ({ ...s, status: "connected", error: null }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "voice restart failed";
       actorRef.current?.send({ type: "CONNECT_FAILED" });
-      setState((s) => ({ ...s, status: "error", error: message }));
+      setState((s) => ({
+        ...s,
+        status: "error",
+        error: errorCode(err) ?? "voice.restart",
+      }));
     }
   }, []);
 

@@ -77,7 +77,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
     });
   }
 
-  app.notFound((c) => c.json({ error: "not found" }, 404));
+  app.notFound((c) => c.json({ error: "not found", code: "not_found" }, 404));
 
   return app;
 }

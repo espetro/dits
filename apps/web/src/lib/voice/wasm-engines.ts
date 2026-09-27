@@ -2,6 +2,7 @@ import type { SttEngine, SttEngineCallbacks, TtsEngine } from "./engines";
 import { DEFAULT_VOICE_MODEL_MANIFEST, loadVoiceModelManifest, readVoiceModelFile } from "./models";
 import type { VoiceModelStorage } from "./models";
 import type { VoiceModelManifest } from "@di/shared";
+import { DiError } from "../errors";
 import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
 import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 
@@ -16,15 +17,15 @@ async function effectiveManifest(): Promise<VoiceModelManifest> {
   return loadVoiceModelManifest().catch(() => DEFAULT_VOICE_MODEL_MANIFEST);
 }
 
-export class WasmSttNotReadyError extends Error {
+export class WasmSttNotReadyError extends DiError {
   constructor() {
-    super("wasm stt engine not available");
+    super("models.sttEngine", undefined, "wasm stt engine not available");
   }
 }
 
-export class WasmTtsNotReadyError extends Error {
+export class WasmTtsNotReadyError extends DiError {
   constructor() {
-    super("wasm tts engine not available");
+    super("models.ttsEngine", undefined, "wasm tts engine not available");
   }
 }
 
@@ -102,7 +103,8 @@ export class WasmTts implements TtsEngine {
             }
           }
         };
-        worker.onerror = (ev) => reject(new Error(`tts worker failed: ${String(ev)}`));
+        worker.onerror = (ev) =>
+          reject(new DiError("models.ttsWorker", undefined, `tts worker failed: ${String(ev)}`));
       });
       const init: KittenInMsg = {
         type: "init",
@@ -139,7 +141,8 @@ export class WasmTts implements TtsEngine {
     this.readyPromise = null;
     this.worker?.terminate();
     this.worker = null;
-    for (const entry of this.pending.values()) entry.reject(new Error("tts engine disposed"));
+    for (const entry of this.pending.values())
+      entry.reject(new DiError("models.disposed", undefined, "tts engine disposed"));
     this.pending.clear();
   }
 }
@@ -195,7 +198,8 @@ export class WasmStt implements SttEngine {
             if (msg.text.trim()) this.cb?.onFinal(msg.text);
           }
         };
-        worker.onerror = (ev) => reject(new Error(`stt worker failed: ${String(ev)}`));
+        worker.onerror = (ev) =>
+          reject(new DiError("models.sttWorker", undefined, `stt worker failed: ${String(ev)}`));
       });
       const init: SttInMsg = { type: "init", model, tokens };
       worker.postMessage(init, [model, tokens]);

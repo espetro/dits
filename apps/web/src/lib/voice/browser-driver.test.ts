@@ -295,7 +295,7 @@ describe("BrowserVoiceDriver recognition errors", () => {
       await vi.advanceTimersByTimeAsync(2_000);
       expect(driver.status).toBe("error");
       expect(driver.onError).toHaveBeenCalledTimes(1);
-      expect(driver.onError).toHaveBeenCalledWith("microphone permission denied");
+      expect(driver.onError).toHaveBeenCalledWith("voice.micDenied");
     } finally {
       vi.useRealTimers();
     }
@@ -310,7 +310,7 @@ describe("BrowserVoiceDriver recognition errors", () => {
       await vi.advanceTimersByTimeAsync(2_000);
       expect(driver.status).toBe("error");
       expect(driver.onError).toHaveBeenCalledTimes(1);
-      expect(driver.onError).toHaveBeenCalledWith("microphone unavailable");
+      expect(driver.onError).toHaveBeenCalledWith("voice.micUnavailable");
     } finally {
       vi.useRealTimers();
     }

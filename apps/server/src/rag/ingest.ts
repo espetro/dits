@@ -13,6 +13,8 @@ export class CapError extends Error {
   constructor(
     message: string,
     readonly status: 413 | 415 | 503 = 413,
+    /** stable code the SPA maps to an `errors.api.<code>` locale key */
+    readonly code: string = "cap",
   ) {
     super(message);
   }
@@ -29,6 +31,8 @@ export async function ingestDocuments(
   if (existing.length + files.length > DOCUMENT_CAPS.maxFiles) {
     throw new CapError(
       `file cap exceeded: ${existing.length} existing + ${files.length} new > ${DOCUMENT_CAPS.maxFiles}`,
+      413,
+      "file_cap",
     );
   }
   const totalNew = files.reduce((n, f) => n + f.bytes.length, 0);
@@ -36,19 +40,22 @@ export async function ingestDocuments(
   if (totalExisting + totalNew > DOCUMENT_CAPS.maxTotalBytes) {
     throw new CapError(
       `size cap exceeded: ${totalExisting + totalNew} > ${DOCUMENT_CAPS.maxTotalBytes} bytes`,
+      413,
+      "size_cap",
     );
   }
   if (!opts.embeddings) {
     throw new CapError(
       "no embeddings provider configured (config.embeddings); cannot ingest documents",
       503,
+      "no_embeddings",
     );
   }
 
   const out: Document[] = [];
   for (const file of files) {
     const kind = kindForName(file.name);
-    if (!kind) throw new CapError(`unsupported file type: ${file.name}`, 415);
+    if (!kind) throw new CapError(`unsupported file type: ${file.name}`, 415, "unsupported_type");
     const doc: Document = {
       id: crypto.randomUUID(),
       session_id: sessionId,

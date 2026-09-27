@@ -6,6 +6,7 @@ import type {
 } from "@ai-sdk/provider";
 import type { BrowserLlmSection, LlmSection, RemoteLlmSection } from "@di/shared";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
+import { DiError } from "../errors";
 
 /**
  * In-browser LLM provider seam. `createLlmModel` picks the right
@@ -88,7 +89,7 @@ function geminiNanoHandles(): BrowserModelHandles | null {
   };
   return {
     get model() {
-      if (!geminiModel) throw new Error("browser llm not loaded yet");
+      if (!geminiModel) throw new DiError("llm.notLoaded", undefined, "browser llm not loaded yet");
       return geminiModel;
     },
     async load(onProgress) {
@@ -191,7 +192,7 @@ function transformersHandles(requestedId?: string): BrowserModelHandles | null {
   return {
     get model() {
       if (!transformersModel || transformersModelId !== modelId) {
-        throw new Error("browser llm not loaded yet");
+        throw new DiError("llm.notLoaded", undefined, "browser llm not loaded yet");
       }
       return transformersModel;
     },
@@ -343,13 +344,20 @@ export async function smokeTestModel(
 ): Promise<void> {
   const handles =
     section.engine === "gemini-nano" ? geminiNanoHandles() : transformersHandles(section.modelId);
-  if (!handles) throw new Error("engine unsupported in this browser");
+  if (!handles)
+    throw new DiError("llm.unsupported", undefined, "engine unsupported in this browser");
   const load = handles.load(opts.onProgress);
   const timeout = opts.timeoutMs
     ? new Promise<never>((_, reject) =>
         setTimeout(
           () =>
-            reject(new Error(`model load timed out after ${Math.round(opts.timeoutMs! / 1000)}s`)),
+            reject(
+              new DiError(
+                "llm.timeout",
+                { seconds: Math.round(opts.timeoutMs! / 1000) },
+                `model load timed out after ${Math.round(opts.timeoutMs! / 1000)}s`,
+              ),
+            ),
           opts.timeoutMs,
         ),
       )

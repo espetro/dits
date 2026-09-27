@@ -9,6 +9,7 @@ import {
   setClientSessionStatus,
 } from "./opfs-store";
 import { generateReport } from "./agent/report-generator";
+import { DiError } from "./errors";
 
 export type { ReportDto };
 
@@ -23,7 +24,8 @@ export async function ensureClientReport(id: string): Promise<ReportDto> {
   if (cached) return cached;
   const profile = $providerProfile.get();
   const session = await getClientSession(id);
-  if (!profile?.llm || !session) throw new Error("no provider profile or session");
+  if (!profile?.llm || !session)
+    throw new DiError("report.noSession", undefined, "no provider profile or session");
   const turns = await getClientTurns(id);
   const report = await generateReport(
     profile.llm,

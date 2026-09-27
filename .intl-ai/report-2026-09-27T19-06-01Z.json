@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-27T19:06:01Z",
+  "command": "fill",
+  "locales": {
+    "es": {
+      "requested": 71,
+      "translated": 32,
+      "written": 32,
+      "adopted_human": 0,
+      "reconciled_human": 0,
+      "skipped_existing": 0,
+      "skipped_human": 0,
+      "omitted": [
+        "errors.models.sha256",
+        "errors.models.size",
+        "errors.models.sttEngine",
+        "errors.models.sttWorker",
+        "errors.models.ttsEngine",
+        "errors.models.ttsWorker",
+        "errors.models.unknown",
+        "errors.report.noSession",
+        "errors.stt.langUnsupported",
+        "errors.stt.network",
+        "errors.stt.noMic",
+        "errors.stt.noSpeech",
+        "errors.stt.notAllowed",
+        "errors.stt.unknown",
+        "errors.stt.unsupported",
+        "errors.tts.builtin",
+        "errors.tts.empty",
+        "errors.tts.endpoint",
+        "errors.tts.pcm",
+        "errors.tts.wav",
+        "errors.unknown",
+        "errors.voice.boot",
+        "errors.voice.captureRate",
+        "errors.voice.connect",
+        "errors.voice.llm",
+        "errors.voice.mic",
+        "errors.voice.micDenied",
+        "errors.voice.micUnavailable",
+        "errors.voice.noResponse",
+        "errors.voice.reconnectExhausted",
+        "errors.voice.restart",
+        "errors.voice.server",
+        "errors.voice.socket",
+        "errors.voice.socketTimeout",
+        "errors.voice.start",
+        "errors.voice.stt",
+        "errors.voice.sttUnsupported",
+        "errors.voice.tool",
+        "errors.voice.tts"
+      ]
+    }
+  },
+  "failures": [
+    {
+      "locale": "es",
+      "key": "errors.models.sha256",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.size",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.sttEngine",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.sttWorker",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.ttsEngine",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.ttsWorker",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.models.unknown",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.report.noSession",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.langUnsupported",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.network",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.noMic",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.noSpeech",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.notAllowed",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.unknown",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.stt.unsupported",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.tts.builtin",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.tts.empty",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.tts.endpoint",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.tts.pcm",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.tts.wav",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.unknown",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.boot",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.captureRate",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.connect",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.llm",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.mic",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.micDenied",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.micUnavailable",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.noResponse",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.reconnectExhausted",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.restart",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.server",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.socket",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.socketTimeout",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.start",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.stt",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.sttUnsupported",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.tool",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "es",
+      "key": "errors.voice.tts",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    }
+  ],
+  "dry_run": false
+}

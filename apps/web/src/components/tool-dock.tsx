@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "./vendor/tabs";
 import {
@@ -37,6 +37,7 @@ export function ToolDock({
   onActive: (id: string) => void;
   loadingLabel: string;
 }) {
+  const intl = useIntl();
   const visible = specs.slice(0, MAX_VISIBLE_TABS);
   const overflow = specs.slice(MAX_VISIBLE_TABS);
   const activeSpec = specs.find((s) => s.id === active) ?? specs[0];
@@ -67,7 +68,7 @@ export function ToolDock({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-label="more tools"
+                  aria-label={intl.formatMessage({ id: "a11y.moreTools" })}
                   className={`size-11 flex-none rounded-full bg-white px-0 text-espresso ring-1 ring-hairline shadow-none hover:bg-white hover:ring-persimmon/50 ${
                     overflow.some((s) => s.id === activeSpec?.id) ? "ring-persimmon/50" : ""
                   }`}

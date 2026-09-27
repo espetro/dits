@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-27T19:15:57Z",
+  "command": "fill",
+  "locales": {
+    "fr": {
+      "requested": 4,
+      "translated": 0,
+      "written": 0,
+      "adopted_human": 0,
+      "reconciled_human": 0,
+      "skipped_existing": 0,
+      "skipped_human": 0,
+      "omitted": [
+        "transcript.source.text",
+        "transcript.source.voice",
+        "transcript.who.agent",
+        "transcript.who.user"
+      ]
+    }
+  },
+  "failures": [
+    {
+      "locale": "fr",
+      "key": "transcript.source.text",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "fr",
+      "key": "transcript.source.voice",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "fr",
+      "key": "transcript.who.agent",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "fr",
+      "key": "transcript.who.user",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    }
+  ],
+  "dry_run": false
+}

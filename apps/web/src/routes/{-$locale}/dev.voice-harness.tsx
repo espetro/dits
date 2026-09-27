@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { intlFor } from "../../locales/i18n";
 import { createSession } from "../../lib/api";
 import { ServerVoiceDriver } from "../../lib/voice/server-driver";
 import type { ServerDriverDeps, SpeechDriver } from "../../lib/voice/server-driver";
@@ -10,7 +11,11 @@ import type { MicCapture } from "../../lib/voice/capture";
 import type { VadGate } from "../../lib/voice/vad";
 
 export const Route = createFileRoute("/{-$locale}/dev/voice-harness")({
-  head: () => ({ meta: [{ title: "voice harness — di" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: intlFor(params.locale ?? "en").formatMessage({ id: "meta.title.voiceHarness" }) },
+    ],
+  }),
   component: VoiceHarness,
 });
 

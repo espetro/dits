@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-27T19:37:43Z",
+  "command": "fill",
+  "locales": {
+    "de": {
+      "requested": 39,
+      "translated": 32,
+      "written": 32,
+      "adopted_human": 0,
+      "reconciled_human": 0,
+      "skipped_existing": 32,
+      "skipped_human": 0,
+      "omitted": [
+        "errors.voice.socket",
+        "errors.voice.socketTimeout",
+        "errors.voice.start",
+        "errors.voice.stt",
+        "errors.voice.sttUnsupported",
+        "errors.voice.tool",
+        "errors.voice.tts"
+      ]
+    }
+  },
+  "failures": [
+    {
+      "locale": "de",
+      "key": "errors.voice.socket",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.socketTimeout",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.start",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.stt",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.sttUnsupported",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.tool",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    },
+    {
+      "locale": "de",
+      "key": "errors.voice.tts",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    }
+  ],
+  "dry_run": false
+}

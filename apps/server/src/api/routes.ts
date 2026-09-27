@@ -104,7 +104,7 @@ export function apiRoutes(
       .selectAll()
       .where("id", "=", c.req.param("id"))
       .executeTakeFirst();
-    if (!row) return c.json({ error: "not found" }, 404);
+    if (!row) return c.json({ error: "not found", code: "not_found" }, 404);
     return c.json(
       v.parse(SessionSchema, {
         ...row,
@@ -123,7 +123,8 @@ export function apiRoutes(
       .set({ status })
       .where("id", "=", id)
       .executeTakeFirst();
-    if (Number(res.numUpdatedRows) === 0) return c.json({ error: "not found" }, 404);
+    if (Number(res.numUpdatedRows) === 0)
+      return c.json({ error: "not found", code: "not_found" }, 404);
     const row = await db
       .selectFrom("sessions")
       .selectAll()
@@ -147,7 +148,7 @@ export function apiRoutes(
       .select("id")
       .where("id", "=", id)
       .executeTakeFirst();
-    if (!session) return c.json({ error: "not found" }, 404);
+    if (!session) return c.json({ error: "not found", code: "not_found" }, 404);
     // The server owns sequencing: concurrent writers (voice worker, text
     // input, tests) cannot agree on the next seq among themselves.
     const { max_seq } = await db
@@ -192,7 +193,7 @@ export function apiRoutes(
       .select("id")
       .where("id", "=", id)
       .executeTakeFirst();
-    if (!session) return c.json({ error: "not found" }, 404);
+    if (!session) return c.json({ error: "not found", code: "not_found" }, 404);
     const now = new Date().toISOString();
     for (const [tool, state] of Object.entries(body)) {
       await db
@@ -229,14 +230,18 @@ export function apiRoutes(
       .selectAll()
       .where("id", "=", id)
       .executeTakeFirst();
-    if (!session) return c.json({ error: "not found" }, 404);
+    if (!session) return c.json({ error: "not found", code: "not_found" }, 404);
     const existing = await db
       .selectFrom("reports")
       .select("data")
       .where("session_id", "=", id)
       .executeTakeFirst();
     if (existing) return c.json(JSON.parse(existing.data));
-    if (!opts.reportLlm) return c.json({ error: "report generation is not configured" }, 503);
+    if (!opts.reportLlm)
+      return c.json(
+        { error: "report generation is not configured", code: "report_unconfigured" },
+        503,
+      );
     const turns = await db
       .selectFrom("turns")
       .selectAll()
@@ -253,7 +258,7 @@ export function apiRoutes(
       });
     } catch (err) {
       console.error(`[report] generation failed for ${id}: ${err}`);
-      return c.json({ error: "report generation failed" }, 502);
+      return c.json({ error: "report generation failed", code: "report_failed" }, 502);
     }
     await db
       .insertInto("reports")
@@ -273,7 +278,8 @@ export function apiRoutes(
   api.put("/sessions/:id/report", vValidator("json", ReportSchema), async (c) => {
     const id = c.req.param("id");
     const report = c.req.valid("json");
-    if (report.session_id !== id) return c.json({ error: "session id mismatch" }, 400);
+    if (report.session_id !== id)
+      return c.json({ error: "session id mismatch", code: "session_id_mismatch" }, 400);
     await db
       .insertInto("reports")
       .values({
@@ -295,14 +301,16 @@ export function apiRoutes(
       .selectAll()
       .where("session_id", "=", c.req.param("id"))
       .executeTakeFirst();
-    if (!row) return c.json({ error: "not found" }, 404);
+    if (!row) return c.json({ error: "not found", code: "not_found" }, 404);
     return c.json(JSON.parse(row.data));
   });
 
   // Voice WebSocket endpoint. Bun upgrades this in serveApp before the Hono
   // app sees it; this route only handles non-upgrade requests (documented
   // in .agents/docs, not openapi.json).
-  api.get("/sessions/:id/voice", (c) => c.json({ error: "websocket upgrade required" }, 426));
+  api.get("/sessions/:id/voice", (c) =>
+    c.json({ error: "websocket upgrade required", code: "upgrade_required" }, 426),
+  );
 
   api.post("/sessions/:id/documents", async (c) => {
     const sessionId = c.req.param("id");
@@ -311,7 +319,7 @@ export function apiRoutes(
       .select("id")
       .where("id", "=", sessionId)
       .executeTakeFirst();
-    if (!session) return c.json({ error: "session not found" }, 404);
+    if (!session) return c.json({ error: "session not found", code: "session_not_found" }, 404);
     const form = await c.req.formData();
     const files: { name: string; bytes: Uint8Array }[] = [];
     for (const value of form.getAll("file")) {
@@ -321,14 +329,16 @@ export function apiRoutes(
         bytes: new Uint8Array(await value.arrayBuffer()),
       });
     }
-    if (files.length === 0) return c.json({ error: "no files uploaded (field: file)" }, 400);
+    if (files.length === 0)
+      return c.json({ error: "no files uploaded (field: file)", code: "no_files" }, 400);
     try {
       const docs = await ingestDocuments(db, sessionId, files, {
         embeddings: opts.embeddings,
       });
       return c.json({ documents: docs.map((d) => v.parse(DocumentSchema, d)) }, 201);
     } catch (err) {
-      if (err instanceof CapError) return c.json({ error: err.message }, err.status);
+      if (err instanceof CapError)
+        return c.json({ error: err.message, code: err.code }, err.status);
       throw err;
     }
   });
@@ -340,7 +350,9 @@ export function apiRoutes(
 
   api.delete("/sessions/:id/documents/:docId", async (c) => {
     const ok = await deleteDocument(db, c.req.param("id"), c.req.param("docId"));
-    return ok ? c.body(null, 204) : c.json({ error: "document not found" }, 404);
+    return ok
+      ? c.body(null, 204)
+      : c.json({ error: "document not found", code: "document_not_found" }, 404);
   });
 
   api.get("/sessions/:id/context", async (c) => {
@@ -350,7 +362,7 @@ export function apiRoutes(
       .select("id")
       .where("id", "=", sessionId)
       .executeTakeFirst();
-    if (!session) return c.json({ error: "session not found" }, 404);
+    if (!session) return c.json({ error: "session not found", code: "session_not_found" }, 404);
     const query = c.req.query("query") ?? "";
     const rows = await loadVectors(db, sessionId);
     if (!query || rows.length === 0) {
@@ -363,7 +375,8 @@ export function apiRoutes(
       }));
       return c.json(v.parse(SessionContextResponseSchema, { chunks }));
     }
-    if (!opts.embeddings) return c.json({ error: "no embeddings provider configured" }, 503);
+    if (!opts.embeddings)
+      return c.json({ error: "no embeddings provider configured", code: "no_embeddings" }, 503);
     const [queryVec] = await opts.embeddings.embed([query]);
     const chunks = retrieve(queryVec!, rows, 8);
     return c.json(v.parse(SessionContextResponseSchema, { chunks }));

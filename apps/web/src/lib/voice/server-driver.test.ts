@@ -226,7 +226,7 @@ describe("ServerVoiceDriver", () => {
     const errs: string[] = [];
     driver.onError = (m) => errs.push(m);
     ws.receive(JSON.stringify({ t: "error", message: "stt down" }));
-    expect(errs).toEqual(["stt down"]);
+    expect(errs).toEqual(["voice.server"]);
   });
 });
 
@@ -326,7 +326,7 @@ describe("reconnect loop", () => {
       await vi.advanceTimersByTimeAsync(16_000);
       expect(reconnects).toEqual([1, 2, 3, 4, 5]);
       expect(driver.status).toBe("error");
-      expect(errs[0]).toContain("retry");
+      expect(errs[0]).toBe("voice.reconnectExhausted");
     } finally {
       vi.useRealTimers();
     }

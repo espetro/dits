@@ -12,13 +12,7 @@ import { SettingsDraftsProvider } from "./settings-drafts";
 import { clearSettings, openSettings, useSettingsSearch } from "./settings-nav";
 import type { SettingsPane } from "./settings-nav";
 import { Button } from "./vendor/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "./vendor/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "./dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 
 /**

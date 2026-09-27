@@ -13,7 +13,8 @@ import {
 import { FormattedMessage } from "react-intl";
 import { AlertTriangle } from "lucide-react";
 
-import { AppIntlProvider, useHtmlLang, useIsRtl } from "../locales/i18n";
+import { AppIntlProvider, intlFor, useHtmlLang, useIsRtl } from "../locales/i18n";
+import { errorDetail } from "../lib/errors";
 import { Button } from "../components/vendor/button";
 import { AppHeader } from "../components/app-header";
 import { SettingsDialogHost } from "../components/settings-dialog";
@@ -88,7 +89,8 @@ function RootDocument() {
  */
 function RouteError({ error, reset }: { error: unknown; reset?: () => void }) {
   const router = useRouter();
-  const message = error instanceof Error ? error.message : "an unexpected error occurred";
+  const pathname = useLocation({ select: (l) => l.pathname });
+  const message = errorDetail(intlFor(localeFromPathname(pathname)), error);
   const retry = () => {
     if (reset) reset();
     else void router.invalidate();

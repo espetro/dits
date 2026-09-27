@@ -1,4 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
+import { useIntl } from "react-intl";
 import { Check, ChevronDown } from "lucide-react";
 
 import { LOCALES } from "../stores/session";
@@ -40,6 +41,7 @@ export const LOCALE_LABELS = {
 } as const satisfies Record<(typeof LOCALES)[number], { flag: string; native: string }>;
 
 export function LocaleSwitcher({ className = "" }: { className?: string }) {
+  const intl = useIntl();
   const { pathname } = useLocation();
   const locale = useLocale() as (typeof LOCALES)[number];
 
@@ -48,7 +50,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          aria-label="Language"
+          aria-label={intl.formatMessage({ id: "a11y.language" })}
           className={
             "gap-2 rounded-full border-hairline bg-white px-3 py-1.5 text-xs font-medium text-espresso-soft hover:border-persimmon/50 hover:bg-white hover:text-espresso " +
             className

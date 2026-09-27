@@ -59,5 +59,7 @@
 - Mobile-first: centered column capped at `max-w-md`, usable at 375px.
 - Session title scales `text-3xl` base -> `sm:text-4xl` and breaks long
   words so long titles do not overflow.
+- The untitled-session fallback and the transcript-format menu labels are
+  localized (`finish.fallbackTitle`, `finish.moreFormats`).
 - Button stack is full-width base; transcript dropdown stays anchored inside
   the button container.

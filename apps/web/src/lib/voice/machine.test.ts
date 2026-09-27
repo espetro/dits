@@ -31,7 +31,7 @@ describe("voiceMachine", () => {
     actor.send({ type: "CONNECT_FAILED" });
     const snap = actor.getSnapshot();
     expect(snap.value).toBe("error");
-    expect(snap.context.error).toBe("connect failed");
+    expect(snap.context.error).toBe("voice.connect");
   });
 
   it("full happy turn: listening -> user_speaking -> thinking -> agent_speaking -> listening", () => {

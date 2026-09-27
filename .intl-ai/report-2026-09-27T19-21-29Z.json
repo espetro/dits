@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-27T19:21:29Z",
+  "command": "fill",
+  "locales": {
+    "it": {
+      "requested": 71,
+      "translated": 71,
+      "written": 71,
+      "adopted_human": 0,
+      "reconciled_human": 0,
+      "skipped_existing": 0,
+      "skipped_human": 0,
+      "omitted": [
+        "errors.models.sttWorker"
+      ]
+    }
+  },
+  "failures": [
+    {
+      "locale": "it",
+      "key": "errors.models.sttWorker",
+      "kind": "output_truncated",
+      "message": "provider returned no translation for this key"
+    }
+  ],
+  "dry_run": false
+}

@@ -4,8 +4,23 @@
  */
 import { dequeuePendingTurn, enqueuePendingTurn, getPendingTurns } from "./opfs-store";
 import type { PendingTurn } from "./opfs-store";
+import { DiError } from "./errors";
 
 const BASE = import.meta.env.VITE_DI_API_BASE ?? "";
+
+interface ApiErrorBody {
+  error?: string;
+  code?: string;
+}
+
+/**
+ * Turn a failed response into a DiError: the server's `code` field wins
+ * (`errors.api.<code>`), otherwise the per-op `errors.api.<op>` key applies.
+ */
+async function apiFailure(res: Response, op: string): Promise<DiError> {
+  const body = (await res.json().catch(() => undefined)) as ApiErrorBody | undefined;
+  return new DiError(`api.${body?.code ?? op}`, { status: res.status });
+}
 
 const PENDING_TURN_RETRIES = 3;
 const POST_TURN_RETRY_BASE_MS = 1_000;
@@ -57,7 +72,7 @@ export async function createSession(body: {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`create session failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "createSession");
   return res.json();
 }
 
@@ -83,16 +98,13 @@ export async function uploadDocuments(
     method: "POST",
     body: form,
   });
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(body.error ?? `upload failed: ${res.status}`);
-  }
+  if (!res.ok) throw await apiFailure(res, "upload");
   return res.json();
 }
 
 export async function listSessions(): Promise<SessionDto[]> {
   const res = await fetch(`${BASE}/v1/sessions`);
-  if (!res.ok) throw new Error(`list sessions failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "listSessions");
   return res.json();
 }
 
@@ -102,25 +114,25 @@ export async function updateSessionStatus(id: string, status: string): Promise<S
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error(`update session failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "updateSession");
   return res.json();
 }
 
 export async function getSession(id: string): Promise<SessionDto> {
   const res = await fetch(`${BASE}/v1/sessions/${id}`);
-  if (!res.ok) throw new Error(`get session failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "getSession");
   return res.json();
 }
 
 export async function getTurns(id: string): Promise<TurnDto[]> {
   const res = await fetch(`${BASE}/v1/sessions/${id}/turns`);
-  if (!res.ok) throw new Error(`get turns failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "getTurns");
   return res.json();
 }
 
 export async function getReport(id: string): Promise<unknown> {
   const res = await fetch(`${BASE}/v1/sessions/${id}/report`);
-  if (!res.ok) throw new Error(`get report failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "getReport");
   return res.json();
 }
 
@@ -131,7 +143,7 @@ export async function getReport(id: string): Promise<unknown> {
  */
 export async function requestReport(id: string): Promise<ReportDto> {
   const res = await fetch(`${BASE}/v1/sessions/${id}/report`, { method: "POST" });
-  if (!res.ok) throw new Error(`generate report failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "requestReport");
   return res.json();
 }
 
@@ -144,7 +156,7 @@ export async function pushToolState(id: string, state: ToolStateDto): Promise<vo
     headers: { "content-type": "application/json" },
     body: JSON.stringify(state),
   });
-  if (!res.ok) throw new Error(`push tool state failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "pushToolState");
 }
 
 /**
@@ -177,7 +189,7 @@ async function postQueuedTurn(id: string, pending: PendingTurn): Promise<TurnDto
     headers: { "content-type": "application/json" },
     body: JSON.stringify(turn),
   });
-  if (!res.ok) throw new Error(`post turn failed: ${res.status}`);
+  if (!res.ok) throw await apiFailure(res, "postTurn");
   await dequeuePendingTurn(id, pending.id);
   return res.json();
 }

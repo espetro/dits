@@ -29,6 +29,7 @@ export interface MilkdownApi {
 }
 
 export function MilkdownEditor(props: MilkdownEditorProps) {
+  const intl = useIntl();
   const [Mod, setMod] = React.useState<{
     default: React.ComponentType<MilkdownEditorProps>;
   } | null>(null);
@@ -46,7 +47,7 @@ export function MilkdownEditor(props: MilkdownEditorProps) {
       <div
         role="textbox"
         aria-busy="true"
-        aria-label={props.placeholder ?? "editor"}
+        aria-label={props.placeholder ?? intl.formatMessage({ id: "a11y.editor" })}
         className={"animate-pulse rounded-2xl bg-espresso/5 " + (props.className ?? "")}
       />
     );

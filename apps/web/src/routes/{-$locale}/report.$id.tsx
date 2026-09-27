@@ -79,7 +79,7 @@ function Report() {
       mode: "coach",
       prompt: intl.formatMessage(
         { id: "report.coachSeed" },
-        { name: weakest?.name ?? "your weakest areas" },
+        { name: weakest?.name ?? intl.formatMessage({ id: "report.weakestFallback" }) },
       ),
       title: "",
     });
@@ -174,7 +174,11 @@ function Report() {
               <FormattedMessage id="report.session" />
             </p>
             <p className="mt-2 font-display text-xl font-bold">
-              {session?.mode} · {session?.duration_min} min
+              {session &&
+                intl.formatMessage({
+                  id: session.mode === "coach" ? "setup.mode.coach" : "setup.mode.interview",
+                })}{" "}
+              · {session?.duration_min} min
             </p>
           </div>
         </div>

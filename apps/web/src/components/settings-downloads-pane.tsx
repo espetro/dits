@@ -9,6 +9,7 @@ import { Button } from "./vendor/button";
 import { Progress } from "./vendor/progress";
 import { Separator } from "./vendor/separator";
 import { $voiceDownload, $voiceModelsConsent } from "../stores/voice";
+import { codeMessage } from "../lib/errors";
 import {
   DEFAULT_VOICE_MODEL_MANIFEST,
   clearVoiceModels,
@@ -102,7 +103,10 @@ export function DownloadsPane() {
     : voiceReady
       ? intl.formatMessage({ id: "settings.downloads.installedSize" }, { size: voiceSizeMb })
       : download.status === "error"
-        ? intl.formatMessage({ id: "settings.voicePane.error" }, { message: download.error ?? "" })
+        ? intl.formatMessage(
+            { id: "settings.voicePane.error" },
+            { message: codeMessage(intl, download.error) },
+          )
         : intl.formatMessage({ id: "settings.voicePane.notInstalled" });
 
   return (

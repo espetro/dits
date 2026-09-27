@@ -3,13 +3,7 @@ import { useStore } from "@nanostores/react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from "./vendor/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "./dialog";
 import { Button } from "./vendor/button";
 import { $voiceConsentPrompt, $voiceDownload, $voiceModelsConsent } from "../stores/voice";
 import { downloadVoiceModels } from "../lib/voice/models";

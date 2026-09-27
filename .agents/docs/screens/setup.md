@@ -50,7 +50,9 @@
   with — seeds `session.tools`), and its own **start** CTA (a real `Button`
   sibling of the label, not nested inside the selectable surface).
   Selecting a card also fills the custom-prompt textarea with the preset
-  text (editable before starting).
+  text (editable before starting). Preset prompt copy is localized
+  (`setup.scenario.<id>.prompt` keys); it both renders in the textarea and
+  seeds the session brief sent to the llm.
 - **Advanced options** disclosure (vendored `Collapsible`, collapsed by
   default, chevron): duration (20/30/45/60), mode, tone, difficulty as
   `RadioPill` rows (`Label` + `RadioGroupItem`, labelled by their `h3` via
