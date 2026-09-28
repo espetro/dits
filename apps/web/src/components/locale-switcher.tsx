@@ -15,11 +15,15 @@ import {
 /**
  * Pill dropdown language switcher, ported from brioso's LanguageSwitcher.
  *
- * Trigger shows the current locale flag + native name; the menu has one row
+ * Trigger shows a language-code chip + the native name; the menu has one row
  * per locale navigating to the same path under the target locale prefix,
  * preserving pathname (search/hash come from the router location but the app
  * doesn't use them, so only the pathname is rewritten). Active row carries a
  * checkmark.
+ *
+ * Chips render the uppercase language subtag (EN, PT, ZH...) rather than flag
+ * emoji: flag glyphs need a color-emoji flag font that Windows and some Linux
+ * installs don't ship, so they degrade to bare two-letter boxes.
  *
  * Rows are plain `<a>` elements, deliberately not TanStack's `<Link>` (same
  * reasoning as brioso): our hrefs are plain optional-prefix paths so Link
@@ -28,17 +32,30 @@ import {
  */
 
 export const LOCALE_LABELS = {
-  en: { flag: "🇺🇸", native: "English" },
-  de: { flag: "🇩🇪", native: "Deutsch" },
-  es: { flag: "🇪🇸", native: "Español" },
-  fr: { flag: "🇫🇷", native: "Français" },
-  ja: { flag: "🇯🇵", native: "日本語" },
-  "pt-br": { flag: "🇧🇷", native: "Português (Brasil)" },
-  "zh-cn": { flag: "🇨🇳", native: "简体中文" },
-  ko: { flag: "🇰🇷", native: "한국어" },
-  it: { flag: "🇮🇹", native: "Italiano" },
-  ar: { flag: "🇸🇦", native: "العربية" },
-} as const satisfies Record<(typeof LOCALES)[number], { flag: string; native: string }>;
+  en: { native: "English" },
+  de: { native: "Deutsch" },
+  es: { native: "Español" },
+  fr: { native: "Français" },
+  ja: { native: "日本語" },
+  "pt-br": { native: "Português (Brasil)" },
+  "zh-cn": { native: "简体中文" },
+  ko: { native: "한국어" },
+  it: { native: "Italiano" },
+  ar: { native: "العربية" },
+} as const satisfies Record<(typeof LOCALES)[number], { native: string }>;
+
+const localeCode = (l: string) => l.replace(/-.*/, "").toUpperCase();
+
+function LocaleChip({ code }: { code: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="grid size-[22px] flex-none place-items-center rounded-full border border-hairline bg-cream-deep text-[8px] font-bold tracking-[0.04em] text-espresso-soft"
+    >
+      {code}
+    </span>
+  );
+}
 
 export function LocaleSwitcher({ className = "" }: { className?: string }) {
   const intl = useIntl();
@@ -56,7 +73,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
             className
           }
         >
-          <span aria-hidden="true">{LOCALE_LABELS[locale].flag}</span>
+          <LocaleChip code={localeCode(locale)} />
           {LOCALE_LABELS[locale].native}
           <ChevronDown className="size-3.5 text-espresso-soft" aria-hidden="true" />
         </Button>
@@ -75,7 +92,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
                 aria-current={isActive ? "true" : undefined}
                 lang={l}
               >
-                <span aria-hidden="true">{label.flag}</span>
+                <LocaleChip code={localeCode(l)} />
                 <span className="font-medium text-espresso">{label.native}</span>
                 {isActive && <Check className="ml-auto size-4 text-persimmon" aria-hidden="true" />}
               </a>
