@@ -1,7 +1,8 @@
 # browser wasm stt reassessment
 
 date: 2026-09-28
-status: proposal, awaiting pick
+status: implemented — option a (vendored build + stub .data repack), pr #40;
+verified end-to-end in a real browser (engine.boot ok + sherpa partials/finals)
 scope: browser-first wasm stt (priority path) + desktop sidecar parity
 
 ## finding
@@ -45,6 +46,14 @@ call stay unchanged; `FS.writeFile` can keep working too (alternative: 1-byte st
 - pros: no emscripten toolchain, official build artifacts, same api, keeps our model
   manifest/cache exactly as-is, ~39MB total payload (13MB wasm + 26MB model) vs the 183MB
   upstream bundle
+
+shipped (pr #40): the 1-byte stub `.data` variant — glue metadata patched to a single
+`/.stub` entry, model keeps arriving via manifest + MEMFS. two findings e2e caught that
+the plan did not: the flat classic build exposes no `Module.FS` (top-level `var FS` lands
+on worker globalThis; `Module["FS_createDataFile"]` is the working export), and the glue
+self-initializes at script load — `Module` is seeded first with `locateFile` +
+`onRuntimeInitialized`/`onAbort`, there is no factory call.
+
 - cons: glue metadata patch is version-pinned (mitigate: pin the tarball, contract-test the
   patch applied + worker reaches ready)
 - effort: ~half a session incl. verification
