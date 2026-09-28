@@ -80,6 +80,16 @@ describe("llm section union", () => {
     expect(out?.llm).toEqual({ mode: "browser", engine: "gemini-nano" });
   });
 
+  it("decodeProviderProfile keeps a keyless remote llm section", () => {
+    // keyless endpoints are valid: callers omit the authorization header
+    // entirely, which is what lets zero-conf gateways pass CORS preflight
+    const raw = JSON.stringify({
+      llm: { mode: "remote", baseUrl: "http://a/v1", apiKey: "", model: "m1" },
+    });
+    const out = decodeProviderProfile(raw);
+    expect(out?.llm).toMatchObject({ mode: "remote", apiKey: "", model: "m1" });
+  });
+
   it("decodeProviderProfile migrates legacy flat llm to remote mode", () => {
     const out = decodeProviderProfile(
       JSON.stringify({ baseUrl: "http://a/", apiKey: "k", llmModel: "m1" }),

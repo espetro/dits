@@ -1,9 +1,13 @@
 /**
  * Zero-conf demo LLM (p2). The endpoint is never committed: builds inject it
  * via VITE_DEMO_LLM_* env vars, so the shipped bundle is the only place the
- * url exists. The managed endpoint ignores the api key, so the fill plants a
- * placeholder just to satisfy the profile schema. When VITE_DEMO_LLM_BASE_URL
- * is unset (local dev without env), the demo affordances stay hidden.
+ * url exists. The managed endpoint ignores the api key: a build that ships
+ * VITE_DEMO_LLM_API_KEY="" stores a keyless profile, so no authorization
+ * header is sent at all (gateways without `authorization` in CORS
+ * allow-headers then pass preflight); the "demo" fallback below only keeps
+ * the field non-empty for builds that don't set one. When
+ * VITE_DEMO_LLM_BASE_URL is unset (local dev without env), the demo
+ * affordances stay hidden.
  */
 export const DEMO_LLM = {
   baseUrl: (import.meta.env.VITE_DEMO_LLM_BASE_URL as string | undefined) ?? "",
