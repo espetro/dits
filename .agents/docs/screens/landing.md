@@ -46,6 +46,8 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
 
 - Headerless: `__root`'s `AppHeaderSlot` returns null when the index route
   matches (`useMatch("/{-$locale}/")`), so no top nav renders on the landing.
+  Instead a fixed `LocaleSwitcher` pill sits at `bottom-6 end-6` (inline-end,
+  so `/ar` mirrors it to bottom-left), level with the peek's bottom edge.
 - CTA **"grill me"** is a persimmon pill with a circular arrow-dot affordance;
   navigates to `/setup` (locale-prefixed). On the public-site build
   (`VITE_PUBLIC_SITE=1`) it links to the setup docs on GitHub instead.
@@ -63,9 +65,9 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
   `.peek-wave` in `theme.css`), not the live vendored orb/waveform — the peek
   is static mock content. Both honor `prefers-reduced-motion`.
 - The sticker field (scattered tilted question cards) is gone — deleted
-  outright, along with its `landing.sticker.*` / `landing.trust` locale keys
-  and the floating locale pill. Locale switching lives in the account
-  dropdown on every other route; the prerender `pages` list in
+  outright, along with its `landing.sticker.*` / `landing.trust` locale keys.
+  Locale switching lives in the fixed bottom-end pill on the landing and in
+  the account dropdown on every other route; the prerender `pages` list in
   `vite.config.ts` still covers every locale landing.
 
 ## Responsive
