@@ -19,6 +19,7 @@ import { createVadGate } from "./vad";
 import type { VadFrameProbabilities, VadGate, VadGateOptions } from "./vad";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
+import { pushVoiceHealth } from "./health";
 import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 
@@ -135,8 +136,18 @@ export class BrowserVoiceDriver implements SpeechDriver {
     private readonly sessionId: string,
     private readonly deps: BrowserDriverDeps = {},
   ) {
-    this.player = deps.player ?? createPcmPlayer();
+    this.player =
+      deps.player ??
+      createPcmPlayer({
+        // a gap while sentences are still synthesizing = playback underrun
+        onGap: (ms) => {
+          if (this.pendingSpeaks > 0) {
+            pushVoiceHealth({ kind: "playback.gap", ok: false, ms });
+          }
+        },
+      });
     this.player.onDrained(() => {
+      pushVoiceHealth({ kind: "playback.drained", ok: true });
       this.echoGateUntil = Date.now() + BrowserVoiceDriver.ECHO_GATE_TAIL_MS;
     });
   }
@@ -318,14 +329,34 @@ export class BrowserVoiceDriver implements SpeechDriver {
     }
     this.highProbFrames =
       probs.isSpeech >= BrowserVoiceDriver.BARGE_IN_PROB ? this.highProbFrames + 1 : 0;
-    if (this.highProbFrames >= BrowserVoiceDriver.BARGE_IN_FRAMES) this.noteSpeech();
+    const earned = this.highProbFrames >= BrowserVoiceDriver.BARGE_IN_FRAMES;
+    // per-gated-frame gate event: this is the real-device tuning data for
+    // BARGE_IN_PROB/BARGE_IN_FRAMES (allowed flips true at the earn point)
+    pushVoiceHealth({
+      kind: "gate",
+      ok: earned,
+      detail: "vad-frame",
+      duringPlayback: true,
+      vadProb: probs.isSpeech,
+      allowed: earned,
+    });
+    if (earned) this.noteSpeech();
   };
 
   /** interim speech evidence: marks the utterance and arms barge-in. */
   private noteSpeech(): void {
     // inside the gated window, speech evidence counts only once the vad's
     // per-frame confidence has earned it (see onVadFrame)
-    if (this.playbackGated && this.highProbFrames < BrowserVoiceDriver.BARGE_IN_FRAMES) return;
+    if (this.playbackGated && this.highProbFrames < BrowserVoiceDriver.BARGE_IN_FRAMES) {
+      pushVoiceHealth({
+        kind: "gate",
+        ok: false,
+        detail: "speech-suppressed",
+        duringPlayback: true,
+        allowed: false,
+      });
+      return;
+    }
     this.speechSeen = true;
     if (this.agentSpeaking && this.bargeInTimer === null) {
       this.bargeInTimer = setTimeout(() => {
@@ -342,7 +373,16 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private noteFinal(text: string): void {
     this.speechSeen = false;
     // gated window: a transcript here is the agent's own audio, not a turn
-    if (this.playbackGated) return;
+    if (this.playbackGated) {
+      pushVoiceHealth({
+        kind: "gate",
+        ok: false,
+        detail: "final-suppressed",
+        duringPlayback: true,
+        allowed: false,
+      });
+      return;
+    }
     const trimmed = text.trim();
     if (!trimmed || this.muted) return;
     this.cancelKickoff();
@@ -391,7 +431,16 @@ export class BrowserVoiceDriver implements SpeechDriver {
 
   private handleResult(ev: SpeechRecognitionEventLike) {
     // echo gate: results arriving while agent audio plays are speaker bleed
-    if (this.playbackGated) return;
+    if (this.playbackGated) {
+      pushVoiceHealth({
+        kind: "gate",
+        ok: false,
+        detail: "result-suppressed",
+        duringPlayback: true,
+        allowed: false,
+      });
+      return;
+    }
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
       const result = ev.results[i];
       if (!result) continue;
@@ -599,7 +648,10 @@ export class BrowserVoiceDriver implements SpeechDriver {
    * Barge-in: called from the route's VAD path when the user starts speaking
    * during agent playback. Same semantics as the server interrupt.
    */
-  interrupt(): void {
+  interrupt(cause: "barge-in" | "mute" | "stop" = "barge-in"): void {
+    if (this.player.playing || this.pendingSpeaks > 0) {
+      pushVoiceHealth({ kind: "playback.stop", ok: false, detail: cause });
+    }
     this.player.stop();
     this.wasmTts?.cancelPending?.();
     // the gate drops at barge-in, not at drain: the utterance that
@@ -617,7 +669,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.muted = muted;
     this.capture?.setMuted(muted);
     if (muted) {
-      this.interrupt();
+      this.interrupt("mute");
     }
   }
 
@@ -647,7 +699,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     } catch {
       // teardown must not throw
     }
-    this.interrupt();
+    this.interrupt("stop");
     this.releaseAnchor();
     this.wasmTts?.dispose();
     this.wasmTts = null;

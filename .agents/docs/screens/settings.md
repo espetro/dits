@@ -84,10 +84,12 @@ runtime, api flavor) only appear in the advanced pane.
 - Voice & microphone pane: mic picker (MicSelector, `di.devices.mic`),
   "understands you with" stt select (on this device | browser
   built-in), "answers you with" tts select (+ "your own service" only
-  when profile.tts exists), a models status row (installed size /
-  downloading % / not downloaded / failed) linking to downloads, and a
-  test call row that says hello through the resolved tts engine then
-  runs a read-aloud stt capture for the mic check. Picks persist to
+  when profile.tts exists), a test voice row that plays a localized
+  preset phrase through the resolved tts engine via PcmPlayer (shows
+  synth ms, failure toast on error), a models status row (installed
+  size / downloading % / not downloaded / failed) linking to
+  downloads, and a test call row that says hello through the resolved
+  tts engine then runs a read-aloud stt capture for the mic check. Picks persist to
   `di.voice.sttEngine`/`di.voice.ttsEngine`.
 - Consent is point-of-need, never silent: `requestVoiceConsent()` arms
   the root-mounted VoiceConsentDialog via the `$voiceConsentPrompt`

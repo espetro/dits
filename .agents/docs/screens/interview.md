@@ -131,6 +131,11 @@ mobile) stacks, top to bottom:
     interrupt fires the gate drops immediately, so the barge-in utterance's
     own final reaches the turn. With no vad frame-prob feed the behavior is
     the previous hard gate; typed input and mute always interrupt.
+  - Voice health (`lib/voice/health.ts`): a capped `$voiceHealth` event
+    ring (engine.boot ok/fail + ms, worker.error, stt.firstPartial latency,
+    stt.feed/flush failures, tts.speak ms per utterance,
+    playback.gap/drained/stop with cause, gate decisions with vad prob)
+    mirrored to `window.voiceHealth` in dev for pipeline observability.
 - **On-device voice (client-only)**: first browser-mode entry arms the
   root-mounted `VoiceConsentDialog` via `requestVoiceConsent()`
   (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models

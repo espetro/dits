@@ -141,9 +141,9 @@ export function startLiveStt(handlers: {
 }
 
 /** In-browser TTS test: resolve on `end`, reject on `error` or timeout. */
-export function testBrowserTts(): Promise<void> {
+export function testBrowserTts(text = "hello"): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const utterance = new SpeechSynthesisUtterance("hello");
+    const utterance = new SpeechSynthesisUtterance(text);
     const timer = setTimeout(() => {
       speechSynthesis.cancel();
       resolve();

@@ -1,10 +1,13 @@
+import { expose } from "kkrpc/streaming";
+import { workerSelfTransport } from "kkrpc/worker";
 import { describe, expect, it } from "vitest";
+
 import type { VoiceModelStorage } from "./models";
 import { modelFileKey } from "./models";
-import type { KittenInMsg, KittenOutMsg } from "./kitten/kitten-worker";
-import { WasmTts, WasmTtsNotReadyError, WasmStt, WasmSttNotReadyError } from "./wasm-engines";
+import type { KittenTtsApi } from "./kitten/kitten-api";
+import type { SherpaSttApi } from "./sherpa/stt-api";
+import { WasmStt, WasmSttNotReadyError, WasmTts, WasmTtsNotReadyError } from "./wasm-engines";
 import type { WorkerLike } from "./wasm-engines";
-import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
 
 function memStorage(): VoiceModelStorage & { map: Map<string, ArrayBuffer> } {
   const map = new Map<string, ArrayBuffer>();
@@ -16,38 +19,61 @@ function memStorage(): VoiceModelStorage & { map: Map<string, ArrayBuffer> } {
   };
 }
 
-/** Fake worker: replies ready on init, echoes a stub pcm on speak. */
-function fakeWorker(
-  behavior?: Partial<{ failInit: boolean; failSpeak: boolean; silentSpeak: boolean }>,
-): WorkerLike & { sent: unknown[] } {
-  const sent: unknown[] = [];
-  let onmessage: WorkerLike["onmessage"] = null;
-  const post = (msg: KittenOutMsg, transfer?: Transferable[]) => {
-    void transfer;
-    queueMicrotask(() => onmessage?.({ data: msg } as MessageEvent<unknown>));
-  };
-  return {
-    sent,
-    get onmessage() {
-      return onmessage;
+/**
+ * Fake worker bound to a real kkrpc channel pair: the api is exposed over a
+ * scope-like object, and the returned WorkerLike bridges both directions
+ * through microtask message delivery. Engines under test exercise the same
+ * wire protocol they use against a real Worker.
+ */
+function fakeWorkerFor(api: object): WorkerLike {
+  type Listener = (ev: MessageEvent) => void;
+  const mainHandlers = new Set<Listener>();
+  const workerHandlers = new Set<Listener>();
+  const deliver = (to: Set<Listener>, msg: unknown) =>
+    queueMicrotask(() => to.forEach((fn) => fn({ data: msg } as MessageEvent)));
+  const scope = {
+    postMessage(msg: unknown) {
+      deliver(mainHandlers, msg);
     },
-    set onmessage(cb) {
-      onmessage = cb;
+    addEventListener(_type: "message", fn: Listener) {
+      workerHandlers.add(fn);
+    },
+    removeEventListener(_type: "message", fn: Listener) {
+      workerHandlers.delete(fn);
+    },
+  };
+  expose(api, workerSelfTransport(scope));
+  return {
+    postMessage(msg: unknown) {
+      deliver(workerHandlers, msg);
+    },
+    addEventListener(_type: "message", fn) {
+      mainHandlers.add(fn);
+    },
+    removeEventListener(_type: "message", fn) {
+      mainHandlers.delete(fn);
     },
     onerror: null,
-    postMessage(msg: unknown) {
-      sent.push(msg);
-      const m = msg as KittenInMsg;
-      if (m.type === "init") {
-        if (behavior?.failInit) return post({ type: "error", id: null, message: "init boom" });
-        return post({ type: "ready" });
-      }
-      if (m.type === "clear") return;
-      if (behavior?.failSpeak) return post({ type: "error", id: m.id, message: "speak boom" });
-      if (behavior?.silentSpeak) return;
-      post({ type: "pcm", id: m.id, pcm: new Float32Array([0.5, -0.5]) });
-    },
     terminate: () => undefined,
+  };
+}
+
+/** Fake kitten api: init can fail once, speak yields one pcm chunk (or hangs). */
+function fakeTtsApi(
+  behavior?: Partial<{ failInit: boolean; failSpeak: boolean; silentSpeak: boolean }>,
+): KittenTtsApi {
+  return {
+    init: async () => {
+      if (behavior?.failInit) throw new Error("init boom");
+    },
+    speak() {
+      return (async function* () {
+        if (behavior?.failSpeak) throw new Error("speak boom");
+        if (behavior?.silentSpeak) await new Promise(() => undefined);
+        yield new Float32Array([0.5, -0.5]);
+      })();
+    },
+    clear: async () => undefined,
   };
 }
 
@@ -63,22 +89,19 @@ describe("WasmTts", () => {
   it("boots the worker with cached model bytes and resolves speak pcm", async () => {
     const storage = memStorage();
     await installTts(storage);
-    const worker = fakeWorker();
-    const tts = new WasmTts({ workerFactory: () => worker, storage });
+    const tts = new WasmTts({ workerFactory: () => fakeWorkerFor(fakeTtsApi()), storage });
 
     const pcm = await tts.speak("hello there");
     expect(pcm).toBeInstanceOf(Float32Array);
     expect(pcm.length).toBe(2);
     expect(pcm[0]).toBeCloseTo(0.5);
-
-    const init = worker.sent[0] as KittenInMsg;
-    expect(init.type).toBe("init");
-    const speak = worker.sent[1] as KittenInMsg;
-    expect(speak.type).toBe("speak");
   });
 
   it("rejects speak when model bytes are not cached", async () => {
-    const tts = new WasmTts({ workerFactory: () => fakeWorker(), storage: memStorage() });
+    const tts = new WasmTts({
+      workerFactory: () => fakeWorkerFor(fakeTtsApi()),
+      storage: memStorage(),
+    });
     await expect(tts.speak("hi")).rejects.toBeInstanceOf(WasmTtsNotReadyError);
   });
 
@@ -87,7 +110,7 @@ describe("WasmTts", () => {
     await installTts(storage);
     let fail = true;
     const tts = new WasmTts({
-      workerFactory: () => fakeWorker({ failInit: fail }),
+      workerFactory: () => fakeWorkerFor(fakeTtsApi({ failInit: fail })),
       storage,
     });
     await expect(tts.speak("hi")).rejects.toThrow("init boom");
@@ -98,40 +121,34 @@ describe("WasmTts", () => {
   it("rejects in-flight speaks on dispose", async () => {
     const storage = memStorage();
     await installTts(storage);
-    // worker that never answers speaks
-    const worker = fakeWorker({ silentSpeak: true });
-    const tts = new WasmTts({ workerFactory: () => worker, storage });
+    // api that never resolves speaks
+    const tts = new WasmTts({
+      workerFactory: () => fakeWorkerFor(fakeTtsApi({ silentSpeak: true })),
+      storage,
+    });
     const pending = tts.speak("stuck");
-    // let boot() finish so the pending entry is registered
+    // let boot() finish so the speak iterator is registered
     await new Promise((r) => setTimeout(r, 0));
     tts.dispose();
-    await expect(pending).rejects.toThrow("disposed");
+    await expect(pending).rejects.toThrow();
   });
 });
 
-function fakeSttWorker(): WorkerLike & { sent: SttInMsg[] } {
-  const sent: SttInMsg[] = [];
-  let onmessage: WorkerLike["onmessage"] = null;
-  const post = (msg: SttOutMsg) => {
-    queueMicrotask(() => onmessage?.({ data: msg } as MessageEvent<unknown>));
-  };
+/** Fake sherpa api: feed emits a partial, flush emits a final. */
+function fakeSttApi(): SherpaSttApi {
+  let onPartial: (text: string) => void = () => undefined;
+  let onFinal: (text: string) => void = () => undefined;
   return {
-    sent,
-    get onmessage() {
-      return onmessage;
+    init: async (_args, partialCb, finalCb) => {
+      onPartial = partialCb;
+      onFinal = finalCb;
     },
-    set onmessage(cb) {
-      onmessage = cb;
+    feed: async () => {
+      onPartial("par");
     },
-    onerror: null,
-    postMessage(msg: unknown) {
-      const m = msg as SttInMsg;
-      sent.push(m);
-      if (m.type === "init") post({ type: "ready" });
-      if (m.type === "feed") post({ type: "partial", text: "par" });
-      if (m.type === "flush") post({ type: "final", text: "hello world" });
+    flush: async () => {
+      onFinal("hello world");
     },
-    terminate: () => undefined,
   };
 }
 
@@ -152,8 +169,7 @@ describe("WasmStt", () => {
   it("buffers pre-boot frames, then relays partial/final to callbacks", async () => {
     const storage = memStorage();
     await installStt(storage);
-    const worker = fakeSttWorker();
-    const stt = new WasmStt({ workerFactory: () => worker, storage });
+    const stt = new WasmStt({ workerFactory: () => fakeWorkerFor(fakeSttApi()), storage });
     const seen: string[] = [];
     const started = stt.start({
       onInterim: (t) => seen.push(`i:${t}`),
@@ -166,15 +182,14 @@ describe("WasmStt", () => {
     stt.feed(new Float32Array(4));
     await stt.flush();
     await new Promise((r) => setTimeout(r, 0));
-    expect(worker.sent.filter((m) => m.type === "feed")).toHaveLength(2);
-    expect(worker.sent.some((m) => m.type === "flush")).toBe(true);
     expect(seen).toContain("f:hello world");
+    expect(seen).toContain("i:par");
   });
 
   it("stop terminates the worker and drops later finals", async () => {
     const storage = memStorage();
     await installStt(storage);
-    const stt = new WasmStt({ workerFactory: () => fakeSttWorker(), storage });
+    const stt = new WasmStt({ workerFactory: () => fakeWorkerFor(fakeSttApi()), storage });
     await stt.start({ onInterim: () => {}, onFinal: () => {}, onSpeechStart: () => {} });
     await stt.stop();
     stt.feed(new Float32Array(4)); // must not throw

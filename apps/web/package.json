@@ -45,6 +45,7 @@
     "cn": "^0.2.5",
     "codemirror": "^6",
     "jszip": "3.10.1",
+    "kkrpc": "2.1.0",
     "lucide-react": "^0.550",
     "nanoid": "^6.0.1",
     "nanostores": "^1",

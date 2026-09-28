@@ -58,7 +58,14 @@ interface QueuedChunk {
  * running playhead. write() only enqueues, so the WS receive path never
  * blocks on audio.
  */
-export function createPcmPlayer(opts: { createContext?: () => AudioContextLike } = {}): PcmPlayer {
+export interface PcmPlayerOpts {
+  /** test seam: fake AudioContext */
+  createContext?: () => AudioContextLike;
+  /** playback-starvation signal: gap ms when a chunk arrives after the queue drained */
+  onGap?: (gapMs: number) => void;
+}
+
+export function createPcmPlayer(opts: PcmPlayerOpts = {}): PcmPlayer {
   const ctx =
     opts.createContext?.() ??
     new (globalThis.AudioContext as unknown as new (o?: {
@@ -68,6 +75,7 @@ export function createPcmPlayer(opts: { createContext?: () => AudioContextLike }
     });
 
   let playhead = 0;
+  let playedOnce = false;
   let drainedCb: (() => void) | null = null;
   const active = new Set<AudioBufferSourceNodeLike>();
   // small pending queue: chunks written while a gap already exists are
@@ -77,10 +85,14 @@ export function createPcmPlayer(opts: { createContext?: () => AudioContextLike }
   function scheduleNext() {
     while (pending.length > 0) {
       const { source, buffer } = pending.shift()!;
+      // playback starved: the queue drained and the next chunk arrives late
+      const gap = ctx.currentTime - playhead;
+      if (playedOnce && gap > 0.01) opts.onGap?.(Math.round(gap * 1000));
       const at = Math.max(playhead, ctx.currentTime);
       playhead = at + buffer.duration;
       source.start(at);
       active.add(source);
+      playedOnce = true;
     }
   }
 
