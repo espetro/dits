@@ -2,12 +2,13 @@ import { defineConfig, type Plugin } from "vite";
 import { readFileSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import Icons from "unplugin-icons/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
 // Inlined literal (not imported from stores/session.ts): that module also
 // exports persistentAtom-backed stores which touch localStorage at import
 // time, unsafe in this Node-only config context.
-const LOCALES = ["en", "de", "es", "fr", "ja", "pt-BR", "zh-CN", "ko", "it", "ar"] as const;
+const LOCALES = ["en", "de", "es", "fr", "ja", "pt-br", "zh-cn", "ko", "it", "ar"] as const;
 
 export default defineConfig({
   plugins: [
@@ -50,6 +51,9 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
+    // flag icons for the locale switcher — lucide ships no country flags.
+    // resolves `~icons/circle-flags/<iso>` from @iconify-json/circle-flags.
+    Icons({ compiler: "jsx", jsx: "react" }),
   ],
   // the shadcn cli emits cross-imports as the literal components.json alias
   // (`src/components/vendor/x`); resolve `src/` to the app src dir so vendored

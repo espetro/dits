@@ -3,6 +3,7 @@ import { AlignLeft, ArrowRight, Mic, X } from "lucide-react";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { ReactNode } from "react";
 import { Reveal } from "./reveal";
+import { LocaleSwitcher } from "./locale-switcher";
 import { useLocale, withLocale } from "../lib/locale-href";
 
 const IS_PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE === "1";
@@ -38,7 +39,9 @@ function PeekWave() {
  * Fraunces-black headline with a persimmon italic emphasis word, one-line sub,
  * single persimmon CTA) above a miniature of the interview screen that runs
  * below the fold by design. The peek is purely presentational (role="img") —
- * static mock content, every string from the locale files.
+ * static mock content, every string from the locale files. A fixed
+ * LocaleSwitcher pill sits bottom-right (inline-end so rtl mirrors it), level
+ * with the peek's bottom edge.
  */
 export function LandingPage() {
   const locale = useLocale();
@@ -189,6 +192,9 @@ export function LandingPage() {
           </div>
         </Reveal>
       </main>
+      <div className="fixed bottom-6 end-6 z-30">
+        <LocaleSwitcher />
+      </div>
     </div>
   );
 }

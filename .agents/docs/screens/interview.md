@@ -131,7 +131,9 @@ mobile) stacks, top to bottom:
   and closes when muted/inactive.
 - Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
   no-speech hint focuses the composer (it is always mounted now — no rail or
-  sheet to open).
+  sheet to open). Transcript turn tags (`speaker · source`) render via
+  `turnTag`/`transcript.*` keys; the error toast description maps `errors.*`
+  codes via `codeMessage`, never raw driver text.
 - **Client-only runtime** (ADR-0003): OPFS-backed session/turns,
   `$clientTurns` rehydration, browser driver agent loop — all unchanged.
 - **Ended-session re-entry**: a `finished`/`reported`/`discarded` session

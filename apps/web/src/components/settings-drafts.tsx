@@ -10,6 +10,7 @@ import { isDemoLlm } from "../lib/demo-llm";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
+import { DiError, codeMessage, errorDetail } from "../lib/errors";
 import { useSsrStore } from "../lib/ssr";
 import { LLM_SMOKE_TEST_TIMEOUT_MS } from "../lib/timeouts";
 
@@ -212,7 +213,7 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
       } catch (err) {
         setTestState((prev) => ({
           ...prev,
-          llm: { status: "err", message: err instanceof Error ? err.message : String(err) },
+          llm: { status: "err", message: errorDetail(intl, err) },
         }));
       } finally {
         setTesting(null);
@@ -245,12 +246,12 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
       liveStt.current?.stop();
       liveStt.current = startLiveStt({
         onText: (text) => setSttOutput(text),
-        onError: (message) => {
+        onError: (code) => {
           liveStt.current = null;
           setTesting(null);
           setTestState((prev) => ({
             ...prev,
-            stt: { status: "err", message },
+            stt: { status: "err", message: codeMessage(intl, code) },
           }));
         },
         timeoutMs: 15_000,
@@ -316,7 +317,7 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
             },
             "hello",
           );
-          if (pcm.length === 0) throw new Error("empty audio");
+          if (pcm.length === 0) throw new DiError("tts.empty", undefined, "empty audio");
           setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
         }
       } else {
@@ -326,7 +327,7 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
     } catch (err) {
       setTestState((prev) => ({
         ...prev,
-        [key]: { status: "err", message: err instanceof Error ? err.message : String(err) },
+        [key]: { status: "err", message: errorDetail(intl, err) },
       }));
     } finally {
       setTesting(null);

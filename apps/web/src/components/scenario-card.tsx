@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Button } from "./vendor/button";
 import { Label } from "./vendor/label";
 import { RadioGroupItem } from "./vendor/radio-group";
@@ -9,8 +9,8 @@ import type { SessionTools } from "@di/shared";
 /** One setup scenario (p3): narrative + goal checklist + toolset preview + start CTA. */
 export interface Scenario {
   id: string;
-  /** preset text filled into the shared prompt textarea */
-  prompt: string;
+  /** react-intl key resolved into the shared prompt textarea (custom has none) */
+  promptKey?: string;
   /** number of localized `setup.scenario.<id>.goalN` lines rendered */
   goalCount: number;
   /** toolset seeded into session.tools on start */
@@ -27,6 +27,7 @@ interface Props {
  *  body selects; the start CTA is a real button sibling (no nested
  *  interactives). Checked state styles the shell via `has-[]`. */
 export function ScenarioCard({ scenario, busy, onStart }: Props) {
+  const intl = useIntl();
   const { id } = scenario;
   const titleId = `scenario-${id}-title`;
   const descId = `scenario-${id}-desc`;
@@ -70,7 +71,7 @@ export function ScenarioCard({ scenario, busy, onStart }: Props) {
             return (
               <span
                 key={toolId}
-                title={toolId}
+                title={intl.formatMessage({ id: spec.labelKey })}
                 className="inline-flex size-6 items-center justify-center rounded-full bg-cream ring-1 ring-hairline"
               >
                 <Icon className="size-3 text-espresso-soft" aria-hidden="true" />

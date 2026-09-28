@@ -3,6 +3,7 @@ import { VoiceModelManifestSchema } from "@di/shared";
 import type { VoiceModelFile, VoiceModelManifest } from "@di/shared";
 import { $voiceDownload } from "../../stores/voice";
 import type { VoiceDownloadState } from "../../stores/voice";
+import { DiError, errorCode } from "../errors";
 
 /**
  * On-device voice model pipeline: manifest -> download (progress + sha256)
@@ -153,7 +154,12 @@ function opfsImpl(): VoiceModelStorage | null {
 
 export function defaultVoiceModelStorage(): VoiceModelStorage {
   const impl = cacheStorageImpl() ?? opfsImpl();
-  if (!impl) throw new Error("no persistent storage api (caches/opfs) available");
+  if (!impl)
+    throw new DiError(
+      "models.noStorage",
+      undefined,
+      "no persistent storage api (caches/opfs) available",
+    );
   return impl;
 }
 
@@ -163,7 +169,12 @@ export async function loadVoiceModelManifest(
   const base = resolveVoiceModelsBase();
   if (!base) return DEFAULT_VOICE_MODEL_MANIFEST;
   const res = await fetchImpl(`${base.replace(/\/+$/, "")}/manifest.json`);
-  if (!res.ok) throw new Error(`voice model manifest fetch failed: ${res.status}`);
+  if (!res.ok)
+    throw new DiError(
+      "models.manifest",
+      { status: res.status },
+      `voice model manifest fetch failed: ${res.status}`,
+    );
   return v.parse(VoiceModelManifestSchema, await res.json());
 }
 
@@ -200,7 +211,7 @@ export async function downloadVoiceModels(opts: VoiceDownloadOptions = {}): Prom
   const files: { modelId: string; version: string; file: VoiceModelFile }[] = [];
   for (const id of ids) {
     const entry = manifest.models[id];
-    if (!entry) throw new Error(`unknown voice model: ${id}`);
+    if (!entry) throw new DiError("models.unknown", { id }, `unknown voice model: ${id}`);
     for (const file of entry.files) files.push({ modelId: id, version: entry.version, file });
   }
   const bytesTotal = files.reduce((sum, f) => sum + f.file.size, 0);
@@ -223,21 +234,32 @@ export async function downloadVoiceModels(opts: VoiceDownloadOptions = {}): Prom
       const res = await doFetch(resolveUrl(file.url, resolveVoiceModelsBase()), {
         signal: opts.signal,
       });
-      if (!res.ok) throw new Error(`download ${file.path} failed: ${res.status}`);
+      if (!res.ok)
+        throw new DiError(
+          "models.download",
+          { status: res.status },
+          `download ${file.path} failed: ${res.status}`,
+        );
       const bytes = await res.arrayBuffer();
       if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
       if (bytes.byteLength !== file.size) {
-        throw new Error(`download ${file.path} size ${bytes.byteLength} != manifest ${file.size}`);
+        throw new DiError(
+          "models.size",
+          undefined,
+          `download ${file.path} size ${bytes.byteLength} != manifest ${file.size}`,
+        );
       }
       const hex = await sha256Hex(bytes);
-      if (hex !== file.sha256) throw new Error(`sha256 mismatch for ${file.path}`);
+      if (hex !== file.sha256)
+        throw new DiError("models.sha256", undefined, `sha256 mismatch for ${file.path}`);
       await storage.put(modelFileKey(modelId, version, file.path), bytes);
       bytesDone += bytes.byteLength;
       report({});
     }
     report({ status: "ready" });
   } catch (err) {
-    report({ status: "error", error: err instanceof Error ? err.message : String(err) });
+    console.error("[voice] model download failed:", err);
+    report({ status: "error", error: errorCode(err) ?? "models.download" });
     throw err;
   }
 }

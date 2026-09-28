@@ -23,10 +23,10 @@
 
 ## Behavior
 
-- Root-route `notFoundComponent`: big `404` in `font-display` (zero in persimmon), friendly copy, localized "back home" link. Returned with HTTP 404 for unknown paths and invalid locale prefixes.
+- Root-route `notFoundComponent`: big `404` in `font-display` (zero in persimmon), friendly copy, localized "back home" link. Returned with HTTP 404 for unknown paths and invalid locale prefixes. Locale codes are lowercase canonical (`pt-br`, `zh-cn`); a legacy mixed-case prefix like `/pt-BR/...` is redirected (replace) to its lowercase form in `{-$locale}`'s beforeLoad, not 404'd.
 - Root-route `errorComponent`: warning icon, localized title, the raw error message in a muted mono block, a "try again" button (calls the boundary `reset`, falling back to router invalidate), and a "back home" link.
 - Both render in place of the route tree, so each wraps itself in its own `IntlProvider` (URL-derived locale, en fallback) via `ErrorShell` in `apps/web/src/routes/__root.tsx`.
-- Locale keys: `error.title` / `error.message` / `error.retry` / `error.home` and `notfound.title` / `notfound.message` / `notfound.home`, with parity across all 10 locales (enforced by `scripts/check-locales.ts`).
+- Locale keys: `error.title` / `error.message` / `error.retry` / `error.home` and `notfound.title` / `notfound.message` / `notfound.home`, with parity across all 10 locales (CI gate: `intl-ai check`; offline fallback `scripts/check-locales.ts`).
 
 ## URL / state
 

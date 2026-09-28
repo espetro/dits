@@ -1,4 +1,5 @@
 import { CAPTURE_SAMPLE_RATE } from "@di/shared/voice";
+import { DiError } from "../errors";
 
 /** ~100ms of mono 16k Float32 samples per worklet message. */
 const FRAME_SAMPLES = Math.floor(CAPTURE_SAMPLE_RATE * 0.1);
@@ -133,7 +134,11 @@ export class MicCaptureImpl implements MicCapture {
       });
     if (ctx.sampleRate !== CAPTURE_SAMPLE_RATE) {
       stream.getTracks().forEach((t) => t.stop());
-      throw new Error(`capture context rate ${ctx.sampleRate} != ${CAPTURE_SAMPLE_RATE}`);
+      throw new DiError(
+        "voice.captureRate",
+        { rate: ctx.sampleRate },
+        `capture context rate ${ctx.sampleRate} != ${CAPTURE_SAMPLE_RATE}`,
+      );
     }
     this.ctx = ctx;
 

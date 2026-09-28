@@ -15,8 +15,14 @@ describe("localeFromPathname", () => {
   it("detects a valid locale prefix", () => {
     expect(localeFromPathname("/es")).toBe("es");
     expect(localeFromPathname("/es/setup")).toBe("es");
-    expect(localeFromPathname("/pt-BR/history")).toBe("pt-BR");
-    expect(localeFromPathname("/zh-CN/report/x")).toBe("zh-CN");
+    expect(localeFromPathname("/pt-br/history")).toBe("pt-br");
+    expect(localeFromPathname("/zh-cn/report/x")).toBe("zh-cn");
+  });
+
+  it("canonicalizes legacy mixed-case prefixes", () => {
+    expect(localeFromPathname("/pt-BR/history")).toBe("pt-br");
+    expect(localeFromPathname("/ZH-CN/report/x")).toBe("zh-cn");
+    expect(localeFromPathname("/ES/setup")).toBe("es");
   });
 
   it("falls back to en for unknown segments", () => {
@@ -34,14 +40,19 @@ describe("withLocale", () => {
   it("prefixes other locales", () => {
     expect(withLocale("es", "/setup")).toBe("/es/setup");
     expect(withLocale("fr", "/")).toBe("/fr");
-    expect(withLocale("pt-BR", "/interview/1")).toBe("/pt-BR/interview/1");
+    expect(withLocale("pt-br", "/interview/1")).toBe("/pt-br/interview/1");
   });
 });
 
 describe("replaceLocale", () => {
   it("swaps the prefix on prefixed paths", () => {
     expect(replaceLocale("/es/setup", "fr")).toBe("/fr/setup");
-    expect(replaceLocale("/fr/interview/abc", "pt-BR")).toBe("/pt-BR/interview/abc");
+    expect(replaceLocale("/fr/interview/abc", "pt-br")).toBe("/pt-br/interview/abc");
+  });
+
+  it("treats a legacy mixed-case segment as a prefix to replace", () => {
+    expect(replaceLocale("/pt-BR/setup", "fr")).toBe("/fr/setup");
+    expect(replaceLocale("/ZH-CN", "en")).toBe("/");
   });
 
   it("drops the prefix when target is en", () => {
@@ -66,7 +77,7 @@ describe("replaceLocale", () => {
   });
 
   it("round-trips through every locale", () => {
-    for (const target of ["en", "es", "fr", "de", "ja", "pt-BR", "zh-CN", "ko", "it", "ar"]) {
+    for (const target of ["en", "es", "fr", "de", "ja", "pt-br", "zh-cn", "ko", "it", "ar"]) {
       expect(replaceLocale("/es/setup", target)).toBe(
         target === "en" ? "/setup" : `/${target}/setup`,
       );

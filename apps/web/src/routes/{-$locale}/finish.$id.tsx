@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLocale, withLocale } from "../../lib/locale-href";
 import { useQuery } from "@tanstack/react-query";
 import { useHydrated, useSsrStore } from "../../lib/ssr";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { getSession, getTurns, updateSessionStatus } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
 import { $effectiveRuntime } from "../../lib/runtime";
@@ -40,6 +40,7 @@ export const Route = createFileRoute("/{-$locale}/finish/$id")({
 
 function Finish() {
   const { id } = Route.useParams();
+  const intl = useIntl();
   const locale = useLocale();
   const navigate = useNavigate();
   const hydrated = useHydrated();
@@ -146,7 +147,7 @@ function Finish() {
             <FormattedMessage id="finish.complete" />
           </p>
           <h1 className="mt-3 break-words font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {session?.title ?? "session"}
+            {session?.title ?? intl.formatMessage({ id: "finish.fallbackTitle" })}
           </h1>
           <p className="mt-2 text-sm text-espresso-soft">
             <FormattedMessage
@@ -207,7 +208,7 @@ function Finish() {
               variant="ghost"
               size="icon"
               onClick={() => setMenuOpen((o) => !o)}
-              aria-label="more transcript formats"
+              aria-label={intl.formatMessage({ id: "finish.moreFormats" })}
               aria-expanded={menuOpen}
               className="absolute right-1.5 top-1.5 h-[calc(100%-0.75rem)] w-10 rounded-full text-espresso-soft duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-cream-deep"
             >

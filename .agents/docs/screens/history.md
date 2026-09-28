@@ -42,3 +42,5 @@ The finish screen's "discard" button also opens this pane
 
 - The pane label is "Previous sessions" (`settings.history` locale key); the
   `history` id is kept for URL continuity.
+- Session status chips are localized via `history.status.<status>` keys
+  (created | interviewing | finished | reported | discarded).

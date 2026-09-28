@@ -1,5 +1,5 @@
 import { History, Settings, SlidersHorizontal } from "lucide-react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { openSettings } from "./settings-nav";
 import { LocaleSwitcher } from "./locale-switcher";
@@ -20,6 +20,7 @@ import {
  * pane via URL search params (?settings=1&pane=…).
  */
 export function UserDropdown() {
+  const intl = useIntl();
   return (
     <>
       <DropdownMenu>
@@ -27,7 +28,7 @@ export function UserDropdown() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="account"
+            aria-label={intl.formatMessage({ id: "a11y.account" })}
             className="size-8 rounded-full bg-card/60 p-0 hover:bg-accent"
           >
             <SlidersHorizontal className="size-4 text-espresso" aria-hidden="true" />

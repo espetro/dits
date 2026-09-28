@@ -43,6 +43,8 @@
 - **Practice weak areas ->** enabled coach CTA: seeds `$draft` with
   `mode: coach` and a report.coachSeed prompt naming the weakest competency,
   then navigates to `/setup` where the user confirms and starts it.
+- Mode badges and the weakest-competency fallback label are localized
+  (`setup.mode.*`, `report.weakestFallback`).
 - Scoring is async (ScoringPoll pattern): the report query fires `POST /v1/sessions/[id]/report`, which generates the report on first call (or returns the stored one — idempotent) and persists it with status `reported`.
 - **Loading state**: spinner with `report.scoring` copy; after 15s swap in
   `report.scoringSlow` ("this can take a minute on free models") so slow

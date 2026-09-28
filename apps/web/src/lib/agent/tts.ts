@@ -1,5 +1,6 @@
 import { TTS_SAMPLE_RATE } from "@di/shared";
 import type { TtsEndpoint } from "@di/shared";
+import { DiError } from "../errors";
 
 /**
  * Client-only TTS: POST ${baseUrl}/v1/audio/speech (OpenAI-compatible) and
@@ -20,7 +21,7 @@ export function decodeWav(bytes: Uint8Array): {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const tag = (off: number, len: number) => String.fromCharCode(...bytes.subarray(off, off + len));
   if (bytes.byteLength < 44 || tag(0, 4) !== "RIFF" || tag(8, 4) !== "WAVE") {
-    throw new Error("not a wav buffer");
+    throw new DiError("tts.wav", undefined, "not a wav buffer");
   }
   let off = 12;
   let channels = 1;
@@ -42,7 +43,7 @@ export function decodeWav(bytes: Uint8Array): {
     }
     off = body + size + (size % 2);
   }
-  if (!data) throw new Error("no 16-bit pcm data chunk in wav");
+  if (!data) throw new DiError("tts.pcm", undefined, "no 16-bit pcm data chunk in wav");
   return { pcm: data, sampleRate, channels };
 }
 
@@ -96,7 +97,7 @@ export async function synthesizeSpeech(
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`tts failed: ${res.status} ${body}`);
+    throw new DiError("tts.endpoint", { status: res.status }, `tts failed: ${res.status} ${body}`);
   }
   const wav = new Uint8Array(await res.arrayBuffer());
   const { pcm, sampleRate, channels } = decodeWav(wav);

@@ -3,6 +3,7 @@ import { ReportSchema, buildReportPrompt } from "@di/shared/report";
 import type { Report, ReportPromptContext } from "@di/shared/report";
 import type { LlmSection } from "@di/shared";
 import { createLlmModel } from "./browser-provider";
+import { DiError } from "../errors";
 
 /**
  * Client-only report generation: one generateObject call against the BYO
@@ -24,7 +25,12 @@ export async function generateReport(
 ): Promise<Report> {
   const { generateObject, jsonSchema } = await import("ai");
   const built = createLlmModel(llm, { fetchImpl });
-  if (!built) throw new Error("in-browser llm engine unsupported in this browser");
+  if (!built)
+    throw new DiError(
+      "llm.unsupported",
+      undefined,
+      "in-browser llm engine unsupported in this browser",
+    );
   const schema = jsonSchema(toJsonSchema(ReportSchema));
   const prompt = buildReportPrompt(ctx);
   try {

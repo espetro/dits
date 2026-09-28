@@ -1,26 +1,32 @@
 name: intl
 
-# Advisory (non-blocking) locale consistency check: key parity with en.json,
-# no empty values, interpolation placeholders in sync.
+# Locale gate: `intl-ai check` fails on missing, stale, or invalid target keys
+# (icu + placeholder-parity checks). Offline — compares locale files against the
+# committed intl-ai.lock.d provenance, no provider needed.
 on:
   push:
     branches: [develop, main]
     paths:
       - "apps/web/src/locales/**"
+      - "intl-ai.toml"
+      - "intl-ai.fill.toml"
       - "scripts/check-locales.ts"
+      - "scripts/flatten-locales.ts"
       - ".github/workflows/intl.yml"
   pull_request:
     paths:
       - "apps/web/src/locales/**"
+      - "intl-ai.toml"
+      - "intl-ai.fill.toml"
       - "scripts/check-locales.ts"
+      - "scripts/flatten-locales.ts"
       - ".github/workflows/intl.yml"
 
 jobs:
-  check-locales:
+  intl-check:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - name: check locale files
-        run: bun run scripts/check-locales.ts
+        run: bunx intl-ai@0.5.0 check

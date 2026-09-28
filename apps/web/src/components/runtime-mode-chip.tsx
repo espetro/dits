@@ -1,4 +1,4 @@
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useSsrStore } from "../lib/ssr";
 
 import type { RuntimeMode } from "@di/shared";
@@ -19,6 +19,7 @@ const MODE_LABELS: Record<RuntimeMode, string> = {
 };
 
 export function RuntimeModeChip() {
+  const intl = useIntl();
   const chosen = useSsrStore($runtimeMode, "server");
   const effective = useSsrStore($effectiveRuntime, "server");
   const reachable = useSsrStore($serverReachable, null);
@@ -28,10 +29,10 @@ export function RuntimeModeChip() {
   return (
     <Button
       variant="outline"
-      aria-label="runtime mode"
+      aria-label={intl.formatMessage({ id: "a11y.runtimeMode" })}
       title={
         degraded && chosen === "server" && reachable === false
-          ? `chosen: ${chosen}, effective: ${effective}`
+          ? intl.formatMessage({ id: "runtime.degradedTitle" }, { chosen, effective })
           : undefined
       }
       onClick={() => openSettings("advanced")}

@@ -1,5 +1,17 @@
 import { useLocation } from "@tanstack/react-router";
+import { useIntl } from "react-intl";
 import { Check, ChevronDown } from "lucide-react";
+import FlagAr from "~icons/circle-flags/sa";
+import FlagDe from "~icons/circle-flags/de";
+import FlagEn from "~icons/circle-flags/us";
+import FlagEs from "~icons/circle-flags/es";
+import FlagFr from "~icons/circle-flags/fr";
+import FlagIt from "~icons/circle-flags/it";
+import FlagJa from "~icons/circle-flags/jp";
+import FlagKo from "~icons/circle-flags/kr";
+import FlagPtBr from "~icons/circle-flags/br";
+import FlagZhCn from "~icons/circle-flags/cn";
+import type { ComponentType, SVGProps } from "react";
 
 import { LOCALES } from "../stores/session";
 import { replaceLocale, useLocale } from "../lib/locale-href";
@@ -14,11 +26,15 @@ import {
 /**
  * Pill dropdown language switcher, ported from brioso's LanguageSwitcher.
  *
- * Trigger shows the current locale flag + native name; the menu has one row
+ * Trigger shows a circular flag icon + the native name; the menu has one row
  * per locale navigating to the same path under the target locale prefix,
  * preserving pathname (search/hash come from the router location but the app
  * doesn't use them, so only the pathname is rewritten). Active row carries a
  * checkmark.
+ *
+ * Flags are `circle-flags` SVGs via unplugin-icons (lucide ships no country
+ * flags) — not flag emoji, which need a color-emoji flag font that Windows
+ * and some Linux installs don't ship.
  *
  * Rows are plain `<a>` elements, deliberately not TanStack's `<Link>` (same
  * reasoning as brioso): our hrefs are plain optional-prefix paths so Link
@@ -27,19 +43,40 @@ import {
  */
 
 export const LOCALE_LABELS = {
-  en: { flag: "🇺🇸", native: "English" },
-  de: { flag: "🇩🇪", native: "Deutsch" },
-  es: { flag: "🇪🇸", native: "Español" },
-  fr: { flag: "🇫🇷", native: "Français" },
-  ja: { flag: "🇯🇵", native: "日本語" },
-  "pt-BR": { flag: "🇧🇷", native: "Português (Brasil)" },
-  "zh-CN": { flag: "🇨🇳", native: "简体中文" },
-  ko: { flag: "🇰🇷", native: "한국어" },
-  it: { flag: "🇮🇹", native: "Italiano" },
-  ar: { flag: "🇸🇦", native: "العربية" },
-} as const satisfies Record<(typeof LOCALES)[number], { flag: string; native: string }>;
+  en: { native: "English" },
+  de: { native: "Deutsch" },
+  es: { native: "Español" },
+  fr: { native: "Français" },
+  ja: { native: "日本語" },
+  "pt-br": { native: "Português (Brasil)" },
+  "zh-cn": { native: "简体中文" },
+  ko: { native: "한국어" },
+  it: { native: "Italiano" },
+  ar: { native: "العربية" },
+} as const satisfies Record<(typeof LOCALES)[number], { native: string }>;
+
+type FlagIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+export const LOCALE_FLAGS: Record<(typeof LOCALES)[number], FlagIcon> = {
+  en: FlagEn,
+  de: FlagDe,
+  es: FlagEs,
+  fr: FlagFr,
+  ja: FlagJa,
+  "pt-br": FlagPtBr,
+  "zh-cn": FlagZhCn,
+  ko: FlagKo,
+  it: FlagIt,
+  ar: FlagAr,
+};
+
+function LocaleFlag({ locale }: { locale: (typeof LOCALES)[number] }) {
+  const Flag = LOCALE_FLAGS[locale];
+  return <Flag className="size-5 flex-none rounded-full" aria-hidden="true" />;
+}
 
 export function LocaleSwitcher({ className = "" }: { className?: string }) {
+  const intl = useIntl();
   const { pathname } = useLocation();
   const locale = useLocale() as (typeof LOCALES)[number];
 
@@ -48,13 +85,13 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          aria-label="Language"
+          aria-label={intl.formatMessage({ id: "a11y.language" })}
           className={
             "gap-2 rounded-full border-hairline bg-white px-3 py-1.5 text-xs font-medium text-espresso-soft hover:border-persimmon/50 hover:bg-white hover:text-espresso " +
             className
           }
         >
-          <span aria-hidden="true">{LOCALE_LABELS[locale].flag}</span>
+          <LocaleFlag locale={locale} />
           {LOCALE_LABELS[locale].native}
           <ChevronDown className="size-3.5 text-espresso-soft" aria-hidden="true" />
         </Button>
@@ -73,7 +110,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
                 aria-current={isActive ? "true" : undefined}
                 lang={l}
               >
-                <span aria-hidden="true">{label.flag}</span>
+                <LocaleFlag locale={l} />
                 <span className="font-medium text-espresso">{label.native}</span>
                 {isActive && <Check className="ml-auto size-4 text-persimmon" aria-hidden="true" />}
               </a>

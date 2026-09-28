@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useIntl } from "react-intl";
 import { Github } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -15,6 +16,7 @@ import { UserDropdown } from "./user-dropdown";
  * dropdown.
  */
 export function AppHeader({ title }: { title?: ReactNode }) {
+  const intl = useIntl();
   const locale = useLocale();
   return (
     <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-4 pt-8 md:px-8">
@@ -33,7 +35,7 @@ export function AppHeader({ title }: { title?: ReactNode }) {
           href="https://github.com/espetro/dits"
           target="_blank"
           rel="noreferrer"
-          aria-label="GitHub"
+          aria-label={intl.formatMessage({ id: "a11y.github" })}
           className="flex h-8 w-8 items-center justify-center rounded-full text-espresso-soft transition-fluid hover:text-espresso"
         >
           <Github className="h-4 w-4" aria-hidden="true" />

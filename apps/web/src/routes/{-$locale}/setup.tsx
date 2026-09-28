@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { $draft, $interviewLanguage } from "../../stores/session";
 import { $micDeviceId } from "../../stores/devices";
 import { createSession, listSessions, uploadDocuments } from "../../lib/api";
-import { MicSelector } from "../../components/vendor/mic-selector";
+import { MicSelector } from "../../components/mic-selector";
 import { Button } from "../../components/vendor/button";
 import { Textarea } from "../../components/vendor/textarea";
 import { RadioGroup } from "../../components/vendor/radio-group";
@@ -40,6 +40,8 @@ import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 import { ScenarioCard } from "../../components/scenario-card";
 import type { Scenario } from "../../components/scenario-card";
+import { intlFor } from "../../locales/i18n";
+import { errorDetail } from "../../lib/errors";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 
 const MAX_FILES = 10;
@@ -47,39 +49,40 @@ const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 const ACCEPTED = [".pdf", ".md", ".markdown", ".txt", ".docx"];
 
 export const Route = createFileRoute("/{-$locale}/setup")({
-  head: () => ({ meta: [{ title: "setup — di" }] }),
+  head: ({ params }) => ({
+    meta: [{ title: intlFor(params.locale ?? "en").formatMessage({ id: "meta.title.setup" }) }],
+  }),
   component: Setup,
 });
 
 const SCENARIOS: Scenario[] = [
   {
     id: "sysDesign",
-    prompt: "Run a system design interview. Focus on scaling, caching and tradeoff reasoning.",
+    promptKey: "setup.scenario.sysDesign.prompt",
     goalCount: 3,
     tools: { editor: "", whiteboard: "" },
   },
   {
     id: "behavioral",
-    prompt: "Run a behavioral interview using the STAR method. Probe for specifics.",
+    promptKey: "setup.scenario.behavioral.prompt",
     goalCount: 3,
     tools: { editor: "" },
   },
   {
     id: "frontend",
-    prompt: "Run a frontend interview. Mix of component design and JS fundamentals.",
+    promptKey: "setup.scenario.frontend.prompt",
     goalCount: 3,
     tools: { editor: "" },
   },
   {
     id: "ml",
-    prompt: "Run a machine learning interview. Model choice, evaluation, and data hygiene.",
+    promptKey: "setup.scenario.ml.prompt",
     goalCount: 3,
     tools: { editor: "" },
   },
   {
     id: "custom",
     // custom keeps whatever the candidate typed — the textarea drives it
-    prompt: "",
     goalCount: 0,
     tools: { ...DEFAULT_SESSION_TOOLS },
   },
@@ -88,13 +91,15 @@ const SCENARIOS: Scenario[] = [
 const DURATIONS = [20, 30, 45, 60];
 const TONES = ["friendly", "challenging", "neutral"];
 const DIFFICULTIES = ["easy", "medium", "hard"];
-const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-BR", "ja", "ko", "zh-CN", "ar"];
+const LANGUAGES = ["en", "es", "fr", "de", "it", "pt-br", "ja", "ko", "zh-cn", "ar"];
 
 const fieldHeadingClass = "text-[10px] uppercase tracking-[0.2em] font-medium text-espresso-soft";
 
 function Setup() {
   const { locale } = useLocaleNav();
   const intl = useIntl();
+  const scenarioPrompt = (scenario?: Scenario) =>
+    scenario?.promptKey ? intl.formatMessage({ id: scenario.promptKey }) : "";
   const draft = useStore($draft);
   const micDeviceId = useSsrStore($micDeviceId, "");
   const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
@@ -170,13 +175,17 @@ function Setup() {
     setError(null);
     if (scenario) {
       setSelectedId(scenario.id);
-      if (scenario.prompt) $draft.set({ ...draft, prompt: scenario.prompt });
+      const preset = scenarioPrompt(scenario);
+      if (preset) $draft.set({ ...draft, prompt: preset });
     }
     const tools =
       scenario?.tools ?? SCENARIOS.find((s) => s.id === selectedId)?.tools ?? DEFAULT_SESSION_TOOLS;
     const prompt = buildBriefWith(scenario);
     try {
-      const title = scenario?.id || draft.title || "practice session";
+      const title =
+        (scenario && scenario.id !== "custom"
+          ? intl.formatMessage({ id: `setup.preset.${scenario.id}` })
+          : draft.title) || intl.formatMessage({ id: "setup.defaultTitle" });
       if (clientOnly) {
         resetClientSession();
         const session = await createClientSession({
@@ -210,7 +219,7 @@ function Setup() {
           await uploadDocuments(session.id, files);
         } catch (err) {
           // ingestion failure must not block starting the interview
-          setError(err instanceof Error ? err.message : "upload failed");
+          setError(errorDetail(intl, err));
         }
       }
       navigate({
@@ -226,7 +235,7 @@ function Setup() {
           description: intl.formatMessage({ id: "setup.needsProvider" }),
         });
       } else {
-        setError(err instanceof Error ? err.message : String(err));
+        setError(errorDetail(intl, err));
       }
     } finally {
       setBusy(false);
@@ -236,7 +245,7 @@ function Setup() {
   // Card starts use the scenario's prompt (the textarea is already synced,
   // but build it off the card value so it is right even pre-sync).
   function buildBriefWith(scenario?: Scenario): string {
-    const base = scenario?.prompt || draft.prompt;
+    const base = scenarioPrompt(scenario) || draft.prompt;
     const knobs = [
       draft.tone !== "friendly" ? `tone: ${draft.tone}` : null,
       draft.difficulty !== "medium" ? `difficulty: ${draft.difficulty}` : null,
@@ -276,7 +285,8 @@ function Setup() {
                 onValueChange={(v) => {
                   setSelectedId(v);
                   const picked = SCENARIOS.find((s) => s.id === v);
-                  if (picked?.prompt) $draft.set({ ...draft, prompt: picked.prompt });
+                  const preset = scenarioPrompt(picked);
+                  if (preset) $draft.set({ ...draft, prompt: preset });
                 }}
                 aria-labelledby="setup-scenario-heading"
                 className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"

@@ -10,6 +10,7 @@ import type { PcmPlayer } from "./pcm-player";
 import { createVadGate } from "./vad";
 import type { VadGate } from "./vad";
 import { WS_OPEN_TIMEOUT_MS } from "../timeouts";
+import { DiError } from "../errors";
 
 /**
  * SpeechDriver: the transport-facing voice interface. Both server-driver
@@ -22,7 +23,11 @@ export interface SpeechDriver {
   setMuted(muted: boolean): void;
   readonly status: "idle" | "connecting" | "connected" | "reconnecting" | "error";
   readonly agentSpeaking: boolean;
-  /** error sink; the route assigns this. readonly in the interface, mutable on impls */
+  /**
+   * Error sink; the route assigns this. Implementations pass a stable code
+   * (`errors.voice.*` key suffix), never user-facing prose — the toast layer
+   * maps it via `codeMessage`. readonly in the interface, mutable on impls.
+   */
   onError: (message: string) => void;
   /** reconnect attempt started after an unexpected close (p0.1) */
   onReconnecting: (attempt: number) => void;
@@ -154,9 +159,7 @@ export class ServerVoiceDriver implements SpeechDriver {
     if (this.stopped) return;
     if (this.reconnectAttempt >= MAX_RECONNECT_ATTEMPTS) {
       this.status = "error";
-      this.onError(
-        "lost the voice connection after several reconnect attempts; the transcript is saved. Press retry to reconnect.",
-      );
+      this.onError("voice.reconnectExhausted");
       return;
     }
     this.reconnectAttempt += 1;
@@ -183,14 +186,14 @@ export class ServerVoiceDriver implements SpeechDriver {
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         ws.close();
-        reject(new Error("voice socket open timed out"));
+        reject(new DiError("voice.socketTimeout"));
       }, WS_OPEN_TIMEOUT_MS);
       const settle = (fn: () => void) => {
         clearTimeout(timeout);
         fn();
       };
       ws.onopen = () => settle(() => resolve());
-      ws.onerror = () => settle(() => reject(new Error("voice socket failed")));
+      ws.onerror = () => settle(() => reject(new DiError("voice.socket")));
       ws.onclose = () => {
         if (this.status === "connected") {
           this.status = "reconnecting";
@@ -276,7 +279,9 @@ export class ServerVoiceDriver implements SpeechDriver {
         this.events.onQuestion?.({ text: msg.question, hints: msg.hints });
         break;
       case "error":
-        this.onError(msg.message);
+        // server error text is english-only detail: log it, surface the code
+        console.error("[voice] server error:", msg.message);
+        this.onError("voice.server");
         break;
     }
   }

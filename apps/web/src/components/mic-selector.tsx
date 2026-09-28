@@ -1,18 +1,17 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
+import { useIntl } from "react-intl";
 import { Check, ChevronsUpDown, Mic, MicOff } from "lucide-react";
 
-import { cn } from "../../lib/utils";
-import { Button } from "./button";
+import { cn } from "../lib/utils";
+import { Button } from "./vendor/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { LiveWaveform } from "./live-waveform";
+} from "./vendor/dropdown-menu";
+import { LiveWaveform } from "./vendor/live-waveform";
 
 export interface AudioDevice {
   deviceId: string;
@@ -37,6 +36,7 @@ export function MicSelector({
   disabled,
   className,
 }: MicSelectorProps) {
+  const intl = useIntl();
   const { devices, loading, error, hasPermission, loadDevices } = useAudioDevices();
   const [selectedDevice, setSelectedDevice] = useState<string>(value || "");
   const [internalMuted, setInternalMuted] = useState(false);
@@ -64,7 +64,9 @@ export function MicSelector({
 
   const currentDevice = devices.find((d) => d.deviceId === selectedDevice) ||
     devices[0] || {
-      label: loading ? "Loading..." : "No microphone",
+      label: intl.formatMessage({
+        id: loading ? "micSelector.loading" : "micSelector.none",
+      }),
       deviceId: "",
     };
 
@@ -116,9 +118,11 @@ export function MicSelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" side="top" className="w-72">
         {loading ? (
-          <DropdownMenuItem disabled>Loading devices...</DropdownMenuItem>
+          <DropdownMenuItem disabled>
+            {intl.formatMessage({ id: "micSelector.loadingDevices" })}
+          </DropdownMenuItem>
         ) : error ? (
-          <DropdownMenuItem disabled>Error: {error}</DropdownMenuItem>
+          <DropdownMenuItem disabled>{intl.formatMessage({ id: error })}</DropdownMenuItem>
         ) : (
           devices.map((device) => (
             <DropdownMenuItem
@@ -127,7 +131,13 @@ export function MicSelector({
               onSelect={(e) => e.preventDefault()}
               className="flex items-center justify-between"
             >
-              <span className="truncate">{device.label}</span>
+              <span className="truncate">
+                {device.label ||
+                  intl.formatMessage(
+                    { id: "micSelector.fallback" },
+                    { id: device.deviceId.slice(0, 8) },
+                  )}
+              </span>
               {selectedDevice === device.deviceId && <Check className="h-4 w-4 flex-shrink-0" />}
             </DropdownMenuItem>
           ))
@@ -146,10 +156,15 @@ export function MicSelector({
                 className="h-8 gap-2"
               >
                 {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                <span className="text-sm">{isMuted ? "Unmute" : "Mute"}</span>
+                <span className="text-sm">
+                  {intl.formatMessage({
+                    id: isMuted ? "micSelector.unmute" : "micSelector.mute",
+                  })}
+                </span>
               </Button>
               <div className="bg-accent ml-auto w-16 overflow-hidden rounded-md p-1.5">
                 <LiveWaveform
+                  aria-label={intl.formatMessage({ id: "micSelector.waveform" })}
                   active={isPreviewActive}
                   deviceId={selectedDevice || defaultDeviceId}
                   mode="static"
@@ -182,8 +197,7 @@ export function useAudioDevices() {
       const audioInputs = deviceList
         .filter((device) => device.kind === "audioinput")
         .map((device) => {
-          let cleanLabel = device.label || `Microphone ${device.deviceId.slice(0, 8)}`;
-          cleanLabel = cleanLabel.replace(/\s*\([^)]*\)/g, "").trim();
+          const cleanLabel = (device.label || "").replace(/\s*\([^)]*\)/g, "").trim();
 
           return {
             deviceId: device.deviceId,
@@ -194,7 +208,7 @@ export function useAudioDevices() {
 
       setDevices(audioInputs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to get audio devices");
+      setError("micSelector.devicesFailed");
       console.error("Error getting audio devices:", err);
     } finally {
       setLoading(false);
@@ -218,8 +232,7 @@ export function useAudioDevices() {
       const audioInputs = deviceList
         .filter((device) => device.kind === "audioinput")
         .map((device) => {
-          let cleanLabel = device.label || `Microphone ${device.deviceId.slice(0, 8)}`;
-          cleanLabel = cleanLabel.replace(/\s*\([^)]*\)/g, "").trim();
+          const cleanLabel = (device.label || "").replace(/\s*\([^)]*\)/g, "").trim();
 
           return {
             deviceId: device.deviceId,
@@ -231,7 +244,7 @@ export function useAudioDevices() {
       setDevices(audioInputs);
       setHasPermission(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to get audio devices");
+      setError("micSelector.devicesFailed");
       console.error("Error getting audio devices:", err);
     } finally {
       setLoading(false);

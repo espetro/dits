@@ -18,6 +18,7 @@ import type {
 } from "@di/shared";
 import type { LanguageModelV3, LanguageModelV4 } from "@ai-sdk/provider";
 import { resolveBrowserLlm } from "./browser-provider";
+import { DiError } from "../errors";
 import type { BrowserModelHandles } from "./browser-provider";
 
 /** Model spec version accepted by ai v7's model union. */
@@ -190,7 +191,11 @@ export class ClientAgent implements TurnRunner {
   ): Promise<ClientAgent> {
     const built = await resolveBrowserLlm(llm, { fetchImpl });
     if (!built) {
-      throw new Error("in-browser llm engine unsupported in this browser");
+      throw new DiError(
+        "llm.unsupported",
+        undefined,
+        "in-browser llm engine unsupported in this browser",
+      );
     }
     // Browser engines construct lazily: load() instantiates the underlying
     // model (and waits for weights to be ready) before the getter is read.

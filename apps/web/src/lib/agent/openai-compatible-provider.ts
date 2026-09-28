@@ -11,6 +11,7 @@ import type {
   LanguageModelV3Usage,
 } from "@ai-sdk/provider";
 import type { ProviderEndpoint } from "@di/shared";
+import { DiError } from "../errors";
 
 /**
  * Minimal OpenAI-compatible LanguageModelV3 provider for client-only mode.
@@ -202,7 +203,11 @@ export function createOpenAiCompatibleModel(
       });
       if (!res.ok || !res.body) {
         const body = await res.text().catch(() => "");
-        throw new Error(`llm chat failed: ${res.status} ${body}`);
+        throw new DiError(
+          "llm.chat",
+          { status: res.status },
+          `llm chat failed: ${res.status} ${body}`,
+        );
       }
 
       const tools = makeToolCallAccumulator();

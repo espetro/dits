@@ -4,7 +4,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Check, ChevronRight, Loader2, X } from "lucide-react";
 
 import { SettingsRow } from "./settings-row";
-import { MicSelector } from "./vendor/mic-selector";
+import { MicSelector } from "./mic-selector";
 import { Textarea } from "./vendor/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 import { Button } from "./vendor/button";
@@ -29,6 +29,7 @@ import {
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { hasBrowserStt, startLiveStt, testBrowserTts } from "../lib/settings-tests";
+import { DiError, codeMessage, errorDetail } from "../lib/errors";
 import { toast } from "sonner";
 
 function fmtMb(bytes: number): string {
@@ -119,7 +120,7 @@ export function VoicePane() {
     try {
       if (engines.tts === "endpoint" && profile?.tts) {
         const pcm = await synthesizeSpeech(profile.tts, "hello");
-        if (pcm.length === 0) throw new Error("empty audio");
+        if (pcm.length === 0) throw new DiError("tts.empty", undefined, "empty audio");
       } else if (engines.tts === "builtin") {
         await testBrowserTts();
       }
@@ -128,7 +129,7 @@ export function VoicePane() {
     } catch (err) {
       setTtsTest({
         status: "err",
-        message: err instanceof Error ? err.message : String(err),
+        message: errorDetail(intl, err),
       });
     }
     if (engines.stt === "builtin") {
@@ -142,9 +143,9 @@ export function VoicePane() {
       liveStt.current?.stop();
       liveStt.current = startLiveStt({
         onText: (text) => setSttOutput(text),
-        onError: (message) => {
+        onError: (code) => {
           liveStt.current = null;
-          setSttTest({ status: "err", message });
+          setSttTest({ status: "err", message: codeMessage(intl, code) });
         },
         timeoutMs: 15_000,
       });
@@ -166,7 +167,14 @@ export function VoicePane() {
         }
       }, 15_500);
     } else {
-      setSttTest(installed?.stt ? { status: "ok" } : { status: "err", message: "not downloaded" });
+      setSttTest(
+        installed?.stt
+          ? { status: "ok" }
+          : {
+              status: "err",
+              message: intl.formatMessage({ id: "settings.voicePane.notInstalled" }),
+            },
+      );
     }
   }
 
@@ -196,7 +204,10 @@ export function VoicePane() {
       }}
     />
   ) : download.status === "error" ? (
-    <FormattedMessage id="settings.voicePane.error" values={{ message: download.error ?? "" }} />
+    <FormattedMessage
+      id="settings.voicePane.error"
+      values={{ message: codeMessage(intl, download.error) }}
+    />
   ) : (
     <FormattedMessage id="settings.voicePane.notInstalled" />
   );

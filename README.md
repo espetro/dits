@@ -14,7 +14,7 @@
 
 ## Try it now
 
-[🇬🇧 en](https://dits.illo.fyi/) · [🇩🇪 de](https://dits.illo.fyi/de) · [🇪🇸 es](https://dits.illo.fyi/es) · [🇫🇷 fr](https://dits.illo.fyi/fr) · [🇯🇵 ja](https://dits.illo.fyi/ja) · [🇧🇷 pt-BR](https://dits.illo.fyi/pt-BR) · [🇨🇳 zh-CN](https://dits.illo.fyi/zh-CN) · [🇰🇷 ko](https://dits.illo.fyi/ko) · [🇮🇹 it](https://dits.illo.fyi/it) · [🇸🇦 ar](https://dits.illo.fyi/ar)
+[🇬🇧 en](https://dits.illo.fyi/) · [🇩🇪 de](https://dits.illo.fyi/de) · [🇪🇸 es](https://dits.illo.fyi/es) · [🇫🇷 fr](https://dits.illo.fyi/fr) · [🇯🇵 ja](https://dits.illo.fyi/ja) · [🇧🇷 pt-br](https://dits.illo.fyi/pt-br) · [🇨🇳 zh-cn](https://dits.illo.fyi/zh-cn) · [🇰🇷 ko](https://dits.illo.fyi/ko) · [🇮🇹 it](https://dits.illo.fyi/it) · [🇸🇦 ar](https://dits.illo.fyi/ar)
 
 ## Set it up with your coding agent
 

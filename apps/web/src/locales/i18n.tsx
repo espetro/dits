@@ -1,5 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
-import { IntlProvider } from "react-intl";
+import { IntlProvider, createIntl, createIntlCache } from "react-intl";
+import type { IntlShape } from "react-intl";
 import type { ReactNode } from "react";
 
 import { LOCALES, RTL_LOCALES } from "../stores/session";
@@ -12,27 +13,58 @@ import fr from "./fr.json";
 import it from "./it.json";
 import ja from "./ja.json";
 import ko from "./ko.json";
-import ptBR from "./pt-BR.json";
-import zhCN from "./zh-CN.json";
+import ptBR from "./pt-br.json";
+import zhCN from "./zh-cn.json";
 
-const MESSAGES: Record<string, Record<string, string>> = {
-  en,
-  de,
-  es,
-  fr,
-  ja,
-  "pt-BR": ptBR,
-  "zh-CN": zhCN,
-  ko,
-  it,
-  ar,
-};
+/** intl-ai `fill` emits nested objects for dotted keys; locale files are flat. */
+function flattenMessages(tree: Record<string, unknown>, prefix = ""): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(tree)) {
+    const id = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === "string") out[id] = value;
+    else if (value && typeof value === "object" && !Array.isArray(value)) {
+      Object.assign(out, flattenMessages(value as Record<string, unknown>, id));
+    }
+  }
+  return out;
+}
+
+// en is spread under every locale: a key missing from a translated file
+// renders English rather than the raw id (intl-ai fills in stages).
+const MESSAGES: Record<string, Record<string, string>> = Object.fromEntries(
+  Object.entries({
+    en,
+    de,
+    es,
+    fr,
+    ja,
+    "pt-br": ptBR,
+    "zh-cn": zhCN,
+    ko,
+    it,
+    ar,
+  }).map(([locale, msgs]) => [locale, { ...flattenMessages(en), ...flattenMessages(msgs) }]),
+);
+
+const intlCache = createIntlCache();
+
+/**
+ * Non-hook IntlShape for route head()/error boundaries — bound to the URL
+ * locale so localized strings work outside React's provider tree.
+ */
+export function intlFor(locale: string): IntlShape {
+  const resolved = MESSAGES[locale] ? locale : "en";
+  return createIntl(
+    { locale: resolved, defaultLocale: "en", messages: MESSAGES[resolved] },
+    intlCache,
+  );
+}
 
 export { localeFromPathname };
 
 /** Returns true when the active locale is written right-to-left (drives html dir). */
 export function useIsRtl(): boolean {
-  return useUrlLocale() in RTL_LOCALE_SET;
+  return RTL_LOCALE_SET.has(useUrlLocale());
 }
 
 const RTL_LOCALE_SET: ReadonlySet<string> = new Set(RTL_LOCALES);

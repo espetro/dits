@@ -6,8 +6,15 @@ import * as React from "react";
 import { useLocale, withLocale } from "../lib/locale-href";
 import { clearClientSessions, listClientSessions } from "../lib/opfs-store";
 import type { Session } from "@di/shared/session";
+import type { IntlShape } from "react-intl";
 import { Button } from "./vendor/button";
 import { Empty, EmptyDescription, EmptyHeader } from "./vendor/empty";
+
+const STATUS_KEYS = new Set(["created", "interviewing", "finished", "reported", "discarded"]);
+
+function statusLabel(intl: IntlShape, status: string): string {
+  return STATUS_KEYS.has(status) ? intl.formatMessage({ id: `history.status.${status}` }) : status;
+}
 
 /**
  * Cached-session list pane (settings -> past interviews). This is user data,
@@ -75,7 +82,7 @@ export function HistoryPane() {
           <span className="min-w-0">
             <span className="block truncate font-medium">{s.title}</span>
             <span className="block text-xs text-muted-foreground">
-              {s.status} · {relative(s.created_at)}
+              {statusLabel(intl, s.status)} · {relative(s.created_at)}
             </span>
           </span>
           <span
@@ -86,7 +93,7 @@ export function HistoryPane() {
                 : "bg-muted text-muted-foreground")
             }
           >
-            {s.status}
+            {statusLabel(intl, s.status)}
           </span>
         </Link>
       ))}

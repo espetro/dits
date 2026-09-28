@@ -1,0 +1,21 @@
+version = 1
+locale_dir = "apps/web/src/locales"
+source = "en"
+targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn"]
+
+
+# `check` is offline; `fill` needs a real provider. This replay stub keeps the
+# schema satisfied without env vars — `mise run i18n:fill` uses the standalone
+# intl-ai.fill.toml (http provider, env-interpolated creds) instead.
+[provider]
+kind = "replay"
+file = "intl-ai.cassette.json"
+
+[check]
+fail_on = ["missing", "stale", "invalid"]
+
+[[checks]]
+id = "icu"
+
+[[checks]]
+id = "placeholder-parity"

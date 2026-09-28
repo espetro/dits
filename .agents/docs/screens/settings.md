@@ -125,6 +125,9 @@ runtime, api flavor) only appear in the advanced pane.
   600ms debounce, an enabled-but-incomplete llm draft never overwrites
   the last valid profile, and a save rebuilds the browser voice driver
   so the new endpoint takes effect live.
+- Pane failures render keyed `errors.*` copy, not raw exception text:
+  driver and api errors carry a `code` that maps to a locale key
+  (`errorDetail`/`codeMessage` in `lib/errors.ts`).
 - Runtime chip is a status indicator, not a control: it shows the
   effective runtime (tinted persimmon when the server pick degraded to
   a browser mode) and opens settings -> advanced on click. The old

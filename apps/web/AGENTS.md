@@ -50,7 +50,10 @@ screen's responsive behavior changes.
 
 ## Icons
 
-lucide-react only (project decision). Do not add other icon sets.
+lucide-react only (project decision). One exception: country flags — lucide ships
+none, so the locale switcher uses `circle-flags` SVGs via `unplugin-icons`
+(`~icons/circle-flags/<iso>` imports, configured in `vite.config.ts`). Do not add
+other icon sets.
 
 ## Voice client (`src/lib/voice/`)
 

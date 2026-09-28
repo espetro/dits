@@ -161,7 +161,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     const Ctor = this.deps.recognitionCtor ?? w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!Ctor || (!("speechSynthesis" in globalThis) && !this.agent)) {
       this.status = "error";
-      this.onError("speech recognition not supported in this browser");
+      this.onError("voice.sttUnsupported");
       return;
     }
     const rec = new Ctor();
@@ -197,9 +197,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
         this.releaseAnchor();
         // no mic is not the end of the interview: the kickoff stays armed so
         // the agent still opens; the composer keeps the session text-first.
-        this.onError(
-          kind === "not-allowed" ? "microphone permission denied" : "microphone unavailable",
-        );
+        this.onError(kind === "not-allowed" ? "voice.micDenied" : "voice.micUnavailable");
       }
     };
     // continuous mode ends on silence in some builds; restart while active.
@@ -241,7 +239,8 @@ export class BrowserVoiceDriver implements SpeechDriver {
         onSpeechStart: () => this.noteSpeech(),
       });
     } catch (err) {
-      this.onError(`[stt] ${String(err instanceof Error ? err.message : err)}`);
+      console.error("[voice] stt engine failed:", err);
+      this.onError("voice.stt");
       return false;
     }
     this.stt = stt;
@@ -257,10 +256,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
       capture.onFrame((pcm16) => this.vad?.processFrame(pcm16));
       capture.onFloat32Frame?.((samples) => stt.feed(samples));
     } catch (err) {
+      console.error("[voice] mic capture failed:", err);
       this.status = "error";
-      this.onError(
-        `[mic] ${String(err instanceof Error ? err.message : err) || "microphone unavailable"}`,
-      );
+      this.onError("voice.mic");
     }
     this.armKickoff();
     return true;
@@ -368,8 +366,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
     const agent = this.agent;
     const tts = this.deps.tts ?? synthesizeSpeech;
     if (!agent) return;
-    const reportError = (error: unknown, phase: TurnPhase) =>
-      this.onError(`[${phase}] ${String(error)}`);
+    // `voice.<phase>` codes map to errors.* keys; raw detail goes to console
+    const reportError = (error: unknown, phase: TurnPhase) => {
+      console.error(`[voice] ${phase} failed:`, error);
+      this.onError(`voice.${phase}`);
+    };
     // barge-in from a previous turn: drop it
     this.abort?.abort();
     const ctrl = new AbortController();
@@ -437,7 +438,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       const retry = await this.attemptAgentTurn(text, source, ctrl, speak, reportError);
       if (retry !== "failed") return;
     }
-    this.onError(`[${"llm" as TurnPhase}] no agent response for turn; retry also failed`);
+    this.onError("voice.noResponse");
     this.finishSpeaking();
   }
 
