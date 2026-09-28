@@ -124,7 +124,9 @@ export class WasmTts implements TtsEngine {
             ok: false,
             detail: `tts: ${message}`,
           });
-          rejectBoot?.(new Error(`tts worker error before ready: ${message}`));
+          rejectBoot?.(
+            new DiError("models.ttsWorker", undefined, `tts worker error before ready: ${message}`),
+          );
         };
         const channel = new StreamingRPCChannel<object, KittenTtsApi>(
           workerTransport(worker as unknown as Worker),
@@ -298,7 +300,9 @@ export class WasmStt implements SttEngine {
             ok: false,
             detail: `stt: ${message}`,
           });
-          rejectBoot?.(new Error(`stt worker error before ready: ${message}`));
+          rejectBoot?.(
+            new DiError("models.sttWorker", undefined, `stt worker error before ready: ${message}`),
+          );
         };
         const channel = new StreamingRPCChannel<object, SherpaSttApi>(
           workerTransport(worker as unknown as Worker),
