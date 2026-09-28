@@ -134,11 +134,15 @@ export function VoicePane() {
       const engines = await resolveInstalledVoiceEngines();
       if (engines.tts === "wasm") {
         const engine = (sampleEngine.current ??= new WasmTts());
-        const pcm = await engine.speak(phrase);
-        (samplePlayer.current ??= createPcmPlayer()).writeFloat32(pcm);
+        const player = (samplePlayer.current ??= createPcmPlayer());
+        let firstChunkMs: number | null = null;
+        for await (const chunk of engine.speak(phrase)) {
+          if (firstChunkMs === null) firstChunkMs = performance.now() - startedAt;
+          player.writeFloat32(chunk);
+        }
         setVoiceSample({
           status: "ok",
-          message: `${Math.round(performance.now() - startedAt)} ms`,
+          message: `first chunk ${Math.round(firstChunkMs ?? performance.now() - startedAt)} ms`,
         });
       } else if (engines.tts === "endpoint" && profile?.tts) {
         const pcm = await synthesizeSpeech(profile.tts, phrase);

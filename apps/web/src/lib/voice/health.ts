@@ -4,6 +4,7 @@
 // to `window.voiceHealth` in dev so failures are inspectable without relying
 // on ear-testing.
 import { atom } from "nanostores";
+import { envNum } from "../env";
 
 export type VoiceHealthKind =
   | "engine.boot"
@@ -31,7 +32,7 @@ export interface VoiceHealthEvent {
   allowed?: boolean;
 }
 
-const CAP = 300;
+const CAP = envNum("VITE_VOICE_HEALTH_CAP", 300);
 
 export const $voiceHealth = atom<VoiceHealthEvent[]>([]);
 

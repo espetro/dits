@@ -118,9 +118,14 @@ mobile) stacks, top to bottom:
 - **Back-guard**: while the interview is in progress, browser back/close
   fires a confirm (`beforeunload` + router blocker). Inert once ended.
 - Voice wiring is unchanged: WebSocket + Web Audio, 16k PCM16 capture, Silero
-  VAD (`/vad/` vendored), `{t:"interrupt"}` barge-in (300ms grace on the
-  browser driver), reconnect with backoff, voice->text degradation surfaces
-  the type path immediately.
+  VAD (`/vad/` vendored, tuned for interview cadence — 600ms redemption,
+  0.5/0.35 hysteresis, 250ms min utterance; all `VITE_VAD_*` overridable),
+  `{t:"interrupt"}` barge-in (300ms grace on the browser driver), reconnect
+  with backoff, voice->text degradation surfaces the type path immediately.
+  - Wasm tts streams pcm chunks as synthesized, so playback starts on the
+    first chunk rather than waiting for the whole utterance; the per-sentence
+    timeout budgets time-to-first-chunk and abandons via iterator `return()`,
+    which cancels the worker-side generator.
   - Browser-mode echo gate (adaptive): while agent audio is queued or
     playing (plus a ~350ms drain tail), transcripts and builtin
     SpeechRecognition results are still dropped (speaker bleed otherwise
@@ -133,7 +138,8 @@ mobile) stacks, top to bottom:
     the previous hard gate; typed input and mute always interrupt.
   - Voice health (`lib/voice/health.ts`): a capped `$voiceHealth` event
     ring (engine.boot ok/fail + ms, worker.error, stt.firstPartial latency,
-    stt.feed/flush failures, tts.speak ms per utterance — including the
+    stt.feed/flush failures, tts.speak per utterance (total ms; first-chunk
+    ms in detail) — including the
     sentence-timeout path where the remote iterator never settles,
     playback.gap/drained/stop with cause, gate decisions with vad prob —
     vad-frame events emit for the first qualifying frame and every 8th
