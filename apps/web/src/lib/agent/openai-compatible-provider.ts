@@ -186,12 +186,16 @@ export function createOpenAiCompatibleModel(
     supportedUrls: {},
 
     async doStream(options) {
+      // only attach auth when a key exists: an empty `authorization: Bearer `
+      // header still counts as a non-simple request header, so it forces a
+      // CORS preflight that gateways omitting `authorization` from
+      // access-control-allow-headers reject — breaking zero-key endpoints
+      // (the deployed demo) while keyed BYO endpoints keep working
+      const headers: Record<string, string> = { "content-type": "application/json" };
+      if (endpoint.apiKey) headers["authorization"] = `Bearer ${endpoint.apiKey}`;
       const res = await doFetch(chatUrl(endpoint.baseUrl), {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${endpoint.apiKey}`,
-        },
+        headers,
         body: JSON.stringify({
           model: endpoint.model,
           messages: toOpenAiMessages(options.prompt),

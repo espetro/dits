@@ -584,3 +584,76 @@ describe("BrowserVoiceDriver retry-once on llm failure", () => {
     expect(onError).toHaveBeenCalledTimes(1);
   }, 15_000);
 });
+
+describe("BrowserVoiceDriver speak drop race", () => {
+  /**
+   * Wasm tts with a controllable speak(): each call parks until the test
+   * resolves it, so an abort can land while synthesis is in flight.
+   */
+  async function setupSpeakDriver() {
+    const rec = fakeRecognitionCtor();
+    const writes: Float32Array[] = [];
+    const player: PcmPlayer = {
+      write: vi.fn(),
+      writeFloat32: (chunk) => {
+        writes.push(chunk);
+      },
+      stop: vi.fn(),
+      onDrained: vi.fn(),
+      get playing() {
+        return false;
+      },
+    };
+    const driver = new BrowserVoiceDriver("s1", { player, recognitionCtor: rec.ctor });
+    driver.onError = vi.fn();
+    await driver.useClientAgent(
+      { llm: LLM },
+      {
+        update_question: async () => "ok",
+        read_editor: async () => "",
+        read_whiteboard: async () => "",
+      },
+      { editor: "", whiteboard: "" },
+      () => ({ mode: "interview" }),
+    );
+    (driver as any).engines = { stt: "builtin", tts: "wasm" };
+    const resolves: Array<(v: Float32Array) => void> = [];
+    (driver as any).wasmTts = {
+      speak: vi.fn(() => new Promise<Float32Array>((r) => resolves.push(r))),
+      cancelPending: vi.fn(),
+      dispose: vi.fn(),
+    };
+    const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+    agent.respond = (async (_text: string, opts: { onText?: (delta: string) => void }) => {
+      opts.onText?.("First reply sentence.");
+      return "First reply sentence.";
+    }) as typeof agent.respond;
+    return { driver, resolves, writes, player };
+  }
+
+  it("forwards pcm synthesized before a superseding turn aborts", async () => {
+    const { driver, resolves, writes } = await setupSpeakDriver();
+    driver.sendText("hi");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(resolves).toHaveLength(1);
+    // the next turn aborts this turn's controller while synth is in flight —
+    // pcm already produced must still reach the player
+    driver.sendText("next");
+    const pcm = new Float32Array([0.25]);
+    resolves[0]!(pcm);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(writes).toContain(pcm);
+  });
+
+  it("drops in-flight synthesis on interrupt()", async () => {
+    const { driver, resolves, writes, player } = await setupSpeakDriver();
+    driver.sendText("hi");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(resolves).toHaveLength(1);
+    driver.interrupt();
+    resolves[0]!(new Float32Array([0.5]));
+    await new Promise((r) => setTimeout(r, 10));
+    expect(writes).toHaveLength(0);
+    expect(player.stop).toHaveBeenCalled();
+  });
+});
