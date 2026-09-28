@@ -9,9 +9,17 @@ import { DiError } from "../errors";
 import type { KittenTtsApi } from "./kitten/kitten-api";
 import type { SherpaSttApi } from "./sherpa/stt-api";
 import { pushVoiceHealth } from "./health";
-import sherpaWasmUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.wasm?url";
-import sherpaGlueUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.js?url";
-import sherpaAsrUrl from "sherpa-onnx/sherpa-onnx-asr.js?url";
+
+// vendored sherpa-onnx browser build under public/sherpa/ (apache-2.0,
+// regenerated via scripts/repack-sherpa-stt.ts). the npm package only
+// ships the nodejs glue, which can never run in a browser worker.
+const SHERPA_BASE = (import.meta.env.VITE_SHERPA_ASSETS_BASE as string | undefined) ?? "/sherpa";
+const sherpaAssets = {
+  glueUrl: `${SHERPA_BASE}/sherpa-onnx-wasm-main-asr.js`,
+  asrUrl: `${SHERPA_BASE}/sherpa-onnx-asr.js`,
+  wasmUrl: `${SHERPA_BASE}/sherpa-onnx-wasm-main-asr.wasm`,
+  dataUrl: `${SHERPA_BASE}/sherpa-onnx-wasm-main-asr.data`,
+};
 
 /**
  * On-device engines (phase c/d). Each lazily spawns a dedicated Worker that
@@ -315,7 +323,7 @@ export class WasmStt implements SttEngine {
             {
               model,
               tokens,
-              assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
+              assets: sherpaAssets,
             },
             (text) => {
               if (text.trim() && this.fedAt !== null && !this.partialSent) {

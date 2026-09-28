@@ -1,2 +1,3 @@
 apps/web/src/routeTree.gen.ts
 apps/web/public/vad/ort.wasm.bundle.min.mjs
+apps/web/public/sherpa/
