@@ -2,9 +2,8 @@ import type { Db } from "../store/db";
 import { chunkText, kindForName, parseDocument } from "./parse";
 import { EmbeddingClient } from "./embeddings";
 import { DOCUMENT_CAPS, DocumentSchema } from "@di/shared";
-import type { Document, DocumentKind } from "@di/shared";
+import type { Config, Document, DocumentKind } from "@di/shared";
 import * as v from "valibot";
-import type { Config } from "@di/shared";
 
 export interface IngestOptions {
   embeddings: EmbeddingClient | undefined;
