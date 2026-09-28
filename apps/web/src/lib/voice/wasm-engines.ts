@@ -1,10 +1,13 @@
+import { StreamingRPCChannel } from "kkrpc/streaming";
+import { workerTransport } from "kkrpc/worker";
+
 import type { SttEngine, SttEngineCallbacks, TtsEngine } from "./engines";
 import { DEFAULT_VOICE_MODEL_MANIFEST, loadVoiceModelManifest, readVoiceModelFile } from "./models";
 import type { VoiceModelStorage } from "./models";
 import type { VoiceModelManifest } from "@di/shared";
 import { DiError } from "../errors";
-import type { KittenInMsg, KittenOutMsg, KittenSpeakMsg } from "./kitten/kitten-worker";
-import type { SttInMsg, SttOutMsg } from "./sherpa/stt-worker";
+import type { KittenTtsApi } from "./kitten/kitten-api";
+import type { SherpaSttApi } from "./sherpa/stt-api";
 import { pushVoiceHealth } from "./health";
 import sherpaWasmUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.wasm?url";
 import sherpaGlueUrl from "sherpa-onnx/sherpa-onnx-wasm-nodejs.js?url";
@@ -13,7 +16,10 @@ import sherpaAsrUrl from "sherpa-onnx/sherpa-onnx-asr.js?url";
 /**
  * On-device engines (phase c/d). Each lazily spawns a dedicated Worker that
  * owns its runtime (ort wasm for tts, sherpa-onnx for stt); model bytes come
- * from the manifest cache via readVoiceModelFile.
+ * from the manifest cache via readVoiceModelFile. The wire protocol is kkrpc:
+ * init() doubles as the ready handshake (rejections carry the worker error),
+ * tts speak() is a remote async iterable (chunked pcm + iterator cancel),
+ * stt partials/finals arrive as kkrpc callbacks.
  */
 
 /** The manifest the downloader wrote with — override-aware, baked fallback. */
@@ -42,25 +48,36 @@ export interface WasmEngineDeps {
   wasmBase?: string;
 }
 
-/** Structural subset of Worker the engines need. */
+/**
+ * Structural subset of Worker the engines need (postMessage + message
+ * listeners feed the kkrpc transport; onerror reports worker crashes).
+ */
 export interface WorkerLike {
   postMessage(msg: unknown, transfer?: Transferable[]): void;
-  onmessage: ((ev: MessageEvent) => void) | null;
+  addEventListener(type: "message", listener: (ev: MessageEvent) => void): void;
+  removeEventListener(type: "message", listener: (ev: MessageEvent) => void): void;
   onerror: AbstractWorker["onerror"];
   terminate(): void;
 }
 
 const VAD_ASSETS_BASE = (import.meta.env.VITE_VAD_ASSETS_BASE as string | undefined) ?? "/vad/";
 
+/** wasm compile + model parse on slow machines outlasts the 30s default */
+const RPC_TIMEOUT_MS = 120_000;
+
+function healthError(err: unknown): string {
+  return String(err instanceof Error ? err.message : err);
+}
+
 /** KittenTTS over onnxruntime-web wasm in a dedicated worker. */
 export class WasmTts implements TtsEngine {
   private worker: WorkerLike | null = null;
+  private channel: StreamingRPCChannel<object, KittenTtsApi> | null = null;
+  private api: KittenTtsApi | null = null;
   private readyPromise: Promise<void> | null = null;
-  private seq = 0;
-  private readonly pending = new Map<
-    number,
-    { resolve: (pcm: Float32Array) => void; reject: (err: Error) => void }
-  >();
+  private disposed = false;
+  /** in-flight remote speak iterators: cancelPending() returns them */
+  private readonly activeSpeaks = new Set<AsyncIterator<Float32Array>>();
 
   constructor(private readonly deps: WasmEngineDeps = {}) {}
 
@@ -90,42 +107,31 @@ export class WasmTts implements TtsEngine {
             type: "module",
           });
         this.worker = worker;
-        const ready = new Promise<void>((resolve, reject) => {
-          worker.onmessage = (ev) => {
-            const msg = ev.data as KittenOutMsg;
-            if (msg.type === "ready") return resolve();
-            if (msg.type === "error" && msg.id === null) return reject(new Error(msg.message));
-            if (msg.type === "pcm") {
-              const entry = this.pending.get(msg.id);
-              if (entry) {
-                this.pending.delete(msg.id);
-                entry.resolve(msg.pcm);
-              }
-            } else if (msg.type === "error" && msg.id !== null) {
-              const entry = this.pending.get(msg.id);
-              if (entry) {
-                this.pending.delete(msg.id);
-                entry.reject(new Error(msg.message));
-              }
-            }
-          };
-          worker.onerror = (ev) =>
-            reject(new DiError("models.ttsWorker", undefined, `tts worker failed: ${String(ev)}`));
-        });
-        const init: KittenInMsg = {
-          type: "init",
+        worker.onerror = (ev) =>
+          pushVoiceHealth({
+            kind: "worker.error",
+            ok: false,
+            detail: `tts: ${String(ev)}`,
+          });
+        const channel = new StreamingRPCChannel<object, KittenTtsApi>(
+          workerTransport(worker as unknown as Worker),
+          { timeout: RPC_TIMEOUT_MS },
+        );
+        this.channel = channel;
+        const api = channel.getAPI();
+        // init doubles as the ready handshake; a worker-side throw rejects here
+        await api.init({
           model,
           voices,
           wasmBase: this.deps.wasmBase ?? VAD_ASSETS_BASE,
-        };
-        worker.postMessage(init, [model, voices]);
-        await ready;
+        });
+        this.api = api;
       } catch (err) {
         pushVoiceHealth({
           kind: "engine.boot",
           ok: false,
           ms: Date.now() - startedAt,
-          detail: `tts: ${String(err instanceof Error ? err.message : err)}`,
+          detail: `tts: ${healthError(err)}`,
         });
         throw err;
       }
@@ -133,6 +139,9 @@ export class WasmTts implements TtsEngine {
     })().catch((err: unknown) => {
       // a failed boot must not poison future speak() calls
       this.readyPromise = null;
+      this.api = null;
+      this.channel?.destroy();
+      this.channel = null;
       this.worker?.terminate();
       this.worker = null;
       throw err;
@@ -142,17 +151,27 @@ export class WasmTts implements TtsEngine {
 
   async speak(sentence: string): Promise<Float32Array> {
     await this.boot();
-    const worker = this.worker;
-    if (!worker) throw new WasmTtsNotReadyError();
-    const id = this.seq++;
-    const msg: KittenSpeakMsg = { type: "speak", id, text: sentence };
-    const promise = new Promise<Float32Array>((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-    });
+    const api = this.api;
+    if (!api) throw new WasmTtsNotReadyError();
     const startedAt = Date.now();
-    worker.postMessage(msg);
+    const iterator = api.speak(sentence)[Symbol.asyncIterator]();
+    this.activeSpeaks.add(iterator);
     try {
-      const pcm = await promise;
+      const chunks: Float32Array[] = [];
+      let total = 0;
+      for (;;) {
+        const { done, value } = await iterator.next();
+        if (done) break;
+        chunks.push(value);
+        total += value.length;
+      }
+      if (this.disposed) throw new DiError("models.disposed", undefined, "tts engine disposed");
+      const pcm = new Float32Array(total);
+      let off = 0;
+      for (const chunk of chunks) {
+        pcm.set(chunk, off);
+        off += chunk.length;
+      }
       pushVoiceHealth({
         kind: "tts.speak",
         ok: true,
@@ -165,28 +184,33 @@ export class WasmTts implements TtsEngine {
         kind: "tts.speak",
         ok: false,
         ms: Date.now() - startedAt,
-        detail: String(err instanceof Error ? err.message : err),
+        detail: healthError(err),
       });
       throw err;
+    } finally {
+      this.activeSpeaks.delete(iterator);
     }
   }
 
   /**
-   * Barge-in: drop queued (not yet started) utterances on the worker. An
-   * in-flight run still completes and resolves its speak(), which the
-   * caller then discards via its own abort check.
+   * Barge-in: clear() drops queued (not yet started) utterances on the
+   * worker; returning the remote iterators stops the current pulls (the
+   * worker generator's finally frees its queue slot).
    */
   cancelPending(): void {
-    this.worker?.postMessage({ type: "clear" });
+    void this.api?.clear().catch(() => undefined);
+    for (const iterator of this.activeSpeaks) void iterator.return?.(undefined);
   }
 
   dispose(): void {
+    this.disposed = true;
+    this.cancelPending();
     this.readyPromise = null;
+    this.api = null;
+    this.channel?.destroy();
+    this.channel = null;
     this.worker?.terminate();
     this.worker = null;
-    for (const entry of this.pending.values())
-      entry.reject(new DiError("models.disposed", undefined, "tts engine disposed"));
-    this.pending.clear();
   }
 }
 
@@ -197,6 +221,8 @@ export class WasmTts implements TtsEngine {
  */
 export class WasmStt implements SttEngine {
   private worker: WorkerLike | null = null;
+  private channel: StreamingRPCChannel<object, SherpaSttApi> | null = null;
+  private api: SherpaSttApi | null = null;
   private readyPromise: Promise<void> | null = null;
   private cb: SttEngineCallbacks | null = null;
   /** frames arriving during worker boot are buffered, then replayed */
@@ -233,53 +259,56 @@ export class WasmStt implements SttEngine {
         ]);
         if (!model || !tokens) throw new WasmSttNotReadyError();
         // classic worker, not module: the sherpa glue loads via importScripts,
-        // which module workers do not have. The worker file itself must stay
-        // import-free (asset urls arrive on the init message) for vite to emit
-        // a classic bundle.
+        // which module workers do not have.
         const worker =
           this.deps.workerFactory?.() ??
           new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "classic" });
         this.worker = worker;
-        const ready = new Promise<void>((resolve, reject) => {
-          worker.onmessage = (ev) => {
-            const msg = ev.data as SttOutMsg;
-            if (msg.type === "ready") return resolve();
-            if (msg.type === "error") return reject(new Error(msg.message));
-            if (msg.type === "partial") {
-              if (msg.text.trim() && this.fedAt !== null && !this.partialSent) {
-                pushVoiceHealth({
-                  kind: "stt.firstPartial",
-                  ok: true,
-                  ms: Date.now() - this.fedAt,
-                });
-                this.partialSent = true;
-              }
-              this.cb?.onInterim(msg.text);
+        worker.onerror = (ev) =>
+          pushVoiceHealth({
+            kind: "worker.error",
+            ok: false,
+            detail: `stt: ${String(ev)}`,
+          });
+        const channel = new StreamingRPCChannel<object, SherpaSttApi>(
+          workerTransport(worker as unknown as Worker),
+          { timeout: RPC_TIMEOUT_MS },
+        );
+        this.channel = channel;
+        const api = channel.getAPI();
+        await api.init(
+          {
+            model,
+            tokens,
+            assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
+          },
+          (text) => {
+            if (text.trim() && this.fedAt !== null && !this.partialSent) {
+              pushVoiceHealth({ kind: "stt.firstPartial", ok: true, ms: Date.now() - this.fedAt });
+              this.partialSent = true;
             }
-            if (msg.type === "final") {
-              this.fedAt = null;
-              this.partialSent = false;
-              if (msg.text.trim()) this.cb?.onFinal(msg.text);
-            }
-          };
-          worker.onerror = (ev) =>
-            reject(new DiError("models.sttWorker", undefined, `stt worker failed: ${String(ev)}`));
-        });
-        const init: SttInMsg = {
-          type: "init",
-          model,
-          tokens,
-          assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
-        };
-        worker.postMessage(init, [model, tokens]);
-        await ready;
-        for (const f of this.preboot.splice(0)) worker.postMessage({ type: "feed", samples: f });
+            this.cb?.onInterim(text);
+          },
+          (text) => {
+            this.fedAt = null;
+            this.partialSent = false;
+            if (text.trim()) this.cb?.onFinal(text);
+          },
+        );
+        this.api = api;
+        for (const f of this.preboot.splice(0)) {
+          void api
+            .feed(f)
+            .catch((err: unknown) =>
+              pushVoiceHealth({ kind: "stt.feed", ok: false, detail: healthError(err) }),
+            );
+        }
       } catch (err) {
         pushVoiceHealth({
           kind: "engine.boot",
           ok: false,
           ms: Date.now() - startedAt,
-          detail: `stt: ${String(err instanceof Error ? err.message : err)}`,
+          detail: `stt: ${healthError(err)}`,
         });
         throw err;
       }
@@ -287,6 +316,9 @@ export class WasmStt implements SttEngine {
     })().catch((err: unknown) => {
       // a failed boot must not poison future start() calls
       this.readyPromise = null;
+      this.api = null;
+      this.channel?.destroy();
+      this.channel = null;
       this.worker?.terminate();
       this.worker = null;
       throw err;
@@ -296,26 +328,38 @@ export class WasmStt implements SttEngine {
 
   feed(frame: Float32Array): void {
     this.fedAt ??= Date.now();
-    const worker = this.worker;
-    if (!worker) {
+    const api = this.api;
+    if (!api) {
       if (this.readyPromise && this.preboot.length < 100) this.preboot.push(frame);
       return;
     }
-    worker.postMessage({ type: "feed", samples: frame });
+    void api
+      .feed(frame)
+      .catch((err: unknown) =>
+        pushVoiceHealth({ kind: "stt.feed", ok: false, detail: healthError(err) }),
+      );
   }
 
   /** utterance end (vad speech-end): drain the stream and emit onFinal */
   async flush(): Promise<void> {
     await this.boot();
-    this.worker?.postMessage({ type: "flush" });
+    try {
+      await this.api?.flush();
+    } catch (err) {
+      pushVoiceHealth({ kind: "stt.flush", ok: false, detail: healthError(err) });
+      throw err;
+    }
   }
 
   async stop(): Promise<void> {
     this.readyPromise = null;
     this.cb = null;
+    this.api = null;
     this.preboot = [];
     this.fedAt = null;
     this.partialSent = false;
+    this.channel?.destroy();
+    this.channel = null;
     this.worker?.terminate();
     this.worker = null;
   }

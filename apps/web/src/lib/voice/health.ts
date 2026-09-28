@@ -7,7 +7,10 @@ import { atom } from "nanostores";
 
 export type VoiceHealthKind =
   | "engine.boot"
+  | "worker.error"
   | "stt.firstPartial"
+  | "stt.feed"
+  | "stt.flush"
   | "tts.speak"
   | "playback.gap"
   | "playback.drained"
