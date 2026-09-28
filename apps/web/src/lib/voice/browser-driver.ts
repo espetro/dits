@@ -111,6 +111,13 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private retriedTurnId: string | null = null;
   /** epoch ms until which mic-derived speech is treated as agent echo */
   private echoGateUntil = 0;
+  /**
+   * bumped by interrupt(): pcm synthesized before a superseding turn aborts
+   * the controller still reaches the player (the reply was fully paid for in
+   * synth time — dropping it loses the audio), while a real barge-in kill
+   * drops everything in hand
+   */
+  private playbackGen = 0;
   /** speak() calls still synthesizing/playing: keeps the gate shut in the
    * inter-sentence gap between player drain and the next queued write */
   private pendingSpeaks = 0;
@@ -507,6 +514,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.abort?.abort();
     const ctrl = new AbortController();
     this.abort = ctrl;
+    const playbackGen = this.playbackGen;
     const userTurn: Turn = {
       id: crypto.randomUUID(),
       session_id: this.sessionId,
@@ -563,7 +571,9 @@ export class BrowserVoiceDriver implements SpeechDriver {
             }
             throw err;
           }
-          if (ctrl.signal.aborted) return;
+          // superseded by a new turn still forwards the synthesized pcm;
+          // only an interrupt() kill (gen bump) drops in-hand audio
+          if (this.playbackGen !== playbackGen) return;
           this.player.writeFloat32(pcm);
           return;
         }
@@ -577,7 +587,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
             AbortSignal.timeout(TTS_SENTENCE_TIMEOUT_MS),
           ]),
         );
-        if (ctrl.signal.aborted) return;
+        if (this.playbackGen !== playbackGen) return;
         this.player.write(pcm);
       } catch (err) {
         if (!ctrl.signal.aborted) reportError(err, "tts");
@@ -686,6 +696,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       pushVoiceHealth({ kind: "playback.stop", ok: false, detail: cause });
     }
     this.player.stop();
+    this.playbackGen += 1;
     this.wasmTts?.cancelPending?.();
     // the gate drops at barge-in, not at drain: the utterance that
     // interrupted us must reach noteFinal. residual echo is covered by the
