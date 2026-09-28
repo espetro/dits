@@ -16,7 +16,7 @@ import { WasmStt, WasmTts } from "./wasm-engines";
 import { startCapture } from "./capture";
 import type { MicCapture } from "./capture";
 import { createVadGate } from "./vad";
-import type { VadGate, VadGateOptions } from "./vad";
+import type { VadFrameProbabilities, VadGate, VadGateOptions } from "./vad";
 import { createPcmPlayer } from "./pcm-player";
 import type { PcmPlayer } from "./pcm-player";
 import type { SpeechDriver } from "./server-driver";
@@ -113,11 +113,19 @@ export class BrowserVoiceDriver implements SpeechDriver {
   /** speak() calls still synthesizing/playing: keeps the gate shut in the
    * inter-sentence gap between player drain and the next queued write */
   private pendingSpeaks = 0;
+  /** consecutive vad frames at/above BARGE_IN_PROB seen while playbackGated */
+  private highProbFrames = 0;
 
   /** continuation grace before interim speech cuts the agent off (p0.8) */
   private static readonly BARGE_IN_GRACE_MS = 300;
   /** echo gate tail after playback drains: room echo / aec lag outlives it */
   private static readonly ECHO_GATE_TAIL_MS = 350;
+  /** frame speech-prob at which a gated frame counts toward a real barge-in:
+   * speaker bleed into the mic scores far below close-talked speech */
+  private static readonly BARGE_IN_PROB = 0.85;
+  /** consecutive >=BARGE_IN_PROB frames required to arm barge-in during
+   * playback (~190ms of sustained confident speech) */
+  private static readonly BARGE_IN_FRAMES = 2;
   /** confidence at which an unconfirmed final is trusted without interim evidence */
   private static readonly MIN_CONFIDENCE = 0.6;
   /** recognition errors that must never trigger an onend restart loop */
@@ -263,6 +271,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       this.vad = await vadFactory({
         onSpeechStart: () => this.noteSpeech(),
         onSpeechEnd: () => void stt.flush().catch(() => undefined),
+        onFrameProcessed: this.onVadFrame,
       });
       capture.onFrame((pcm16) => this.vad?.processFrame(pcm16));
       capture.onFloat32Frame?.((samples) => stt.feed(samples));
@@ -277,13 +286,17 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   /**
-   * Half-duplex echo gate: while agent audio is queued or playing (plus a
-   * short drain tail), the mic hears the speaker output, which the vad
-   * reads as speech — self barge-in truncates tts mid-utterance and the
-   * echo transcript spawns phantom user turns. Without a reliable aec
-   * reference there is no way to tell echo from a real barge-in, so all
-   * speech evidence is ignored for the window; interrupts stay reachable
-   * via mute / typed input.
+   * Echo gate with adaptive confidence: while agent audio is queued or
+   * playing (plus a short drain tail), the mic hears the speaker output,
+   * which the vad reads as speech — self barge-in truncates tts
+   * mid-utterance and the echo transcript spawns phantom user turns.
+   * Finals and builtin SpeechRecognition results inside the window are
+   * still dropped (no per-frame confidence to judge them by), but vad
+   * speech-start is allowed through once sustained high-confidence frames
+   * (>=BARGE_IN_PROB for BARGE_IN_FRAMES consecutive frames) distinguish a
+   * close-talked barge-in from attenuated room echo. When the vad impl
+   * produces no frame probs, highProbFrames never rises and the behavior
+   * is exactly the hard gate.
    */
   private get playbackGated(): boolean {
     return (
@@ -294,9 +307,27 @@ export class BrowserVoiceDriver implements SpeechDriver {
     );
   }
 
+  /**
+   * Per-frame vad probabilities (~96ms cadence) — pre-bound, allocation-free
+   * per frame. Tracks sustained high-confidence speech inside the gated
+   * window; reaching the threshold is enough evidence to call noteSpeech,
+   * which then runs the normal barge-in arm.
+   */
+  private readonly onVadFrame = (probs: VadFrameProbabilities): void => {
+    if (!this.playbackGated) {
+      this.highProbFrames = 0;
+      return;
+    }
+    this.highProbFrames =
+      probs.isSpeech >= BrowserVoiceDriver.BARGE_IN_PROB ? this.highProbFrames + 1 : 0;
+    if (this.highProbFrames >= BrowserVoiceDriver.BARGE_IN_FRAMES) this.noteSpeech();
+  };
+
   /** interim speech evidence: marks the utterance and arms barge-in. */
   private noteSpeech(): void {
-    if (this.playbackGated) return;
+    // inside the gated window, speech evidence counts only once the vad's
+    // per-frame confidence has earned it (see onVadFrame)
+    if (this.playbackGated && this.highProbFrames < BrowserVoiceDriver.BARGE_IN_FRAMES) return;
     this.speechSeen = true;
     if (this.agentSpeaking && this.bargeInTimer === null) {
       this.bargeInTimer = setTimeout(() => {
@@ -570,8 +601,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
   interrupt(): void {
     this.player.stop();
     this.wasmTts?.cancelPending?.();
-    // keep the gate up briefly: whatever the mic hears next is still echo
-    this.echoGateUntil = Date.now() + BrowserVoiceDriver.ECHO_GATE_TAIL_MS;
+    // the gate drops at barge-in, not at drain: the utterance that
+    // interrupted us must reach noteFinal. residual echo is covered by the
+    // frame-confidence check on the next window instead.
+    this.echoGateUntil = 0;
+    this.highProbFrames = 0;
     this.abort?.abort();
     this.abort = null;
     if (this.ttsMode === "builtin") globalThis.speechSynthesis?.cancel();

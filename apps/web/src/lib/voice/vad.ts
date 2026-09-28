@@ -17,9 +17,21 @@ export interface VadGate {
   destroy(): Promise<void>;
 }
 
+/** Per-frame silero speech probabilities (structurally vad-web's SpeechProbabilities). */
+export interface VadFrameProbabilities {
+  isSpeech: number;
+  notSpeech: number;
+}
+
 export interface VadGateOptions {
   onSpeechStart?: () => void;
   onSpeechEnd?: (audio: Float32Array) => void;
+  /**
+   * Per-silero-frame speech probabilities (~96ms cadence), forwarded from
+   * MicVAD's onFrameProcessed. Absent when an impl/test stub does not
+   * produce them — callers must treat the feed as optional.
+   */
+  onFrameProcessed?: (probabilities: VadFrameProbabilities, frame: Float32Array) => void;
   /** base path for silero onnx + ort wasm assets (default /vad/) */
   modelAssetsBase?: string;
   /** test seam: inject a fully custom VAD implementation */
@@ -90,6 +102,7 @@ async function createDefaultImpl(assetsBase: string, opts: VadGateOptions): Prom
     getStream: () => new Promise<MediaStream>(() => undefined),
     onSpeechStart: () => opts.onSpeechStart?.(),
     onSpeechEnd: (audio) => opts.onSpeechEnd?.(audio),
+    onFrameProcessed: (probs, frame) => opts.onFrameProcessed?.(probs, frame),
   });
   return {
     processFrame: (frame) => mic.processFrame(frame),

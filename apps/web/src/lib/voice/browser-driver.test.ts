@@ -125,6 +125,48 @@ describe("BrowserVoiceDriver echo gate", () => {
     driver.interrupt();
     expect(cancelPending).toHaveBeenCalledTimes(1);
   });
+
+  it("arms barge-in on sustained high-confidence frames during playback", async () => {
+    const playing = { v: true };
+    const { driver, respond } = await setupDriver(playing);
+    await driver.start();
+    driver["cancelKickoff"]();
+    driver.agentSpeaking = true;
+    const interruptSpy = vi.spyOn(driver, "interrupt");
+
+    // one frame is not enough — echo spikes must not cut the agent off
+    driver["onVadFrame"]({ isSpeech: 0.9, notSpeech: 0.1 });
+    await new Promise((r) => setTimeout(r, 400));
+    expect(interruptSpy).not.toHaveBeenCalled();
+
+    // sustained confident speech earns the barge-in
+    driver["onVadFrame"]({ isSpeech: 0.5, notSpeech: 0.5 });
+    driver["onVadFrame"]({ isSpeech: 0.9, notSpeech: 0.1 });
+    driver["onVadFrame"]({ isSpeech: 0.95, notSpeech: 0.05 });
+    await new Promise((r) => setTimeout(r, 400));
+    expect(interruptSpy).toHaveBeenCalledTimes(1);
+
+    // the gate drops at barge-in: the utterance that interrupted is a real turn
+    expect(playing.v).toBe(false); // interrupt() stopped playback
+    driver["noteFinal"]("the user's actual question");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(respond).toHaveBeenCalledTimes(1);
+    expect((respond.mock.calls as unknown[][])[0]![0]).toBe("the user's actual question");
+  });
+
+  it("keeps the hard gate when no vad frame probs are wired", async () => {
+    const playing = { v: true };
+    const { driver } = await setupDriver(playing);
+    await driver.start();
+    driver["cancelKickoff"]();
+    driver.agentSpeaking = true;
+    const interruptSpy = vi.spyOn(driver, "interrupt");
+
+    // noteSpeech with no frame evidence inside the gate window: suppressed
+    driver["noteSpeech"]();
+    await new Promise((r) => setTimeout(r, 400));
+    expect(interruptSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe("BrowserVoiceDriver barge-in", () => {
