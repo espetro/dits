@@ -116,7 +116,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private pendingSpeaks = 0;
   /** consecutive vad frames at/above BARGE_IN_PROB seen while playbackGated */
   private highProbFrames = 0;
+  /** qualifying vad frames seen in the current gated window (event sampling) */
+  private vadFrameLogCount = 0;
 
+  /** emit every Nth qualifying vad-frame gate event (96ms cadence -> ~1.2/s cap) */
+  private static readonly VAD_FRAME_LOG_EVERY = 8;
   /** continuation grace before interim speech cuts the agent off (p0.8) */
   private static readonly BARGE_IN_GRACE_MS = 300;
   /** echo gate tail after playback drains: room echo / aec lag outlives it */
@@ -325,24 +329,35 @@ export class BrowserVoiceDriver implements SpeechDriver {
   private readonly onVadFrame = (probs: VadFrameProbabilities): void => {
     if (!this.playbackGated) {
       this.highProbFrames = 0;
+      this.vadFrameLogCount = 0;
       return;
     }
     this.highProbFrames =
       probs.isSpeech >= BrowserVoiceDriver.BARGE_IN_PROB ? this.highProbFrames + 1 : 0;
     const earned = this.highProbFrames >= BrowserVoiceDriver.BARGE_IN_FRAMES;
-    // per-gated-frame gate event: the real-device tuning data for
-    // BARGE_IN_PROB/BARGE_IN_FRAMES. silence/noise frames below 0.5 carry
-    // no gate signal — at ~10/s they would evict engine.boot from the
-    // 300-cap ring within seconds of playback
+    // gate events are the real-device tuning data for
+    // BARGE_IN_PROB/BARGE_IN_FRAMES. keep the prob profile while capping
+    // ring churn: below-0.5 noise carries no gate signal, and at ~10/s the
+    // ring evicts engine.boot in seconds — emit the first qualifying
+    // frame, every Nth after (~1.2/s cap), plus every high-prob and
+    // earned frame (the events that matter)
     if (earned || probs.isSpeech >= 0.5) {
-      pushVoiceHealth({
-        kind: "gate",
-        ok: earned,
-        detail: "vad-frame",
-        duringPlayback: true,
-        vadProb: probs.isSpeech,
-        allowed: earned,
-      });
+      this.vadFrameLogCount += 1;
+      if (
+        earned ||
+        probs.isSpeech >= BrowserVoiceDriver.BARGE_IN_PROB ||
+        this.vadFrameLogCount === 1 ||
+        this.vadFrameLogCount % BrowserVoiceDriver.VAD_FRAME_LOG_EVERY === 0
+      ) {
+        pushVoiceHealth({
+          kind: "gate",
+          ok: earned,
+          detail: "vad-frame",
+          duringPlayback: true,
+          vadProb: probs.isSpeech,
+          allowed: earned,
+        });
+      }
     }
     if (earned) this.noteSpeech();
   };
@@ -525,15 +540,29 @@ export class BrowserVoiceDriver implements SpeechDriver {
           if (!engine) return;
           // same per-sentence budget as the endpoint path (p0.3): a stalled
           // wasm synth must skip the sentence, not stall the speak queue
-          const pcm = await Promise.race([
-            engine.speak(sentence),
-            new Promise<never>((_resolve, reject) =>
-              setTimeout(
-                () => reject(new Error("wasm tts sentence timed out")),
-                TTS_SENTENCE_TIMEOUT_MS,
+          const sentenceTimeout = new Error("wasm tts sentence timed out");
+          let pcm: Float32Array;
+          try {
+            pcm = await Promise.race([
+              engine.speak(sentence),
+              new Promise<never>((_resolve, reject) =>
+                setTimeout(() => reject(sentenceTimeout), TTS_SENTENCE_TIMEOUT_MS),
               ),
-            ),
-          ]);
+            ]);
+          } catch (err) {
+            if (err === sentenceTimeout) {
+              // the race won by abandoning engine.speak — its remote iterator
+              // stays pending, so the engine-side tts.speak event never fires;
+              // surface the stall here or the ring is silent about it
+              pushVoiceHealth({
+                kind: "tts.speak",
+                ok: false,
+                ms: TTS_SENTENCE_TIMEOUT_MS,
+                detail: "sentence timeout: remote iterator unsettled",
+              });
+            }
+            throw err;
+          }
           if (ctrl.signal.aborted) return;
           this.player.writeFloat32(pcm);
           return;
