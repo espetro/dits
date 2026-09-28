@@ -46,7 +46,11 @@
   session summary and transcript come from OPFS
   (`apps/web/src/lib/opfs-store.ts#getClientSession` / `#getClientTurns`);
   the auto-build uses the in-browser report generator and the navigation
-  behaves the same either way.
+  behaves the same either way. The generator's llm call goes through the
+  same openai-compatible provider as the interview, which only attaches
+  `authorization` when an api key is set — so keyless gateways whose
+  `access-control-allow-headers` omits `authorization` no longer reject
+  the report call at CORS preflight.
 
 ## URL / state
 

@@ -81,12 +81,14 @@ export async function synthesizeSpeech(
   fetchImpl: typeof fetch = fetch,
 ): Promise<Uint8Array> {
   const base = tts.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
+  // see createOpenAiCompatibleModel: an empty Bearer still forces a CORS
+  // preflight, which zero-key gateways without `authorization` in
+  // access-control-allow-headers reject
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (tts.apiKey) headers["authorization"] = `Bearer ${tts.apiKey}`;
   const res = await fetchImpl(`${base}/v1/audio/speech`, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${tts.apiKey}`,
-    },
+    headers,
     body: JSON.stringify({
       model: tts.model || "tts-1",
       ...(tts.voice ? { voice: tts.voice } : {}),
