@@ -80,6 +80,30 @@ describe("ClientAgent.respond", () => {
     expect(agent.messages.map((m) => m.role)).toEqual(["user", "assistant"]);
   });
 
+  it("omits the authorization header when no api key is set", async () => {
+    const inits: any[] = [];
+    const fetchMock = vi.fn().mockImplementation(async (_u: string, init: any) => {
+      inits.push(init);
+      return sse([{ choices: [{ delta: { content: "hi" } }] }]);
+    });
+    // an empty Bearer still counts as a non-simple header -> forces a CORS
+    // preflight that zero-key gateways without `authorization` in
+    // access-control-allow-headers reject
+    const agent = await ClientAgent.create(
+      { ...LLM, apiKey: "" },
+      {
+        update_question: vi.fn(async () => "ok"),
+        read_editor: vi.fn(async () => ""),
+        read_whiteboard: vi.fn(async () => ""),
+      },
+      CTX,
+      fetchMock as unknown as typeof fetch,
+    );
+    await agent.respond("hello", {});
+    expect(inits[0].headers.authorization).toBeUndefined();
+    expect(inits[0].headers["content-type"]).toBe("application/json");
+  });
+
   it("surfaces a provider stream error via onError instead of swallowing it", async () => {
     const executors = {
       update_question: vi.fn(async () => "ok"),
@@ -245,6 +269,19 @@ describe("tts", () => {
     });
     // 44100 -> 24000 resample of 2 samples => 1 sample
     expect(bytes.byteLength).toBe(2);
+  });
+
+  it("synthesizeSpeech omits authorization when no api key is set", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(wavBytes(Int16Array.from([1]), 24000)));
+    await synthesizeSpeech(
+      { ...TTS, apiKey: "" },
+      "hi",
+      undefined,
+      fetchMock as unknown as typeof fetch,
+    );
+    expect(fetchMock.mock.calls[0]![1].headers.authorization).toBeUndefined();
   });
 
   it("synthesizeSpeech throws on error status", async () => {
