@@ -330,16 +330,20 @@ export class BrowserVoiceDriver implements SpeechDriver {
     this.highProbFrames =
       probs.isSpeech >= BrowserVoiceDriver.BARGE_IN_PROB ? this.highProbFrames + 1 : 0;
     const earned = this.highProbFrames >= BrowserVoiceDriver.BARGE_IN_FRAMES;
-    // per-gated-frame gate event: this is the real-device tuning data for
-    // BARGE_IN_PROB/BARGE_IN_FRAMES (allowed flips true at the earn point)
-    pushVoiceHealth({
-      kind: "gate",
-      ok: earned,
-      detail: "vad-frame",
-      duringPlayback: true,
-      vadProb: probs.isSpeech,
-      allowed: earned,
-    });
+    // per-gated-frame gate event: the real-device tuning data for
+    // BARGE_IN_PROB/BARGE_IN_FRAMES. silence/noise frames below 0.5 carry
+    // no gate signal — at ~10/s they would evict engine.boot from the
+    // 300-cap ring within seconds of playback
+    if (earned || probs.isSpeech >= 0.5) {
+      pushVoiceHealth({
+        kind: "gate",
+        ok: earned,
+        detail: "vad-frame",
+        duringPlayback: true,
+        vadProb: probs.isSpeech,
+        allowed: earned,
+      });
+    }
     if (earned) this.noteSpeech();
   };
 

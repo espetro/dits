@@ -46,9 +46,6 @@ export interface SherpaSttApi {
   flush(): Promise<void>;
 }
 
-interface SherpaFs {
-  writeFile(path: string, data: Uint8Array): void;
-}
 interface SherpaStream {
   acceptWaveform(sampleRate: number, samples: Float32Array): void;
   inputFinished(): void;
@@ -67,9 +64,21 @@ interface SherpaModuleSeed {
   onRuntimeInitialized?: () => void;
   onAbort?: (what: unknown) => void;
 }
-/** the same object after the glue finishes init (FS is populated in place). */
+/** the same object after the glue finishes init (populated in place). */
 interface SherpaModule extends SherpaModuleSeed {
-  FS: SherpaFs;
+  /**
+   * module-level export the glue itself uses for .data files — in this
+   * flat classic build top-level `var FS` lands on worker globalThis, not
+   * on Module, so there is no `Module.FS`.
+   */
+  FS_createDataFile(
+    parent: string,
+    name: string | null,
+    data: Uint8Array,
+    canRead: boolean,
+    canWrite: boolean,
+    canOwn: boolean,
+  ): void;
 }
 interface SherpaGlobalScope {
   Module: SherpaModuleSeed | SherpaModule;
@@ -145,10 +154,10 @@ export function createSherpaSttApi(deps: SherpaSttDeps): SherpaSttApi {
       // classic scripts: top-level var/function land on the worker global scope
       deps.loadScripts([args.assets.glueUrl, args.assets.asrUrl]);
       await initialized;
-      // init resolved => the glue populated FS onto the seeded Module in place
+      // init resolved => the glue populated its exports on the seeded Module
       const mod = g.Module as SherpaModule;
-      mod.FS.writeFile("model.onnx", new Uint8Array(args.model));
-      mod.FS.writeFile("tokens.txt", new Uint8Array(args.tokens));
+      mod.FS_createDataFile("/model.onnx", null, new Uint8Array(args.model), true, true, true);
+      mod.FS_createDataFile("/tokens.txt", null, new Uint8Array(args.tokens), true, true, true);
       recognizer = g.createOnlineRecognizer(mod, {
         featConfig: { sampleRate: 16000, featureDim: 80 },
         modelConfig: {
