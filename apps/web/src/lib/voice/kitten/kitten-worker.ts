@@ -27,7 +27,11 @@ export interface KittenSpeakMsg {
   id: number;
   text: string;
 }
-export type KittenInMsg = KittenInitMsg | KittenSpeakMsg;
+export interface KittenClearMsg {
+  /** drop queued (not yet started) speak requests; in-flight runs finish */
+  type: "clear";
+}
+export type KittenInMsg = KittenInitMsg | KittenSpeakMsg | KittenClearMsg;
 
 export type KittenOutMsg =
   | { type: "ready" }
@@ -41,6 +45,11 @@ const DEFAULT_VOICE = "expr-voice-5-m";
 let ort: typeof Ort | null = null;
 let session: Ort.InferenceSession | null = null;
 let voices: Record<string, NpyArray> = {};
+/** serializes session.run: concurrent runs on one ort wasm session
+ * interleave and post pcm out of order. */
+let speakQueue: Promise<void> = Promise.resolve();
+/** bumped by clear: queued speaks captured before the bump are dropped */
+let generation = 0;
 
 function post(msg: KittenOutMsg, transfer?: Transferable[]): void {
   (self as unknown as Worker).postMessage(msg, transfer ?? []);
@@ -87,18 +96,32 @@ async function speak(id: number, text: string): Promise<void> {
 
 self.onmessage = (ev: MessageEvent<KittenInMsg>) => {
   const msg = ev.data;
-  void (async () => {
-    if (msg.type === "init") {
-      await init(msg);
-      post({ type: "ready" });
-    } else {
-      await speak(msg.id, msg.text);
-    }
-  })().catch((err: unknown) => {
-    post({
-      type: "error",
-      id: msg.type === "speak" ? msg.id : null,
-      message: err instanceof Error ? err.message : String(err),
-    });
-  });
+  if (msg.type === "init") {
+    void init(msg)
+      .then(() => post({ type: "ready" }))
+      .catch((err: unknown) =>
+        post({
+          type: "error",
+          id: null,
+          message: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    return;
+  }
+  if (msg.type === "clear") {
+    generation += 1;
+    return;
+  }
+  const gen = generation;
+  speakQueue = speakQueue
+    .then(() =>
+      gen === generation ? speak(msg.id, msg.text) : Promise.reject(new Error("cleared")),
+    )
+    .catch((err: unknown) =>
+      post({
+        type: "error",
+        id: msg.id,
+        message: err instanceof Error ? err.message : String(err),
+      }),
+    );
 };

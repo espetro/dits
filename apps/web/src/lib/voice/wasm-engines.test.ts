@@ -42,6 +42,7 @@ function fakeWorker(
         if (behavior?.failInit) return post({ type: "error", id: null, message: "init boom" });
         return post({ type: "ready" });
       }
+      if (m.type === "clear") return;
       if (behavior?.failSpeak) return post({ type: "error", id: m.id, message: "speak boom" });
       if (behavior?.silentSpeak) return;
       post({ type: "pcm", id: m.id, pcm: new Float32Array([0.5, -0.5]) });
