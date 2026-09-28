@@ -133,8 +133,12 @@ mobile) stacks, top to bottom:
     the previous hard gate; typed input and mute always interrupt.
   - Voice health (`lib/voice/health.ts`): a capped `$voiceHealth` event
     ring (engine.boot ok/fail + ms, worker.error, stt.firstPartial latency,
-    stt.feed/flush failures, tts.speak ms per utterance,
-    playback.gap/drained/stop with cause, gate decisions with vad prob)
+    stt.feed/flush failures, tts.speak ms per utterance — including the
+    sentence-timeout path where the remote iterator never settles,
+    playback.gap/drained/stop with cause, gate decisions with vad prob —
+    vad-frame events emit for the first qualifying frame and every 8th
+    after, plus every high-prob/earned frame, so the ring keeps the prob
+    profile without evicting boot events)
     mirrored to `window.voiceHealth` in dev for pipeline observability.
 - **On-device voice (client-only)**: first browser-mode entry arms the
   root-mounted `VoiceConsentDialog` via `requestVoiceConsent()`

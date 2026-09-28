@@ -3,6 +3,7 @@ import { BrowserVoiceDriver } from "./browser-driver";
 import type { RecognitionLike } from "./browser-driver";
 import { createPcmPlayer } from "./pcm-player";
 import type { AudioContextLike, PcmPlayer } from "./pcm-player";
+import { $voiceHealth } from "./health";
 
 const LLM = {
   mode: "remote" as const,
@@ -166,6 +167,26 @@ describe("BrowserVoiceDriver echo gate", () => {
     driver["noteSpeech"]();
     await new Promise((r) => setTimeout(r, 400));
     expect(interruptSpy).not.toHaveBeenCalled();
+  });
+
+  it("samples vad-frame gate events instead of flooding the health ring", async () => {
+    const playing = { v: true };
+    const { driver } = await setupDriver(playing);
+    await driver.start();
+    driver["cancelKickoff"]();
+    driver.agentSpeaking = true;
+    $voiceHealth.set([]);
+
+    // sustained mid-prob gated speech: only 1st + every 8th qualifying frame
+    for (let i = 0; i < 20; i++) driver["onVadFrame"]({ isSpeech: 0.6, notSpeech: 0.4 });
+    expect($voiceHealth.get().filter((e) => e.detail === "vad-frame")).toHaveLength(3);
+
+    // high-prob and earned frames always emit — they carry the gate decision
+    driver["onVadFrame"]({ isSpeech: 0.9, notSpeech: 0.1 });
+    driver["onVadFrame"]({ isSpeech: 0.95, notSpeech: 0.05 });
+    const frames = $voiceHealth.get().filter((e) => e.detail === "vad-frame");
+    expect(frames).toHaveLength(5);
+    expect(frames.at(-1)?.allowed).toBe(true);
   });
 });
 
