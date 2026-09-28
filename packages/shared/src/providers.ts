@@ -21,8 +21,11 @@ export type Flavor = v.InferOutput<typeof FlavorSchema>;
 export const ProviderEndpointSchema = v.object({
   /** OpenAI-compatible base URL, e.g. http://localhost:8317/v1 or a cloud endpoint */
   baseUrl: v.pipe(v.string(), v.url()),
-  /** API key; treated as a secret, displayed redacted */
-  apiKey: v.pipe(v.string(), v.minLength(1)),
+  /** API key; treated as a secret, displayed redacted. Empty is valid:
+   * keyless gateways (local servers, the zero-conf demo) reject
+   * `authorization` in CORS allow-headers, so callers omit the header
+   * entirely when no key is set */
+  apiKey: v.string(),
   /** Model id for this endpoint */
   model: v.pipe(v.string(), v.minLength(1)),
   /** API flavor; "anthropic" targets native /v1/messages endpoints. */

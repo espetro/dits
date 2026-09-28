@@ -169,8 +169,10 @@ export interface ProbeDraft {
 /** /models probe shared by all sections: the endpoint class is the same. */
 export async function probeModels(draft: ProbeDraft): Promise<void> {
   const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-  const res = await fetch(`${base}/v1/models`, {
-    headers: { authorization: `Bearer ${draft.apiKey}` },
-  });
+  // keyless endpoints must send no authorization header at all — an empty
+  // Bearer still forces a CORS preflight some gateways reject
+  const headers: Record<string, string> = {};
+  if (draft.apiKey) headers["authorization"] = `Bearer ${draft.apiKey}`;
+  const res = await fetch(`${base}/v1/models`, { headers });
   if (!res.ok) throw new DiError("http", { status: res.status }, `HTTP ${res.status}`);
 }
