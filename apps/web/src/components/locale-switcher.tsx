@@ -1,6 +1,17 @@
 import { useLocation } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import { Check, ChevronDown } from "lucide-react";
+import FlagAr from "~icons/circle-flags/sa";
+import FlagDe from "~icons/circle-flags/de";
+import FlagEn from "~icons/circle-flags/us";
+import FlagEs from "~icons/circle-flags/es";
+import FlagFr from "~icons/circle-flags/fr";
+import FlagIt from "~icons/circle-flags/it";
+import FlagJa from "~icons/circle-flags/jp";
+import FlagKo from "~icons/circle-flags/kr";
+import FlagPtBr from "~icons/circle-flags/br";
+import FlagZhCn from "~icons/circle-flags/cn";
+import type { ComponentType, SVGProps } from "react";
 
 import { LOCALES } from "../stores/session";
 import { replaceLocale, useLocale } from "../lib/locale-href";
@@ -15,15 +26,15 @@ import {
 /**
  * Pill dropdown language switcher, ported from brioso's LanguageSwitcher.
  *
- * Trigger shows a language-code chip + the native name; the menu has one row
+ * Trigger shows a circular flag icon + the native name; the menu has one row
  * per locale navigating to the same path under the target locale prefix,
  * preserving pathname (search/hash come from the router location but the app
  * doesn't use them, so only the pathname is rewritten). Active row carries a
  * checkmark.
  *
- * Chips render the uppercase language subtag (EN, PT, ZH...) rather than flag
- * emoji: flag glyphs need a color-emoji flag font that Windows and some Linux
- * installs don't ship, so they degrade to bare two-letter boxes.
+ * Flags are `circle-flags` SVGs via unplugin-icons (lucide ships no country
+ * flags) — not flag emoji, which need a color-emoji flag font that Windows
+ * and some Linux installs don't ship.
  *
  * Rows are plain `<a>` elements, deliberately not TanStack's `<Link>` (same
  * reasoning as brioso): our hrefs are plain optional-prefix paths so Link
@@ -44,17 +55,24 @@ export const LOCALE_LABELS = {
   ar: { native: "العربية" },
 } as const satisfies Record<(typeof LOCALES)[number], { native: string }>;
 
-const localeCode = (l: string) => l.replace(/-.*/, "").toUpperCase();
+type FlagIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
-function LocaleChip({ code }: { code: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="grid size-[22px] flex-none place-items-center rounded-full border border-hairline bg-cream-deep text-[8px] font-bold tracking-[0.04em] text-espresso-soft"
-    >
-      {code}
-    </span>
-  );
+export const LOCALE_FLAGS: Record<(typeof LOCALES)[number], FlagIcon> = {
+  en: FlagEn,
+  de: FlagDe,
+  es: FlagEs,
+  fr: FlagFr,
+  ja: FlagJa,
+  "pt-br": FlagPtBr,
+  "zh-cn": FlagZhCn,
+  ko: FlagKo,
+  it: FlagIt,
+  ar: FlagAr,
+};
+
+function LocaleFlag({ locale }: { locale: (typeof LOCALES)[number] }) {
+  const Flag = LOCALE_FLAGS[locale];
+  return <Flag className="size-5 flex-none rounded-full" aria-hidden="true" />;
 }
 
 export function LocaleSwitcher({ className = "" }: { className?: string }) {
@@ -73,7 +91,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
             className
           }
         >
-          <LocaleChip code={localeCode(locale)} />
+          <LocaleFlag locale={locale} />
           {LOCALE_LABELS[locale].native}
           <ChevronDown className="size-3.5 text-espresso-soft" aria-hidden="true" />
         </Button>
@@ -92,7 +110,7 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
                 aria-current={isActive ? "true" : undefined}
                 lang={l}
               >
-                <LocaleChip code={localeCode(l)} />
+                <LocaleFlag locale={l} />
                 <span className="font-medium text-espresso">{label.native}</span>
                 {isActive && <Check className="ml-auto size-4 text-persimmon" aria-hidden="true" />}
               </a>
