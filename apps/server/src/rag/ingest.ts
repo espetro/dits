@@ -2,11 +2,13 @@ import type { Db } from "../store/db";
 import { chunkText, kindForName, parseDocument } from "./parse";
 import { EmbeddingClient } from "./embeddings";
 import { DOCUMENT_CAPS, DocumentSchema } from "@di/shared";
-import type { Document, DocumentKind } from "@di/shared";
+import type { Config, Document, DocumentKind } from "@di/shared";
 import * as v from "valibot";
 
 export interface IngestOptions {
   embeddings: EmbeddingClient | undefined;
+  /** config.documents overrides; DOCUMENT_CAPS + CHUNK_SIZE/OVERLAP are the defaults. */
+  documents?: Config["documents"];
 }
 
 export class CapError extends Error {
@@ -27,19 +29,21 @@ export async function ingestDocuments(
   files: { name: string; bytes: Uint8Array }[],
   opts: IngestOptions,
 ): Promise<Document[]> {
+  const maxFiles = opts.documents?.max_files ?? DOCUMENT_CAPS.maxFiles;
+  const maxTotalBytes = opts.documents?.max_total_bytes ?? DOCUMENT_CAPS.maxTotalBytes;
   const existing = await listDocuments(db, sessionId);
-  if (existing.length + files.length > DOCUMENT_CAPS.maxFiles) {
+  if (existing.length + files.length > maxFiles) {
     throw new CapError(
-      `file cap exceeded: ${existing.length} existing + ${files.length} new > ${DOCUMENT_CAPS.maxFiles}`,
+      `file cap exceeded: ${existing.length} existing + ${files.length} new > ${maxFiles}`,
       413,
       "file_cap",
     );
   }
   const totalNew = files.reduce((n, f) => n + f.bytes.length, 0);
   const totalExisting = existing.reduce((n, d) => n + d.size_bytes, 0);
-  if (totalExisting + totalNew > DOCUMENT_CAPS.maxTotalBytes) {
+  if (totalExisting + totalNew > maxTotalBytes) {
     throw new CapError(
-      `size cap exceeded: ${totalExisting + totalNew} > ${DOCUMENT_CAPS.maxTotalBytes} bytes`,
+      `size cap exceeded: ${totalExisting + totalNew} > ${maxTotalBytes} bytes`,
       413,
       "size_cap",
     );
@@ -73,7 +77,10 @@ export async function ingestDocuments(
 
     try {
       const text = await parseDocument(kind, file.bytes);
-      const chunks = chunkText(text);
+      const chunks = chunkText(text, {
+        size: opts.documents?.chunk_size,
+        overlap: opts.documents?.chunk_overlap,
+      });
       const vectors = await opts.embeddings.embed(chunks);
       await db.transaction().execute(async (tx) => {
         for (let i = 0; i < chunks.length; i++) {

@@ -74,6 +74,50 @@ describe("loadConfig", () => {
     }
   });
 
+  it("leaves optional tunable sections undefined when omitted", () => {
+    const cfg = loadConfig(writeConfig(minimal));
+    expect(cfg.voice).toBeUndefined();
+    expect(cfg.check).toBeUndefined();
+    expect(cfg.documents).toBeUndefined();
+    expect(cfg.llm.max_tokens).toBeUndefined();
+  });
+
+  it("accepts the optional tunable sections", () => {
+    const cfg = loadConfig(
+      writeConfig(
+        minimal +
+          `
+voice:
+  kickoff_ms: 2000
+  max_tool_output: 8000
+check:
+  timeout_ms: 5000
+documents:
+  max_files: 25
+  max_total_bytes: 104857600
+  chunk_size: 800
+  chunk_overlap: 100
+  context_top_k: 12
+`,
+      ),
+    );
+    expect(cfg.voice?.kickoff_ms).toBe(2000);
+    expect(cfg.voice?.max_tool_output).toBe(8000);
+    expect(cfg.check?.timeout_ms).toBe(5000);
+    expect(cfg.documents?.max_files).toBe(25);
+    expect(cfg.documents?.context_top_k).toBe(12);
+  });
+
+  it("env-overrides optional tunable keys (DI_DOCUMENTS__MAX_FILES)", () => {
+    process.env.DI_DOCUMENTS__MAX_FILES = "50";
+    try {
+      const cfg = loadConfig(writeConfig(minimal));
+      expect(cfg.documents?.max_files).toBe(50);
+    } finally {
+      delete process.env.DI_DOCUMENTS__MAX_FILES;
+    }
+  });
+
   it("rejects a missing file", () => {
     expect(() => loadConfig("/nonexistent/config.yaml")).toThrow(ConfigError);
   });

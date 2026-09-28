@@ -10,6 +10,7 @@ import {
 } from "./opfs-store";
 import { generateReport } from "./agent/report-generator";
 import { DiError } from "./errors";
+import { LLM_TURN_TIMEOUT_MS } from "./timeouts";
 
 export type { ReportDto };
 
@@ -36,7 +37,7 @@ export async function ensureClientReport(id: string): Promise<ReportDto> {
       turns,
     },
     undefined,
-    { signal: AbortSignal.timeout(90_000) },
+    { signal: AbortSignal.timeout(LLM_TURN_TIMEOUT_MS) },
   );
   await saveClientReport(id, report);
   await setClientSessionStatus(id, "reported");
