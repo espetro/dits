@@ -107,12 +107,25 @@ export class WasmTts implements TtsEngine {
             type: "module",
           });
         this.worker = worker;
-        worker.onerror = (ev) =>
+        // a syntax/parse error in the worker script never reaches the rpc
+        // channel — reject boot on worker.onerror so we fail fast instead
+        // of hanging until the rpc timeout
+        let rejectBoot: ((err: Error) => void) | null = null;
+        const bootCrash = new Promise<never>((_resolve, reject) => {
+          rejectBoot = reject;
+        });
+        worker.onerror = (ev) => {
+          const message =
+            typeof ev === "object" && ev !== null && "message" in ev
+              ? String(ev.message)
+              : String(ev);
           pushVoiceHealth({
             kind: "worker.error",
             ok: false,
-            detail: `tts: ${String(ev)}`,
+            detail: `tts: ${message}`,
           });
+          rejectBoot?.(new Error(`tts worker error before ready: ${message}`));
+        };
         const channel = new StreamingRPCChannel<object, KittenTtsApi>(
           workerTransport(worker as unknown as Worker),
           { timeout: RPC_TIMEOUT_MS },
@@ -120,11 +133,15 @@ export class WasmTts implements TtsEngine {
         this.channel = channel;
         const api = channel.getAPI();
         // init doubles as the ready handshake; a worker-side throw rejects here
-        await api.init({
-          model,
-          voices,
-          wasmBase: this.deps.wasmBase ?? VAD_ASSETS_BASE,
-        });
+        await Promise.race([
+          api.init({
+            model,
+            voices,
+            wasmBase: this.deps.wasmBase ?? VAD_ASSETS_BASE,
+          }),
+          bootCrash,
+        ]);
+        rejectBoot = null;
         this.api = api;
       } catch (err) {
         pushVoiceHealth({
@@ -264,37 +281,58 @@ export class WasmStt implements SttEngine {
           this.deps.workerFactory?.() ??
           new Worker(new URL("./sherpa/stt-worker.ts", import.meta.url), { type: "classic" });
         this.worker = worker;
-        worker.onerror = (ev) =>
+        // a syntax/parse error in the classic worker script (e.g. vite dev
+        // serving it transformed) never reaches the rpc channel — reject
+        // boot on worker.onerror so we fall back to builtin immediately
+        let rejectBoot: ((err: Error) => void) | null = null;
+        const bootCrash = new Promise<never>((_resolve, reject) => {
+          rejectBoot = reject;
+        });
+        worker.onerror = (ev) => {
+          const message =
+            typeof ev === "object" && ev !== null && "message" in ev
+              ? String(ev.message)
+              : String(ev);
           pushVoiceHealth({
             kind: "worker.error",
             ok: false,
-            detail: `stt: ${String(ev)}`,
+            detail: `stt: ${message}`,
           });
+          rejectBoot?.(new Error(`stt worker error before ready: ${message}`));
+        };
         const channel = new StreamingRPCChannel<object, SherpaSttApi>(
           workerTransport(worker as unknown as Worker),
           { timeout: RPC_TIMEOUT_MS },
         );
         this.channel = channel;
         const api = channel.getAPI();
-        await api.init(
-          {
-            model,
-            tokens,
-            assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
-          },
-          (text) => {
-            if (text.trim() && this.fedAt !== null && !this.partialSent) {
-              pushVoiceHealth({ kind: "stt.firstPartial", ok: true, ms: Date.now() - this.fedAt });
-              this.partialSent = true;
-            }
-            this.cb?.onInterim(text);
-          },
-          (text) => {
-            this.fedAt = null;
-            this.partialSent = false;
-            if (text.trim()) this.cb?.onFinal(text);
-          },
-        );
+        await Promise.race([
+          api.init(
+            {
+              model,
+              tokens,
+              assets: { glueUrl: sherpaGlueUrl, asrUrl: sherpaAsrUrl, wasmUrl: sherpaWasmUrl },
+            },
+            (text) => {
+              if (text.trim() && this.fedAt !== null && !this.partialSent) {
+                pushVoiceHealth({
+                  kind: "stt.firstPartial",
+                  ok: true,
+                  ms: Date.now() - this.fedAt,
+                });
+                this.partialSent = true;
+              }
+              this.cb?.onInterim(text);
+            },
+            (text) => {
+              this.fedAt = null;
+              this.partialSent = false;
+              if (text.trim()) this.cb?.onFinal(text);
+            },
+          ),
+          bootCrash,
+        ]);
+        rejectBoot = null;
         this.api = api;
         for (const f of this.preboot.splice(0)) {
           void api
