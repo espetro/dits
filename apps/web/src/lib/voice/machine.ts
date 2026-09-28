@@ -13,7 +13,8 @@ export type VoiceEvent =
   | { type: "RECONNECTING"; attempt: number }
   | { type: "ERROR"; message: string }
   | { type: "RETRY" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "RECOVERED" };
 
 export interface VoiceContext {
   error: string | null;
@@ -104,6 +105,8 @@ export const voiceMachine = setup({
         RESET: { target: "idle", actions: "clear" },
         // retry: driver restart rebuilds the socket/recognizer and reconnects
         RETRY: { target: "idle", actions: "clear" },
+        // a landed agent reply proves the pipeline recovered on its own
+        RECOVERED: { target: "listening", actions: "clear" },
       },
     },
   },

@@ -152,4 +152,17 @@ describe("voiceMachine reconnecting", () => {
     expect(snap.value).toBe("idle");
     expect(snap.context.error).toBeNull();
   });
+
+  it("RECOVERED from error returns to listening and clears the error", () => {
+    const actor = createActor(voiceMachine);
+    actor.start();
+    actor.send({ type: "CONNECT" });
+    actor.send({ type: "CONNECTED" });
+    actor.send({ type: "ERROR", message: "voice.llm" });
+    expect(actor.getSnapshot().value).toBe("error");
+    actor.send({ type: "RECOVERED" });
+    const snap = actor.getSnapshot();
+    expect(snap.value).toBe("listening");
+    expect(snap.context.error).toBeNull();
+  });
 });
