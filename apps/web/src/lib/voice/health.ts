@@ -14,7 +14,8 @@ export type VoiceHealthKind =
   | "tts.speak"
   | "playback.gap"
   | "playback.drained"
-  | "playback.stop";
+  | "playback.stop"
+  | "gate";
 
 export interface VoiceHealthEvent {
   at: number;
@@ -22,6 +23,12 @@ export interface VoiceHealthEvent {
   ok: boolean;
   ms?: number;
   detail?: string;
+  /** gate events: the playback echo gate was active (always true today) */
+  duringPlayback?: boolean;
+  /** gate events: silero speech prob of the vad frame, when known */
+  vadProb?: number;
+  /** gate events: whether the speech evidence was allowed through */
+  allowed?: boolean;
 }
 
 const CAP = 300;
