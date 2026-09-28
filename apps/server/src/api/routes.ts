@@ -14,6 +14,7 @@ import {
 } from "@di/shared";
 import { vValidator } from "@hono/valibot-validator";
 import type { Db } from "../store/db";
+import type { Config } from "@di/shared";
 import type { ReportLlm } from "../report/generate";
 import { generateReport } from "../report/generate";
 import { testRoutes } from "./test-mode";
@@ -52,6 +53,8 @@ export function apiRoutes(
     embeddings?: ReturnType<typeof import("../rag/ingest").embeddingsClientFromConfig>;
     /** LLM port for POST /sessions/:id/report; without it the route is 503. */
     reportLlm?: ReportLlm;
+    /** config.documents overrides for ingest caps/chunking/retrieval depth. */
+    documents?: Config["documents"];
   },
 ): Hono {
   const api = new Hono();
@@ -334,6 +337,7 @@ export function apiRoutes(
     try {
       const docs = await ingestDocuments(db, sessionId, files, {
         embeddings: opts.embeddings,
+        documents: opts.documents,
       });
       return c.json({ documents: docs.map((d) => v.parse(DocumentSchema, d)) }, 201);
     } catch (err) {
@@ -364,9 +368,10 @@ export function apiRoutes(
       .executeTakeFirst();
     if (!session) return c.json({ error: "session not found", code: "session_not_found" }, 404);
     const query = c.req.query("query") ?? "";
+    const topK = opts.documents?.context_top_k ?? 8;
     const rows = await loadVectors(db, sessionId);
     if (!query || rows.length === 0) {
-      const chunks = rows.slice(0, 8).map((r) => ({
+      const chunks = rows.slice(0, topK).map((r) => ({
         document_id: r.document_id,
         document_name: r.document_name,
         seq: r.seq,
@@ -378,7 +383,7 @@ export function apiRoutes(
     if (!opts.embeddings)
       return c.json({ error: "no embeddings provider configured", code: "no_embeddings" }, 503);
     const [queryVec] = await opts.embeddings.embed([query]);
-    const chunks = retrieve(queryVec!, rows, 8);
+    const chunks = retrieve(queryVec!, rows, topK);
     return c.json(v.parse(SessionContextResponseSchema, { chunks }));
   });
 

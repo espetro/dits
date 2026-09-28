@@ -33,3 +33,23 @@ files:
   db_path: .deepinterview/di.db
   log_path: .deepinterview/di.log
   data_dir: .deepinterview/data
+
+# optional ops tunables. every default below matches the code when the
+# section is omitted, so these are no-ops unless you change the values.
+#
+# voice:
+#   kickoff_ms: 5000        # delay before the agent's opening turn
+#   max_tool_output: 4000   # chars of tool output fed to the llm
+#
+# check:
+#   timeout_ms: 3000        # `di --check` provider probe budget
+#
+# documents:                # RAG ingestion caps + chunking
+#   max_files: 10
+#   max_total_bytes: 20971520
+#   chunk_size: 1000
+#   chunk_overlap: 150
+#   context_top_k: 8        # chunks returned by /v1/sessions/:id/context
+#
+# llm.max_tokens also exists (completion cap; anthropic flavor defaults to
+# 1024, openai-shaped calls send no cap unless set).

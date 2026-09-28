@@ -45,6 +45,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
     apiRoutes(deps.db, {
       testMode: deps.testMode,
       embeddings: embeddingsClientFromConfig(deps.config.embeddings),
+      documents: deps.config.documents,
       reportLlm: new OpenAiChatClient({
         baseUrl: deps.config.llm.base_url,
         apiKey: deps.config.llm.api_key,
@@ -52,6 +53,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
         flavor: deps.config.llm.flavor,
         reasoningExclude: deps.config.llm.reasoning_exclude,
         thinkingDisabled: deps.config.llm.thinking_disabled,
+        maxTokens: deps.config.llm.max_tokens,
       }),
     }),
   );

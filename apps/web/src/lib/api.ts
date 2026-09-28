@@ -5,6 +5,7 @@
 import { dequeuePendingTurn, enqueuePendingTurn, getPendingTurns } from "./opfs-store";
 import type { PendingTurn } from "./opfs-store";
 import { DiError } from "./errors";
+import { envNum } from "./env";
 
 const BASE = import.meta.env.VITE_DI_API_BASE ?? "";
 
@@ -22,8 +23,8 @@ async function apiFailure(res: Response, op: string): Promise<DiError> {
   return new DiError(`api.${body?.code ?? op}`, { status: res.status });
 }
 
-const PENDING_TURN_RETRIES = 3;
-const POST_TURN_RETRY_BASE_MS = 1_000;
+const PENDING_TURN_RETRIES = envNum("VITE_TURN_POST_RETRIES", 3);
+const POST_TURN_RETRY_BASE_MS = envNum("VITE_TURN_POST_RETRY_BASE_MS", 1_000);
 
 export interface SessionDto {
   id: string;
