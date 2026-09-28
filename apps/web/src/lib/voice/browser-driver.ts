@@ -22,6 +22,7 @@ import type { PcmPlayer } from "./pcm-player";
 import { pushVoiceHealth } from "./health";
 import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
+import { envNum } from "../env";
 
 /**
  * Browser driver, multi-mode. Engine resolution (lib/voice/engines.ts) picks
@@ -122,17 +123,17 @@ export class BrowserVoiceDriver implements SpeechDriver {
   /** emit every Nth qualifying vad-frame gate event (96ms cadence -> ~1.2/s cap) */
   private static readonly VAD_FRAME_LOG_EVERY = 8;
   /** continuation grace before interim speech cuts the agent off (p0.8) */
-  private static readonly BARGE_IN_GRACE_MS = 300;
+  private static readonly BARGE_IN_GRACE_MS = envNum("VITE_VOICE_BARGE_IN_GRACE_MS", 300);
   /** echo gate tail after playback drains: room echo / aec lag outlives it */
-  private static readonly ECHO_GATE_TAIL_MS = 350;
+  private static readonly ECHO_GATE_TAIL_MS = envNum("VITE_VOICE_ECHO_GATE_TAIL_MS", 350);
   /** frame speech-prob at which a gated frame counts toward a real barge-in:
    * speaker bleed into the mic scores far below close-talked speech */
-  private static readonly BARGE_IN_PROB = 0.85;
+  private static readonly BARGE_IN_PROB = envNum("VITE_VOICE_BARGE_IN_PROB", 0.85);
   /** consecutive >=BARGE_IN_PROB frames required to arm barge-in during
    * playback (~190ms of sustained confident speech) */
-  private static readonly BARGE_IN_FRAMES = 2;
+  private static readonly BARGE_IN_FRAMES = envNum("VITE_VOICE_BARGE_IN_FRAMES", 2);
   /** confidence at which an unconfirmed final is trusted without interim evidence */
-  private static readonly MIN_CONFIDENCE = 0.6;
+  private static readonly MIN_CONFIDENCE = envNum("VITE_VOICE_MIN_CONFIDENCE", 0.6);
   /** recognition errors that must never trigger an onend restart loop */
   private static readonly FATAL_ERRORS = new Set(["not-allowed", "audio-capture"]);
 
@@ -538,22 +539,31 @@ export class BrowserVoiceDriver implements SpeechDriver {
         if (mode === "wasm") {
           const engine = this.getTtsEngine();
           if (!engine) return;
-          // same per-sentence budget as the endpoint path (p0.3): a stalled
-          // wasm synth must skip the sentence, not stall the speak queue
+          // time-to-first-chunk budget (p0.3): a stalled synth must skip the
+          // sentence, not stall the speak queue; once pcm flows the serialized
+          // worker queue keeps chunks coming, so no total deadline applies
           const sentenceTimeout = new Error("wasm tts sentence timed out");
-          let pcm: Float32Array;
+          const stream = engine.speak(sentence)[Symbol.asyncIterator]();
           try {
-            pcm = await Promise.race([
-              engine.speak(sentence),
+            const first = await Promise.race([
+              stream.next(),
               new Promise<never>((_resolve, reject) =>
                 setTimeout(() => reject(sentenceTimeout), TTS_SENTENCE_TIMEOUT_MS),
               ),
             ]);
+            if (!first.done) {
+              if (!ctrl.signal.aborted) this.player.writeFloat32(first.value);
+              for (;;) {
+                const { done, value } = await stream.next();
+                if (done || ctrl.signal.aborted) break;
+                this.player.writeFloat32(value);
+              }
+            }
           } catch (err) {
             if (err === sentenceTimeout) {
-              // the race won by abandoning engine.speak — its remote iterator
-              // stays pending, so the engine-side tts.speak event never fires;
-              // surface the stall here or the ring is silent about it
+              // the race won by abandoning the first next() — its remote
+              // iterator stays pending, so the engine-side tts.speak event
+              // never fires; surface the stall here or the ring is silent
               pushVoiceHealth({
                 kind: "tts.speak",
                 ok: false,
@@ -562,9 +572,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
               });
             }
             throw err;
+          } finally {
+            // early-exit paths (timeout/abort): return() propagates into the
+            // engine generator -> remote iterator -> worker generator finally,
+            // freeing the serialized speak slot
+            void stream.return?.(undefined);
           }
-          if (ctrl.signal.aborted) return;
-          this.player.writeFloat32(pcm);
           return;
         }
         const pcm = await tts(

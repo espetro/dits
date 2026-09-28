@@ -9,10 +9,12 @@ import { atom } from "nanostores";
  * time-based release so the orb falls back to idle smoothly.
  */
 
+import { envNum } from "../env";
+
 export const $micAttack = atom(0);
 export const $agentAttack = atom(0);
 
-const RELEASE_MS = 220;
+const RELEASE_MS = envNum("VITE_VOICE_LEVEL_RELEASE_MS", 220);
 
 function decayed(attack: number, pushedAt: number, now: number): number {
   if (attack <= 0) return 0;

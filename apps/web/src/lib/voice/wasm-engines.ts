@@ -9,6 +9,7 @@ import { DiError } from "../errors";
 import type { KittenTtsApi } from "./kitten/kitten-api";
 import type { SherpaSttApi } from "./sherpa/stt-api";
 import { pushVoiceHealth } from "./health";
+import { envNum } from "../env";
 
 // vendored sherpa-onnx browser build under public/sherpa/ (apache-2.0,
 // regenerated via scripts/repack-sherpa-stt.ts). the npm package only
@@ -71,7 +72,7 @@ export interface WorkerLike {
 const VAD_ASSETS_BASE = (import.meta.env.VITE_VAD_ASSETS_BASE as string | undefined) ?? "/vad/";
 
 /** wasm compile + model parse on slow machines outlasts the 30s default */
-const RPC_TIMEOUT_MS = 120_000;
+const RPC_TIMEOUT_MS = envNum("VITE_VOICE_RPC_TIMEOUT_MS", 120_000);
 
 function healthError(err: unknown): string {
   return String(err instanceof Error ? err.message : err);
@@ -176,36 +177,28 @@ export class WasmTts implements TtsEngine {
     return this.readyPromise;
   }
 
-  async speak(sentence: string): Promise<Float32Array> {
+  async *speak(sentence: string): AsyncIterable<Float32Array> {
     await this.boot();
     const api = this.api;
     if (!api) throw new WasmTtsNotReadyError();
     const startedAt = Date.now();
     const iterator = api.speak(sentence)[Symbol.asyncIterator]();
     this.activeSpeaks.add(iterator);
+    let firstChunkMs: number | null = null;
     try {
-      const chunks: Float32Array[] = [];
-      let total = 0;
       for (;;) {
         const { done, value } = await iterator.next();
         if (done) break;
-        chunks.push(value);
-        total += value.length;
-      }
-      if (this.disposed) throw new DiError("models.disposed", undefined, "tts engine disposed");
-      const pcm = new Float32Array(total);
-      let off = 0;
-      for (const chunk of chunks) {
-        pcm.set(chunk, off);
-        off += chunk.length;
+        if (this.disposed) throw new DiError("models.disposed", undefined, "tts engine disposed");
+        if (firstChunkMs === null) firstChunkMs = Date.now() - startedAt;
+        yield value;
       }
       pushVoiceHealth({
         kind: "tts.speak",
         ok: true,
         ms: Date.now() - startedAt,
-        detail: `${sentence.length} chars`,
+        detail: `${sentence.length} chars, first chunk ${firstChunkMs ?? 0}ms`,
       });
-      return pcm;
     } catch (err) {
       pushVoiceHealth({
         kind: "tts.speak",
@@ -215,6 +208,9 @@ export class WasmTts implements TtsEngine {
       });
       throw err;
     } finally {
+      // propagate consumer abandon into the remote iterator (same cancel path
+      // cancelPending uses) so the worker generator's finally frees its slot
+      void iterator.return?.(undefined);
       this.activeSpeaks.delete(iterator);
     }
   }
