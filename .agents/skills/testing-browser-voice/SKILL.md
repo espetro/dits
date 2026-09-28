@@ -25,12 +25,14 @@ Mock provider: `bun run packages/evals/mock-provider/main.ts --port 9000` (canne
 
 ## Fake microphone
 
-Relaunch Chrome for Testing with:
+The computer/browser_console tools attach to the session-managed Chrome for Testing at `/opt/.devin/chrome/chrome/linux-*/chrome-linux64/chrome` on `--remote-debugging-port=29229` with `--user-data-dir=/home/ubuntu/.browser_data_dir`. To get a fake mic, kill that process and relaunch it with the SAME argv plus:
 
 ```
 --use-fake-device-for-media-stream --use-fake-ui-for-media-stream
 --use-file-for-fake-audio-capture=/tmp/speech_loop.wav
 ```
+
+Do NOT spawn a second Chrome on a different port/profile — browser_console won't reach it. `/tmp` is wiped between runs: recreate the wav before relaunching (ffmpeg concat of HF `csukuangfj/sherpa-onnx-streaming-zipformer-en-2023-06-26` `test_wavs/0.wav` + ~3.5s `anullsrc` silence + `1.wav` + ~3s silence, `-ar 16000 -ac 1`, verify with `-af silencedetect`).
 
 `speech_loop.wav`: 16kHz mono PCM16 real speech plus a few seconds of trailing silence so the silero VAD endpoints each loop. A continuously-looping file may never trigger VAD speech-end — sherpa produces partials but no flush/final turn; vary silence length or stop/restart capture if finals never arrive.
 
