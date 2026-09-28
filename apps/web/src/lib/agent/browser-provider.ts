@@ -7,6 +7,7 @@ import type {
 import type { BrowserLlmSection, LlmSection, RemoteLlmSection } from "@di/shared";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
 import { DiError } from "../errors";
+import { envStr } from "../env";
 
 /**
  * In-browser LLM provider seam. `createLlmModel` picks the right
@@ -43,7 +44,10 @@ let transformersModel: AnyLanguageModel | null = null;
 let transformersModelId: string | null = null;
 let transformersModelWasm = false;
 
-export const DEFAULT_TRANSFORMERS_MODEL_ID = "onnx-community/Qwen3-0.6B-ONNX";
+export const DEFAULT_TRANSFORMERS_MODEL_ID = envStr(
+  "VITE_TRANSFORMERS_MODEL_ID",
+  "onnx-community/Qwen3-0.6B-ONNX",
+);
 
 /** Curated transformers.js catalog shown in the settings model manager. */
 export interface CatalogModel {

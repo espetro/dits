@@ -1,5 +1,6 @@
 import { persistentAtom } from "@nanostores/persistent";
 import { computed } from "nanostores";
+import { envNum } from "./env";
 import {
   PROVIDER_PROFILE_STORAGE_KEY,
   RUNTIME_MODE_STORAGE_KEY,
@@ -51,6 +52,9 @@ export const $serverReachable = persistentAtom<boolean | null>("di.server-reacha
 
 const API_BASE = (import.meta.env.VITE_DI_API_BASE as string | undefined) ?? "";
 
+/** Health-probe budget: keep it short — it only gates driver selection. */
+const PROBE_TIMEOUT_MS = envNum("VITE_SERVER_PROBE_TIMEOUT_MS", 2_000);
+
 /**
  * Strict health check: the di server answers JSON `{ok:true}` — anything else
  * (including a 200 from an SPA fallback serving index.html) is not a server.
@@ -82,7 +86,7 @@ export async function probeServer(): Promise<boolean> {
   }
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 2000);
+    const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
     const res = await fetch(`${API_BASE}/api/health`, {
       method: "GET",
       signal: ctrl.signal,

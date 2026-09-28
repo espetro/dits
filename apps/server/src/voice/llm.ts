@@ -30,6 +30,12 @@ export interface OpenAiChatOptions {
   reasoningExclude?: boolean;
   /** Send `thinking: {type: "disabled"}` (Z.AI-style) on chat requests. */
   thinkingDisabled?: boolean;
+  /**
+   * Completion token cap (config.llm.max_tokens). Required by the
+   * Anthropic wire protocol (falls back to 1024); sent on OpenAI-shaped
+   * requests only when set.
+   */
+  maxTokens?: number;
   fetchImpl?: typeof fetch;
   /** When set, emit llm.request/llm.result pipeline events. */
   events?: EventSink;
@@ -76,6 +82,7 @@ export class OpenAiChatClient {
         body: JSON.stringify({
           model: this.opts.model,
           messages: toWireMessages(messages),
+          ...(this.opts.maxTokens ? { max_tokens: this.opts.maxTokens } : {}),
           ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
           ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0
@@ -154,7 +161,7 @@ export class OpenAiChatClient {
       .join("\n\n");
     const body = {
       model: this.opts.model,
-      max_tokens: 1024,
+      max_tokens: this.opts.maxTokens ?? 1024,
       ...(system ? { system } : {}),
       messages: messages
         .filter((m) => m.role === "user" || m.role === "assistant")
@@ -257,6 +264,7 @@ export class OpenAiChatClient {
           model: this.opts.model,
           messages: toWireMessages(messages),
           stream: true,
+          ...(this.opts.maxTokens ? { max_tokens: this.opts.maxTokens } : {}),
           ...(this.opts.reasoningExclude ? { reasoning: { exclude: true } } : {}),
           ...(this.opts.thinkingDisabled ? { thinking: { type: "disabled" } } : {}),
           ...(tools && tools.length > 0

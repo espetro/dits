@@ -42,10 +42,12 @@ import { ScenarioCard } from "../../components/scenario-card";
 import type { Scenario } from "../../components/scenario-card";
 import { intlFor } from "../../locales/i18n";
 import { errorDetail } from "../../lib/errors";
-import { DEFAULT_SESSION_TOOLS } from "@di/shared";
+import { DEFAULT_SESSION_TOOLS, DOCUMENT_CAPS } from "@di/shared";
 
-const MAX_FILES = 10;
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+// Pre-upload mirror of the server-enforced caps (rag/ingest.ts); the
+// operator can raise the server side via documents.max_* config keys.
+const MAX_FILES = DOCUMENT_CAPS.maxFiles;
+const MAX_TOTAL_BYTES = DOCUMENT_CAPS.maxTotalBytes;
 const ACCEPTED = [".pdf", ".md", ".markdown", ".txt", ".docx"];
 
 export const Route = createFileRoute("/{-$locale}/setup")({
