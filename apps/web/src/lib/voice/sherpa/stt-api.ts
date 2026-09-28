@@ -1,16 +1,17 @@
 /**
  * sherpa-onnx streaming zipformer (int8, ctc) worker api.
  *
- * sherpa ships no browser esm build: the emscripten glue + asr api are
- * classic scripts whose top-level vars must land on the worker global
- * scope, so they load via the injected `loadScripts` (importScripts on a
- * classic worker) and expose `Module`/`createOnlineRecognizer` there.
- * The asset urls (glue/asr/wasm) are resolved on the main thread via ?url
- * and arrive in the init args; the 15MB wasm binary resolves via
- * locateFile, and the model + tokens bytes land in MEMFS.
+ * the npm package only ships the nodejs glue, so the runtime is the
+ * vendored browser build (public/sherpa/, see its README): classic
+ * scripts whose top-level vars land on the worker global scope, loaded
+ * via the injected `loadScripts` (importScripts on a classic worker).
+ * the glue self-initializes at script load: `Module` must already sit on
+ * the global scope with locateFile (routes the 13MB .wasm and the stub
+ * .data fetch) plus the ready/abort hooks — there is no factory call.
+ * the model + tokens bytes land in MEMFS via FS.writeFile.
  */
 
-/** vite-emitted ?url asset urls, resolved on the main thread. */
+/** urls for the vendored browser build under public/sherpa/. */
 export interface SttAssets {
   /** emscripten glue (classic script, attaches `Module`) */
   glueUrl: string;
@@ -18,6 +19,8 @@ export interface SttAssets {
   asrUrl: string;
   /** wasm binary; resolved via locateFile */
   wasmUrl: string;
+  /** file-packager stub blob; fetched unconditionally by the glue at init */
+  dataUrl: string;
 }
 
 export interface SttInitArgs {
@@ -43,9 +46,6 @@ export interface SherpaSttApi {
   flush(): Promise<void>;
 }
 
-interface SherpaFs {
-  writeFile(path: string, data: Uint8Array): void;
-}
 interface SherpaStream {
   acceptWaveform(sampleRate: number, samples: Float32Array): void;
   inputFinished(): void;
@@ -58,15 +58,30 @@ interface SherpaRecognizer {
   reset(stream: SherpaStream): void;
   getResult(stream: SherpaStream): { text?: string };
 }
-interface SherpaModule {
-  FS: SherpaFs;
-}
-interface SherpaFactoryArg {
+/** seeded on the worker global scope BEFORE the glue loads. */
+interface SherpaModuleSeed {
   locateFile?: (path: string, dir: string) => string;
-  wasmBinary?: ArrayBuffer;
+  onRuntimeInitialized?: () => void;
+  onAbort?: (what: unknown) => void;
+}
+/** the same object after the glue finishes init (populated in place). */
+interface SherpaModule extends SherpaModuleSeed {
+  /**
+   * module-level export the glue itself uses for .data files — in this
+   * flat classic build top-level `var FS` lands on worker globalThis, not
+   * on Module, so there is no `Module.FS`.
+   */
+  FS_createDataFile(
+    parent: string,
+    name: string | null,
+    data: Uint8Array,
+    canRead: boolean,
+    canWrite: boolean,
+    canOwn: boolean,
+  ): void;
 }
 interface SherpaGlobalScope {
-  Module: (arg: SherpaFactoryArg) => Promise<SherpaModule>;
+  Module: SherpaModuleSeed | SherpaModule;
   createOnlineRecognizer(
     module: SherpaModule,
     config: {
@@ -121,13 +136,28 @@ export function createSherpaSttApi(deps: SherpaSttDeps): SherpaSttApi {
     async init(args, partialCb, finalCb) {
       onPartial = partialCb;
       onFinal = finalCb;
+      // the glue self-initializes at script load, so Module is seeded on the
+      // global scope FIRST: locateFile routes the .wasm + .data fetches, the
+      // ready/abort hooks settle init — there is no factory call
+      const initialized = new Promise<void>((resolve, reject) => {
+        g.Module = {
+          locateFile: (path) =>
+            path.endsWith(".wasm")
+              ? args.assets.wasmUrl
+              : path.endsWith(".data")
+                ? args.assets.dataUrl
+                : path,
+          onRuntimeInitialized: resolve,
+          onAbort: (what) => reject(new Error(`sherpa wasm aborted: ${String(what)}`)),
+        };
+      });
       // classic scripts: top-level var/function land on the worker global scope
       deps.loadScripts([args.assets.glueUrl, args.assets.asrUrl]);
-      const mod = await g.Module({
-        locateFile: (path) => (path.endsWith(".wasm") ? args.assets.wasmUrl : path),
-      });
-      mod.FS.writeFile("model.onnx", new Uint8Array(args.model));
-      mod.FS.writeFile("tokens.txt", new Uint8Array(args.tokens));
+      await initialized;
+      // init resolved => the glue populated its exports on the seeded Module
+      const mod = g.Module as SherpaModule;
+      mod.FS_createDataFile("/model.onnx", null, new Uint8Array(args.model), true, true, true);
+      mod.FS_createDataFile("/tokens.txt", null, new Uint8Array(args.tokens), true, true, true);
       recognizer = g.createOnlineRecognizer(mod, {
         featConfig: { sampleRate: 16000, featureDim: 80 },
         modelConfig: {

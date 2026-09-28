@@ -1,11 +1,16 @@
 /**
  * VAD gate over @ricky0123/vad-web. Integration approach: MicVAD constructed
- * with startOnLoad: false and a never-called getStream, then fed frames via
+ * with startOnLoad: false and a never-resolving getStream, then fed frames via
  * its public processFrame(Float32Array). That reuses vad-web's own silero
  * model loading (state tensors, thresholds, hysteresis) without its audio
  * graph, so our capture.ts stays the single audio path and we keep the
  * PCM16 bytes for streaming to the server. NonRealTimeVAD.run() only accepts
  * complete audio arrays, so it does not fit streaming.
+ *
+ * start() IS needed: the frame processor early-returns while inactive, and
+ * `active` is only set by frameProcessor.resume() inside start(). start()
+ * resumes synchronously, then parks on the never-resolving getStream stub —
+ * the audio graph is never built, but frames flow.
  *
  * Assets: silero onnx + ort wasm are vendored into apps/web/public/vad/ (committed,
  * no CDN); baseAssetPath/onnxWASMBasePath point there.
@@ -87,9 +92,10 @@ export async function createVadGate(opts: VadGateOptions = {}): Promise<VadGate>
 
 /**
  * Default impl: MicVAD.new with startOnLoad false and a getStream stub that
- * never resolves (start() is never called; only processFrame/destroy are
- * used). ort wasm paths point at the vendored assets. Lazy dynamic import so
- * tests and non-voice routes never load onnxruntime.
+ * never resolves: start() activates the frame processor synchronously, then
+ * parks awaiting the stream — only processFrame/destroy are used. ort wasm
+ * paths point at the vendored assets. Lazy dynamic import so tests and
+ * non-voice routes never load onnxruntime.
  */
 async function createDefaultImpl(assetsBase: string, opts: VadGateOptions): Promise<VadImpl> {
   const { MicVAD } = await import("@ricky0123/vad-web");
@@ -98,12 +104,16 @@ async function createDefaultImpl(assetsBase: string, opts: VadGateOptions): Prom
     baseAssetPath: assetsBase,
     onnxWASMBasePath: assetsBase,
     startOnLoad: false,
-    // never called: we never start() the internal audio graph
+    // start() awaits this forever — the internal audio graph never attaches
     getStream: () => new Promise<MediaStream>(() => undefined),
     onSpeechStart: () => opts.onSpeechStart?.(),
     onSpeechEnd: (audio) => opts.onSpeechEnd?.(audio),
     onFrameProcessed: (probs, frame) => opts.onFrameProcessed?.(probs, frame),
   });
+  // activate the frame processor: without resume() processFrame is a no-op.
+  // start() resumes first, then awaits getStream forever — never settles, so
+  // the audio graph is never built and destroy() still releases the model.
+  void mic.start();
   return {
     processFrame: (frame) => mic.processFrame(frame),
     destroy: () => mic.destroy(),

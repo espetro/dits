@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreFiles": ["spikes/**", "apps/web/public/vad/**", "apps/web/src/components/vendor/**"],
+  "ignoreFiles": [
+    "spikes/**",
+    "apps/web/public/vad/**",
+    "apps/web/public/sherpa/**",
+    "apps/web/src/components/vendor/**"
+  ],
   "ignore": [
     "build/release.ts",
     "packages/evals/src/spike-sqlite-vec.ts",
@@ -12,7 +17,8 @@
     "scripts/flatten-locales.ts",
     "scripts/pocket-shim.ts",
     "scripts/seed-demo.ts",
-    "tests/e2e/playwright.config.ts"
+    "tests/e2e/playwright.config.ts",
+    "scripts/repack-sherpa-stt.ts"
   ],
   "ignoreDependencies": [
     "@aeriondyseti/drizzle-sqlite-vec",
