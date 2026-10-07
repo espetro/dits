@@ -119,6 +119,8 @@ export class VoiceLoop {
   private closed = false;
   private kickoffTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly kickoffMs: number;
+  /** Truncation budget for tool results fed to the llm (config.voice.max_tool_output). */
+  private readonly maxToolOutput: number;
 
   constructor(deps: VoiceLoopDeps) {
     this.sessionId = deps.sessionId;
@@ -126,7 +128,8 @@ export class VoiceLoop {
     this.db = deps.db;
     this.send = deps.send;
     this.sendBinary = deps.sendBinary;
-    this.kickoffMs = deps.kickoffMs ?? KICKOFF_DELAY_MS;
+    this.kickoffMs = deps.kickoffMs ?? deps.config.voice?.kickoff_ms ?? KICKOFF_DELAY_MS;
+    this.maxToolOutput = deps.config.voice?.max_tool_output ?? MAX_TOOL_OUTPUT;
     const events = {
       postEvent: (sid: string, type: string, payload?: unknown) =>
         this.postEvent(sid, type, payload),
@@ -159,6 +162,7 @@ export class VoiceLoop {
         flavor: this.config.llm.flavor,
         reasoningExclude: this.config.llm.reasoning_exclude,
         thinkingDisabled: this.config.llm.thinking_disabled,
+        maxTokens: this.config.llm.max_tokens,
         events,
         sessionId: this.sessionId,
       });
@@ -551,7 +555,7 @@ export class VoiceLoop {
       const content = state[tool] ?? "";
       await this.postEvent(this.sessionId, `tool.${name}`, { length: content.length });
       const text = tool === "whiteboard" ? describeWhiteboardSnapshot(content) : content;
-      return JSON.stringify({ text: truncate(text) });
+      return JSON.stringify({ text: truncate(text, this.maxToolOutput) });
     }
     if (name.startsWith("update_")) {
       const tool = name.slice(7);
