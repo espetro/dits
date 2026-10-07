@@ -145,7 +145,8 @@ mobile) stacks, top to bottom:
     stt.feed/flush failures, tts.speak per utterance (total ms; first-chunk
     ms in detail) — including the
     sentence-timeout path where the remote iterator never settles,
-    playback.gap/drained/stop with cause, gate decisions with vad prob —
+    playback.gap/drained/stop with cause, turnstile challenge ok/fail + ms
+    (managed demo endpoint only), gate decisions with vad prob —
     vad-frame events emit for the first qualifying frame and every 8th
     after, plus every high-prob/earned frame, so the ring keeps the prob
     profile without evicting boot events)

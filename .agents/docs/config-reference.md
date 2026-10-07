@@ -52,6 +52,7 @@ Standalone env vars:
 | `DI_URL`                                                  | target server for the e2e suite (default `http://localhost:3000`)                                                            |
 | `DI_DEMO_LLM_*`                                           | demo LLM endpoint for `dev:server:demo-llm` (`BASE_URL`/`MODEL`/`API_KEY`)                                                   |
 | `VITE_DEMO_LLM_*`                                         | same endpoint exposed to the SPA's one-click demo fill                                                                       |
+| `VITE_TURNSTILE_SITE_KEY`                                 | turnstile sitekey for the managed demo endpoint (fresh token per keyless request); bundled default when unset, empty disables |
 | `VITE_VOICE_DEFAULT`                                      | pin the voice driver (`server`/`browser`), overrides runtime probe                                                           |
 | `VITE_VAD_*`                                              | vad endpointing tuning (`REDEMPTION_MS`, `POSITIVE/NEGATIVE_SPEECH_THRESHOLD`, `MIN_SPEECH_MS`); see `apps/web/.env.example` |
 | `VITE_VOICE_*`                                            | voice pipeline knobs: barge-in gate, timeouts, reconnect backoff, health ring, level decay; see `apps/web/.env.example`      |
