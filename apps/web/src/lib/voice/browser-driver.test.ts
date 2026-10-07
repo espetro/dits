@@ -619,7 +619,12 @@ describe("BrowserVoiceDriver speak drop race", () => {
     (driver as any).engines = { stt: "builtin", tts: "wasm" };
     const resolves: Array<(v: Float32Array) => void> = [];
     (driver as any).wasmTts = {
-      speak: vi.fn(() => new Promise<Float32Array>((r) => resolves.push(r))),
+      speak: vi.fn(() => {
+        async function* chunks() {
+          yield await new Promise<Float32Array>((r) => resolves.push(r));
+        }
+        return chunks();
+      }),
       cancelPending: vi.fn(),
       dispose: vi.fn(),
     };

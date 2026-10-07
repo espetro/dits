@@ -6,41 +6,41 @@ numbers. Example: `DI_LLM__MODEL=gpt-4o` overrides `llm.model`;
 `DI_SERVER__PORT=9000` overrides `server.port`. A value in env always wins over the
 yaml file. Case-insensitive key paths after the prefix.
 
-| Key                     | Type                              | Default                              | Description                                                              |
-| ----------------------- | --------------------------------- | ------------------------------------ | ------------------------------------------------------------------------ |
-| `server.port`           | int 1..65535                      | required                             | HTTP port for the API and SPA                                            |
-| `server.auth`           | `none` \| `token`                 | `none`                               | auth middleware stub, inert in v1                                        |
-| `llm.provider`          | `openai` \| `anthropic` \| `mock` | required                             | LLM contract; endpoints are all OpenAI-shaped                            |
-| `llm.base_url`          | url                               | required                             | OpenAI-compatible base URL, e.g. `http://localhost:9000/v1`              |
-| `llm.api_key`           | string                            | optional                             | bearer key for the LLM endpoint                                          |
-| `llm.model`             | string                            | required                             | model id                                                                 |
-| `llm.reasoning_exclude` | bool                              | `false`                              | send `reasoning: {exclude: true}` (OpenRouter-style) on chat completions |
-| `llm.thinking_disabled` | bool                              | `false`                              | send `thinking: {type: "disabled"}` (Z.AI-style) on chat completions     |
-| `llm.max_tokens`        | int >= 1                          | optional                             | completion token cap; anthropic flavor falls back to 1024, openai-shaped calls send no cap unless set |
-| `stt.base_url`          | url                               | required                             | speech-to-text endpoint (OpenAI transcription shape)                     |
-| `stt.api_key`           | string                            | optional                             | bearer key                                                               |
-| `stt.model`             | string                            | required                             | STT model id                                                             |
-| `stt.mode`              | `buffered`                        | required                             | transport is streaming WS; recognition is per-utterance buffered         |
-| `tts.base_url`          | url                               | required                             | text-to-speech endpoint                                                  |
-| `tts.api_key`           | string                            | optional                             | bearer key                                                               |
-| `tts.model`             | string                            | required                             | TTS model id                                                             |
-| `tts.voice`             | string                            | required                             | voice id, e.g. `alloy`                                                   |
-| `embeddings.base_url`   | url                               | optional                             | embeddings endpoint                                                      |
-| `embeddings.api_key`    | string                            | optional                             | bearer key                                                               |
-| `embeddings.model`      | string                            | required if embeddings block present | embeddings model id                                                      |
-| `phoenix.endpoint`      | url                               | optional                             | Arize Phoenix tracing endpoint                                           |
-| `phoenix.headers`       | map                               | optional                             | headers for the Phoenix endpoint                                         |
-| `files.db_path`         | string                            | optional                             | SQLite database path (default: platform data dir, below)                 |
-| `files.log_path`        | string                            | optional                             | log file path (default: platform data dir)                               |
-| `files.data_dir`        | string                            | optional                             | data directory (default: platform data dir)                              |
-| `voice.kickoff_ms`      | int >= 0                          | `5000`                                 | delay before the agent's opening turn; <= 0 disables the kickoff         |
-| `voice.max_tool_output` | int >= 1                          | `4000`                                 | chars of tool output fed to the llm per read_* call                      |
-| `check.timeout_ms`      | int >= 1                          | `3000`                                 | `di --check` provider probe budget                                       |
-| `documents.max_files`   | int >= 1                          | `10`                                   | server-enforced upload cap (the SPA pre-check mirrors DOCUMENT_CAPS)     |
-| `documents.max_total_bytes` | int >= 1                      | `20971520` (20 MiB)                    | server-enforced total upload size cap                                    |
-| `documents.chunk_size`  | int >= 1                          | `1000`                                 | target chunk size in chars for embedder input                            |
-| `documents.chunk_overlap` | int >= 0                        | `150`                                  | tail overlap carried between chunks                                      |
-| `documents.context_top_k` | int >= 1                        | `8`                                    | chunks returned by `GET /v1/sessions/:id/context`                        |
+| Key                         | Type                              | Default                              | Description                                                                                           |
+| --------------------------- | --------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `server.port`               | int 1..65535                      | required                             | HTTP port for the API and SPA                                                                         |
+| `server.auth`               | `none` \| `token`                 | `none`                               | auth middleware stub, inert in v1                                                                     |
+| `llm.provider`              | `openai` \| `anthropic` \| `mock` | required                             | LLM contract; endpoints are all OpenAI-shaped                                                         |
+| `llm.base_url`              | url                               | required                             | OpenAI-compatible base URL, e.g. `http://localhost:9000/v1`                                           |
+| `llm.api_key`               | string                            | optional                             | bearer key for the LLM endpoint                                                                       |
+| `llm.model`                 | string                            | required                             | model id                                                                                              |
+| `llm.reasoning_exclude`     | bool                              | `false`                              | send `reasoning: {exclude: true}` (OpenRouter-style) on chat completions                              |
+| `llm.thinking_disabled`     | bool                              | `false`                              | send `thinking: {type: "disabled"}` (Z.AI-style) on chat completions                                  |
+| `llm.max_tokens`            | int >= 1                          | optional                             | completion token cap; anthropic flavor falls back to 1024, openai-shaped calls send no cap unless set |
+| `stt.base_url`              | url                               | required                             | speech-to-text endpoint (OpenAI transcription shape)                                                  |
+| `stt.api_key`               | string                            | optional                             | bearer key                                                                                            |
+| `stt.model`                 | string                            | required                             | STT model id                                                                                          |
+| `stt.mode`                  | `buffered`                        | required                             | transport is streaming WS; recognition is per-utterance buffered                                      |
+| `tts.base_url`              | url                               | required                             | text-to-speech endpoint                                                                               |
+| `tts.api_key`               | string                            | optional                             | bearer key                                                                                            |
+| `tts.model`                 | string                            | required                             | TTS model id                                                                                          |
+| `tts.voice`                 | string                            | required                             | voice id, e.g. `alloy`                                                                                |
+| `embeddings.base_url`       | url                               | optional                             | embeddings endpoint                                                                                   |
+| `embeddings.api_key`        | string                            | optional                             | bearer key                                                                                            |
+| `embeddings.model`          | string                            | required if embeddings block present | embeddings model id                                                                                   |
+| `phoenix.endpoint`          | url                               | optional                             | Arize Phoenix tracing endpoint                                                                        |
+| `phoenix.headers`           | map                               | optional                             | headers for the Phoenix endpoint                                                                      |
+| `files.db_path`             | string                            | optional                             | SQLite database path (default: platform data dir, below)                                              |
+| `files.log_path`            | string                            | optional                             | log file path (default: platform data dir)                                                            |
+| `files.data_dir`            | string                            | optional                             | data directory (default: platform data dir)                                                           |
+| `voice.kickoff_ms`          | int >= 0                          | `5000`                               | delay before the agent's opening turn; <= 0 disables the kickoff                                      |
+| `voice.max_tool_output`     | int >= 1                          | `4000`                               | chars of tool output fed to the llm per read_* call                                                   |
+| `check.timeout_ms`          | int >= 1                          | `3000`                               | `di --check` provider probe budget                                                                    |
+| `documents.max_files`       | int >= 1                          | `10`                                 | server-enforced upload cap (the SPA pre-check mirrors DOCUMENT_CAPS)                                  |
+| `documents.max_total_bytes` | int >= 1                          | `20971520` (20 MiB)                  | server-enforced total upload size cap                                                                 |
+| `documents.chunk_size`      | int >= 1                          | `1000`                               | target chunk size in chars for embedder input                                                         |
+| `documents.chunk_overlap`   | int >= 0                          | `150`                                | tail overlap carried between chunks                                                                   |
+| `documents.context_top_k`   | int >= 1                          | `8`                                  | chunks returned by `GET /v1/sessions/:id/context`                                                     |
 
 Omitted `files.*` keys default to the platform app-support dir: `~/Library/Application Support/di` on macOS, `%APPDATA%/di` on Windows, `$XDG_DATA_HOME/di` or `~/.local/share/di` elsewhere. A present-but-non-object `files:` still fails validation.
 
