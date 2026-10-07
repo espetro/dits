@@ -195,8 +195,10 @@ export function createOpenAiCompatibleModel(
       const headers: Record<string, string> = { "content-type": "application/json" };
       if (endpoint.apiKey) headers["authorization"] = `Bearer ${endpoint.apiKey}`;
       // the managed demo worker requires a fresh single-use turnstile token
-      // on every keyless request; BYO endpoints never get script or header
-      const turnstile = await turnstileTokenFor(endpoint.baseUrl);
+      // on every keyless request; BYO endpoints never get script or header,
+      // and a configured key is itself the credential (the worker skips
+      // turnstile for valid bearers — localhost solves would fail anyway)
+      const turnstile = endpoint.apiKey ? null : await turnstileTokenFor(endpoint.baseUrl);
       if (turnstile) headers["cf-turnstile-response"] = turnstile;
       const res = await doFetch(chatUrl(endpoint.baseUrl), {
         method: "POST",
