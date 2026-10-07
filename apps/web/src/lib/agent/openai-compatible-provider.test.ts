@@ -1,5 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { turnstileTokenFor } from "../turnstile";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
+
+vi.mock("../turnstile", () => ({ turnstileTokenFor: vi.fn(async () => "ts-tok") }));
 
 const PROFILE = {
   baseUrl: "http://t.local/v1",
@@ -20,6 +23,8 @@ const PROMPT = [
 ];
 
 describe("openai-compatible provider", () => {
+  beforeEach(() => vi.clearAllMocks());
+
   it("streams text deltas and finish stop", async () => {
     const fetchMock = vi
       .fn()
@@ -118,6 +123,31 @@ describe("openai-compatible provider", () => {
     expect(init.headers.authorization).toBe("Bearer sk-x");
     const body = JSON.parse(init.body);
     expect(body.tools[0].function.name).toBe("read_editor");
+  });
+
+  it("skips the turnstile token entirely when an apiKey is configured", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(sseResponse([{ choices: [{ delta: { content: "ok" } }] }]));
+    const model = createOpenAiCompatibleModel(PROFILE, {
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    await model.doStream({ prompt: PROMPT } as never);
+    expect(turnstileTokenFor).not.toHaveBeenCalled();
+    expect(fetchMock.mock.calls[0]![1].headers["cf-turnstile-response"]).toBeUndefined();
+  });
+
+  it("attaches a turnstile token on keyless requests", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(sseResponse([{ choices: [{ delta: { content: "ok" } }] }]));
+    const model = createOpenAiCompatibleModel(
+      { ...PROFILE, apiKey: "" },
+      { fetchImpl: fetchMock as unknown as typeof fetch },
+    );
+    await model.doStream({ prompt: PROMPT } as never);
+    expect(turnstileTokenFor).toHaveBeenCalledWith(PROFILE.baseUrl);
+    expect(fetchMock.mock.calls[0]![1].headers["cf-turnstile-response"]).toBe("ts-tok");
   });
 
   it("throws on non-ok response", async () => {

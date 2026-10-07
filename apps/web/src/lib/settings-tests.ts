@@ -174,8 +174,9 @@ export async function probeModels(draft: ProbeDraft): Promise<void> {
   // Bearer still forces a CORS preflight some gateways reject
   const headers: Record<string, string> = {};
   if (draft.apiKey) headers["authorization"] = `Bearer ${draft.apiKey}`;
-  // the managed demo worker requires a fresh turnstile token on /v1/models too
-  const turnstile = await turnstileTokenFor(draft.baseUrl);
+  // the managed demo worker requires a fresh turnstile token on /v1/models
+  // too — but a configured key is itself the credential and skips the gate
+  const turnstile = draft.apiKey ? null : await turnstileTokenFor(draft.baseUrl);
   if (turnstile) headers["cf-turnstile-response"] = turnstile;
   const res = await fetch(`${base}/v1/models`, { headers });
   if (!res.ok) throw new DiError("http", { status: res.status }, `HTTP ${res.status}`);
