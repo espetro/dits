@@ -12,6 +12,7 @@ import type {
 } from "@ai-sdk/provider";
 import type { ProviderEndpoint } from "@di/shared";
 import { DiError } from "../errors";
+import { turnstileTokenFor } from "../turnstile";
 
 /**
  * Minimal OpenAI-compatible LanguageModelV3 provider for client-only mode.
@@ -193,6 +194,10 @@ export function createOpenAiCompatibleModel(
       // (the deployed demo) while keyed BYO endpoints keep working
       const headers: Record<string, string> = { "content-type": "application/json" };
       if (endpoint.apiKey) headers["authorization"] = `Bearer ${endpoint.apiKey}`;
+      // the managed demo worker requires a fresh single-use turnstile token
+      // on every keyless request; BYO endpoints never get script or header
+      const turnstile = await turnstileTokenFor(endpoint.baseUrl);
+      if (turnstile) headers["cf-turnstile-response"] = turnstile;
       const res = await doFetch(chatUrl(endpoint.baseUrl), {
         method: "POST",
         headers,

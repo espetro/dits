@@ -16,7 +16,8 @@ export type VoiceHealthKind =
   | "playback.gap"
   | "playback.drained"
   | "playback.stop"
-  | "gate";
+  | "gate"
+  | "turnstile";
 
 export interface VoiceHealthEvent {
   at: number;
