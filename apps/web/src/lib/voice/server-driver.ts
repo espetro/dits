@@ -11,6 +11,7 @@ import { createVadGate } from "./vad";
 import type { VadGate } from "./vad";
 import { WS_OPEN_TIMEOUT_MS } from "../timeouts";
 import { DiError } from "../errors";
+import { envNum } from "../env";
 
 /**
  * SpeechDriver: the transport-facing voice interface. Both server-driver
@@ -92,8 +93,8 @@ export interface ServerDriverDeps {
  * interrupt and kills scheduled playback.
  */
 const MAX_RECONNECT_ATTEMPTS = 5;
-const RECONNECT_BASE_MS = 1_000;
-const RECONNECT_CAP_MS = 15_000;
+const RECONNECT_BASE_MS = envNum("VITE_VOICE_RECONNECT_BASE_MS", 1_000);
+const RECONNECT_CAP_MS = envNum("VITE_VOICE_RECONNECT_CAP_MS", 15_000);
 
 export class ServerVoiceDriver implements SpeechDriver {
   status: SpeechDriver["status"] = "idle";

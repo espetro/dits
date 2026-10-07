@@ -16,6 +16,8 @@
  * no CDN); baseAssetPath/onnxWASMBasePath point there.
  */
 
+import { envNum } from "../env";
+
 export interface VadGate {
   /** Feed one PCM16LE mono 16k chunk; internally re-chunked to silero frames. */
   processFrame(pcm16: Uint8Array): void;
@@ -97,6 +99,11 @@ export async function createVadGate(opts: VadGateOptions = {}): Promise<VadGate>
  * paths point at the vendored assets. Lazy dynamic import so tests and
  * non-voice routes never load onnxruntime.
  */
+const VAD_REDEMPTION_MS = envNum("VITE_VAD_REDEMPTION_MS", 600);
+const VAD_POSITIVE_THRESHOLD = envNum("VITE_VAD_POSITIVE_SPEECH_THRESHOLD", 0.5);
+const VAD_NEGATIVE_THRESHOLD = envNum("VITE_VAD_NEGATIVE_SPEECH_THRESHOLD", 0.35);
+const VAD_MIN_SPEECH_MS = envNum("VITE_VAD_MIN_SPEECH_MS", 250);
+
 async function createDefaultImpl(assetsBase: string, opts: VadGateOptions): Promise<VadImpl> {
   const { MicVAD } = await import("@ricky0123/vad-web");
   const mic = await MicVAD.new({
@@ -104,6 +111,14 @@ async function createDefaultImpl(assetsBase: string, opts: VadGateOptions): Prom
     baseAssetPath: assetsBase,
     onnxWASMBasePath: assetsBase,
     startOnLoad: false,
+    // interview cadence: vad-web default redemptionMs (1400) leaves ~1.4s of
+    // dead air between turns; 600 still absorbs mid-sentence pauses. 0.5/0.35
+    // is the canonical silero hysteresis pair (negative = positive - 0.15);
+    // minSpeechMs 250 keeps short backchannels ("yeah") vs the 400 default.
+    redemptionMs: VAD_REDEMPTION_MS,
+    positiveSpeechThreshold: VAD_POSITIVE_THRESHOLD,
+    negativeSpeechThreshold: VAD_NEGATIVE_THRESHOLD,
+    minSpeechMs: VAD_MIN_SPEECH_MS,
     // start() awaits this forever — the internal audio graph never attaches
     getStream: () => new Promise<MediaStream>(() => undefined),
     onSpeechStart: () => opts.onSpeechStart?.(),

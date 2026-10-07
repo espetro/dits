@@ -15,6 +15,7 @@ import { transfer } from "kkrpc/streaming";
 import { loadNpz } from "./npz";
 import type { NpyArray } from "./npz";
 import { phonemizeText } from "./phonemize";
+import { splitClauses } from "./segments";
 import { basicEnglishTokenize, cleanText } from "./text-cleaner";
 
 export interface KittenInitArgs {
@@ -27,9 +28,10 @@ export interface KittenTtsApi {
   /** Loads ort + the inference session; rejects with the init failure. */
   init(args: KittenInitArgs): Promise<void>;
   /**
-   * Synthesizes one utterance; the pcm resolves in ~340ms chunks so the
-   * consumer can start playback early and cancel mid-stream (the remote
-   * iterator's return() runs this generator's finally, freeing the slot).
+   * Synthesizes one utterance; the pcm resolves in ~340ms chunks, segmented
+   * on clause boundaries so the first clause starts playback early (the
+   * remote iterator's return() runs this generator's finally, freeing the
+   * slot).
    */
   speak(text: string): AsyncIterable<Float32Array>;
   /** Drop queued-but-not-started speaks (barge-in); in-flight runs finish. */
@@ -107,10 +109,12 @@ export function createKittenApi(): KittenTtsApi {
         try {
           await myTurn;
           if (gen !== generation) throw new Error("cleared");
-          const pcm = await synthesize(text);
-          for (let off = 0; off < pcm.length; off += CHUNK_SAMPLES) {
-            const chunk = pcm.slice(off, off + CHUNK_SAMPLES);
-            yield transfer(chunk, [chunk.buffer]);
+          for (const segment of splitClauses(text)) {
+            const pcm = await synthesize(segment);
+            for (let off = 0; off < pcm.length; off += CHUNK_SAMPLES) {
+              const chunk = pcm.slice(off, off + CHUNK_SAMPLES);
+              yield transfer(chunk, [chunk.buffer]);
+            }
           }
         } finally {
           release();
