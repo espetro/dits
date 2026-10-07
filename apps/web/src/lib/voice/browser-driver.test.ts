@@ -218,6 +218,39 @@ describe("BrowserVoiceDriver barge-in", () => {
 
     expect(onError).not.toHaveBeenCalled();
   });
+
+  it("releases the speaking claim when a new turn supersedes a speaking one", async () => {
+    const driver = new BrowserVoiceDriver("s1", {
+      player: createPcmPlayer({ createContext: () => fakeCtx() }),
+    });
+    // first turn produces text (-> agentSpeaking) then hangs; the second
+    // turn only aborts the first and hangs silently. without clearing the
+    // claim at supersession, agentSpeaking latches and the echo gate
+    // suppresses every later final.
+    let calls = 0;
+    (driver as any).agent = {
+      respond: (
+        _text: string,
+        opts?: { onText?: (delta: string) => void; signal?: AbortSignal },
+      ) => {
+        calls += 1;
+        if (calls === 1) opts?.onText?.("This is the first sentence of the reply. ");
+        return new Promise<string>((_resolve, reject) => {
+          opts?.signal?.addEventListener("abort", () =>
+            reject(new DOMException("This operation was aborted", "AbortError")),
+          );
+        });
+      },
+    };
+    void (driver as any).runAgentTurn("one", "voice");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(driver.agentSpeaking).toBe(true);
+
+    void (driver as any).runAgentTurn("two", "voice");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(driver.agentSpeaking).toBe(false);
+    expect((driver as any).playbackGated).toBe(false);
+  });
 });
 
 function fakeRecognitionCtor(): {

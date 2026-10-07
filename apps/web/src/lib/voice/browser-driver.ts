@@ -511,8 +511,12 @@ export class BrowserVoiceDriver implements SpeechDriver {
       console.error(`[voice] ${phase} failed:`, error);
       this.onError(`voice.${phase}`);
     };
-    // barge-in from a previous turn: drop it
+    // barge-in from a previous turn: drop it. supersession also ends the
+    // old turn's speaking claim — its async tail returns "aborted" early
+    // and never runs finishSpeaking, so without this agentSpeaking latches
+    // and playbackGated suppresses every later final (voice goes deaf).
     this.abort?.abort();
+    this.finishSpeaking();
     const ctrl = new AbortController();
     this.abort = ctrl;
     const playbackGen = this.playbackGen;
