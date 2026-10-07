@@ -136,6 +136,10 @@ mobile) stacks, top to bottom:
     interrupt fires the gate drops immediately, so the barge-in utterance's
     own final reaches the turn. With no vad frame-prob feed the behavior is
     the previous hard gate; typed input and mute always interrupt.
+  - Superseded-turn playback: a new user turn aborts the previous turn's
+    controller (its pending llm/synth work stops), but pcm already
+    synthesized still reaches the player instead of being dropped — only
+    a confirmed barge-in `interrupt()` discards in-hand audio.
   - Voice health (`lib/voice/health.ts`): a capped `$voiceHealth` event
     ring (engine.boot ok/fail + ms, worker.error, stt.firstPartial latency,
     stt.feed/flush failures, tts.speak per utterance (total ms; first-chunk
@@ -154,7 +158,11 @@ mobile) stacks, top to bottom:
   on-device in settings -> voice re-arms the prompt instead of silently
   granting. The waveform's own capture stream is separate from `MicCapture`
   and closes when muted/inactive.
-- Kickoff on silence, error toast + retry, no-speech hint: unchanged. The
+- Kickoff on silence, error toast + retry, no-speech hint: unchanged.
+  Turn-pipeline errors (voice.llm/tts/stt/noResponse) latch the error
+  status only until the next landed reply — the first successful agent
+  turn sends RECOVERED and clears the phase; mic/boot/connect failures
+  stay latched until retry rebuilds the driver. The
   no-speech hint focuses the composer (it is always mounted now — no rail or
   sheet to open). Transcript turn tags (`speaker · source`) render via
   `turnTag`/`transcript.*` keys; the error toast description maps `errors.*`

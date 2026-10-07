@@ -39,6 +39,15 @@ interface VoiceCoreState {
   muted: boolean;
 }
 
+/** turn-pipeline codes a successful reply unlatches; hardware/boot errors
+ * persist until the retry path rebuilds the driver */
+const RECOVERABLE_VOICE_ERRORS = new Set([
+  "voice.llm",
+  "voice.tts",
+  "voice.stt",
+  "voice.noResponse",
+]);
+
 /**
  * Voice loop hook: driver (server WS or browser Web Speech) + xstate turn
  * machine. Mute is applied via driver.setMuted and $muted stays the source
@@ -110,6 +119,15 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       };
       driver.events.onAgentTurn = (turn: Turn) => {
         if (driver instanceof BrowserVoiceDriver) onClientTurn(turn);
+        // a landed reply proves the pipeline recovered: unlatch turn errors
+        // (llm/tts/stt/noResponse). mic/boot/connect failures stay latched —
+        // a reply can't resurrect dead capture or a missing driver.
+        actor.send({ type: "RECOVERED" });
+        setState((s) =>
+          s.error && RECOVERABLE_VOICE_ERRORS.has(s.error)
+            ? { ...s, status: "connected", error: null }
+            : s,
+        );
       };
       // server driver: question.updated tool calls arrive as ws messages
       driver.events.onQuestion = (q) => setQuestion({ text: q.text, hints: q.hints });
