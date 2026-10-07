@@ -1,17 +1,17 @@
 /**
  * Zero-conf demo LLM (p2). The endpoint is never committed: builds inject it
  * via VITE_DEMO_LLM_* env vars, so the shipped bundle is the only place the
- * url exists. The managed endpoint ignores the api key: a build that ships
- * VITE_DEMO_LLM_API_KEY="" stores a keyless profile, so no authorization
- * header is sent at all (gateways without `authorization` in CORS
- * allow-headers then pass preflight); the "demo" fallback below only keeps
- * the field non-empty for builds that don't set one. When
- * VITE_DEMO_LLM_BASE_URL is unset (local dev without env), the demo
+ * url exists. The managed worker ingress resolves a Bearer token against
+ * CLIENT_KEYS — an unregistered value is a hard 401 — so keyless is the
+ * default: no authorization header is sent, and every request carries a
+ * fresh Cloudflare Turnstile token instead (lib/turnstile.ts). A non-empty
+ * VITE_DEMO_LLM_API_KEY is for issued dev/self-hosted client keys only.
+ * When VITE_DEMO_LLM_BASE_URL is unset (local dev without env), the demo
  * affordances stay hidden.
  */
 export const DEMO_LLM = {
   baseUrl: (import.meta.env.VITE_DEMO_LLM_BASE_URL as string | undefined) ?? "",
-  apiKey: (import.meta.env.VITE_DEMO_LLM_API_KEY as string | undefined) ?? "demo",
+  apiKey: (import.meta.env.VITE_DEMO_LLM_API_KEY as string | undefined) ?? "",
   model: (import.meta.env.VITE_DEMO_LLM_MODEL as string | undefined) ?? "demo",
 };
 
