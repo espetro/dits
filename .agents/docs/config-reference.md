@@ -46,20 +46,20 @@ Omitted `files.*` keys default to the platform app-support dir: `~/Library/Appli
 
 Standalone env vars:
 
-| Var                                                       | Effect                                                                                                                       |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `DI_TEST_MODE=1`                                          | mounts `/v1/test/*` debug routes                                                                                             |
-| `DI_URL`                                                  | target server for the e2e suite (default `http://localhost:3000`)                                                            |
-| `DI_DEMO_LLM_*`                                           | demo LLM endpoint for `dev:server:demo-llm` (`BASE_URL`/`MODEL`/`API_KEY`)                                                   |
-| `VITE_DEMO_LLM_*`                                         | same endpoint exposed to the SPA's one-click demo fill                                                                       |
+| Var                                                       | Effect                                                                                                                        |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `DI_TEST_MODE=1`                                          | mounts `/v1/test/*` debug routes                                                                                              |
+| `DI_URL`                                                  | target server for the e2e suite (default `http://localhost:3000`)                                                             |
+| `DI_DEMO_LLM_*`                                           | demo LLM endpoint for `dev:server:demo-llm` (`BASE_URL`/`MODEL`/`API_KEY`)                                                    |
+| `VITE_DEMO_LLM_*`                                         | same endpoint exposed to the SPA's one-click demo fill                                                                        |
 | `VITE_TURNSTILE_SITE_KEY`                                 | turnstile sitekey for the managed demo endpoint (fresh token per keyless request); bundled default when unset, empty disables |
-| `VITE_VOICE_DEFAULT`                                      | pin the voice driver (`server`/`browser`), overrides runtime probe                                                           |
-| `VITE_VAD_*`                                              | vad endpointing tuning (`REDEMPTION_MS`, `POSITIVE/NEGATIVE_SPEECH_THRESHOLD`, `MIN_SPEECH_MS`); see `apps/web/.env.example` |
-| `VITE_VOICE_*`                                            | voice pipeline knobs: barge-in gate, timeouts, reconnect backoff, health ring, level decay; see `apps/web/.env.example`      |
-| `VITE_SERVER_PROBE_TIMEOUT_MS`                            | SPA `/api/health` probe budget, build-time (default 2000)                                                                    |
-| `VITE_TURN_POST_RETRIES` / `VITE_TURN_POST_RETRY_BASE_MS` | SPA pending-turn retry policy, build-time (3 / 1000)                                                                         |
-| `VITE_TRANSFORMERS_MODEL_ID`                              | default transformers.js browser-llm model id, build-time                                                                     |
-| `DI_<SECTION>__<KEY>`                                     | yaml override for any config key, see rules above                                                                            |
+| `VITE_VOICE_DEFAULT`                                      | pin the voice driver (`server`/`browser`), overrides runtime probe                                                            |
+| `VITE_VAD_*`                                              | vad endpointing tuning (`REDEMPTION_MS`, `POSITIVE/NEGATIVE_SPEECH_THRESHOLD`, `MIN_SPEECH_MS`); see `apps/web/.env.example`  |
+| `VITE_VOICE_*`                                            | voice pipeline knobs: barge-in gate, timeouts, reconnect backoff, health ring, level decay; see `apps/web/.env.example`       |
+| `VITE_SERVER_PROBE_TIMEOUT_MS`                            | SPA `/api/health` probe budget, build-time (default 2000)                                                                     |
+| `VITE_TURN_POST_RETRIES` / `VITE_TURN_POST_RETRY_BASE_MS` | SPA pending-turn retry policy, build-time (3 / 1000)                                                                          |
+| `VITE_TRANSFORMERS_MODEL_ID`                              | default transformers.js browser-llm model id, build-time                                                                      |
+| `DI_<SECTION>__<KEY>`                                     | yaml override for any config key, see rules above                                                                             |
 
 ## API
 
