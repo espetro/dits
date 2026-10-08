@@ -96,6 +96,17 @@ mobile) stacks, top to bottom:
   (active tab = paper pill), paper body pane. `session.tools` order is tab
   order; `>4` tools collapse trailing tabs into a `+` overflow picker; the
   active tab is the `?tool=` search param.
+- Dock panes ship per session toolset (`TOOL_REGISTRY`/`TOOL_AGENT_ACCESS`):
+  - `editor` (notes): Milkdown markdown notepad + code-block language bar;
+    `read_editor` returns the raw markdown.
+  - `code` (code notepad): CodeMirror 6 editor — language picker (python,
+    js, ts, java, c++, go, rust, sql, json), mono pane, di-palette theme,
+    a `syntax error` pill when the lezer parse flags errors. Buffer lives in
+    `$codeBuffer`; the pick persists as `di:code:language`. `read_code`
+    returns code + a `language`/`syntax` trailer (`ok` / `syntax error(s)` /
+    `unchecked (editor closed)`).
+  - `whiteboard`: tldraw surface, `read_whiteboard` returns a text snapshot;
+    server-only while tldraw is bundled (hidden in client-only mode).
 
 ### ControlBar (floating pillbar)
 

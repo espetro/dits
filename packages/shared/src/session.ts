@@ -40,7 +40,7 @@ export const SessionToolsSchema = v.record(v.string(), v.string());
 export type SessionTools = v.InferOutput<typeof SessionToolsSchema>;
 
 /** Toolset for sessions created before presets could pick one. */
-export const DEFAULT_SESSION_TOOLS: SessionTools = { editor: "", whiteboard: "" };
+export const DEFAULT_SESSION_TOOLS: SessionTools = { editor: "", whiteboard: "", code: "" };
 
 export const SessionSchema = v.object({
   id: SessionIdSchema,

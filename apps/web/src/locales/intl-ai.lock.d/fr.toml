@@ -959,6 +959,30 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:08:52Z"
 
+[entries."interview.codeLanguage"]
+value = "langage de code"
+source_hash = "d6b67ab3eea610bb5fc52dcd4c543d89da68381f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:30:33Z"
+
+[entries."interview.codePlaceholder"]
+value = "écrivez ou collez le code ici…"
+source_hash = "9555bfbd0c27822bcde2f2f5811b7dab86242d7a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:30:33Z"
+
+[entries."interview.codeSyntaxError"]
+value = "erreur de syntaxe"
+source_hash = "2c4f85fcddbb9d4aafff48a6f33e59be855c88b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:30:33Z"
+
 [entries."interview.controls"]
 value = "contrôles de l'appel"
 source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
@@ -1162,6 +1186,14 @@ source_hash = "2b4dcb0e61a6b93062bb8697b9340eb68807c83f"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T20:00:43Z"
+
+[entries."interview.tab.code"]
+value = "code"
+source_hash = "e6fb06210fafc02fd7479ddbed2d042cc3a5155e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:30:33Z"
 
 [entries."interview.tab.editor"]
 value = "éditeur"

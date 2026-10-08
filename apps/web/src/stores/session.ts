@@ -36,6 +36,25 @@ export const $whiteboard = atom<string>("{}");
 /** Current editor buffer text, for the worker's read_editor tool. */
 export const $editorBuffer = atom<string>("");
 
+/** Code notepad buffer, for the agent's read_code tool. */
+export const $codeBuffer = atom<string>("");
+
+/** Code notepad language pick. Persisted; survives across sessions like the notes language. */
+export const $codeLanguage = persistentAtom<string>("di:code:language", "python");
+
+/** Syntax verdict from the live editor parse ("unknown" until the code tab mounts). */
+export const $codeSyntax = atom<"unknown" | "ok" | "error">("unknown");
+
+/** What read_code returns: code + language + syntax verdict so the agent knows if it parses. */
+export function codeToolReadout(): string {
+  const code = $codeBuffer.get();
+  if (!code.trim()) return "";
+  const syntax = $codeSyntax.get();
+  const verdict =
+    syntax === "ok" ? "ok" : syntax === "error" ? "syntax error(s)" : "unchecked (editor closed)";
+  return `${code}\n\n---\nlanguage: ${$codeLanguage.get()}\nsyntax: ${verdict}`;
+}
+
 /** Interview live state mirrored from the agent (question block is agent-editable). */
 export const $question = map<{ text: string; hints: string[] }>({
   text: "",

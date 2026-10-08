@@ -74,7 +74,7 @@ const SCENARIOS: Scenario[] = [
     id: "frontend",
     promptKey: "setup.scenario.frontend.prompt",
     goalCount: 3,
-    tools: { editor: "" },
+    tools: { editor: "", code: "" },
   },
   {
     id: "ml",
