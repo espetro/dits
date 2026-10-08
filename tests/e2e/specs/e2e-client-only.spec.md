@@ -8,7 +8,7 @@ LLM.
 
 ## client-only session creation persists to OPFS
 
-Seed `di.runtime-mode` / `di.provider-profile` in localStorage, start a
+Seed `di.voice.sttEngine` / `di.voice.ttsEngine` / `di.provider-profile` in localStorage, start a
 session from `/setup` via a scenario card's "start" CTA (cards skip the
 validate step by default, p3), land on
 `/interview/[id]`, and confirm the session record exists in OPFS

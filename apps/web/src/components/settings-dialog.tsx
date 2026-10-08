@@ -1,13 +1,11 @@
-import { AudioLines, Bot, Download, History, Languages, Wrench, X } from "lucide-react";
+import { AudioLines, History, Languages, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { HistoryPane } from "./history-pane";
 import { VoicePane } from "./settings-voice-pane";
-import { InterviewerAiPane } from "./settings-ai-pane";
-import { DownloadsPane } from "./settings-downloads-pane";
-import { LanguagePane } from "./settings-language-pane";
-import { AdvancedPane } from "./settings-advanced-pane";
+import { PreferencesPane } from "./settings-preferences-pane";
+import { StatusPane } from "./settings-status-pane";
 import { SettingsDraftsProvider } from "./settings-drafts";
 import { clearSettings, openSettings, useSettingsSearch } from "./settings-nav";
 import type { SettingsPane } from "./settings-nav";
@@ -18,9 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 /**
  * Unified settings dialog: one url-driven surface with a left nav and
  * spotify-style rows (title + one-line description + right control) per
- * pane — past interviews, voice & microphone, interviewer ai, downloads,
- * language, advanced. `?settings=1&pane=…` opens it; the helpers live in
- * settings-nav.ts so panes can cross-link without an import cycle.
+ * pane — past interviews, user preferences, voice & personality, and the
+ * hidden system-status view the navbar chip opens. `?settings=1&pane=…`
+ * opens it; the helpers live in settings-nav.ts so panes can cross-link
+ * without an import cycle.
  */
 
 export type { SettingsPane };
@@ -71,55 +70,34 @@ const NAV: { id: SettingsPane; label: string; icon: React.ReactNode }[] = [
     icon: <History className="size-4" aria-hidden="true" />,
   },
   {
-    id: "voice",
-    label: "settings.nav.voice",
-    icon: <AudioLines className="size-4" aria-hidden="true" />,
-  },
-  {
-    id: "ai",
-    label: "settings.nav.ai",
-    icon: <Bot className="size-4" aria-hidden="true" />,
-  },
-  {
-    id: "downloads",
-    label: "settings.nav.downloads",
-    icon: <Download className="size-4" aria-hidden="true" />,
-  },
-  {
-    id: "language",
-    label: "settings.nav.language",
+    id: "preferences",
+    label: "settings.nav.preferences",
     icon: <Languages className="size-4" aria-hidden="true" />,
   },
   {
-    id: "advanced",
-    label: "settings.nav.advanced",
-    icon: <Wrench className="size-4" aria-hidden="true" />,
+    id: "voice",
+    label: "settings.nav.voice",
+    icon: <AudioLines className="size-4" aria-hidden="true" />,
   },
 ];
 
 const PANE_TITLES: Record<SettingsPane, string> = {
   history: "settings.nav.history",
+  preferences: "settings.nav.preferences",
   voice: "settings.nav.voice",
-  ai: "settings.nav.ai",
-  downloads: "settings.nav.downloads",
-  language: "settings.nav.language",
-  advanced: "settings.nav.advanced",
+  status: "settings.nav.status",
 };
 
 function PaneBody({ pane }: { pane: SettingsPane }) {
   switch (pane) {
     case "history":
       return <HistoryPane />;
+    case "preferences":
+      return <PreferencesPane />;
     case "voice":
       return <VoicePane />;
-    case "ai":
-      return <InterviewerAiPane />;
-    case "downloads":
-      return <DownloadsPane />;
-    case "language":
-      return <LanguagePane />;
-    case "advanced":
-      return <AdvancedPane />;
+    case "status":
+      return <StatusPane />;
   }
 }
 
@@ -230,14 +208,7 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
                   pane === "history" ? "mx-auto max-w-2xl space-y-6" : "mx-auto max-w-xl space-y-6"
                 }
               >
-                <PaneHeading
-                  title={intl.formatMessage({ id: PANE_TITLES[pane] })}
-                  description={
-                    pane === "advanced"
-                      ? intl.formatMessage({ id: "settings.advanced.intro" })
-                      : undefined
-                  }
-                />
+                <PaneHeading title={intl.formatMessage({ id: PANE_TITLES[pane] })} />
                 <PaneBody pane={pane} />
               </div>
             )}

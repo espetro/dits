@@ -80,15 +80,16 @@ function cacheKey(modelId: string, version: string, path: string): string {
 
 function seedClientOnly(page: Page, extra: Record<string, string> = {}) {
   return page.addInitScript(
-    ([mode, profile, base, kv]) => {
-      localStorage.setItem("di.runtime-mode", mode as string);
+    ([profile, base, kv]) => {
+      localStorage.setItem("di.voice.sttEngine", "in-browser");
+      localStorage.setItem("di.voice.ttsEngine", "in-browser");
       localStorage.setItem("di.provider-profile", JSON.stringify(profile));
       localStorage.setItem("di.voice.models-base", base as string);
       for (const [k, v] of Object.entries(kv as Record<string, string>)) {
         localStorage.setItem(k, v);
       }
     },
-    ["custom", PROFILE, MODELS_BASE, extra] as const,
+    [PROFILE, MODELS_BASE, extra] as const,
   );
 }
 

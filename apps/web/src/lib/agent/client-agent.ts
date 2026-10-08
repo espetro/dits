@@ -18,7 +18,8 @@ import type {
 } from "@di/shared";
 import type { LanguageModelV3, LanguageModelV4 } from "@ai-sdk/provider";
 import { resolveBrowserLlm } from "./browser-provider";
-import { DiError } from "../errors";
+import { DiError, errorCode } from "../errors";
+import { pushVoiceHealth } from "../voice/health";
 import type { BrowserModelHandles } from "./browser-provider";
 
 /** Model spec version accepted by ai v7's model union. */
@@ -316,6 +317,13 @@ export class ClientAgent implements TurnRunner {
           NoSuchToolError.isInstance(error) || InvalidToolInputError.isInstance(error)
             ? "tool"
             : "llm";
+        if (phase === "llm") {
+          pushVoiceHealth({
+            kind: "llm.turn",
+            ok: false,
+            detail: errorCode(error) ?? String(error),
+          });
+        }
         onError(error, phase);
       },
     });
@@ -334,7 +342,10 @@ export class ClientAgent implements TurnRunner {
       full += tail;
       opts.onText?.(tail);
     }
-    if (full.trim()) this.history.push({ role: "assistant", content: full });
+    if (full.trim()) {
+      this.history.push({ role: "assistant", content: full });
+      pushVoiceHealth({ kind: "llm.turn", ok: true, ms: llmTtftMs });
+    }
     opts.onMetrics?.({
       vad_ms: 0,
       llm_ttft_ms: llmTtftMs,

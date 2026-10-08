@@ -13,6 +13,7 @@ import { synthesizeSpeech } from "../agent/tts";
 import { resolveInstalledVoiceEngines } from "./engines";
 import type { ResolvedVoiceEngines, SttEngine, TtsEngine } from "./engines";
 import { WasmStt, WasmTts } from "./wasm-engines";
+import { EndpointStt } from "./endpoint-stt";
 import { startCapture } from "./capture";
 import type { MicCapture } from "./capture";
 import { createVadGate } from "./vad";
@@ -194,7 +195,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   async start(): Promise<void> {
-    if (this.engines.stt === "wasm" && (await this.tryWasmStt())) return;
+    if (
+      (this.engines.stt === "wasm" || this.engines.stt === "endpoint") &&
+      (await this.tryEngineStt())
+    )
+      return;
     const w = globalThis as unknown as {
       SpeechRecognition?: RecognitionCtor;
       webkitSpeechRecognition?: RecognitionCtor;
@@ -271,8 +276,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
    * SpeechRecognition. Mic/vad failures mirror the builtin fatal-error
    * path: status "error", kickoff still fires (text-first interview).
    */
-  private async tryWasmStt(): Promise<boolean> {
-    const stt = this.deps.wasmSttEngine ?? new WasmStt();
+  private async tryEngineStt(): Promise<boolean> {
+    const stt =
+      this.engines.stt === "endpoint" && this.profile?.stt
+        ? new EndpointStt(this.profile.stt)
+        : (this.deps.wasmSttEngine ?? new WasmStt());
     try {
       await stt.start({
         onInterim: () => this.noteSpeech(),

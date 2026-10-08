@@ -1,35 +1,18 @@
 import { persistentAtom } from "@nanostores/persistent";
 import { computed } from "nanostores";
 import { envNum } from "./env";
-import {
-  PROVIDER_PROFILE_STORAGE_KEY,
-  RUNTIME_MODE_STORAGE_KEY,
-  decodeProviderProfile,
-} from "@di/shared";
-import type { ProviderSections, RuntimeMode } from "@di/shared";
+import { PROVIDER_PROFILE_STORAGE_KEY, decodeProviderProfile } from "@di/shared";
+import type { ProviderSections } from "@di/shared";
+import { $voiceSttEngine, $voiceTtsEngine } from "../stores/voice";
 
 /**
- * Runtime selection: server-managed (default), custom (BYO per-section
- * provider endpoints, client-side agent loop) or in-browser (Web Speech
- * STT/TTS + custom LLM). The mode is persisted; an unreachable server never
- * rewrites the persisted choice, it only changes the effective runtime used
- * by driver/route wiring.
+ * Deployment reachability: whether the di server hosts this app. The voice
+ * driver is server-side only when BOTH stt and tts picks ask for it
+ * ("server" pick, or "" auto) AND the health probe answers — otherwise the
+ * browser driver runs the resolved per-layer engines.
  */
 
-export const $runtimeMode = persistentAtom<RuntimeMode>(RUNTIME_MODE_STORAGE_KEY, "server", {
-  // migrate pre-rename persisted values ("local-server" / "client-only")
-  decode: (raw) =>
-    raw === "local-server" || raw === "server"
-      ? ("server" as RuntimeMode)
-      : raw === "client-only"
-        ? ("custom" as RuntimeMode)
-        : raw === "custom" || raw === "in-browser"
-          ? (raw as RuntimeMode)
-          : ("server" as RuntimeMode),
-  encode: (value: RuntimeMode) => value,
-});
-
-/** null = no BYO provider configured (custom runtime requires an llm section). */
+/** null = no BYO provider configured. */
 export const $providerProfile = persistentAtom<ProviderSections | null>(
   PROVIDER_PROFILE_STORAGE_KEY,
   null,
@@ -78,12 +61,6 @@ export async function probeServer(): Promise<boolean> {
     $serverReachable.set(false);
     return false;
   }
-  const mode = $runtimeMode.get();
-  const hasCustomBase = (import.meta.env.VITE_DI_API_BASE as string | undefined) !== undefined;
-  if ((mode === "in-browser" || mode === "custom") && !hasCustomBase) {
-    $serverReachable.set(false);
-    return false;
-  }
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
@@ -102,13 +79,23 @@ export async function probeServer(): Promise<boolean> {
 }
 
 /**
- * Effective runtime: custom when the persisted mode says so, or when the
- * chosen server cannot be reached (probe result; null = not probed yet,
- * trust the persisted mode). Read-only derived, never mutates $runtimeMode.
+ * A layer pick wants the server when it is "server" explicitly, or "" auto
+ * (auto preserves the di-hosted default of the old server runtime).
  */
-export const $effectiveRuntime = computed(
-  [$runtimeMode, $serverReachable],
-  (mode, reachable): RuntimeMode => (mode === "server" && reachable === false ? "custom" : mode),
+export function pickWantsServer(pick: string): boolean {
+  return pick === "server" || pick === "";
+}
+
+/**
+ * True when voice runs on the di server: both speech layers ask for it and
+ * the probe hasn't disproven reachability (null = not probed yet — the
+ * server-side read is the optimistic default, matching the old behavior
+ * where "server" was assumed until the probe said otherwise).
+ */
+export const $serverDriven = computed(
+  [$voiceSttEngine, $voiceTtsEngine, $serverReachable],
+  (stt, tts, reachable): boolean =>
+    pickWantsServer(stt) && pickWantsServer(tts) && reachable !== false,
 );
 
 /** Kick off the probe once per app; safe to call repeatedly. */
@@ -116,7 +103,7 @@ let probeStarted = false;
 export function ensureRuntimeProbe(): void {
   if (probeStarted) return;
   probeStarted = true;
-  if ($runtimeMode.get() === "server" && $serverReachable.get() !== true) {
+  if ($serverReachable.get() !== true) {
     void probeServer();
   }
 }

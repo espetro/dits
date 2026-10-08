@@ -13,6 +13,7 @@ import {
 import { setQuestion } from "../../stores/session";
 import { BrowserVoiceDriver } from "./browser-driver";
 import { errorCode } from "../errors";
+import { markDriverError } from "../seam-health";
 import { createDriver } from "./index";
 import { voiceMachine } from "./machine";
 import { MODEL_LOAD_TIMEOUT_MS } from "../timeouts";
@@ -96,6 +97,7 @@ export function useVoice(sessionId: string, muted: boolean): VoiceState {
       driverRef.current = driver;
 
       driver.onError = (message: string) => {
+        markDriverError(message);
         actor.send({ type: "ERROR", message });
         if (!cancelled) setState((s) => ({ ...s, status: "error", error: message }));
       };

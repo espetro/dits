@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSsrStore } from "../../lib/ssr";
 import { getSession, requestReport } from "../../lib/api";
 import type { ReportDto } from "../../lib/api";
-import { $effectiveRuntime } from "../../lib/runtime";
+import { $serverDriven } from "../../lib/runtime";
 import { ensureClientReport } from "../../lib/report";
 import { getClientSession } from "../../lib/opfs-store";
 import { $draft } from "../../stores/session";
@@ -28,8 +28,8 @@ function Report() {
   const intl = useIntl();
   const { id } = Route.useParams();
   const locale = useLocale();
-  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
-  const clientOnly = effectiveRuntime !== "server";
+  const serverDriven = useSsrStore($serverDriven, true);
+  const clientOnly = !serverDriven;
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
     queryFn: () => getSession(id),

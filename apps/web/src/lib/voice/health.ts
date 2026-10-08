@@ -17,7 +17,8 @@ export type VoiceHealthKind =
   | "playback.drained"
   | "playback.stop"
   | "gate"
-  | "turnstile";
+  | "turnstile"
+  | "llm.turn";
 
 export interface VoiceHealthEvent {
   at: number;

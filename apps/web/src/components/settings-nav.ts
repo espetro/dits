@@ -14,15 +14,13 @@ import * as v from "valibot";
  * agents and deep links.
  */
 
-export type SettingsPane = "history" | "voice" | "ai" | "downloads" | "language" | "advanced";
+export type SettingsPane = "history" | "preferences" | "voice" | "status";
 
 export const SETTINGS_PANES: readonly SettingsPane[] = [
   "history",
+  "preferences",
   "voice",
-  "ai",
-  "downloads",
-  "language",
-  "advanced",
+  "status",
 ];
 
 export interface SettingsSearch {
@@ -60,15 +58,20 @@ export function useSettingsSearch(): SettingsSearch {
   return search;
 }
 
+/** pre-restructure pane ids keep deep-linking into their new home */
 const LEGACY_PANES: Record<string, SettingsPane> = {
-  aiProvider: "ai",
+  aiProvider: "voice",
+  ai: "voice",
+  downloads: "voice",
+  advanced: "voice",
+  language: "preferences",
 };
 
 function parseSettingsSearch(query: string): SettingsSearch {
   const parsed = v.safeParse(
     v.object({
       settings: v.optional(v.picklist(["1"])),
-      pane: v.optional(v.picklist([...SETTINGS_PANES, "aiProvider"])),
+      pane: v.optional(v.picklist([...SETTINGS_PANES, ...Object.keys(LEGACY_PANES)])),
     }),
     Object.fromEntries(new URLSearchParams(query)),
   );

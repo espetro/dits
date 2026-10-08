@@ -3,13 +3,14 @@ import { resolveVoiceEngines } from "./engines";
 import type { VoiceEngineInput } from "./engines";
 
 const base: VoiceEngineInput = {
-  sttPick: "on-device",
-  ttsPick: "on-device",
+  sttPick: "wasm",
+  ttsPick: "wasm",
   consent: "granted",
   sttReady: true,
   ttsReady: true,
   supported: true,
   hasTtsEndpoint: false,
+  hasSttEndpoint: false,
 };
 
 describe("resolveVoiceEngines", () => {
@@ -17,16 +18,27 @@ describe("resolveVoiceEngines", () => {
     expect(resolveVoiceEngines(base)).toEqual({ stt: "wasm", tts: "wasm" });
   });
 
-  it("falls back to builtin without consent", () => {
+  it("auto picks take the wasm-first chain when on-device is ready", () => {
+    expect(resolveVoiceEngines({ ...base, sttPick: "", ttsPick: "" })).toEqual({
+      stt: "wasm",
+      tts: "wasm",
+    });
+  });
+
+  it("a degraded server pick follows the same auto chain", () => {
+    expect(resolveVoiceEngines({ ...base, sttPick: "server", ttsPick: "server" })).toEqual({
+      stt: "wasm",
+      tts: "wasm",
+    });
+  });
+
+  it("falls back per engine when consent or downloads are missing", () => {
     for (const consent of ["declined", ""]) {
       expect(resolveVoiceEngines({ ...base, consent })).toEqual({
         stt: "builtin",
         tts: "builtin",
       });
     }
-  });
-
-  it("falls back per engine when only one model is downloaded", () => {
     expect(resolveVoiceEngines({ ...base, sttReady: false })).toEqual({
       stt: "builtin",
       tts: "wasm",
@@ -44,42 +56,52 @@ describe("resolveVoiceEngines", () => {
     });
   });
 
-  it("honors explicit builtin picks even when on-device is ready", () => {
-    expect(resolveVoiceEngines({ ...base, sttPick: "builtin", ttsPick: "builtin" })).toEqual({
+  it("honors explicit in-browser picks even when on-device is ready", () => {
+    expect(resolveVoiceEngines({ ...base, sttPick: "in-browser", ttsPick: "in-browser" })).toEqual({
       stt: "builtin",
       tts: "builtin",
     });
   });
 
-  it("endpoint pick without a configured endpoint falls back to builtin", () => {
-    expect(resolveVoiceEngines({ ...base, ttsPick: "endpoint" })).toEqual({
+  it("cloud pick without a configured endpoint falls back to builtin", () => {
+    expect(resolveVoiceEngines({ ...base, ttsPick: "cloud" })).toEqual({
+      stt: "wasm",
+      tts: "builtin",
+    });
+    expect(resolveVoiceEngines({ ...base, sttPick: "cloud" })).toEqual({
+      stt: "builtin",
+      tts: "wasm",
+    });
+  });
+
+  it("cloud pick with a configured endpoint wins", () => {
+    expect(resolveVoiceEngines({ ...base, ttsPick: "cloud", hasTtsEndpoint: true })).toEqual({
+      stt: "wasm",
+      tts: "endpoint",
+    });
+    expect(resolveVoiceEngines({ ...base, sttPick: "cloud", hasSttEndpoint: true })).toEqual({
+      stt: "endpoint",
+      tts: "wasm",
+    });
+  });
+
+  it("unset tts pick prefers a configured endpoint over builtin when wasm is not ready", () => {
+    expect(
+      resolveVoiceEngines({ ...base, ttsPick: "", ttsReady: false, hasTtsEndpoint: true }),
+    ).toEqual({
+      stt: "wasm",
+      tts: "endpoint",
+    });
+    expect(resolveVoiceEngines({ ...base, ttsPick: "", ttsReady: false })).toEqual({
       stt: "wasm",
       tts: "builtin",
     });
   });
 
-  it("endpoint pick with a configured endpoint wins", () => {
-    expect(resolveVoiceEngines({ ...base, ttsPick: "endpoint", hasTtsEndpoint: true })).toEqual({
-      stt: "wasm",
-      tts: "endpoint",
-    });
-  });
-
-  it("unset tts pick defaults to endpoint when one is configured (pre-wasm behavior)", () => {
-    expect(resolveVoiceEngines({ ...base, ttsPick: "", hasTtsEndpoint: true })).toEqual({
-      stt: "wasm",
-      tts: "endpoint",
-    });
-    expect(resolveVoiceEngines({ ...base, ttsPick: "" })).toEqual({
-      stt: "wasm",
-      tts: "wasm",
-    });
-  });
-
-  it("on-device pick not ready prefers the configured endpoint over builtin", () => {
+  it("explicit wasm pick not installed falls to builtin (status pane shows the gap)", () => {
     expect(resolveVoiceEngines({ ...base, ttsReady: false, hasTtsEndpoint: true })).toEqual({
       stt: "wasm",
-      tts: "endpoint",
+      tts: "builtin",
     });
   });
 });
