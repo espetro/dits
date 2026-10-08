@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { VoiceModelManifestSchema } from "@di/shared";
 import type { VoiceModelFile, VoiceModelManifest } from "@di/shared";
-import { $voiceDownload } from "../../stores/voice";
+import { $voiceDownload, $voiceModelsInstalled } from "../../stores/voice";
 import type { VoiceDownloadState } from "../../stores/voice";
 import { DiError, errorCode } from "../errors";
 
@@ -269,6 +269,7 @@ async function runVoiceModelDownload(opts: VoiceDownloadOptions): Promise<void> 
       report({});
     }
     report({ status: "ready" });
+    await refreshVoiceModelsInstalled(manifest, storage);
   } catch (err) {
     console.error("[voice] model download failed:", err);
     report({ status: "error", error: errorCode(err) ?? "models.download" });
@@ -302,6 +303,22 @@ export async function voiceModelBytesInstalled(
   };
 }
 
+/**
+ * Re-verify the cache into $voiceModelsInstalled (called on load, consent
+ * grant, layer pick, and after a download). A broken storage seam keeps
+ * the last-known value rather than flipping the verdict to a false miss.
+ */
+export async function refreshVoiceModelsInstalled(
+  manifest?: VoiceModelManifest,
+  storage?: VoiceModelStorage,
+): Promise<void> {
+  try {
+    $voiceModelsInstalled.set(await voiceModelBytesInstalled(manifest, storage));
+  } catch {
+    // keep last-known: a transient cache read error is not "uninstalled"
+  }
+}
+
 /** Cached bytes for one manifest file (engine load path in phases c/d). */
 export async function readVoiceModelFile(
   modelId: string,
@@ -320,4 +337,5 @@ export async function clearVoiceModels(storage?: VoiceModelStorage): Promise<voi
   const store = storage ?? defaultVoiceModelStorage();
   await store.clear();
   $voiceDownload.set({ status: "idle", progress: 0, bytesDone: 0, bytesTotal: 0 });
+  $voiceModelsInstalled.set({ stt: false, tts: false });
 }
