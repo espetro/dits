@@ -4,7 +4,15 @@
  * punctuation runs pass through unphonemized, everything else goes through
  * espeak en-us.
  */
+// order matters: readable-async-iterator installs the Symbol.asyncIterator
+// polyfill during module eval, which import order places before
+// phonemizer's bundled espeak loader (it for-awaits a ReadableStream —
+// needs chrome >=124 / safari >=27 / firefox >=110). the call below repeats
+// it so the guarantee holds even if import order ever changes.
+import { installReadableStreamAsyncIterator } from "../readable-async-iterator";
 import { phonemize as espeakPhonemize } from "phonemizer";
+
+installReadableStreamAsyncIterator();
 
 const PUNCTUATION = ';:,.!?¡¿—…"«»""(){}[]';
 const PUNCT_RE = new RegExp(
