@@ -6,13 +6,13 @@ import { toast } from "sonner";
 
 import { Button } from "./vendor/button";
 import { Progress } from "./vendor/progress";
-import { $voiceDownload, $voiceModelsConsent } from "../stores/voice";
+import { $voiceDownload, $voiceModelsConsent, $voiceModelsInstalled } from "../stores/voice";
 import { codeMessage } from "../lib/errors";
 import {
   DEFAULT_VOICE_MODEL_MANIFEST,
   clearVoiceModels,
   downloadVoiceModels,
-  voiceModelBytesInstalled,
+  refreshVoiceModelsInstalled,
   wasmVoiceSupported,
 } from "../lib/voice/models";
 
@@ -30,12 +30,11 @@ export function VoicePackFiles() {
   const download = useStore($voiceDownload);
   const consent = useStore($voiceModelsConsent);
   const supported = React.useMemo(() => wasmVoiceSupported(), []);
-  const [installed, setInstalled] = React.useState<{ stt: boolean; tts: boolean } | null>(null);
+  // the shared installed flag (persisted + cache-re-verified) — the same
+  // verdict the seam chip reads, so the pane and the chip can't disagree
+  const installed = useStore($voiceModelsInstalled);
 
-  const refresh = React.useCallback(async () => {
-    // a broken storage seam must not strand this row in a loading state
-    setInstalled(await voiceModelBytesInstalled().catch(() => ({ stt: false, tts: false })));
-  }, []);
+  const refresh = React.useCallback(() => refreshVoiceModelsInstalled(), []);
   React.useEffect(() => {
     void refresh();
   }, [refresh, download.status]);

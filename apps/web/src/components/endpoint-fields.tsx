@@ -3,6 +3,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "./vendor/input";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
+import { redactKey } from "../lib/runtime";
 
 const fieldClass = "block text-xs text-muted-foreground";
 const helperClass = "mt-1 text-xs text-muted-foreground";
@@ -136,7 +137,10 @@ export function EndpointFields(props: {
             onChange={(e) => props.onChange({ apiKey: e.target.value })}
             placeholder={
               props.savedApiKey
-                ? intl.formatMessage({ id: "settings.apiKeySaved" }, { key: props.savedApiKey })
+                ? intl.formatMessage(
+                    { id: "settings.apiKeySaved" },
+                    { key: redactKey(props.savedApiKey) },
+                  )
                 : ""
             }
             className="pr-9"

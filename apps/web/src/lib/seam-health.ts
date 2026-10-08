@@ -2,13 +2,14 @@ import { atom, computed } from "nanostores";
 import {
   $voiceDownload,
   $voiceModelsConsent,
+  $voiceModelsInstalled,
   $voiceSttEngine,
   $voiceTtsEngine,
 } from "../stores/voice";
 import { $providerProfile, $serverDriven, $serverReachable } from "./runtime";
 import { $voiceHealth } from "./voice/health";
 import type { VoiceHealthEvent, VoiceHealthKind } from "./voice/health";
-import { wasmVoiceSupported } from "./voice/models";
+import { refreshVoiceModelsInstalled, wasmVoiceSupported } from "./voice/models";
 
 /**
  * Seam health: one up/down verdict per pluggable seam (stt, tts, llm) for
@@ -102,6 +103,21 @@ if (typeof window !== "undefined") {
   $voiceSttEngine.listen(clearOnPick("stt"));
   $voiceTtsEngine.listen(clearOnPick("tts"));
   $providerProfile.listen(() => $seamOps.set({}));
+
+  // re-verify the persisted installed flag against the cache: once on
+  // load (eviction while away), on consent grant, and on a wasm pick.
+  // consent-gated: an unconsented session must not touch the storage api.
+  const reverify = () => {
+    if ($voiceModelsConsent.get() === "granted") void refreshVoiceModelsInstalled();
+  };
+  reverify();
+  $voiceModelsConsent.listen(reverify);
+  $voiceSttEngine.listen((pick) => {
+    if (pick === "wasm") reverify();
+  });
+  $voiceTtsEngine.listen((pick) => {
+    if (pick === "wasm") reverify();
+  });
 }
 
 function browserSttSupported(): boolean {
@@ -150,15 +166,23 @@ function configStatus(seam: SeamId): SeamStatus {
   return up;
 }
 
-// install state without an async cache read: the download store and the
-// seam ops are enough for the chip (it errs toward "up" once a wasm op
-// succeeded — lastSuccess means files must exist)
+// install state for the sync verdict: the persisted last-known flag
+// (kept fresh by refreshVoiceModelsInstalled) plus this session's
+// download/op signals — errs toward "up" once a wasm op succeeded.
 function sttInstalled(): boolean {
-  return $voiceDownload.get().status === "ready" || lastOk("stt") !== null;
+  return (
+    $voiceModelsInstalled.get()?.stt === true ||
+    $voiceDownload.get().status === "ready" ||
+    lastOk("stt") !== null
+  );
 }
 
 function ttsInstalled(): boolean {
-  return $voiceDownload.get().status === "ready" || lastOk("tts") !== null;
+  return (
+    $voiceModelsInstalled.get()?.tts === true ||
+    $voiceDownload.get().status === "ready" ||
+    lastOk("tts") !== null
+  );
 }
 
 function lastOk(seam: SeamId): number | null {
@@ -174,6 +198,7 @@ export const $seamHealth = computed(
     $providerProfile,
     $serverDriven,
     $voiceModelsConsent,
+    $voiceModelsInstalled,
     $voiceDownload,
   ],
   (): Record<SeamId, SeamStatus> => {

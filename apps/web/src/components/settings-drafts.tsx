@@ -163,6 +163,20 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
     tts: draftFromEndpoint(profile?.tts),
     llm: draftFromLlm(profile?.llm),
   }));
+  // useSsrStore yields null during SSR/first paint, so the useState
+  // initializer can run before the persisted profile is readable. Hydrate
+  // once on the first real profile — but never over an edit the user
+  // already typed into an empty draft.
+  const hydrated = React.useRef(profile !== null);
+  React.useEffect(() => {
+    if (hydrated.current || !profile) return;
+    hydrated.current = true;
+    setDrafts({
+      stt: draftFromEndpoint(profile.stt),
+      tts: draftFromEndpoint(profile.tts),
+      llm: draftFromLlm(profile.llm),
+    });
+  }, [profile]);
   const [testing, setTesting] = React.useState<SectionKey | null>(null);
   const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
   // STT read-aloud block: live transcript shown in a read-only textarea.
@@ -171,6 +185,7 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
   React.useEffect(() => () => liveStt.current?.stop(), []);
 
   function update(key: SectionKey, patch: Partial<SectionDraft>) {
+    hydrated.current = true;
     setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
     setTestState((prev) => ({ ...prev, [key]: undefined }));
   }

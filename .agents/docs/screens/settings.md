@@ -109,7 +109,8 @@ driver otherwise.
   in-browser renders the future options — gemini nano + transformers
   catalog — marked unavailable, no fake engine), cloud reveals the
   endpoint fields (base url, api key masked inside a <form> with a
-  show/hide toggle, model datalist, free-provider callout) plus an
+  show/hide toggle — the saved-key placeholder is redactKey-masked,
+  never raw — model datalist, free-provider callout) plus an
   incomplete alert; the test row streams a
   real one-word completion into a read-only textarea. Voice: tts
   layer select mirroring Hearing (wasm → pack files, cloud → tts
@@ -126,6 +127,9 @@ driver otherwise.
   "declined" and the layer shows the consent-declined note. A wasm
   pick with consent already granted also fetches the pack itself
   (VoicePackFiles effect) — concurrent mounts share one download.
+  Install state lives in the persisted `di.voice.modelsInstalled`
+  flag (written on download/clear, re-verified against the cache on
+  load/consent/wasm pick) — pane and chip read the same verdict.
   Switching a layer pick resets that section's test state (stale
   clip/output/playback dropped).
 - System status view (hidden, chip-only): one row per seam (stt /
@@ -137,10 +141,13 @@ driver otherwise.
     statuses, last ~20 health events) via `reportIssueUrl()`.
 - Saving is automatic: every pane edits a shared SectionDraft context
   (SettingsDraftsProvider inside the dialog so pane switches keep
-  in-flight edits); valid drafts write to $providerProfile after a
-  600ms debounce, an enabled-but-incomplete llm draft never overwrites
-  the last valid profile, and a save rebuilds the browser voice driver
-  so the new endpoint takes effect live.
+  in-flight edits); drafts hydrate once from the first real
+  $providerProfile value (the ssr store yields null pre-mount — a
+  typed edit cancels hydration so nothing clobbers it); valid drafts
+  write to $providerProfile after a 600ms debounce, an
+  enabled-but-incomplete llm draft never overwrites the last valid
+  profile, and a save rebuilds the browser voice driver so the new
+  endpoint takes effect live.
 - Pane failures render keyed `errors.*` copy, not raw exception text:
   driver and api errors carry a `code` that maps to a locale key
   (`errorDetail`/`codeMessage` in `lib/errors.ts`).
@@ -149,8 +156,10 @@ driver otherwise.
   down an orange dot + tint naming the layer ("stt down"), two "unstable",
   all three a red "offline". Clicking opens pane=status. Health comes
   from lib/seam-health.ts: configuration resolution (pick unsupported /
-  unreachable / unconfigured) + last-op outcomes (voice health events,
-  driver onError codes, llm turn results), cleared on next success.
+  unreachable / unconfigured — the wasm "missing download" verdict
+  reads `di.voice.modelsInstalled`) + last-op outcomes (voice health
+  events, driver onError codes, llm turn results), cleared on next
+  success.
 - Tests (per layer): stt test runs the resolved engine on a ~12s mic
   window (builtin read-aloud or capture→flush for wasm/endpoint);
   llm test streams a short completion; tts test really synthesizes

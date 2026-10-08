@@ -80,6 +80,23 @@ export const $voiceModelsConsent = persistentAtom<VoiceModelsConsent | "">(
   "",
 );
 
+export interface VoiceModelsInstalled {
+  stt: boolean;
+  tts: boolean;
+}
+
+/**
+ * Last-known installed model files. Persisted so an installed pack does
+ * not report "not downloaded" on a fresh session before the async cache
+ * read lands; models.ts writes it on download/clear and seam-health
+ * lazily re-verifies it against the cache (eviction corrects it).
+ */
+export const $voiceModelsInstalled = persistentAtom<VoiceModelsInstalled | null>(
+  "di.voice.modelsInstalled",
+  null,
+  { encode: JSON.stringify, decode: JSON.parse },
+);
+
 export interface VoiceDownloadState {
   status: "idle" | "downloading" | "ready" | "error";
   /** 0..1 across all files */
