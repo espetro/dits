@@ -335,7 +335,10 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
   }, [secsLeft, goFinish]);
 
   const blocker = useBlocker({
-    shouldBlockFn: () => !bypassNavRef.current,
+    // same-path navigations (?tool= dock tab switches) are in-page — only
+    // real leaves trigger the guard
+    shouldBlockFn: ({ current, next }) =>
+      !bypassNavRef.current && next.pathname !== current.pathname,
     enableBeforeUnload: true,
     withResolver: true,
   });
