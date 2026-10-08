@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
-import { Code2, PenLine } from "lucide-react";
+import { NotebookPen, PenLine, SquareCode } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { AgentAccess } from "@di/shared";
 
@@ -24,9 +24,19 @@ export const TOOL_REGISTRY: Record<string, ToolSpec> = {
   editor: {
     id: "editor",
     labelKey: "interview.tab.editor",
-    icon: Code2,
+    icon: NotebookPen,
     component: lazy(() =>
       import("../../components/editor-tool").then((m) => ({ default: m.EditorTool })),
+    ),
+    agentAccess: "read",
+    platforms: "all",
+  },
+  code: {
+    id: "code",
+    labelKey: "interview.tab.code",
+    icon: SquareCode,
+    component: lazy(() =>
+      import("../../components/code-tool").then((m) => ({ default: m.CodeTool })),
     ),
     agentAccess: "read",
     platforms: "all",

@@ -4,7 +4,13 @@ import type { SpeechDriver } from "./server-driver";
 import { createStoreToolExecutors } from "../agent/client-agent";
 import { $clientTurns, $currentQuestion } from "../agent/session-store";
 import { getClientSession } from "../opfs-store";
-import { $editorBuffer, $question, $whiteboard, setQuestion } from "../../stores/session";
+import {
+  $editorBuffer,
+  $question,
+  $whiteboard,
+  codeToolReadout,
+  setQuestion,
+} from "../../stores/session";
 import { $providerProfile, $serverDriven, pickWantsServer, probeServer } from "../runtime";
 import { $voiceSttEngine, $voiceTtsEngine } from "../../stores/voice";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
@@ -53,6 +59,7 @@ export async function createDriver(
       contentGetters: {
         editor: () => $editorBuffer.get(),
         whiteboard: () => $whiteboard.get(),
+        code: () => codeToolReadout(),
       },
       onQuestion: (q) => {
         setQuestion(q);

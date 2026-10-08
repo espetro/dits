@@ -137,6 +137,7 @@ export type AgentAccess = "read" | "write" | "read-write";
 export const TOOL_AGENT_ACCESS: Record<string, AgentAccess> = {
   editor: "read",
   whiteboard: "read",
+  code: "read",
 };
 
 /** Hand-tuned read defs per tool id; anything else gets the generic def. */
@@ -144,7 +145,13 @@ const TUNED_READ_DEFS: Record<string, ToolDef> = {
   editor: {
     name: "read_editor",
     description:
-      "Read the candidate's current code editor contents from their shared browser workspace. Call when you need to review what they wrote.",
+      "Read the candidate's notes contents from their shared browser workspace. Call when you need to review what they wrote.",
+    parameters: { type: "object", properties: {} },
+  },
+  code: {
+    name: "read_code",
+    description:
+      "Read the candidate's code notepad from their shared browser workspace. Returns the code plus its language and a syntax check verdict. Call when you need to review what they wrote.",
     parameters: { type: "object", properties: {} },
   },
   whiteboard: {

@@ -44,11 +44,13 @@ import { wasmVoiceSupported } from "../../lib/voice/models";
 import { dockSpecs } from "../../lib/tools/registry";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
 import {
+  $codeBuffer,
   $editorBuffer,
   $muted,
   $question,
   $questionCount,
   $whiteboard,
+  codeToolReadout,
   resetQuestion,
 } from "../../stores/session";
 
@@ -228,6 +230,7 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
   }, [noQuestionYet]);
   const editor = useStore($editorBuffer);
   const whiteboard = useStore($whiteboard);
+  const codeBuffer = useStore($codeBuffer);
   const voice = useVoice(id, muted);
   // p1.14 voice->text degradation: a voice failure (mic denied, unsupported
   // browser, ws down) immediately offers the type-instead path instead of
@@ -297,12 +300,19 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
     const t = setTimeout(() => {
       const state: Record<string, string> = {};
       for (const toolId of Object.keys(sessionTools)) {
-        state[toolId] = toolId === "editor" ? editor : toolId === "whiteboard" ? whiteboard : "";
+        state[toolId] =
+          toolId === "editor"
+            ? editor
+            : toolId === "whiteboard"
+              ? whiteboard
+              : toolId === "code"
+                ? codeToolReadout()
+                : "";
       }
       pushToolState(id, state).catch(() => {});
     }, 1000);
     return () => clearTimeout(t);
-  }, [id, editor, whiteboard, clientOnly, sessionTools]);
+  }, [id, editor, whiteboard, codeBuffer, clientOnly, sessionTools]);
 
   const durationSecs = (session?.duration_min ?? 30) * 60;
   const secsLeft = useCountdown(session?.duration_min ?? 30, session?.created_at);
@@ -325,7 +335,10 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
   }, [secsLeft, goFinish]);
 
   const blocker = useBlocker({
-    shouldBlockFn: () => !bypassNavRef.current,
+    // same-path navigations (?tool= dock tab switches) are in-page — only
+    // real leaves trigger the guard
+    shouldBlockFn: ({ current, next }) =>
+      !bypassNavRef.current && next.pathname !== current.pathname,
     enableBeforeUnload: true,
     withResolver: true,
   });

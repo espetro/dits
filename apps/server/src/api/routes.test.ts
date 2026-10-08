@@ -101,7 +101,7 @@ describe("tool state routes", () => {
     expect(sessions[0]!.tools).toEqual({ editor: "ts", cards: "" });
   });
 
-  it("defaults sessions created without tools to editor+whiteboard", async () => {
+  it("defaults sessions created without tools to editor+whiteboard+code", async () => {
     const app = await makeApp();
     const res = await app.request("/v1/sessions", {
       method: "POST",
@@ -109,7 +109,7 @@ describe("tool state routes", () => {
       body: JSON.stringify({ title: "t", mode: "interview", duration_min: 30 }),
     });
     const body = (await res.json()) as { tools?: Record<string, string> };
-    expect(body.tools).toEqual({ editor: "", whiteboard: "" });
+    expect(body.tools).toEqual({ editor: "", whiteboard: "", code: "" });
   });
 });
 

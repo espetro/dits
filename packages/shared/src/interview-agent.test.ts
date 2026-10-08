@@ -31,11 +31,12 @@ describe("buildPrompt", () => {
 });
 
 describe("VOICE_TOOLS", () => {
-  it("has the three interview tools with JSON schema parameters", () => {
+  it("has the interview tools with JSON schema parameters", () => {
     expect(VOICE_TOOLS.map((t) => t.name)).toEqual([
       "update_question",
       "read_editor",
       "read_whiteboard",
+      "read_code",
     ]);
     for (const t of VOICE_TOOLS) {
       expect((t.parameters as { type: string }).type).toBe("object");

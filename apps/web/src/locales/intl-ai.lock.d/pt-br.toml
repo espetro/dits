@@ -959,6 +959,30 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:26:24Z"
 
+[entries."interview.codeLanguage"]
+value = "linguagem de código"
+source_hash = "d6b67ab3eea610bb5fc52dcd4c543d89da68381f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:31:24Z"
+
+[entries."interview.codePlaceholder"]
+value = "escreva ou cole o código aqui…"
+source_hash = "9555bfbd0c27822bcde2f2f5811b7dab86242d7a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:31:24Z"
+
+[entries."interview.codeSyntaxError"]
+value = "erro de sintaxe"
+source_hash = "2c4f85fcddbb9d4aafff48a6f33e59be855c88b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:31:24Z"
+
 [entries."interview.controls"]
 value = "controles da chamada"
 source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
@@ -1163,12 +1187,21 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T20:07:27Z"
 
-[entries."interview.tab.editor"]
-value = "editor"
-source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
-origin = "human"
+[entries."interview.tab.code"]
+value = "código"
+source_hash = "e6fb06210fafc02fd7479ddbed2d042cc3a5155e"
+origin = "ai"
 reviewed = false
-updated_at = "2026-09-27T19:26:24Z"
+model = "openrouter/free"
+updated_at = "2026-10-08T22:31:24Z"
+
+[entries."interview.tab.editor"]
+value = "notas"
+source_hash = "3add7b9612102f2a7dbe4ed4fe886e07e847c24d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-08T22:51:52Z"
 
 [entries."interview.tab.whiteboard"]
 value = "whiteboard"
