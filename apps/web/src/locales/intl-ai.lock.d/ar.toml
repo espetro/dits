@@ -2258,7 +2258,7 @@ updated_at = "2026-09-27T19:00:50Z"
 
 [entries."settings.nav.voice"]
 value = "الصوت والشخصية"
-source_hash = "a2b2d2bde072bef7e2d661e181f017b428441ad1"
+source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:00:50Z"
@@ -3240,399 +3240,399 @@ updated_at = "2026-09-27T19:00:50Z"
 [entries."a11y.status"]
 value = "حالة النظام"
 source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.title"]
 value = "حالة النظام"
 source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.offline"]
 value = "غير متصل"
 source_hash = "d1ffda5dc9903c9a42d66636aea9405e311c6f85"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.unstable"]
 value = "غير مستقر"
 source_hash = "fd2a7e1cb00c329990c65763cacd331b6ddf577d"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.sttDown"]
 value = "stt متوقف"
 source_hash = "d8b58f6a74fbb521b0e7a079c5d221751dbc6cbb"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.ttsDown"]
 value = "tts متوقف"
 source_hash = "e61f68e1d7c0c205db212dade724116a9af32bec"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."chip.llmDown"]
 value = "llm متوقف"
 source_hash = "0668a19afd2b77155a29d3a839e98b220d32a103"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.nav.preferences"]
 value = "تفضيلات المستخدم"
 source_hash = "8f86ede9757e85be28f448f1dc706a545fbfa189"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.nav.status"]
 value = "حالة النظام"
 source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.hearing"]
 value = "السمع"
 source_hash = "33b9bc376d79ed72c4d5f58a883fa08aa9d3f5be"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.hearingDesc"]
 value = "بماذا يستمع — الميكروفون وتحويل الصوت إلى نص"
 source_hash = "ee9ad162a816a3a6b3663745b1b5fbb2aaf11764"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.brain"]
 value = "العقل"
 source_hash = "8b9248a4e0b64bbccf82e7723a3734279bf9bbc4"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.brainDesc"]
 value = "نموذج المحاوِر"
 source_hash = "b89e65c26a8c8aab2f6d831c54f831d29bbe3db8"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.voice"]
 value = "الصوت"
 source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.voiceDesc"]
 value = "كيف يجيب — تحويل النص إلى كلام"
 source_hash = "35fd5848c954c2df1e748a04d0a8b88016141edc"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.stt"]
 value = "طبقة stt"
 source_hash = "813ea48cc01d5fee62a9ad13611e9aea06e2c77e"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.sttDesc"]
 value = "تحول صوتك إلى نص"
 source_hash = "4571742e15718a7a2c4863b177ce3f918911cd34"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.tts"]
 value = "طبقة tts"
 source_hash = "3aa7b7961d6a2c428435a2fa50a1de4ad1f715ca"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.ttsDesc"]
 value = "تحول الإجابات إلى كلام"
 source_hash = "6c34a8dd80565fb04353e0e6e2ab2dc3147304ae"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.llm"]
 value = "نموذج المحاوِر"
 source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.llmDesc"]
 value = "يدير المحادثة"
 source_hash = "9a7506132330dd30bd5330e21f2cb10e186e35ef"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.auto"]
 value = "تلقائي"
 source_hash = "ebe8872498bd7a369441cf75f56db2bf3701eef9"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.inBrowser"]
 value = "داخل المتصفح"
 source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.wasm"]
 value = "wasm على الجهاز"
 source_hash = "73916856ff327eedc5b8d91e226f2117ecce574b"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.cloud"]
 value = "نقطة سحابية"
 source_hash = "8b620a0e16d12c82709da727ac89dcaafb1eb00b"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.server"]
 value = "تطبيق سطح المكتب"
 source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.comingSoon"]
 value = "قريباً"
 source_hash = "9549bf8d0d30a9496159e0bde5fb063fdb817905"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.serverOwned"]
 value = "يديره تطبيق سطح المكتب — هذه الطبقة تعمل هناك"
 source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.layer.serverUnreachable"]
 value = "تطبيق سطح المكتب غير متاح — تعود هذه الطبقة إلى المتصفح"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.stt.listening"]
 value = "يستمع…"
 source_hash = "cc45fd2e52d3e67e1ab7161803751cc916ee69c3"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.voicePack.size"]
 value = "{size} ميغا"
 source_hash = "9f00fb90db266e6139441d61b5ac27ed34acc98d"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.ai.demoLimits"]
 value = "المحاوِر التجريبي يستخدم نقطة مشتركة محدودة المعدل — مناسب لتجربة التطبيق لا للاستخدام المكثف."
 source_hash = "a4d52e132de61ce58a83adcd37bdf18cf9aebb50"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.llm.comingSoonDesc"]
 value = "نماذج المحاوِر على الجهاز قادمة قريباً — غير متاحة بعد."
 source_hash = "078c1fb3639ffb6b44e8f3f9799b951a798d7672"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.llm.outputPlaceholder"]
 value = "يظهر الرد هنا…"
 source_hash = "d6ed24603fb55638b563655e72a0dea36dd99eb5"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.intro"]
 value = "كل طبقة من طبقات المقابلة وهل هي قابلة للاستخدام الآن."
 source_hash = "db9d8d52923f68f58adf00e494cc7333469bfac5"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.seam.stt"]
 value = "الصوت إلى نص"
 source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.seam.tts"]
 value = "النص إلى كلام"
 source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.seam.llm"]
 value = "نموذج المحاوِر"
 source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.ok"]
 value = "جاهز"
 source_hash = "75c0533730caf1f78561c0883fb87bc8d98ef04b"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.up"]
 value = "يعمل"
 source_hash = "7c0a25c06ea30bae50e39a37a5997e31a1a96e20"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.down"]
 value = "متوقف"
 source_hash = "77346d0447daff959358a0ecbeec83bfd9ec86bb"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.server"]
 value = "تطبيق سطح المكتب غير متاح"
 source_hash = "5ee1de5d64f7c5507ce243be49ae65240b69b326"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.unsupported"]
 value = "غير مدعوم في هذا المتصفح"
 source_hash = "83112c29cbe3c8ee9d88e7cfcba50a5c62503a5d"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.consent"]
 value = "يتطلب تنزيل نماذج على الجهاز"
 source_hash = "a32043dedbfe6d512fc471a619a8c199606e0744"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.notDownloaded"]
 value = "ملفات النموذج غير منزّلة"
 source_hash = "c425954f10fc4cbf86aada29b1461b7feb0ac48b"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.noEndpoint"]
 value = "لا توجد نقطة مهيأة"
 source_hash = "5f8b6c36b7f24be96298e7caa8175a915c8c0881"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.llmUnconfigured"]
 value = "لا يوجد نموذج محاوِر مهيأ"
 source_hash = "1fca7e06b3727ce4dd11b753bebababcd7e0b993"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reason.error"]
 value = "آخر محاولة فشلت"
 source_hash = "38b946fc39f2c7d111abcd4d58a2eef4e5b350e1"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.server"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.unsupported"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.download"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.sttEndpoint"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.ttsEndpoint"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.llm"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.action.retry"]
 value = "أصلح في voice"
 source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reportIssue"]
 value = "الإبلاغ عن مشكلة"
 source_hash = "4f49ed7432b43a906b411a57f9182fd38c83408f"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.status.reportHint"]
 value = "يفتح issue على github مع تشخيصات معبأة — صِف ما حدث."
 source_hash = "8506987a066fc3444cfcc9ad55d57ec85949ca5c"
-origin = "manual"
+origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
