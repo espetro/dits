@@ -28,5 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
       - name: check locale files
-        run: bunx intl-ai@0.5.0 check
+        run: bunx intl-ai check
