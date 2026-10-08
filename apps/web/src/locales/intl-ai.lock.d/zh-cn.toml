@@ -64,6 +64,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:13:41Z"
 
+[entries."a11y.status"]
+value = "系统状态"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
 [entries."account.guest"]
 value = "访客"
 source_hash = "face83ee3014bdc8f98203cc94e2e89222452e90"
@@ -98,6 +105,48 @@ source_hash = "c7f73bb54d928922c3838bb789ee9fb8a5b1eb37"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."chip.llmDown"]
+value = "llm 故障"
+source_hash = "0668a19afd2b77155a29d3a839e98b220d32a103"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."chip.offline"]
+value = "离线"
+source_hash = "d1ffda5dc9903c9a42d66636aea9405e311c6f85"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."chip.sttDown"]
+value = "stt 故障"
+source_hash = "d8b58f6a74fbb521b0e7a079c5d221751dbc6cbb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."chip.title"]
+value = "系统状态"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."chip.ttsDown"]
+value = "tts 故障"
+source_hash = "e61f68e1d7c0c205db212dade724116a9af32bec"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."chip.unstable"]
+value = "不稳定"
+source_hash = "fd2a7e1cb00c329990c65763cacd331b6ddf577d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."common.github"]
 value = "github"
@@ -1752,6 +1801,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.ai.demoLimits"]
+value = "演示面试官使用共享且限流的 endpoint — 适合试用，不适合重度使用。"
+source_hash = "a4d52e132de61ce58a83adcd37bdf18cf9aebb50"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
 [entries."settings.ai.experimental"]
 value = "实验性"
 source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
@@ -1829,12 +1885,26 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.apiKeyHide"]
+value = "隐藏 API 密钥"
+source_hash = "29538b53771fff5bad78e3a48a3a8f88c2f141d2"
+origin = "ai"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
 [entries."settings.apiKeySaved"]
 value = "已保存:{key}"
 source_hash = "474a31b09c5abe5801f5967b6b7d073c7c24c048"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.apiKeyShow"]
+value = "显示 API 密钥"
+source_hash = "8d24e5afd2e9b40d21e4300c893a486aab979795"
+origin = "ai"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
 
 [entries."settings.autosaveNote"]
 value = "更改会自动保存。"
@@ -2060,6 +2130,104 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.layer.auto"]
+value = "自动"
+source_hash = "ebe8872498bd7a369441cf75f56db2bf3701eef9"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.cloud"]
+value = "云端 endpoint"
+source_hash = "8b620a0e16d12c82709da727ac89dcaafb1eb00b"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.comingSoon"]
+value = "即将推出"
+source_hash = "9549bf8d0d30a9496159e0bde5fb063fdb817905"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.inBrowser"]
+value = "浏览器内"
+source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.llm"]
+value = "面试官模型"
+source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.llmDesc"]
+value = "驱动对话"
+source_hash = "9a7506132330dd30bd5330e21f2cb10e186e35ef"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.server"]
+value = "桌面应用"
+source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.serverOwned"]
+value = "由桌面应用处理 — 此层在其中运行"
+source_hash = "4212c88be5d521fc218576da0749196d382dd480"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.serverUnreachable"]
+value = "桌面应用无法连接 — 此层回退到浏览器"
+source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.stt"]
+value = "stt 层"
+source_hash = "813ea48cc01d5fee62a9ad13611e9aea06e2c77e"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.sttDesc"]
+value = "把你的语音转成文字"
+source_hash = "4571742e15718a7a2c4863b177ce3f918911cd34"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.tts"]
+value = "tts 层"
+source_hash = "3aa7b7961d6a2c428435a2fa50a1de4ad1f715ca"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.ttsDesc"]
+value = "把回答转成语音"
+source_hash = "6c34a8dd80565fb04353e0e6e2ab2dc3147304ae"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.layer.wasm"]
+value = "设备端 wasm"
+source_hash = "73916856ff327eedc5b8d91e226f2117ecce574b"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
 [entries."settings.llm"]
 value = "大语言模型"
 source_hash = "370515d5b19f82bba11495fd9229cf64fb15aec0"
@@ -2087,6 +2255,13 @@ source_hash = "72e7f3d4ac5f6f5b127d167c35621a74404a6ad2"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.llm.comingSoonDesc"]
+value = "设备端面试官模型即将推出 — 尚不可用。"
+source_hash = "078c1fb3639ffb6b44e8f3f9799b951a798d7672"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.llm.delete"]
 value = "删除"
@@ -2157,6 +2332,13 @@ source_hash = "85841abddb12dc3591a5990c6527df65a5e63c87"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.llm.outputPlaceholder"]
+value = "回复将显示在这里…"
+source_hash = "d6ed24603fb55638b563655e72a0dea36dd99eb5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.llm.reDownload"]
 value = "重新下载"
@@ -2256,12 +2438,54 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.nav.preferences"]
+value = "用户偏好"
+source_hash = "8f86ede9757e85be28f448f1dc706a545fbfa189"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.nav.status"]
+value = "系统状态"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
 [entries."settings.nav.voice"]
 value = "语音与个性"
 source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.section.brain"]
+value = "大脑"
+source_hash = "8b9248a4e0b64bbccf82e7723a3734279bf9bbc4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.section.brainDesc"]
+value = "面试官模型"
+source_hash = "b89e65c26a8c8aab2f6d831c54f831d29bbe3db8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.section.hearing"]
+value = "听觉"
+source_hash = "33b9bc376d79ed72c4d5f58a883fa08aa9d3f5be"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.section.hearingDesc"]
+value = "用什么听 — 麦克风和语音转文字"
+source_hash = "ee9ad162a816a3a6b3663745b1b5fbb2aaf11764"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.section.llm.providers"]
 value = "OpenAI 兼容端点（OpenAI、OpenRouter、Groq、Cerebras、Google AI Studio、Ollama、llama.cpp）或 Anthropic 兼容端点。"
@@ -2305,12 +2529,194 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.section.voice"]
+value = "声音"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.section.voiceDesc"]
+value = "如何回答 — 语音合成"
+source_hash = "35fd5848c954c2df1e748a04d0a8b88016141edc"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.download"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.llm"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.retry"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.server"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.sttEndpoint"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.ttsEndpoint"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.action.unsupported"]
+value = "在 voice 中修复"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.down"]
+value = "故障"
+source_hash = "77346d0447daff959358a0ecbeec83bfd9ec86bb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.intro"]
+value = "各个面试层以及当前是否可用。"
+source_hash = "db9d8d52923f68f58adf00e494cc7333469bfac5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.ok"]
+value = "就绪"
+source_hash = "75c0533730caf1f78561c0883fb87bc8d98ef04b"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.consent"]
+value = "需要下载设备端模型"
+source_hash = "a32043dedbfe6d512fc471a619a8c199606e0744"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.error"]
+value = "上次尝试失败"
+source_hash = "38b946fc39f2c7d111abcd4d58a2eef4e5b350e1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.llmUnconfigured"]
+value = "未配置面试官模型"
+source_hash = "1fca7e06b3727ce4dd11b753bebababcd7e0b993"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.noEndpoint"]
+value = "未配置 endpoint"
+source_hash = "5f8b6c36b7f24be96298e7caa8175a915c8c0881"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.notDownloaded"]
+value = "模型文件未下载"
+source_hash = "c425954f10fc4cbf86aada29b1461b7feb0ac48b"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.server"]
+value = "桌面应用无法连接"
+source_hash = "5ee1de5d64f7c5507ce243be49ae65240b69b326"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reason.unsupported"]
+value = "此浏览器不支持"
+source_hash = "83112c29cbe3c8ee9d88e7cfcba50a5c62503a5d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reportHint"]
+value = "打开预填诊断信息的 github issue — 请描述发生了什么。"
+source_hash = "8506987a066fc3444cfcc9ad55d57ec85949ca5c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.reportIssue"]
+value = "报告问题"
+source_hash = "4f49ed7432b43a906b411a57f9182fd38c83408f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.seam.llm"]
+value = "面试官模型"
+source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.seam.stt"]
+value = "语音转文字"
+source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.seam.tts"]
+value = "文字转语音"
+source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
+[entries."settings.status.up"]
+value = "正常"
+source_hash = "7c0a25c06ea30bae50e39a37a5997e31a1a96e20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
+
 [entries."settings.stt"]
 value = "语音识别"
 source_hash = "eaf1450c665c16e051fa898568278cb816f7031f"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.stt.listening"]
+value = "正在聆听…"
+source_hash = "cc45fd2e52d3e67e1ab7161803751cc916ee69c3"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.stt.micHelp"]
 value = "与设置页的麦克风检查共用。"
@@ -2480,6 +2886,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.voice.sample"]
+value = "语音测试"
+source_hash = "c5becf9cbb2e3226b72dc35e39ac972bea8238e7"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleCta"]
+value = "播放示例"
+source_hash = "f2c5ce6dbca9b0b6f6fe55605e9e96a4b9b5f4d2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleDesc"]
+value = "通过所选的 tts 引擎播放一句话。"
+source_hash = "ddca427f636757e6408878b87bed044e23130b17"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
 [entries."settings.voice.stt"]
 value = "听懂你的方式"
 source_hash = "3eb1483a01ab1666f07b304c80c247f1562846a5"
@@ -2515,6 +2942,13 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.voice.testPhrase"]
+value = "你好，今天由我来担任你的面试官。准备好了就开始。"
+source_hash = "6068dd011fcfccd310fd78a87c58f213b96db72f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
 [entries."settings.voice.tts"]
 value = "回答你的声音"
 source_hash = "af214d3c3cc4df7d7fc72bd038af49a1ac0cfd45"
@@ -2535,6 +2969,13 @@ source_hash = "fb2fa90115603a2d2dae0d4c1aa448cfeead9932"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.voicePack.size"]
+value = "{size} mb"
+source_hash = "9f00fb90db266e6139441d61b5ac27ed34acc98d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T11:17:56Z"
 
 [entries."settings.voicePane.builtin"]
 value = "浏览器内置"
@@ -3236,444 +3677,3 @@ source_hash = "8b1c2a593cb4f35b39f6987738304d44aa57b72c"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
-
-[entries."a11y.status"]
-value = "系统状态"
-source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.title"]
-value = "系统状态"
-source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.offline"]
-value = "离线"
-source_hash = "d1ffda5dc9903c9a42d66636aea9405e311c6f85"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.unstable"]
-value = "不稳定"
-source_hash = "fd2a7e1cb00c329990c65763cacd331b6ddf577d"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.sttDown"]
-value = "stt 故障"
-source_hash = "d8b58f6a74fbb521b0e7a079c5d221751dbc6cbb"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.ttsDown"]
-value = "tts 故障"
-source_hash = "e61f68e1d7c0c205db212dade724116a9af32bec"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."chip.llmDown"]
-value = "llm 故障"
-source_hash = "0668a19afd2b77155a29d3a839e98b220d32a103"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.nav.preferences"]
-value = "用户偏好"
-source_hash = "8f86ede9757e85be28f448f1dc706a545fbfa189"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.nav.status"]
-value = "系统状态"
-source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.hearing"]
-value = "听觉"
-source_hash = "33b9bc376d79ed72c4d5f58a883fa08aa9d3f5be"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.hearingDesc"]
-value = "用什么听 — 麦克风和语音转文字"
-source_hash = "ee9ad162a816a3a6b3663745b1b5fbb2aaf11764"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.brain"]
-value = "大脑"
-source_hash = "8b9248a4e0b64bbccf82e7723a3734279bf9bbc4"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.brainDesc"]
-value = "面试官模型"
-source_hash = "b89e65c26a8c8aab2f6d831c54f831d29bbe3db8"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.voice"]
-value = "声音"
-source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.section.voiceDesc"]
-value = "如何回答 — 语音合成"
-source_hash = "35fd5848c954c2df1e748a04d0a8b88016141edc"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.stt"]
-value = "stt 层"
-source_hash = "813ea48cc01d5fee62a9ad13611e9aea06e2c77e"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.sttDesc"]
-value = "把你的语音转成文字"
-source_hash = "4571742e15718a7a2c4863b177ce3f918911cd34"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.tts"]
-value = "tts 层"
-source_hash = "3aa7b7961d6a2c428435a2fa50a1de4ad1f715ca"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.ttsDesc"]
-value = "把回答转成语音"
-source_hash = "6c34a8dd80565fb04353e0e6e2ab2dc3147304ae"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.llm"]
-value = "面试官模型"
-source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.llmDesc"]
-value = "驱动对话"
-source_hash = "9a7506132330dd30bd5330e21f2cb10e186e35ef"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.auto"]
-value = "自动"
-source_hash = "ebe8872498bd7a369441cf75f56db2bf3701eef9"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.inBrowser"]
-value = "浏览器内"
-source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.wasm"]
-value = "设备端 wasm"
-source_hash = "73916856ff327eedc5b8d91e226f2117ecce574b"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.cloud"]
-value = "云端 endpoint"
-source_hash = "8b620a0e16d12c82709da727ac89dcaafb1eb00b"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.server"]
-value = "桌面应用"
-source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.comingSoon"]
-value = "即将推出"
-source_hash = "9549bf8d0d30a9496159e0bde5fb063fdb817905"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.serverOwned"]
-value = "由桌面应用处理 — 此层在其中运行"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.layer.serverUnreachable"]
-value = "桌面应用无法连接 — 此层回退到浏览器"
-source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.stt.listening"]
-value = "正在聆听…"
-source_hash = "cc45fd2e52d3e67e1ab7161803751cc916ee69c3"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.voicePack.size"]
-value = "{size} mb"
-source_hash = "9f00fb90db266e6139441d61b5ac27ed34acc98d"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.ai.demoLimits"]
-value = "演示面试官使用共享且限流的 endpoint — 适合试用，不适合重度使用。"
-source_hash = "a4d52e132de61ce58a83adcd37bdf18cf9aebb50"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.llm.comingSoonDesc"]
-value = "设备端面试官模型即将推出 — 尚不可用。"
-source_hash = "078c1fb3639ffb6b44e8f3f9799b951a798d7672"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.llm.outputPlaceholder"]
-value = "回复将显示在这里…"
-source_hash = "d6ed24603fb55638b563655e72a0dea36dd99eb5"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.intro"]
-value = "各个面试层以及当前是否可用。"
-source_hash = "db9d8d52923f68f58adf00e494cc7333469bfac5"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.seam.stt"]
-value = "语音转文字"
-source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.seam.tts"]
-value = "文字转语音"
-source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.seam.llm"]
-value = "面试官模型"
-source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.ok"]
-value = "就绪"
-source_hash = "75c0533730caf1f78561c0883fb87bc8d98ef04b"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.up"]
-value = "正常"
-source_hash = "7c0a25c06ea30bae50e39a37a5997e31a1a96e20"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.down"]
-value = "故障"
-source_hash = "77346d0447daff959358a0ecbeec83bfd9ec86bb"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.server"]
-value = "桌面应用无法连接"
-source_hash = "5ee1de5d64f7c5507ce243be49ae65240b69b326"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.unsupported"]
-value = "此浏览器不支持"
-source_hash = "83112c29cbe3c8ee9d88e7cfcba50a5c62503a5d"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.consent"]
-value = "需要下载设备端模型"
-source_hash = "a32043dedbfe6d512fc471a619a8c199606e0744"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.notDownloaded"]
-value = "模型文件未下载"
-source_hash = "c425954f10fc4cbf86aada29b1461b7feb0ac48b"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.noEndpoint"]
-value = "未配置 endpoint"
-source_hash = "5f8b6c36b7f24be96298e7caa8175a915c8c0881"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.llmUnconfigured"]
-value = "未配置面试官模型"
-source_hash = "1fca7e06b3727ce4dd11b753bebababcd7e0b993"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reason.error"]
-value = "上次尝试失败"
-source_hash = "38b946fc39f2c7d111abcd4d58a2eef4e5b350e1"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.server"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.unsupported"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.download"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.sttEndpoint"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.ttsEndpoint"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.llm"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.action.retry"]
-value = "在 voice 中修复"
-source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reportIssue"]
-value = "报告问题"
-source_hash = "4f49ed7432b43a906b411a57f9182fd38c83408f"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.status.reportHint"]
-value = "打开预填诊断信息的 github issue — 请描述发生了什么。"
-source_hash = "8506987a066fc3444cfcc9ad55d57ec85949ca5c"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
-[entries."settings.apiKeyHide"]
-value = "隐藏 API 密钥"
-source_hash = "29538b53771fff5bad78e3a48a3a8f88c2f141d2"
-origin = "ai"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"
-
-[entries."settings.apiKeyShow"]
-value = "显示 API 密钥"
-source_hash = "8d24e5afd2e9b40d21e4300c893a486aab979795"
-origin = "ai"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"
-
-[entries."settings.voice.sample"]
-value = "语音测试"
-source_hash = "c5becf9cbb2e3226b72dc35e39ac972bea8238e7"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"
-
-[entries."settings.voice.sampleCta"]
-value = "播放示例"
-source_hash = "f2c5ce6dbca9b0b6f6fe55605e9e96a4b9b5f4d2"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"
-
-[entries."settings.voice.sampleDesc"]
-value = "通过所选的 tts 引擎播放一句话。"
-source_hash = "ddca427f636757e6408878b87bed044e23130b17"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"
-
-[entries."settings.voice.testPhrase"]
-value = "你好，今天由我来担任你的面试官。准备好了就开始。"
-source_hash = "6068dd011fcfccd310fd78a87c58f213b96db72f"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T13:35:00Z"

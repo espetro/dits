@@ -69,7 +69,7 @@ run = "bun run scripts/check-locales.ts"
 
 [tasks."i18n:fill"]
 description = "Translate missing locale keys via intl-ai (manual; needs provider env), then re-flatten"
-run = "bunx intl-ai@0.5.0 fill --config intl-ai.fill.toml && bun run scripts/flatten-locales.ts"
+run = "bunx intl-ai fill --config intl-ai.fill.toml && bun run scripts/flatten-locales.ts"
 
 [tasks.evals]
 description = "Run evals vitest suite"
