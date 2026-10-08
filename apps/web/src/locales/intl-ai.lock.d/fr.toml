@@ -1196,11 +1196,12 @@ model = "openrouter/free"
 updated_at = "2026-10-08T22:30:33Z"
 
 [entries."interview.tab.editor"]
-value = "éditeur"
-source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
-origin = "human"
+value = "notes"
+source_hash = "3add7b9612102f2a7dbe4ed4fe886e07e847c24d"
+origin = "ai"
 reviewed = false
-updated_at = "2026-09-27T19:08:52Z"
+model = "openrouter/free"
+updated_at = "2026-10-08T22:51:37Z"
 
 [entries."interview.tab.whiteboard"]
 value = "whiteboard"
