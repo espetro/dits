@@ -45,8 +45,14 @@ export function BrainSection() {
         ? "demo"
         : "cloud";
 
+  const [test, setTest] = React.useState<TestState>({ status: "idle" });
+  const [output, setOutput] = React.useState("");
+
   const choose = (value: string) => {
     const next = value as LlmPick;
+    // a different layer means a different endpoint — drop stale test output
+    setTest({ status: "idle" });
+    setOutput("");
     if (next === "demo") {
       update("llm", {
         enabled: true,
@@ -67,9 +73,6 @@ export function BrainSection() {
       update("llm", { enabled: false, llmMode: "browser" });
     }
   };
-
-  const [test, setTest] = React.useState<TestState>({ status: "idle" });
-  const [output, setOutput] = React.useState("");
 
   /** fire one real short completion through the configured llm, streamed */
   async function runTest() {

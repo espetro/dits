@@ -98,7 +98,8 @@ driver otherwise.
   Hearing: mic picker (MicSelector, `di.devices.mic`), stt layer
   select (automatic | in-browser | on-device wasm | cloud endpoint;
   desktop app only when the di server is reachable), the layer's
-  conditional (wasm → voice-pack download/progress/remove; cloud →
+  conditional (wasm → voice-pack download/progress/remove — with
+  consent granted a missing pack auto-downloads; cloud →
   stt endpoint fields; explicit server while unreachable → warn note),
   and the test row: capture the selected mic through the resolved
   layer (builtin live stt, or capture→engine feed→flush for
@@ -107,8 +108,9 @@ driver otherwise.
   demo is the default and fills the managed VITE_DEMO_LLM_* endpoint;
   in-browser renders the future options — gemini nano + transformers
   catalog — marked unavailable, no fake engine), cloud reveals the
-  endpoint fields (base url, redacted api key, model datalist, free-
-  provider callout) plus an incomplete alert; the test row streams a
+  endpoint fields (base url, api key masked inside a <form> with a
+  show/hide toggle, model datalist, free-provider callout) plus an
+  incomplete alert; the test row streams a
   real one-word completion into a read-only textarea. Voice: tts
   layer select mirroring Hearing (wasm → pack files, cloud → tts
   endpoint fields) and the test row that synthesizes the localized
@@ -121,7 +123,11 @@ driver otherwise.
   fires on first browser-mode interview entry (consent unset) and
   whenever a wasm layer is picked while consent is not granted;
   accept grants + starts the ~50 mb download, decline writes
-  "declined" and the layer shows the consent-declined note.
+  "declined" and the layer shows the consent-declined note. A wasm
+  pick with consent already granted also fetches the pack itself
+  (VoicePackFiles effect) — concurrent mounts share one download.
+  Switching a layer pick resets that section's test state (stale
+  clip/output/playback dropped).
 - System status view (hidden, chip-only): one row per seam (stt /
   tts / llm) with up/down, the reason it is down (unreachable server,
   unsupported browser, missing download, unconfigured endpoint, no

@@ -3636,3 +3636,44 @@ origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
+[entries."settings.apiKeyHide"]
+value = "Esconder chave da API"
+source_hash = "29538b53771fff5bad78e3a48a3a8f88c2f141d2"
+origin = "ai"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.apiKeyShow"]
+value = "Mostrar chave da API"
+source_hash = "8d24e5afd2e9b40d21e4300c893a486aab979795"
+origin = "ai"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sample"]
+value = "testar voz"
+source_hash = "c5becf9cbb2e3226b72dc35e39ac972bea8238e7"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleCta"]
+value = "reproduzir amostra"
+source_hash = "f2c5ce6dbca9b0b6f6fe55605e9e96a4b9b5f4d2"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleDesc"]
+value = "ouça uma frase pelo motor tts escolhido."
+source_hash = "ddca427f636757e6408878b87bed044e23130b17"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.testPhrase"]
+value = "oi, serei seu entrevistador hoje. começamos quando você quiser."
+source_hash = "6068dd011fcfccd310fd78a87c58f213b96db72f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-08T13:35:00Z"

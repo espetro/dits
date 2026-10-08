@@ -46,13 +46,14 @@ function decodePick(raw: string): SttLayerPick {
 /** Migrate the dropped di.runtime-mode pref into per-layer picks (once). */
 function migrateRuntimeMode(): void {
   try {
-    const raw = localStorage.getItem("di.runtime-mode");
-    if (raw === null) return;
+    // di.runtime-mode persisted raw (encode: identity); the engine stores
+    // below do too — read and write plain values, no JSON.
+    const mode = localStorage.getItem("di.runtime-mode");
+    if (mode === null) return;
     localStorage.removeItem("di.runtime-mode");
-    const mode = JSON.parse(raw);
     if (mode === "server" || mode === "local-server") {
-      localStorage.setItem("di.voice.sttEngine", JSON.stringify("server"));
-      localStorage.setItem("di.voice.ttsEngine", JSON.stringify("server"));
+      localStorage.setItem("di.voice.sttEngine", "server");
+      localStorage.setItem("di.voice.ttsEngine", "server");
     }
     // custom / in-browser: the engine picks were always the effective
     // choice in browser mode — their own migration below handles them.

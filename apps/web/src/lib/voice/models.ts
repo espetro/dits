@@ -199,11 +199,23 @@ export interface VoiceDownloadOptions {
   onProgress?: (state: VoiceDownloadState) => void;
 }
 
+let inflight: Promise<void> | null = null;
+
 /**
  * Download every file of the requested models, verify sha256, write to the
  * model cache. Progress lands on $voiceDownload (and the optional callback).
+ * Concurrent callers share one run — both layer sections can mount at once.
  */
-export async function downloadVoiceModels(opts: VoiceDownloadOptions = {}): Promise<void> {
+export function downloadVoiceModels(opts: VoiceDownloadOptions = {}): Promise<void> {
+  if (!inflight) {
+    inflight = runVoiceModelDownload(opts).finally(() => {
+      inflight = null;
+    });
+  }
+  return inflight;
+}
+
+async function runVoiceModelDownload(opts: VoiceDownloadOptions): Promise<void> {
   const doFetch = opts.fetchImpl ?? fetch;
   const storage = opts.storage ?? defaultVoiceModelStorage();
   const manifest = opts.manifest ?? (await loadVoiceModelManifest(doFetch));

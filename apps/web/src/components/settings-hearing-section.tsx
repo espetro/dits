@@ -75,6 +75,12 @@ export function HearingSection() {
   const pick = (value: string) => {
     const v = value as SttLayerPick;
     $voiceSttEngine.set(v);
+    // a different layer means a different engine — drop stale results and
+    // release the mic if a test was still listening
+    void liveTest.current?.stop();
+    liveTest.current = null;
+    setTest({ status: "idle" });
+    setOutput("");
     if (v === "wasm" && consent !== "granted") requestVoiceConsent();
   };
 

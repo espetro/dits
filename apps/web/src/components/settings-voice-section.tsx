@@ -58,6 +58,11 @@ export function VoiceSection() {
   const pick = (value: string) => {
     const v = value as TtsLayerPick;
     $voiceTtsEngine.set(v);
+    // a different layer means a different engine — drop stale clip/playback
+    setTest({ status: "idle" });
+    setClip(null);
+    setBuiltin(false);
+    speechSynthesis?.cancel();
     if (v === "wasm" && consent !== "granted") requestVoiceConsent();
   };
 

@@ -28,24 +28,41 @@ function fmtMb(bytes: number): string {
 export function VoicePackFiles() {
   const intl = useIntl();
   const download = useStore($voiceDownload);
+  const consent = useStore($voiceModelsConsent);
   const supported = React.useMemo(() => wasmVoiceSupported(), []);
   const [installed, setInstalled] = React.useState<{ stt: boolean; tts: boolean } | null>(null);
 
   const refresh = React.useCallback(async () => {
-    setInstalled(await voiceModelBytesInstalled());
+    // a broken storage seam must not strand this row in a loading state
+    setInstalled(await voiceModelBytesInstalled().catch(() => ({ stt: false, tts: false })));
   }, []);
   React.useEffect(() => {
     void refresh();
   }, [refresh, download.status]);
 
-  const startDownload = () => {
+  const startDownload = React.useCallback(() => {
     // picking wasm implies consent to download the pack (the consent dialog
     // still owns the first grant elsewhere)
     $voiceModelsConsent.set("granted");
     void downloadVoiceModels()
       .then(refresh)
       .catch(() => toast.error(intl.formatMessage({ id: "settings.voicePane.downloadFailed" })));
-  };
+  }, [intl, refresh]);
+
+  React.useEffect(() => {
+    // a wasm pick with consent already granted is a standing request for
+    // the pack: fetch it without waiting for a second click. errors stay
+    // manual (status "error") so a failed run doesn't loop.
+    if (
+      supported &&
+      installed !== null &&
+      (!installed.stt || !installed.tts) &&
+      consent === "granted" &&
+      download.status === "idle"
+    ) {
+      startDownload();
+    }
+  }, [supported, installed, consent, download.status, startDownload]);
 
   const ready = installed?.stt && installed?.tts;
   const downloading = download.status === "downloading";
