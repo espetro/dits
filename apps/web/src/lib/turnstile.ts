@@ -80,6 +80,13 @@ function settleError(err: Error): void {
 async function ensureWidget(api: TurnstileApi): Promise<string> {
   if (widgetId) return widgetId;
   const host = document.createElement("div");
+  // interaction-only keeps the widget invisible, but when cloudflare
+  // escalates to a real challenge the iframe must be reachable — a bare
+  // appended div renders it half-clipped below the fold
+  host.style.position = "fixed";
+  host.style.bottom = "1rem";
+  host.style.right = "1rem";
+  host.style.zIndex = "9999";
   document.body.appendChild(host);
   widgetId = api.render(host, {
     sitekey: TURNSTILE_SITE_KEY,
