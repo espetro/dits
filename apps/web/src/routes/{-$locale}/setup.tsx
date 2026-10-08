@@ -27,8 +27,8 @@ import {
 } from "../../components/vendor/collapsible";
 import { Alert, AlertDescription } from "../../components/vendor/alert";
 import {
-  $effectiveRuntime,
   $providerProfile,
+  $serverDriven,
   $serverReachable,
   ensureRuntimeProbe,
   probeServer,
@@ -104,12 +104,12 @@ function Setup() {
     scenario?.promptKey ? intl.formatMessage({ id: scenario.promptKey }) : "";
   const draft = useStore($draft);
   const micDeviceId = useSsrStore($micDeviceId, "");
-  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
-  const clientOnly = effectiveRuntime !== "server";
+  const serverDriven = useSsrStore($serverDriven, true);
+  const clientOnly = !serverDriven;
   const profile = useSsrStore($providerProfile, null);
   // coach unlock gate (p1): available once any session reached `reported`.
   const { data: hasReport } = useQuery({
-    queryKey: ["has-report", effectiveRuntime],
+    queryKey: ["has-report", serverDriven],
     queryFn: async () =>
       (clientOnly ? await listClientSessions() : await listSessions()).some(
         (s) => s.status === "reported",
@@ -170,7 +170,7 @@ function Setup() {
       toast.error(intl.formatMessage({ id: "setup.needsProviderToast" }), {
         description: intl.formatMessage({ id: "setup.needsProvider" }),
       });
-      openSettings("ai");
+      openSettings("voice");
       return;
     }
     setBusy(true);
@@ -270,7 +270,7 @@ function Setup() {
                 </p>
                 <Button
                   variant="ghost"
-                  onClick={() => openSettings("ai")}
+                  onClick={() => openSettings("voice")}
                   className="mt-3 h-auto min-h-11 rounded-full bg-white px-5 py-2 font-body text-sm font-medium text-espresso ring-1 ring-hairline transition-fluid hover:bg-white hover:ring-persimmon/50"
                 >
                   <FormattedMessage id="setup.openProviderSettings" />

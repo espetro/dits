@@ -6,7 +6,7 @@ import { useHydrated, useSsrStore } from "../../lib/ssr";
 import { FormattedMessage, useIntl } from "react-intl";
 import { getSession, getTurns, updateSessionStatus } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
-import { $effectiveRuntime } from "../../lib/runtime";
+import { $serverDriven } from "../../lib/runtime";
 import { ensureReport } from "../../lib/report";
 import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
 import { openSettings } from "../../components/settings-nav";
@@ -44,8 +44,8 @@ function Finish() {
   const locale = useLocale();
   const navigate = useNavigate();
   const hydrated = useHydrated();
-  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
-  const clientOnly = effectiveRuntime !== "server";
+  const serverDriven = useSsrStore($serverDriven, true);
+  const clientOnly = !serverDriven;
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
     queryFn: () => getSession(id),
@@ -85,7 +85,7 @@ function Finish() {
   async function buildReport() {
     setBuild("building");
     try {
-      await ensureReport(id, $effectiveRuntime.get() !== "server");
+      await ensureReport(id, !$serverDriven.get());
       setBuild("done");
       void navigate({ href: withLocale(locale, `/report/${id}`) });
     } catch {
@@ -101,7 +101,7 @@ function Finish() {
 
   function discard() {
     void (
-      $effectiveRuntime.get() !== "server"
+      !$serverDriven.get()
         ? setClientSessionStatus(id, "discarded")
         : updateSessionStatus(id, "discarded")
     ).catch(() => undefined);

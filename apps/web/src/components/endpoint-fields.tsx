@@ -1,5 +1,6 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "./vendor/input";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 
@@ -79,8 +80,11 @@ export function EndpointFields(props: {
   const intl = useIntl();
   const tab = props.tab;
   const draft = props.draft;
+  const [showKey, setShowKey] = React.useState(false);
   return (
-    <div className="space-y-4">
+    // a real <form> silences chrome's "password field is not contained in a
+    // form" warning on the api-key input; submit is a no-op (draft autosaves).
+    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
       <SettingsField
         label={intl.formatMessage({ id: "settings.baseUrl" })}
         helper={
@@ -123,16 +127,35 @@ export function EndpointFields(props: {
         label={intl.formatMessage({ id: "settings.apiKey" })}
         helper={intl.formatMessage({ id: "settings.apiKeyHelp" })}
       >
-        <Input
-          type="password"
-          value={draft.apiKey}
-          onChange={(e) => props.onChange({ apiKey: e.target.value })}
-          placeholder={
-            props.savedApiKey
-              ? intl.formatMessage({ id: "settings.apiKeySaved" }, { key: props.savedApiKey })
-              : ""
-          }
-        />
+        <span className="relative block">
+          <Input
+            type={showKey ? "text" : "password"}
+            name={`${tab}-api-key`}
+            autoComplete="off"
+            value={draft.apiKey}
+            onChange={(e) => props.onChange({ apiKey: e.target.value })}
+            placeholder={
+              props.savedApiKey
+                ? intl.formatMessage({ id: "settings.apiKeySaved" }, { key: props.savedApiKey })
+                : ""
+            }
+            className="pr-9"
+          />
+          <button
+            type="button"
+            onClick={() => setShowKey((s) => !s)}
+            aria-label={intl.formatMessage({
+              id: showKey ? "settings.apiKeyHide" : "settings.apiKeyShow",
+            })}
+            className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {showKey ? (
+              <EyeOff className="size-4" aria-hidden="true" />
+            ) : (
+              <Eye className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        </span>
       </SettingsField>
       <SettingsField
         label={intl.formatMessage({ id: "settings.modelId" })}
@@ -202,6 +225,6 @@ export function EndpointFields(props: {
           </p>
         )}
       </div>
-    </div>
+    </form>
   );
 }

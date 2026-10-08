@@ -153,17 +153,5 @@ export function decodeProviderProfile(raw: string): ProviderSections | null {
   return null;
 }
 
-/**
- * Where the interview loop runs.
- * - "server": server-managed voice (di binary WebSocket pipeline), default.
- * - "custom": BYO per-section endpoints, client-side agent loop.
- * - "in-browser": Web Speech STT/TTS + custom LLM only (no STT/TTS endpoint).
- */
-export const RuntimeModeSchema = v.picklist(["server", "custom", "in-browser"]);
-export type RuntimeMode = v.InferOutput<typeof RuntimeModeSchema>;
-
-/** localStorage key for the persisted runtime selection. */
-export const RUNTIME_MODE_STORAGE_KEY = "di.runtime-mode";
-
 /** localStorage key for the persisted provider profile. */
 export const PROVIDER_PROFILE_STORAGE_KEY = "di.provider-profile";

@@ -2,22 +2,77 @@ import { persistentAtom } from "@nanostores/persistent";
 import { atom } from "nanostores";
 
 /**
- * Browser-mode voice engine prefs. "on-device" is the default per the wasm
- * voice plan: it only takes effect once modelsConsent is "granted" AND the
- * model files are cached — otherwise the resolver falls back to builtin.
+ * Per-layer voice engine picks. Each speech layer is independently
+ * configurable (the old di.runtime-mode global is gone):
+ *
+ * - "server": the di desktop app runs this seam (.cpp sidecars). Only
+ *   resolvable when the di server hosts the app; the voice driver is
+ *   all-or-nothing, so a server pick only takes effect when BOTH stt and
+ *   tts resolve server-side — otherwise the seam degrades to the
+ *   in-browser chain and the status view explains why.
+ * - "in-browser": the browser built-in (Web Speech SpeechRecognition /
+ *   speechSynthesis). Zero download, lowest quality.
+ * - "wasm": the on-device wasm engine (sherpa-onnx zipformer / KittenTTS).
+ *   Resolves only with consent + verified model files + wasm support;
+ *   otherwise falls back to in-browser.
+ * - "cloud": a BYO OpenAI-compatible endpoint (provider profile).
+ * - "" (auto, default): server when the di server is reachable, otherwise
+ *   the wasm-then-in-browser chain. Preserves the pre-restructure defaults
+ *   on every deployment.
  */
-
-export type SttEnginePick = "on-device" | "builtin";
-export type TtsEnginePick = "on-device" | "builtin" | "endpoint";
+export type SttLayerPick = "server" | "in-browser" | "wasm" | "cloud" | "";
+export type TtsLayerPick = "server" | "in-browser" | "wasm" | "cloud" | "";
 export type VoiceModelsConsent = "granted" | "declined";
 
-export const $voiceSttEngine = persistentAtom<SttEnginePick>("di.voice.sttEngine", "on-device");
+// legacy stored values -> current picks
+function decodePick(raw: string): SttLayerPick {
+  switch (raw) {
+    case "server":
+    case "in-browser":
+    case "wasm":
+    case "cloud":
+      return raw;
+    case "builtin":
+      return "in-browser";
+    case "on-device":
+      return "wasm";
+    case "endpoint":
+      return "cloud";
+    default:
+      return "";
+  }
+}
 
-/**
- * "" = never picked. Treated as "endpoint" when a BYO tts endpoint exists
- * (pre-wasm behavior), otherwise "on-device".
- */
-export const $voiceTtsEngine = persistentAtom<TtsEnginePick | "">("di.voice.ttsEngine", "");
+/** Migrate the dropped di.runtime-mode pref into per-layer picks (once). */
+function migrateRuntimeMode(): void {
+  try {
+    // di.runtime-mode persisted raw (encode: identity); the engine stores
+    // below do too — read and write plain values, no JSON.
+    const mode = localStorage.getItem("di.runtime-mode");
+    if (mode === null) return;
+    localStorage.removeItem("di.runtime-mode");
+    if (mode === "server" || mode === "local-server") {
+      localStorage.setItem("di.voice.sttEngine", "server");
+      localStorage.setItem("di.voice.ttsEngine", "server");
+    }
+    // custom / in-browser: the engine picks were always the effective
+    // choice in browser mode — their own migration below handles them.
+  } catch {
+    // storage unavailable or corrupt: leave defaults
+  }
+}
+if (typeof window !== "undefined") migrateRuntimeMode();
+
+/** "" = auto (server when di-hosted, else the on-device chain). */
+export const $voiceSttEngine = persistentAtom<SttLayerPick>("di.voice.sttEngine", "", {
+  encode: String,
+  decode: decodePick,
+});
+
+export const $voiceTtsEngine = persistentAtom<TtsLayerPick>("di.voice.ttsEngine", "", {
+  encode: String,
+  decode: decodePick,
+});
 
 /** unset = never asked; the consent dialog only shows while unset. */
 export const $voiceModelsConsent = persistentAtom<VoiceModelsConsent | "">(

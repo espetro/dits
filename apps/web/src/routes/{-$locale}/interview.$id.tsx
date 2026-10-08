@@ -24,7 +24,7 @@ import {
 } from "../../lib/api";
 import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
 import { $clientTurns, resetClientSession } from "../../lib/agent/session-store";
-import { $effectiveRuntime } from "../../lib/runtime";
+import { $serverDriven } from "../../lib/runtime";
 import { Button } from "../../components/vendor/button";
 import { LiveWaveform } from "../../components/vendor/live-waveform";
 import {
@@ -87,10 +87,10 @@ const ACTIVE_STATUSES = new Set(["created", "interviewing"]);
 
 function Interview() {
   const { id } = Route.useParams();
-  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
-  const clientOnly = effectiveRuntime !== "server";
+  const serverDriven = useSsrStore($serverDriven, true);
+  const clientOnly = !serverDriven;
   const { data: session } = useQuery({
-    queryKey: ["session", id, effectiveRuntime],
+    queryKey: ["session", id, serverDriven],
     queryFn: () => (clientOnly ? getClientSession(id) : getSession(id)),
   });
 

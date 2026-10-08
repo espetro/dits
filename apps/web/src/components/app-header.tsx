@@ -4,7 +4,7 @@ import { Github } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useLocale, withLocale } from "../lib/locale-href";
-import { RuntimeModeChip } from "./runtime-mode-chip";
+import { StatusChip } from "./status-chip";
 import { UserDropdown } from "./user-dropdown";
 
 /**
@@ -30,7 +30,7 @@ export function AppHeader({ title }: { title?: ReactNode }) {
         {title}
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
-        <RuntimeModeChip />
+        <StatusChip />
         <a
           href="https://github.com/espetro/dits"
           target="_blank"

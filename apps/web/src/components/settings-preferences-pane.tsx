@@ -21,10 +21,11 @@ function languageName(tag: string, locale: string): string {
 }
 
 /**
- * Settings -> language: app language (UI copy, drives the url locale) and
- * the default interview language new sessions start with.
+ * Settings -> user preferences: app-wide options. Today: language (UI copy,
+ * drives the url locale) and the default interview language new sessions
+ * start with; this pane is the home for future user-wide prefs.
  */
-export function LanguagePane() {
+export function PreferencesPane() {
   const intl = useIntl();
   const locale = useLocale();
   const { pathname } = useLocation();

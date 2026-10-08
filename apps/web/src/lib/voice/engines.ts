@@ -1,5 +1,4 @@
 import { $voiceModelsConsent, $voiceSttEngine, $voiceTtsEngine } from "../../stores/voice";
-import type { SttEnginePick, TtsEnginePick } from "../../stores/voice";
 import { $providerProfile } from "../runtime";
 import {
   DEFAULT_VOICE_MODEL_MANIFEST,
@@ -15,9 +14,14 @@ import {
  *
  * Engine ids:
  * - stt: "wasm" (sherpa-onnx streaming zipformer, on-device) | "builtin"
- *   (Web Speech SpeechRecognition).
+ *   (Web Speech SpeechRecognition) | "endpoint" (BYO transcriptions api).
  * - tts: "wasm" (KittenTTS worker) | "builtin" (speechSynthesis) |
  *   "endpoint" (BYO /v1/audio/speech via profile.tts).
+ *
+ * The "server" layer pick is resolved at driver-selection time
+ * (lib/voice/index.ts): it only lands here when the server could not take
+ * the seam (unreachable, or the other layer forced the browser driver), in
+ * which case the seam falls back to the auto chain.
  */
 
 export interface SttEngineCallbacks {
@@ -50,13 +54,12 @@ export interface TtsEngine {
   dispose(): void;
 }
 
-export type SttEngineId = "wasm" | "builtin";
+export type SttEngineId = "wasm" | "builtin" | "endpoint";
 export type TtsEngineId = "wasm" | "builtin" | "endpoint";
 
 export interface VoiceEngineInput {
-  sttPick: SttEnginePick;
-  /** "" = never picked (see stores/voice) */
-  ttsPick: TtsEnginePick | "";
+  sttPick: string;
+  ttsPick: string;
   /** consent store value: "granted" | "declined" | "" */
   consent: string;
   /** model files verified in the cache */
@@ -66,6 +69,8 @@ export interface VoiceEngineInput {
   supported: boolean;
   /** a BYO tts endpoint is configured (profile.tts) */
   hasTtsEndpoint: boolean;
+  /** a BYO stt endpoint is configured (profile.stt) */
+  hasSttEndpoint: boolean;
 }
 
 export interface ResolvedVoiceEngines {
@@ -78,30 +83,35 @@ function onDeviceReady(consent: string, ready: boolean, supported: boolean): boo
 }
 
 /**
- * Effective engines for browser mode. On-device requires consent + a
- * verified download + wasm support; anything short falls back without a
- * dead voice loop: stt -> builtin; tts -> endpoint when configured, else
- * builtin.
+ * Effective engines for the browser driver. "" auto and a degraded "server"
+ * pick share the auto chain: on-device requires consent + a verified
+ * download + wasm support; anything short falls back without a dead voice
+ * loop — stt -> builtin; tts -> endpoint when configured, else builtin.
  */
 export function resolveVoiceEngines(input: VoiceEngineInput): ResolvedVoiceEngines {
-  const stt: SttEngineId =
-    input.sttPick === "on-device" && onDeviceReady(input.consent, input.sttReady, input.supported)
-      ? "wasm"
-      : "builtin";
-  // "" = never picked: keep the pre-wasm behavior (endpoint when configured).
-  const ttsPick: TtsEnginePick =
-    input.ttsPick === "" ? (input.hasTtsEndpoint ? "endpoint" : "on-device") : input.ttsPick;
-  let tts: TtsEngineId = "builtin";
-  if (ttsPick === "endpoint") {
-    tts = input.hasTtsEndpoint ? "endpoint" : "builtin";
+  let stt: SttEngineId = "builtin";
+  if (input.sttPick === "cloud") {
+    stt = input.hasSttEndpoint ? "endpoint" : "builtin";
+  } else if (input.sttPick === "in-browser") {
+    stt = "builtin";
   } else if (
-    ttsPick === "on-device" &&
-    onDeviceReady(input.consent, input.ttsReady, input.supported)
+    // "wasm", or ""/"server" auto chain (wasm first, builtin fallback)
+    onDeviceReady(input.consent, input.sttReady, input.supported)
   ) {
+    stt = "wasm";
+  }
+
+  let tts: TtsEngineId = "builtin";
+  if (input.ttsPick === "cloud") {
+    tts = input.hasTtsEndpoint ? "endpoint" : "builtin";
+  } else if (input.ttsPick === "in-browser") {
+    tts = "builtin";
+  } else if (onDeviceReady(input.consent, input.ttsReady, input.supported)) {
+    // "wasm", or ""/"server" auto chain (wasm first)
     tts = "wasm";
-  } else if (input.hasTtsEndpoint && ttsPick === "on-device") {
-    // on-device picked but not ready: a configured endpoint is a better
-    // interim voice than speechSynthesis.
+  } else if ((input.ttsPick === "" || input.ttsPick === "server") && input.hasTtsEndpoint) {
+    // auto/degraded pick with a configured endpoint: a better interim voice
+    // than speechSynthesis.
     tts = "endpoint";
   }
   return { stt, tts };
@@ -125,13 +135,15 @@ export async function resolveInstalledVoiceEngines(): Promise<ResolvedVoiceEngin
     stt: false,
     tts: false,
   }));
+  const profile = $providerProfile.get();
   return resolveVoiceEngines({
     sttPick: $voiceSttEngine.get(),
     ttsPick: $voiceTtsEngine.get(),
-    consent: $voiceModelsConsent.get(),
+    consent,
     sttReady: installed.stt,
     ttsReady: installed.tts,
     supported: wasmVoiceSupported(),
-    hasTtsEndpoint: $providerProfile.get()?.tts !== undefined,
+    hasTtsEndpoint: profile?.tts !== undefined,
+    hasSttEndpoint: profile?.stt !== undefined,
   });
 }

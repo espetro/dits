@@ -249,8 +249,8 @@ test("full-loop spec md scenarios all have executed counterparts", () => {
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
   const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
-  // Storage keys mirror packages/shared/src/providers.ts RUNTIME_MODE_STORAGE_KEY /
-  // PROVIDER_PROFILE_STORAGE_KEY; not imported since this package has no
+  // Storage keys mirror packages/shared/src/providers.ts
+  // PROVIDER_PROFILE_STORAGE_KEY and the di.voice.* engine picks; not imported since this package has no
   // workspace dependency on @di/shared.
   const PROFILE = {
     llm: {
@@ -263,11 +263,12 @@ test.describe("client-only runtime (no di server)", () => {
 
   async function seedClientOnly(page: Page) {
     await page.addInitScript(
-      ([mode, profile]) => {
-        localStorage.setItem("di.runtime-mode", mode as string);
+      ([profile]) => {
+        localStorage.setItem("di.voice.sttEngine", "in-browser");
+        localStorage.setItem("di.voice.ttsEngine", "in-browser");
         localStorage.setItem("di.provider-profile", JSON.stringify(profile));
       },
-      ["custom", PROFILE] as const,
+      [PROFILE] as const,
     );
   }
 

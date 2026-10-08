@@ -34,10 +34,13 @@ dropdown (B3).
   a Language row reusing the LocaleSwitcher pill, then History and Settings items.
 - History / Settings items open the centered settings dialog at the matching pane
   (onSelect preventDefault so the menu state survives the dialog opening).
-- Runtime status chip (first item in the right cluster, before the locale
-  switcher): a pill showing the EFFECTIVE runtime (server / custom endpoint /
-  in-browser). It is an indicator, not a control — clicking opens
-  settings -> advanced, where the mode is changed (that pick persists to
-  `$runtimeMode` and re-probes `/api/health` when server is chosen). When
-  the chosen mode fell back (chosen server but unreachable), the pill
-  carries a butter-warn tint + pulsing dot.
+- Seam status chip (first item in the right cluster, before the locale
+  switcher): a dot + label driven by `$seamHealth` (lib/seam-health.ts),
+  aggregating the three voice seams — stt, tts, llm. All up renders a bare
+  green dot on seamless chrome; exactly one down is an orange dot with a
+  persimmon/butter tint naming the layer (`stt down` / `tts down` /
+  `llm down`); two or more down reads `unstable` with the same tint; all
+  three down is a red dot + red tint reading `offline`. It is an
+  indicator, not a control — clicking opens settings -> status, the
+  hidden pane that explains each seam's state and hosts the prefilled
+  github "report issue" link.

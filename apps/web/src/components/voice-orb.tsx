@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Orb } from "./vendor/orb";
 import { getAgentLevel, getMicLevel } from "../lib/voice/levels";
-import { $effectiveRuntime } from "../lib/runtime";
+import { $serverDriven } from "../lib/runtime";
 import { useSsrStore } from "../lib/ssr";
 
 /**
@@ -40,8 +40,8 @@ export function VoiceOrb({
 }) {
   const inputRef = React.useRef(0);
   const outputRef = React.useRef(0);
-  const effectiveRuntime = useSsrStore($effectiveRuntime, "server");
-  const clientOnly = effectiveRuntime !== "server";
+  const serverDriven = useSsrStore($serverDriven, true);
+  const clientOnly = !serverDriven;
 
   React.useEffect(() => {
     let raf = 0;
