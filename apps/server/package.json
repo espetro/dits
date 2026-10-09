@@ -6,6 +6,11 @@
     "di": "./src/cli.ts"
   },
   "type": "module",
+  "exports": {
+    "./api/app": "./src/api/app.ts",
+    "./config/load": "./src/config/load.ts",
+    "./store/db": "./src/store/db.ts"
+  },
   "scripts": {
     "test": "bun run --bun vitest run",
     "typecheck": "tsc --noEmit --checkers 1"

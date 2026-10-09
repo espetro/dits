@@ -46,7 +46,7 @@ function maybeNumber(s: string): string | number {
  * ~/.local/share/di). A bare `bun run server` run from anywhere gets stable
  * paths instead of littering the cwd.
  */
-function defaultFilesDir(): string {
+export function defaultFilesDir(): string {
   const home = process.env.HOME ?? process.env.USERPROFILE ?? ".";
   if (process.platform === "darwin") return join(home, "Library", "Application Support", "di");
   if (process.platform === "win32") return join(process.env.APPDATA ?? home, "di");
