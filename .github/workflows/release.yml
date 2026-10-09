@@ -22,7 +22,9 @@ jobs:
         run: mise run build
 
       - name: Build release archives (all targets)
-        run: mise run release
+        # name assets after the tag, not git-describe output — the build
+        # regenerates committed files, which reports the tree -dirty
+        run: DI_VERSION=${{ github.ref_name }} mise run release
 
       - name: Create GitHub Release with archives
         uses: softprops/action-gh-release@v2
