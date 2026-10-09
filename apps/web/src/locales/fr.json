@@ -186,7 +186,7 @@
   "landing.install.downloadHint": "macos · linux · windows — téléchargez et lancez",
   "landing.install.experimental": "expérimental",
   "landing.install.mise": "ou exécutez-le avec mise",
-  "landing.install.title": "lancez di",
+  "landing.install.title": "démarrer <em>di</em>",
   "landing.peek.aria": "aperçu d'un entretien en cours",
   "landing.peek.caption": "raconte-moi un échec.",
   "landing.peek.line.agent1": "Où est-il écrit sur ton CV que tu gères une panne de prod ?",

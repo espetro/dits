@@ -1408,12 +1408,12 @@ model = "openrouter/free"
 updated_at = "2026-10-09T18:23:16Z"
 
 [entries."landing.install.title"]
-value = "让 di 运行起来"
-source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+value = "让 <em>di</em> 运行起来"
+source_hash = "dc854c7e464bf1fb8b8485eb2ad89db6ecbe9895"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-10-09T18:23:16Z"
+updated_at = "2026-10-09T19:17:09Z"
 
 [entries."landing.peek.aria"]
 value = "进行中的面试预览"

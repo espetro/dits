@@ -1408,12 +1408,12 @@ model = "openrouter/free"
 updated_at = "2026-10-09T18:23:24Z"
 
 [entries."landing.install.title"]
-value = "Starte di"
-source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+value = "<em>di</em> starten"
+source_hash = "dc854c7e464bf1fb8b8485eb2ad89db6ecbe9895"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-10-09T18:23:24Z"
+updated_at = "2026-10-09T19:15:57Z"
 
 [entries."landing.peek.aria"]
 value = "vorschau eines laufenden interviews"

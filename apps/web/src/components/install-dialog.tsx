@@ -1,5 +1,6 @@
 import { Check, Copy, Download } from "lucide-react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "./vendor/badge";
@@ -50,7 +51,12 @@ export function InstallDialog({ open, onOpenChange }: InstallDialogProps) {
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
-            <FormattedMessage id="landing.install.title" />
+            <FormattedMessage
+              id="landing.install.title"
+              values={{
+                em: (chunks: ReactNode) => <em className="italic text-persimmon-deep">{chunks}</em>,
+              }}
+            />
           </DialogTitle>
           <DialogDescription className="sr-only">
             <FormattedMessage id="landing.install.title" />
