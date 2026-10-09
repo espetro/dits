@@ -1,6 +1,18 @@
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { basename, join } from "node:path";
+
 import { dashboardHtml } from "./dashboard";
 import { tailLog } from "./logbuffer";
-import { appUrl, getConfigPath, serverState, startServer, stopServer } from "./server";
+import {
+  appUrl,
+  configuredLogPath,
+  getConfigPath,
+  serverState,
+  startServer,
+  stopServer,
+  webClientDir,
+} from "./server";
 
 export interface ControlDeps {
   /** Open a URL in the user's default browser (electrobun Utils.openExternal). */
@@ -12,6 +24,7 @@ interface StateBody {
   port: number | null;
   url: string | null;
   configPath: string | null;
+  logPath: string | null;
   logs: string[];
 }
 
@@ -22,6 +35,7 @@ function stateBody(): StateBody {
     port,
     url: appUrl(),
     configPath: getConfigPath(),
+    logPath: configuredLogPath(),
     logs: tailLog(120),
   };
 }
@@ -49,6 +63,18 @@ export function startControlServer(deps: ControlDeps): { port: number } {
       const { pathname } = url;
 
       if (req.method === "GET" && pathname === "/") return html(dashboardHtml());
+      // Bundled SPA fonts for the dashboard's @font-face (views/web/fonts in
+      // the electrobun bundle, apps/web/dist/client/fonts in a repo build).
+      if (req.method === "GET" && pathname.startsWith("/fonts/")) {
+        const root = webClientDir();
+        const file = basename(pathname);
+        if (!root || !/^[\w.-]+\.woff2$/.test(file)) return json({ error: "not found" }, 404);
+        const full = join(root, "fonts", file);
+        if (!existsSync(full)) return json({ error: "not found" }, 404);
+        return new Response(await readFile(full), {
+          headers: { "content-type": "font/woff2", "cache-control": "max-age=3600" },
+        });
+      }
       if (req.method === "GET" && pathname === "/api/state") return json(stateBody());
       if (req.method === "GET" && pathname === "/api/logs") return json({ logs: tailLog(300) });
 

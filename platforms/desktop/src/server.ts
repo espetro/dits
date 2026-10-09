@@ -28,11 +28,27 @@ export function getConfigPath(): string | null {
 }
 
 /**
+ * Configured log file path from the current config.yaml, or null when the
+ * config is unreadable/invalid or log_path is disabled (""). The dashboard
+ * surfaces this so users (and their agents) know where the debug log lands.
+ */
+export function configuredLogPath(): string | null {
+  if (!configPath) return null;
+  try {
+    const path = loadConfig(configPath).files.log_path;
+    return path || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Locate the built SPA. Bundled: electrobun `copy` puts apps/web/dist/client
  * at <app>/views/web next to the bun entrypoint. Dev/repo: resolve
  * apps/web/dist/client from the repo root (same candidates cli.ts uses).
+ * Exported so the control server can serve bundled assets (fonts) too.
  */
-function webClientDir(): string | null {
+export function webClientDir(): string | null {
   const candidates = [
     resolve(import.meta.dir, "../views/web"),
     resolve(import.meta.dir, "../../../apps/web/dist/client"),
