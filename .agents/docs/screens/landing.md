@@ -48,9 +48,15 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
   matches (`useMatch("/{-$locale}/")`), so no top nav renders on the landing.
   Instead a fixed `LocaleSwitcher` pill sits at `bottom-6 end-6` (inline-end,
   so `/ar` mirrors it to bottom-left), level with the peek's bottom edge.
-- CTA **"grill me"** is a persimmon pill with a circular arrow-dot affordance;
-  navigates to `/setup` (locale-prefixed). On the public-site build
-  (`VITE_PUBLIC_SITE=1`) it links to the setup docs on GitHub instead.
+- CTA **"grill me"** is a persimmon pill with a circular arrow-dot affordance.
+  On the di-served build it navigates to `/setup` (locale-prefixed). On the
+  public-site build (`VITE_PUBLIC_SITE=1`) it opens the install dialog
+  (`InstallDialog`, vendored `Dialog`) instead: option 1 **download the app**
+  links to the latest GitHub release, option 2 shows the
+  `mise exec github:espetro/dits -- di` command with a copy button, a
+  `Separator` divides those two from option 3 **run the web demo** — a link
+  to `/setup` carrying an "experimental" badge. The dialog never mounts on
+  the di-served/desktop build.
 - The `peek` card is a presentational miniature of the interview screen
   (`role="img"` + localized `landing.peek.aria` label; every inner string is a
   `landing.peek.*` i18n key): 40px callbar (di. logo + scenario + tabular-nums

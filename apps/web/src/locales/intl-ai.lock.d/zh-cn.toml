@@ -1359,6 +1359,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."landing.install.demo"]
+value = "运行网页演示"
+source_hash = "147c0a4fde3f3ccb8d42ce3e432a23d05e5d298f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.demoHint"]
+value = "完全在你的浏览器中运行 —— 可能会不稳定"
+source_hash = "782a8561e13083378e55bb130a8842d88bbb7ff9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.download"]
+value = "下载应用"
+source_hash = "ac716b42db601334cc5e8d00e79cee9ae48260f5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.downloadHint"]
+value = "macOS · Linux · Windows —— 下载并运行"
+source_hash = "e77876c30f6723c9a6f200019e438d1f1a282b30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.experimental"]
+value = "实验性"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.mise"]
+value = "或使用 mise 运行"
+source_hash = "4beadd4040259722b55b39e5b35dc09c12904aa0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
+[entries."landing.install.title"]
+value = "让 di 运行起来"
+source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:23:16Z"
+
 [entries."landing.peek.aria"]
 value = "进行中的面试预览"
 source_hash = "bbcefd17c1db605bae2affde968f601a3ecddf0c"

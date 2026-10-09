@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { AlignLeft, ArrowRight, Mic, X } from "lucide-react";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useState } from "react";
 import type { ReactNode } from "react";
+import { InstallDialog } from "./install-dialog";
 import { Reveal } from "./reveal";
 import { LocaleSwitcher } from "./locale-switcher";
 import { useLocale, withLocale } from "../lib/locale-href";
@@ -46,6 +48,7 @@ function PeekWave() {
 export function LandingPage() {
   const locale = useLocale();
   const intl = useIntl();
+  const [installOpen, setInstallOpen] = useState(false);
   const cta = (
     <>
       <FormattedMessage id="landing.cta" />
@@ -84,20 +87,17 @@ export function LandingPage() {
 
         <Reveal delay={360}>
           {IS_PUBLIC_SITE ? (
-            <a
-              href="https://github.com/espetro/dits/blob/main/docs/setup.md"
-              target="_blank"
-              rel="noreferrer"
-              className={ctaClass}
-            >
+            <button type="button" onClick={() => setInstallOpen(true)} className={ctaClass}>
               {cta}
-            </a>
+            </button>
           ) : (
             <Link to={withLocale(locale, "/setup")} className={ctaClass}>
               {cta}
             </Link>
           )}
         </Reveal>
+
+        {IS_PUBLIC_SITE ? <InstallDialog open={installOpen} onOpenChange={setInstallOpen} /> : null}
 
         <Reveal delay={480} className="mt-14 w-full flex justify-center">
           <div
