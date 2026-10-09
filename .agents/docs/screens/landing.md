@@ -56,7 +56,9 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
   `mise exec github:espetro/dits -- di` command with a copy button, a
   `Separator` divides those two from option 3 **run the web demo** — a link
   to `/setup` carrying an "experimental" badge. The dialog never mounts on
-  the di-served/desktop build.
+  the di-served/desktop build. `VITE_PUBLIC_SITE` defaults to `1` when
+  `CF_PAGES=1` (the Cloudflare Pages git-integration build env); an explicit
+  `VITE_PUBLIC_SITE` always wins.
 - The `peek` card is a presentational miniature of the interview screen
   (`role="img"` + localized `landing.peek.aria` label; every inner string is a
   `landing.peek.*` i18n key): 40px callbar (di. logo + scenario + tabular-nums

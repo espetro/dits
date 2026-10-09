@@ -11,6 +11,15 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 const LOCALES = ["en", "de", "es", "fr", "ja", "pt-br", "zh-cn", "ko", "it", "ar"] as const;
 
 export default defineConfig({
+  define: {
+    // dits.illo.fyi deploys via the Cloudflare Pages git integration, which
+    // sets CF_PAGES=1 but no way to inject custom build env — default the
+    // public-site flag on there (explicit VITE_PUBLIC_SITE still wins; the
+    // di-served tarball build never sees CF_PAGES).
+    "import.meta.env.VITE_PUBLIC_SITE": JSON.stringify(
+      process.env.VITE_PUBLIC_SITE ?? (process.env.CF_PAGES === "1" ? "1" : ""),
+    ),
+  },
   plugins: [
     {
       // onnxruntime-web loads its emscripten glue (ort-wasm-simd-threaded.mjs)
