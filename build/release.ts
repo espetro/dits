@@ -1,10 +1,9 @@
 /**
  * Release archive builder. Produces dist/releases/di-<version>-<target>.tar.gz
  * containing:
- *   di                       compiled binary (bun build --compile)
- *   apps/web/dist/client/         SPA assets
+ *   di                       compiled binary (bun build --compile; di.exe on windows)
+ *   apps/web/dist/client/    SPA assets
  *   config.example.yaml      reference config
- *   install.sh               first-run installer (also curl-able standalone)
  *   README.md                archive-specific quickstart
  *
  * Usage: bun run build/release.ts [--target <bun-target>]...
@@ -19,7 +18,13 @@ import { join, resolve } from "node:path";
 const ROOT = resolve(import.meta.dir, "..");
 const OUT = join(ROOT, "dist", "releases");
 
-const TARGETS = ["bun-linux-x64", "bun-linux-arm64", "bun-darwin-arm64", "bun-darwin-x64"] as const;
+const TARGETS = [
+  "bun-linux-x64",
+  "bun-linux-arm64",
+  "bun-darwin-arm64",
+  "bun-darwin-x64",
+  "bun-windows-x64",
+] as const;
 
 type Target = (typeof TARGETS)[number];
 
@@ -28,6 +33,7 @@ const TRIPLES: Record<Target, string> = {
   "bun-linux-arm64": "linux-arm64",
   "bun-darwin-arm64": "darwin-arm64",
   "bun-darwin-x64": "darwin-x64",
+  "bun-windows-x64": "windows-x64",
 };
 
 const { values } = parseArgs({
@@ -61,49 +67,24 @@ if (!existsSync(join(spaDir, "index.html"))) {
 }
 
 // ---------------------------------------------------------------------------
-// Installer + README generated per archive.
+// README generated per archive. The binary is self-contained — no installer.
 // ---------------------------------------------------------------------------
-const installer = `#!/bin/sh
-# di runtime installer. Installs bun (if needed).
-set -e
-
-have() { command -v "$1" >/dev/null 2>&1; }
-
-# Runtime: bun (preferred) or node >= 22.
-if have bun; then
-  echo "[install] bun found: \$(bun --version)"
-elif have node; then
-  major=\$(node -p 'process.versions.node.split(".")[0]')
-  if [ "\$major" -lt 22 ]; then
-    echo "[install] node >= 22 required (found \$major); installing bun instead" >&2
-    curl -fsSL https://bun.sh/install | bash
-  else
-    echo "[install] node found: \$(node --version)"
-  fi
-else
-  echo "[install] no runtime found; installing bun" >&2
-  curl -fsSL https://bun.sh/install | bash
-fi
-
-echo "[install] done. Next: cp config.example.yaml config.yaml, edit it, then run ./di --config config.yaml"
-`;
-
-const readme = (target: Target) => `# di ${version} (${TRIPLES[target]})
+const readme = (target: Target) => {
+  const bin = target === "bun-windows-x64" ? "di.exe" : "./di";
+  return `# di ${version} (${TRIPLES[target]})
 
 Self-contained distribution: compiled \`di\` server binary and web SPA. The
 voice pipeline runs in-process over WebSocket; no SFU or worker needed.
 
 ## Layout
-- \`di\`                      server binary (also the CLI)
+- \`${bin === "./di" ? "di" : bin}\`                      server binary (also the CLI)
 - \`apps/web/dist/client/\`        SPA assets (served by \`di\`)
 - \`config.example.yaml\`     reference configuration
-- \`install.sh\`              runtime installer (bun/node check)
 
 ## Quickstart
-    ./install.sh
     cp config.example.yaml config.yaml   # then edit for your providers
-    ./di --config config.yaml --check    # validate the stack
-    ./di --config config.yaml            # serve
+    ${bin} --check                        # validate the stack
+    ${bin}                                # serve
 
 \`di --check\` verifies: config parses, sqlite is writable, web assets are
 present, and each provider endpoint responds.
@@ -112,6 +93,7 @@ present, and each provider endpoint responds.
 - Voice transport is WebSocket (GET /v1/sessions/:id/voice upgrade); only the
   configured STT/TTS/LLM endpoints must be reachable.
 `;
+};
 
 // ---------------------------------------------------------------------------
 // Per-target staging + archive.
@@ -124,19 +106,19 @@ for (const target of targets) {
   rmSync(stage, { recursive: true, force: true });
   mkdirSync(stage, { recursive: true });
 
+  const binName = target === "bun-windows-x64" ? "di.exe" : "di";
   console.log(`==> compiling di for ${target}`);
-  const binTmp = join(stage, "di.bin");
+  const binTmp = join(stage, `${binName}.bin`);
   await $`bun build --compile --target ${target} ${join(ROOT, "apps", "server", "src", "cli.ts")} --outfile ${binTmp}`;
 
-  await $`mv ${binTmp} ${join(stage, "di")}`;
-  await $`chmod +x ${join(stage, "di")}`;
+  await $`mv ${binTmp} ${join(stage, binName)}`;
+  await $`chmod +x ${join(stage, binName)}`;
 
   console.log(`==> staging web assets`);
   cpSync(spaDir, join(stage, "apps", "web", "dist", "client"), { recursive: true });
 
-  console.log(`==> staging config, installer, README`);
+  console.log(`==> staging config, README`);
   cpSync(join(ROOT, "config.example.yaml"), join(stage, "config.example.yaml"));
-  writeFileSync(join(stage, "install.sh"), installer, { mode: 0o755 });
   writeFileSync(join(stage, "README.md"), readme(target));
 
   const archive = join(OUT, `di-${version}-${triple}.tar.gz`);
