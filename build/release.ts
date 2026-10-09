@@ -108,10 +108,12 @@ for (const target of targets) {
 
   const binName = target === "bun-windows-x64" ? "di.exe" : "di";
   console.log(`==> compiling di for ${target}`);
-  const binTmp = join(stage, `${binName}.bin`);
+  const binTmp = join(stage, "di.bin");
   await $`bun build --compile --target ${target} ${join(ROOT, "apps", "server", "src", "cli.ts")} --outfile ${binTmp}`;
 
-  await $`mv ${binTmp} ${join(stage, binName)}`;
+  // bun appends .exe to the outfile on windows targets
+  const produced = target === "bun-windows-x64" ? `${binTmp}.exe` : binTmp;
+  await $`mv ${produced} ${join(stage, binName)}`;
   await $`chmod +x ${join(stage, binName)}`;
 
   console.log(`==> staging web assets`);
