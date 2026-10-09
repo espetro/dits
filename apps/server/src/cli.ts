@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { createDatabase, migrate, ping } from "./store/db";
 import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
@@ -16,8 +16,9 @@ export async function main(argv: string[]): Promise<number> {
   });
 
   let config;
+  const configPath = resolveConfigPath(values.config!);
   try {
-    config = loadConfig(values.config!);
+    config = loadConfig(configPath);
   } catch (e) {
     if (e instanceof ConfigError) {
       console.error(e.message);
@@ -25,10 +26,10 @@ export async function main(argv: string[]): Promise<number> {
     }
     throw e;
   }
-  console.log(`[di] config ok (${values.config})`);
+  console.log(`[di] config ok (${configPath})`);
 
   if (values.check) {
-    return check(config, values.config!);
+    return check(config, configPath);
   }
 
   const db = createDatabase(config.files.db_path);
@@ -36,8 +37,8 @@ export async function main(argv: string[]): Promise<number> {
   const testMode = process.env.DI_TEST_MODE === "1";
 
   let webAssets;
-  const spaDir = releaseAssetDir(join("web", "dist", "client"));
-  if (existsSync(join(spaDir, "index.html"))) {
+  const spaDir = releaseAssetDir();
+  if (spaDir) {
     webAssets = { root: spaDir, path: "" };
   }
 
@@ -95,12 +96,11 @@ async function check(
 
   // Web SPA assets must be present next to the binary (release layout) or in
   // the repo checkout (dev layout).
-  const spaDir = releaseAssetDir("apps/web/dist/client");
-  const spaOk = existsSync(join(spaDir, "index.html"));
+  const spaDir = releaseAssetDir();
   results.push([
     "web assets",
-    spaOk,
-    spaOk ? spaDir : `${spaDir}/index.html not found (run: mise run build)`,
+    spaDir !== undefined,
+    spaDir ?? "index.html not found next to the binary or under the cwd",
   ]);
 
   // SQLite database: create/open and ping it (also proves the directory is writable).
@@ -130,30 +130,41 @@ async function check(
   return allOk ? 0 : 1;
 }
 
+const SPA_CANDIDATES = [join("web", "dist", "client"), join("apps", "web", "dist", "client")];
+
 /**
- * Resolve a bundled asset dir. In a release archive the layout is:
- *   di          (compiled binary)
- *   apps/web/dist/client/...
- * In a repo checkout everything resolves relative to this source file.
+ * When the requested config path doesn't exist (e.g. `mise exec
+ * github:espetro/dits -- di` run from an unrelated cwd), look beside the
+ * binary for config.yaml, then the bundled config.example.yaml.
  */
-function releaseAssetDir(rel: string): string {
-  // Bun sets import.meta.dir to the dir of the executing script; in a
-  // `bun build --compile` binary it is a virtual path, so prefer cwd first.
-  // In a repo checkout the assets live at the repo root, which may be one or
-  // two levels above cwd (e.g. when run from apps/server/).
-  const bases = [
-    process.cwd(),
-    import.meta.dir,
-    `${process.cwd()}/..`,
-    `${process.cwd()}/../..`,
-    `${import.meta.dir}/..`,
-    `${import.meta.dir}/../..`,
-  ];
-  for (const base of bases) {
-    const candidate = join(base, rel);
+function resolveConfigPath(requested: string): string {
+  if (existsSync(requested)) return requested;
+  const binDir = dirname(process.execPath);
+  for (const name of [basename(requested), "config.example.yaml"]) {
+    const candidate = join(binDir, name);
     if (existsSync(candidate)) return candidate;
   }
-  return join(process.cwd(), rel);
+  return requested;
+}
+
+/**
+ * Resolve the bundled SPA dir, or undefined when absent. Bases: the cwd (one
+ * or two levels from the repo root), the real executable dir (process.execPath
+ * is the actual binary in a `bun build --compile` release — import.meta.dir is
+ * a virtual /$bunfs path there — which is where `mise exec` installs the
+ * assets), and the source file's dir for repo checkouts.
+ */
+function releaseAssetDir(): string | undefined {
+  const bases = [process.cwd(), dirname(process.execPath), import.meta.dir];
+  for (const base of bases) {
+    for (const up of ["", "..", join("..", "..")]) {
+      for (const rel of SPA_CANDIDATES) {
+        const candidate = join(base, up, rel);
+        if (existsSync(join(candidate, "index.html"))) return candidate;
+      }
+    }
+  }
+  return undefined;
 }
 
 if (import.meta.main) {
