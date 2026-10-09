@@ -14,6 +14,7 @@ workspaces.
 
 - `apps/server/` - Hono API on Bun + the voice pipeline; the `di` CLI deliverable. [apps/server/AGENTS.md](apps/server/AGENTS.md)
 - `apps/web/` - TanStack Start SPA, bundled into `di` via `apps/web/dist/client`. [apps/web/AGENTS.md](apps/web/AGENTS.md)
+- `platforms/desktop/` - Electrobun control shell (start/stop/status/logs); runs the server as a Bun sidecar and opens the app in the real browser.
 - `packages/shared/` - `@di/shared`. Contracts only. [packages/shared/AGENTS.md](packages/shared/AGENTS.md)
 - `packages/evals/` - vitest eval suite + `mock-provider/main.ts` (OpenAI-compatible mock).
 - `tests/e2e/` - Playwright specs; deliberately NOT a workspace member (black-box client of a running server, owns its deps). [tests/e2e/AGENTS.md](tests/e2e/AGENTS.md)

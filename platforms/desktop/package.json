@@ -1,0 +1,21 @@
+{
+  "name": "@di/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:desktop": "electrobun dev --watch",
+    "prebuild:desktop": "rm -rf build artifacts",
+    "build:desktop": "bun run scripts/build.ts",
+    "verify": "bun run scripts/verify.ts",
+    "clean": "rm -rf build artifacts"
+  },
+  "dependencies": {
+    "@di/server": "workspace:*",
+    "@di/shared": "workspace:*",
+    "electrobun": "^1.18.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0"
+  }
+}
