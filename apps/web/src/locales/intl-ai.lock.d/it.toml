@@ -1359,6 +1359,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:15:57Z"
 
+[entries."landing.install.demo"]
+value = "exécutez la démo web"
+source_hash = "147c0a4fde3f3ccb8d42ce3e432a23d05e5d298f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.demoHint"]
+value = "s'exécute entièrement dans votre navigateur — certaines choses peuvent être instables"
+source_hash = "782a8561e13083378e55bb130a8842d88bbb7ff9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.download"]
+value = "téléchargez l'application"
+source_hash = "ac716b42db601334cc5e8d00e79cee9ae48260f5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.downloadHint"]
+value = "macOS · Linux · Windows — téléchargez et exécutez"
+source_hash = "e77876c30f6723c9a6f200019e438d1f1a282b30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.experimental"]
+value = "expérimental"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.mise"]
+value = "ou exécutez-le avec mise"
+source_hash = "4beadd4040259722b55b39e5b35dc09c12904aa0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
+[entries."landing.install.title"]
+value = "démarrez DI"
+source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:22Z"
+
 [entries."landing.peek.aria"]
 value = "anteprima di un colloquio dal vivo"
 source_hash = "bbcefd17c1db605bae2affde968f601a3ecddf0c"

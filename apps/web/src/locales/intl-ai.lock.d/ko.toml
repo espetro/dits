@@ -1359,6 +1359,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."landing.install.demo"]
+value = "웹 데모를 실행하세요"
+source_hash = "147c0a4fde3f3ccb8d42ce3e432a23d05e5d298f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.demoHint"]
+value = "브라우저에서 완전히 실행됩니다 — 불안정할 수 있습니다"
+source_hash = "782a8561e13083378e55bb130a8842d88bbb7ff9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.download"]
+value = "앱을 다운로드하세요"
+source_hash = "ac716b42db601334cc5e8d00e79cee9ae48260f5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.downloadHint"]
+value = "맥OS · 리눅스 · 윈도우 — 다운로드 및 실행"
+source_hash = "e77876c30f6723c9a6f200019e438d1f1a282b30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.experimental"]
+value = "실험적"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.mise"]
+value = "또는 mise로 실행하세요"
+source_hash = "4beadd4040259722b55b39e5b35dc09c12904aa0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
+[entries."landing.install.title"]
+value = "di를 실행하세요"
+source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-09T18:22:36Z"
+
 [entries."landing.peek.aria"]
 value = "진행 중인 면접 미리보기"
 source_hash = "bbcefd17c1db605bae2affde968f601a3ecddf0c"
