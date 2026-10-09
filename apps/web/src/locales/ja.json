@@ -186,7 +186,7 @@
   "landing.install.downloadHint": "macOS・Linux・Windows — ダウンロード＆実行",
   "landing.install.experimental": "実験的",
   "landing.install.mise": "またはmisEで実行",
-  "landing.install.title": "diを実行してください",
+  "landing.install.title": "<em>di</em>を実行する",
   "landing.peek.aria": "進行中の面接のプレビュー",
   "landing.peek.caption": "失敗した経験を教えてください。",
   "landing.peek.line.agent1": "本番障害に対処できると、履歴書のどこに書いてありますか？",

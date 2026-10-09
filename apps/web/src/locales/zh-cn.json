@@ -186,7 +186,7 @@
   "landing.install.downloadHint": "macOS · Linux · Windows —— 下载并运行",
   "landing.install.experimental": "实验性",
   "landing.install.mise": "或使用 mise 运行",
-  "landing.install.title": "让 di 运行起来",
+  "landing.install.title": "让 <em>di</em> 运行起来",
   "landing.peek.aria": "进行中的面试预览",
   "landing.peek.caption": "讲一次你失败的经历。",
   "landing.peek.line.agent1": "你的简历上哪里写着你能应付生产环境故障？",

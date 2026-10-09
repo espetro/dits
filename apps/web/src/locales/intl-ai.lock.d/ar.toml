@@ -1408,12 +1408,12 @@ model = "openrouter/free"
 updated_at = "2026-10-09T18:21:37Z"
 
 [entries."landing.install.title"]
-value = "اجعل di يعمل"
-source_hash = "40d968eecc7f303452aa3de0c78395e791e487d1"
+value = "تشغيل <em>di</em>"
+source_hash = "dc854c7e464bf1fb8b8485eb2ad89db6ecbe9895"
 origin = "ai"
 reviewed = false
 model = "openrouter/free"
-updated_at = "2026-10-09T18:21:37Z"
+updated_at = "2026-10-09T19:18:37Z"
 
 [entries."landing.peek.aria"]
 value = "معاينة لمقابلة جارية"

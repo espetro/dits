@@ -186,7 +186,7 @@
   "landing.install.downloadHint": "macos · linux · windows — download & run",
   "landing.install.experimental": "experimental",
   "landing.install.mise": "or run it with mise",
-  "landing.install.title": "get di running",
+  "landing.install.title": "get <em>di</em> running",
   "landing.peek.aria": "preview of a live interview",
   "landing.peek.caption": "tell me about a time you failed.",
   "landing.peek.line.agent1": "Where on your resume does it say you can handle a prod outage?",

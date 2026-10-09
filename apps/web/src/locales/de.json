@@ -186,7 +186,7 @@
   "landing.install.downloadHint": "macOS · Linux · Windows — herunterladen & ausführen",
   "landing.install.experimental": "experimentell",
   "landing.install.mise": "oder führe es mit mise aus",
-  "landing.install.title": "Starte di",
+  "landing.install.title": "<em>di</em> starten",
   "landing.peek.aria": "vorschau eines laufenden interviews",
   "landing.peek.caption": "erzähl mir von einem misserfolg.",
   "landing.peek.line.agent1": "Wo in deinem Lebenslauf steht, dass du einen Prod-Ausfall stemmst?",
