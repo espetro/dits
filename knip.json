@@ -18,6 +18,7 @@
     "scripts/pocket-shim.ts",
     "scripts/seed-demo.ts",
     "tests/e2e/playwright.config.ts",
+    "platforms/desktop/electrobun.config.ts",
     "scripts/repack-sherpa-stt.ts"
   ],
   "ignoreDependencies": [
