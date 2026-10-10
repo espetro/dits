@@ -48,7 +48,10 @@ export function InstallDialog({ open, onOpenChange }: InstallDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
+      {/* grid-cols minmax(0,1fr): the vendored content is `grid` — an implicit
+          auto track sizes to max-content, and the nowrap mise command inflates
+          it past the max-w clamp so children overflow on narrow viewports. */}
+      <DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-md" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>
             <FormattedMessage
