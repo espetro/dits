@@ -7,8 +7,11 @@
     "apps/web/src/components/vendor/**"
   ],
   "ignore": [
+    "apps/server/src/voice/builtin/tts-worker.ts",
     "build/release.ts",
+    "build/vendor-voice.ts",
     "packages/evals/src/spike-sqlite-vec.ts",
+    "platforms/desktop/electrobun.config.ts",
     "scripts/check-agents-md-length.ts",
     "scripts/check-dscheck.ts",
     "scripts/check-import-paths.ts",
@@ -16,10 +19,9 @@
     "scripts/check-ratchets.ts",
     "scripts/flatten-locales.ts",
     "scripts/pocket-shim.ts",
+    "scripts/repack-sherpa-stt.ts",
     "scripts/seed-demo.ts",
-    "tests/e2e/playwright.config.ts",
-    "platforms/desktop/electrobun.config.ts",
-    "scripts/repack-sherpa-stt.ts"
+    "tests/e2e/playwright.config.ts"
   ],
   "ignoreDependencies": [
     "@aeriondyseti/drizzle-sqlite-vec",
