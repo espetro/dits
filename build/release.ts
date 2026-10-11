@@ -3,6 +3,7 @@
  * containing:
  *   di                       compiled binary (bun build --compile; di.exe on windows)
  *   apps/web/dist/client/    SPA assets
+ *   vendor/voice/            builtin voice engines (wasm workers + runtimes)
  *   config.example.yaml      reference config
  *   README.md                archive-specific quickstart
  *
@@ -14,6 +15,7 @@ import { parseArgs } from "node:util";
 import { $ } from "bun";
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { buildVoiceVendor } from "./vendor-voice.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const OUT = join(ROOT, "dist", "releases");
@@ -79,6 +81,7 @@ voice pipeline runs in-process over WebSocket; no SFU or worker needed.
 ## Layout
 - \`${bin === "./di" ? "di" : bin}\`                      server binary (also the CLI)
 - \`apps/web/dist/client/\`        SPA assets (served by \`di\`)
+- \`vendor/voice/\`             builtin voice engines (wasm STT/TTS workers)
 - \`config.example.yaml\`     reference configuration
 
 ## Quickstart
@@ -87,17 +90,21 @@ voice pipeline runs in-process over WebSocket; no SFU or worker needed.
     ${bin}                                # serve
 
 \`di --check\` verifies: config parses, sqlite is writable, web assets are
-present, and each provider endpoint responds.
+present, and each provider responds. With \`stt.provider: builtin\` /
+\`tts.provider: builtin\` (the example's default) STT/TTS run in-process —
+the ~50MB model bundle downloads into the data dir on first run.
 
 ## Notes
-- Voice transport is WebSocket (GET /v1/sessions/:id/voice upgrade); only the
-  configured STT/TTS/LLM endpoints must be reachable.
+- Voice transport is WebSocket (GET /v1/sessions/:id/voice upgrade). With
+  remote providers only the configured STT/TTS/LLM endpoints must be
+  reachable; builtin engines only need the model mirror (huggingface.co).
 `;
 };
 
 // ---------------------------------------------------------------------------
 // Per-target staging + archive.
 // ---------------------------------------------------------------------------
+const voiceVendor = await buildVoiceVendor();
 rmSync(OUT, { recursive: true, force: true });
 
 for (const target of targets) {
@@ -118,6 +125,9 @@ for (const target of targets) {
 
   console.log(`==> staging web assets`);
   cpSync(spaDir, join(stage, "apps", "web", "dist", "client"), { recursive: true });
+
+  console.log(`==> staging builtin voice engines`);
+  cpSync(voiceVendor, join(stage, "vendor", "voice"), { recursive: true });
 
   console.log(`==> staging config, README`);
   cpSync(join(ROOT, "config.example.yaml"), join(stage, "config.example.yaml"));

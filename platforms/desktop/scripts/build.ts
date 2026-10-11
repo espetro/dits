@@ -18,6 +18,9 @@ const run = async (cmd: string[], cwd: string): Promise<void> => {
 console.log("==> building web SPA...");
 await run(["bun", "run", "build"], WEB_DIR);
 
+console.log("==> building builtin voice engine bundles...");
+await run(["bun", "run", "build/vendor-voice.ts"], REPO_ROOT);
+
 console.log("==> building electrobun app...");
 await run(["electrobun", "build", "--env=stable"], DESKTOP_DIR);
 

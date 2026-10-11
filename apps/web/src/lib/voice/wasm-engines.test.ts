@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import type { VoiceModelStorage } from "./models";
 import { modelFileKey } from "./models";
-import type { KittenTtsApi } from "./kitten/kitten-api";
+import type { KittenTtsApi } from "@di/voice-engines/kitten";
 import type { SherpaSttApi } from "./sherpa/stt-api";
 import { WasmStt, WasmSttNotReadyError, WasmTts, WasmTtsNotReadyError } from "./wasm-engines";
 import type { WorkerLike } from "./wasm-engines";

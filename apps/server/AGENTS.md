@@ -9,12 +9,15 @@ that directory is missing). Generates `/v1/openapi.json` in `src/api/app.ts`.
 ## Voice pipeline (`src/voice/`)
 
 In-process: WS handler (`ws.ts`), per-connection `VoiceLoop` (`loop.ts`), and
-adapter implementations (`stt/whisper-stt.ts`, `tts/pocket-tts.ts`, `llm.ts`)
-all speaking OpenAI-compatible HTTP. `VoiceLoop` takes injected STT/TTS/LLM
-ports; tests stub them.
+adapter implementations — remote `stt/whisper-stt.ts`/`tts/pocket-tts.ts`
+speaking OpenAI-compatible HTTP, or builtin `voice/builtin/` engines
+(sherpa-onnx STT + KittenTTS wasm in Bun workers over kkrpc). `VoiceLoop`
+takes injected STT/TTS/LLM ports; tests stub them.
 
-- Transport is streaming WS frames, but recognition is utterance-buffered (client VAD delimits; parakeet has no streaming endpoint).
-- TTS responses are WAV; the server decodes and resamples to 24k PCM16 regardless of provider sample rate.
+- Provider pick: `stt.provider`/`tts.provider` = `remote` | `builtin`, defaulting to `builtin` when no `base_url` is set (`voice/providers.ts`). Builtin workers spawn by absolute path from `vendor/voice/` beside the binary (dev: TS sources in `voice/builtin/`); models pull sha256-verified into `files.data_dir/models` on first use (`voice/builtin/models.ts`). Vendor dir built by `build/vendor-voice.ts` (`mise run voice:vendor`), staged into releases by `build/release.ts` and into the desktop bundle via electrobun `copy`.
+- Engine cores (kitten api, sherpa session, manifest/download core) live in `packages/voice-engines/`, shared with the browser workers in `apps/web/src/lib/voice/`.
+- Transport is streaming WS frames, but recognition is utterance-buffered (client VAD delimits; parakeet has no streaming endpoint). Builtin sherpa STT is streaming-native and serves both the buffered and streaming ports.
+- Remote TTS responses are WAV; the server decodes and resamples to 24k PCM16 regardless of provider sample rate. Builtin TTS emits Float32 24kHz directly.
 
 ## Test mode driving recipe
 

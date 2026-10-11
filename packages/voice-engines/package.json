@@ -1,0 +1,27 @@
+{
+  "name": "@di/voice-engines",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./models": "./src/models.ts",
+    "./fs-storage": "./src/fs-storage.ts",
+    "./kitten": "./src/kitten/kitten-api.ts",
+    "./sherpa-session": "./src/sherpa/session.ts",
+    "./readable-async-iterator": "./src/readable-async-iterator.ts"
+  },
+  "scripts": {
+    "test": "bun run --bun vitest run",
+    "typecheck": "tsc --noEmit --checkers 1"
+  },
+  "dependencies": {
+    "@di/shared": "workspace:*",
+    "jszip": "^3.10.1",
+    "kkrpc": "^2.1.0",
+    "onnxruntime-web": "^1.29.0",
+    "phonemizer": "^1.2.1",
+    "valibot": "^1"
+  }
+}

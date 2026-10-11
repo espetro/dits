@@ -9,7 +9,12 @@
  * the global scope with locateFile (routes the 13MB .wasm and the stub
  * .data fetch) plus the ready/abort hooks — there is no factory call.
  * the model + tokens bytes land in MEMFS via FS.writeFile.
+ *
+ * feed/flush session semantics are shared with the server-side builtin
+ * engine via @di/voice-engines' createSherpaSession.
  */
+import { createSherpaSession } from "@di/voice-engines/sherpa-session";
+import type { SherpaRecognizer, SherpaSession } from "@di/voice-engines/sherpa-session";
 
 /** urls for the vendored browser build under public/sherpa/. */
 export interface SttAssets {
@@ -46,18 +51,6 @@ export interface SherpaSttApi {
   flush(): Promise<void>;
 }
 
-interface SherpaStream {
-  acceptWaveform(sampleRate: number, samples: Float32Array): void;
-  inputFinished(): void;
-}
-interface SherpaRecognizer {
-  createStream(): SherpaStream;
-  isReady(stream: SherpaStream): boolean;
-  decode(stream: SherpaStream): void;
-  isEndpoint(stream: SherpaStream): boolean;
-  reset(stream: SherpaStream): void;
-  getResult(stream: SherpaStream): { text?: string };
-}
 /** seeded on the worker global scope BEFORE the glue loads. */
 interface SherpaModuleSeed {
   locateFile?: (path: string, dir: string) => string;
@@ -105,37 +98,10 @@ export interface SherpaSttDeps {
 export function createSherpaSttApi(deps: SherpaSttDeps): SherpaSttApi {
   const g = globalThis as unknown as SherpaGlobalScope;
 
-  let recognizer: SherpaRecognizer | null = null;
-  let stream: SherpaStream | null = null;
-  let lastPartial = "";
-  let onPartial: (text: string) => void = () => undefined;
-  let onFinal: (text: string) => void = () => undefined;
-
-  /** Decode pending frames; emit a partial only when the text actually moved. */
-  function decodeStep(): void {
-    if (!recognizer || !stream) return;
-    while (recognizer.isReady(stream)) recognizer.decode(stream);
-    const text = recognizer.getResult(stream).text ?? "";
-    if (text !== lastPartial) {
-      lastPartial = text;
-      if (text) onPartial(text);
-    }
-  }
-
-  /** Utterance boundary (from the silero vad on the main thread, or sherpa's own endpoint). */
-  function finishUtterance(): void {
-    if (!recognizer || !stream) return;
-    decodeStep();
-    const text = lastPartial;
-    onFinal(text);
-    recognizer.reset(stream);
-    lastPartial = "";
-  }
+  let session: SherpaSession | null = null;
 
   return {
     async init(args, partialCb, finalCb) {
-      onPartial = partialCb;
-      onFinal = finalCb;
       // the glue self-initializes at script load, so Module is seeded on the
       // global scope FIRST: locateFile routes the .wasm + .data fetches, the
       // ready/abort hooks settle init — there is no factory call
@@ -158,7 +124,7 @@ export function createSherpaSttApi(deps: SherpaSttDeps): SherpaSttApi {
       const mod = g.Module as SherpaModule;
       mod.FS_createDataFile("/model.onnx", null, new Uint8Array(args.model), true, true, true);
       mod.FS_createDataFile("/tokens.txt", null, new Uint8Array(args.tokens), true, true, true);
-      recognizer = g.createOnlineRecognizer(mod, {
+      const recognizer = g.createOnlineRecognizer(mod, {
         featConfig: { sampleRate: 16000, featureDim: 80 },
         modelConfig: {
           zipformer2Ctc: { model: "model.onnx" },
@@ -168,22 +134,20 @@ export function createSherpaSttApi(deps: SherpaSttDeps): SherpaSttApi {
           debug: 0,
         },
       });
-      stream = recognizer.createStream();
-      lastPartial = "";
+      session = createSherpaSession(recognizer, recognizer.createStream(), {
+        onPartial: partialCb,
+        onFinal: finalCb,
+      });
     },
 
     async feed(samples) {
-      if (!recognizer || !stream) throw new Error("stt worker not initialized");
-      stream.acceptWaveform(16000, samples);
-      decodeStep();
-      // sherpa's trailing-silence rules as a backstop for vad endpointing
-      if (recognizer.isEndpoint(stream)) finishUtterance();
+      if (!session) throw new Error("stt worker not initialized");
+      session.feed(samples);
     },
 
     async flush() {
-      if (!recognizer || !stream) throw new Error("stt worker not initialized");
-      stream.inputFinished();
-      finishUtterance();
+      if (!session) throw new Error("stt worker not initialized");
+      session.flush();
     },
   };
 }

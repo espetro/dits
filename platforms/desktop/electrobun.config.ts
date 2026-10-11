@@ -38,6 +38,9 @@ const config: ElectrobunConfig = {
     },
     copy: {
       "../../apps/web/dist/client": "views/web",
+      // builtin voice engines (wasm workers + runtimes); built by
+      // scripts/build.ts via build/vendor-voice.ts
+      "../../build/vendor/voice": "vendor/voice",
     },
     watch: ["../../apps/server/src"],
   },

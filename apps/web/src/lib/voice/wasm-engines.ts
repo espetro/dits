@@ -6,7 +6,7 @@ import { DEFAULT_VOICE_MODEL_MANIFEST, loadVoiceModelManifest, readVoiceModelFil
 import type { VoiceModelStorage } from "./models";
 import type { VoiceModelManifest } from "@di/shared";
 import { DiError } from "../errors";
-import type { KittenTtsApi } from "./kitten/kitten-api";
+import type { KittenTtsApi } from "@di/voice-engines/kitten";
 import type { SherpaSttApi } from "./sherpa/stt-api";
 import { pushVoiceHealth } from "./health";
 import { envNum } from "../env";

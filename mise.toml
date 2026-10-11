@@ -58,6 +58,11 @@ run = "bun scripts/validate.ts"
 description = "T3: milestone gate — T2 + full-repo turbo typecheck/test + knip. Slow; run before merging a batch of work, not per-commit. CI equivalent."
 run = "bun scripts/validate.ts --full"
 
+[tasks."voice:vendor"]
+description = "Build the builtin voice engine bundles + wasm runtime into build/vendor/voice/"
+run = "bun run build/vendor-voice.ts"
+
+
 [tasks.release]
 description = "Build per-OS release archives into dist/releases/ (requires mise run build first)"
 run = "bun run build/release.ts"
