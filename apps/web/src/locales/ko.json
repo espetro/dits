@@ -359,6 +359,7 @@
   "settings.section.tts.title": "음성 합성 옵션",
   "settings.section.voice": "목소리",
   "settings.section.voiceDesc": "어떻게 답하는지 — 음성 합성",
+  "settings.serverPack.label": "{kind} 서버의",
   "settings.status.action.download": "voice에서 수정",
   "settings.status.action.llm": "voice에서 수정",
   "settings.status.action.retry": "voice에서 수정",

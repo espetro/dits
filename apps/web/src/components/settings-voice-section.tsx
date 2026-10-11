@@ -7,7 +7,7 @@ import { SettingsRow } from "./settings-row";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 import { Button } from "./vendor/button";
 import { EndpointFields } from "./endpoint-fields";
-import { VoicePackFiles } from "./settings-voice-files";
+import { ModelPackFiles } from "./settings-voice-files";
 import { AudioClipPlayer } from "./audio-clip-player";
 import { useModelOptions, useSettingsDrafts } from "./settings-drafts";
 import { $providerProfile, $serverDriven, $serverReachable } from "../lib/runtime";
@@ -136,7 +136,11 @@ export function VoiceSection() {
         </Select>
       </SettingsRow>
 
-      {ttsPick === "wasm" && <VoicePackFiles />}
+      <ModelPackFiles
+        kind="tts"
+        device={ttsPick === "wasm"}
+        server={ttsPick === "server" || (serverDriven && ttsPick === "")}
+      />
       {ttsPick === "cloud" && (
         <div className="pb-3 pl-1">
           <EndpointFields

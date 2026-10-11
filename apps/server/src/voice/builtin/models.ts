@@ -66,6 +66,19 @@ export async function builtinModelsInstalled(
 
 const inflight = new Map<string, Promise<void>>();
 
+/** Progress of the active pull, surfaced by GET /v1/voice/models. */
+let pullState: { path: string; bytesDone: number; bytesTotal: number } | null = null;
+
+export function builtinPullProgress(): {
+  path: string;
+  bytes_done: number;
+  bytes_total: number;
+} | null {
+  return pullState
+    ? { path: pullState.path, bytes_done: pullState.bytesDone, bytes_total: pullState.bytesTotal }
+    : null;
+}
+
 export interface EnsureBuiltinModelsOptions {
   modelIds?: string[];
   fetchImpl?: typeof fetch;
@@ -84,7 +97,10 @@ export function ensureBuiltinModels(
   const key = `${dataDir}::${(opts.modelIds ?? []).join(",")}`;
   let run = inflight.get(key);
   if (!run) {
-    run = doEnsure(dataDir, opts).finally(() => inflight.delete(key));
+    run = doEnsure(dataDir, opts).finally(() => {
+      inflight.delete(key);
+      pullState = null;
+    });
     inflight.set(key, run);
   }
   return run;
@@ -116,8 +132,42 @@ async function doEnsure(dataDir: string, opts: EnsureBuiltinModelsOptions): Prom
     mkdirSync(join(dest, ".."), { recursive: true });
     await writeFile(dest, Buffer.from(bytes));
     bytesDone += bytes.byteLength;
+    pullState = { path: job.file.path, bytesDone, bytesTotal };
     opts.onFile?.(job.file.path, bytesDone, bytesTotal);
   }
+}
+
+/** Per-model byte accounting for the status endpoint / `di models`. */
+export async function builtinModelsStatus(
+  dataDir: string,
+  manifest?: VoiceModelManifest,
+): Promise<{
+  stt: { installed: boolean; bytes_installed: number; bytes_total: number };
+  tts: { installed: boolean; bytes_installed: number; bytes_total: number };
+}> {
+  const m = manifest ?? (await manifestForEnv().catch(() => DEFAULT_VOICE_MODEL_MANIFEST));
+  const entry = async (id: string) => {
+    const files = m.models[id]?.files ?? [];
+    let installed = 0;
+    let total = 0;
+    for (const f of files) {
+      total += f.size;
+      const p = builtinModelPath(dataDir, f.path);
+      if (existsSync(p) && (await filePresent(p, f.size)).sizeOk) installed += f.size;
+    }
+    return {
+      installed: installed === total && total > 0,
+      bytes_installed: installed,
+      bytes_total: total,
+    };
+  };
+  return { stt: await entry("stt"), tts: await entry("tts") };
+}
+
+/** Remove the whole model cache dir; next builtin use re-downloads. */
+export async function clearBuiltinModels(dataDir: string): Promise<void> {
+  const { rm } = await import("node:fs/promises");
+  await rm(builtinModelsDir(dataDir), { recursive: true, force: true });
 }
 
 /**

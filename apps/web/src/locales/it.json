@@ -359,6 +359,7 @@
   "settings.section.tts.title": "Opzioni testo-to-voce",
   "settings.section.voice": "voce",
   "settings.section.voiceDesc": "come risponde — testo a voce",
+  "settings.serverPack.label": "server {kind}",
   "settings.status.action.download": "sistema in voice",
   "settings.status.action.llm": "sistema in voice",
   "settings.status.action.retry": "sistema in voice",

@@ -26,6 +26,13 @@ import {
   loadVectors,
 } from "../rag/ingest";
 import { retrieve } from "../rag/embeddings";
+import {
+  builtinModelsStatus,
+  builtinPullProgress,
+  builtinModelsDir,
+  clearBuiltinModels,
+  ensureBuiltinModels,
+} from "../voice/builtin/models.ts";
 
 const TurnInputSchema = v.omit(TurnSchema, ["session_id"]);
 
@@ -55,6 +62,11 @@ export function apiRoutes(
     reportLlm?: ReportLlm;
     /** config.documents overrides for ingest caps/chunking/retrieval depth. */
     documents?: Config["documents"];
+    /** builtin-voice model management (GET/POST/DELETE /voice/models). */
+    voiceModels?: {
+      providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
+      dataDir: string;
+    };
   },
 ): Hono {
   const api = new Hono();
@@ -386,6 +398,31 @@ export function apiRoutes(
     const chunks = retrieve(queryVec!, rows, topK);
     return c.json(v.parse(SessionContextResponseSchema, { chunks }));
   });
+
+  const voiceModels = opts.voiceModels;
+  if (voiceModels) {
+    const status = async () => ({
+      providers: voiceModels.providers,
+      models: await builtinModelsStatus(voiceModels.dataDir),
+      dir: builtinModelsDir(voiceModels.dataDir),
+      download: builtinPullProgress(),
+    });
+
+    api.get("/voice/models", async (c) => c.json(await status()));
+
+    api.post("/voice/models/pull", async (c) => {
+      const ids = (["stt", "tts"] as const).filter((k) => voiceModels.providers[k] === "builtin");
+      if (ids.length === 0) return c.json({ error: "no builtin providers" }, 400);
+      // idempotent: shares the inflight run with the boot warm / lazy boot
+      await ensureBuiltinModels(voiceModels.dataDir, { modelIds: ids });
+      return c.json(await status());
+    });
+
+    api.delete("/voice/models", async (c) => {
+      await clearBuiltinModels(voiceModels.dataDir);
+      return c.json(await status());
+    });
+  }
 
   if (opts.testMode) {
     api.route("/test", testRoutes(db));

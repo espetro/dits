@@ -359,6 +359,7 @@
   "settings.section.tts.title": "خيارات تحويل النص إلى كلام",
   "settings.section.voice": "الصوت",
   "settings.section.voiceDesc": "كيف يجيب — تحويل النص إلى كلام",
+  "settings.serverPack.label": "من الخادم {kind}",
   "settings.status.action.download": "أصلح في voice",
   "settings.status.action.llm": "أصلح في voice",
   "settings.status.action.retry": "أصلح في voice",

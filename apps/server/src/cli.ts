@@ -6,11 +6,18 @@ import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
 import { createApp, serveApp } from "./api/app";
 import { sttProviderOf, ttsProviderOf } from "./voice/providers";
-import { warmBuiltinModels } from "./voice/builtin/models";
+import {
+  builtinModelsStatus,
+  builtinModelsDir,
+  clearBuiltinModels,
+  ensureBuiltinModels,
+  warmBuiltinModels,
+} from "./voice/builtin/models";
 
 export async function main(argv: string[]): Promise<number> {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
     args: argv,
+    allowPositionals: true,
     options: {
       check: { type: "boolean", default: false },
       config: { type: "string", default: "config.yaml" },
@@ -32,6 +39,12 @@ export async function main(argv: string[]): Promise<number> {
 
   if (values.check) {
     return check(config, configPath);
+  }
+
+  // `di models [list|pull|clear]` — manage the builtin voice model cache
+  // under files.data_dir/models without starting the server.
+  if (positionals[0] === "models") {
+    return models(positionals[1] ?? "list", config);
   }
 
   const db = createDatabase(config.files.db_path);
@@ -146,6 +159,56 @@ async function check(
   }
   console.log(`[di --check] ${allOk ? "all good" : "problems found"}`);
   return allOk ? 0 : 1;
+}
+
+async function models(
+  verb: string,
+  config: Awaited<ReturnType<typeof loadConfig>>,
+): Promise<number> {
+  const dataDir = config.files.data_dir;
+  const dir = builtinModelsDir(dataDir);
+  const print = async () => {
+    const s = await builtinModelsStatus(dataDir);
+    console.log(`[di models] ${dir}`);
+    for (const kind of ["stt", "tts"] as const) {
+      const e = s[kind];
+      const mb = (b: number) => (b / 1024 / 1024).toFixed(1);
+      const provider = kind === "stt" ? sttProviderOf(config.stt) : ttsProviderOf(config.tts);
+      const pct = e.bytes_total ? Math.round((e.bytes_installed / e.bytes_total) * 100) : 0;
+      console.log(
+        `  ${kind}: ${provider}${provider === "builtin" ? ` — ${e.installed ? "installed" : `missing (${pct}%)`} ${mb(e.bytes_installed)}/${mb(e.bytes_total)} MB` : ""}`,
+      );
+    }
+  };
+
+  if (verb === "list" || verb === "status") {
+    await print();
+    return 0;
+  }
+  if (verb === "pull") {
+    const ids = (["stt", "tts"] as const).filter(
+      (k) => (k === "stt" ? sttProviderOf(config.stt) : ttsProviderOf(config.tts)) === "builtin",
+    );
+    if (ids.length === 0) {
+      console.log("[di models] no builtin providers configured — nothing to pull");
+      return 0;
+    }
+    await ensureBuiltinModels(dataDir, {
+      modelIds: ids,
+      onFile: (path, done, total) =>
+        console.log(`[di models] ${path} (${Math.round((done / total) * 100)}%)`),
+    });
+    await print();
+    return 0;
+  }
+  if (verb === "clear" || verb === "rm") {
+    await clearBuiltinModels(dataDir);
+    console.log(`[di models] cleared ${dir}`);
+    await print();
+    return 0;
+  }
+  console.error(`usage: di models [list|pull|clear]`);
+  return 1;
 }
 
 const SPA_CANDIDATES = [join("web", "dist", "client"), join("apps", "web", "dist", "client")];

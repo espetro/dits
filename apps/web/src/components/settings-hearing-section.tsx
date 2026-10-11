@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./vendor/button";
 import { LiveWaveform } from "./vendor/live-waveform";
 import { EndpointFields } from "./endpoint-fields";
-import { VoicePackFiles } from "./settings-voice-files";
+import { ModelPackFiles } from "./settings-voice-files";
 import { useModelOptions, useSettingsDrafts } from "./settings-drafts";
 import { $providerProfile, $serverDriven, $serverReachable } from "../lib/runtime";
 import { useSsrStore } from "../lib/ssr";
@@ -192,7 +192,11 @@ export function HearingSection() {
         </Select>
       </SettingsRow>
 
-      {sttPick === "wasm" && <VoicePackFiles />}
+      <ModelPackFiles
+        kind="stt"
+        device={sttPick === "wasm"}
+        server={sttPick === "server" || (serverDriven && sttPick === "")}
+      />
       {sttPick === "cloud" && (
         <div className="pb-3 pl-1">
           <EndpointFields

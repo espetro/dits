@@ -98,8 +98,12 @@ driver otherwise.
   Hearing: mic picker (MicSelector, `di.devices.mic`), stt layer
   select (automatic | in-browser | on-device wasm | cloud endpoint;
   desktop app only when the di server is reachable), the layer's
-  conditional (wasm → voice-pack download/progress/remove — with
-  consent granted a missing pack auto-downloads; cloud →
+  conditional (one ModelPackFiles block listing a row per model cache
+  in play: wasm → on-device pack download/progress/remove — with
+  consent granted a missing pack auto-downloads; server-effective →
+  "di server {kind}" row managing files.data_dir/models via
+  /v1/voice/models — the row also stays while a stale cache of that
+  location holds files; cloud →
   stt endpoint fields; explicit server while unreachable → warn note),
   and the test row: capture the selected mic through the resolved
   layer (builtin live stt, or capture→engine feed→flush for
@@ -113,7 +117,8 @@ driver otherwise.
   never raw — model datalist, free-provider callout) plus an
   incomplete alert; the test row streams a
   real one-word completion into a read-only textarea. Voice: tts
-  layer select mirroring Hearing (wasm → pack files, cloud → tts
+  layer select mirroring Hearing (same ModelPackFiles block —
+  wasm → device pack row, server → di-server pack row — cloud → tts
   endpoint fields) and the test row that synthesizes the localized
   test phrase into a minimal audio player (play/stop + linear
   progress; speechSynthesis gets an estimated bar). Picks persist to
