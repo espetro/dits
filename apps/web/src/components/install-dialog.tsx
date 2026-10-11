@@ -16,10 +16,9 @@ import { Separator } from "./vendor/separator";
 import { useLocale, withLocale } from "../lib/locale-href";
 
 const RELEASES_URL = "https://github.com/espetro/dits/releases/latest";
-// pinned to a known-working release: mise's minimum_release_age makes a bare
-// (unpinned) github: spec resolve to an older release whose binary lacks the
-// config/asset fallbacks — bump this with each release that ships fixes.
-const MISE_COMMAND = "mise exec github:espetro/dits@v2026.41.0 -- di";
+// unpinned so users always get latest; MISE_MINIMUM_RELEASE_AGE=0 bypasses
+// mise's built-in 24h release-age gate so a just-tagged release resolves.
+const MISE_COMMAND = "MISE_MINIMUM_RELEASE_AGE=0 mise exec github:espetro/dits -- di";
 
 interface InstallDialogProps {
   open: boolean;
