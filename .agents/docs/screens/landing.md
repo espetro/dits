@@ -53,7 +53,9 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
   public-site build (`VITE_PUBLIC_SITE=1`) it opens the install dialog
   (`InstallDialog`, vendored `Dialog`) instead: option 1 **download the app**
   links to the latest GitHub release, option 2 shows the
-  `mise exec github:espetro/dits -- di` command with a copy button, a
+  `MISE_MINIMUM_RELEASE_AGE=0 mise exec github:espetro/dits -- di` command
+  (unpinned — env var skips mise's 24h release-age gate so latest always
+  resolves) with a copy button, a
   `Separator` divides those two from option 3 **run the web demo** — a link
   to `/setup` carrying an "experimental" badge. The dialog never mounts on
   the di-served/desktop build. `VITE_PUBLIC_SITE` defaults to `1` when
