@@ -55,9 +55,9 @@ tts:
   voice: alloy
 
 files:
-  db_path: .deepinterview/di.db
-  log_path: .deepinterview/di.log
-  data_dir: .deepinterview/data
+  db_path: .di/di.db
+  log_path: .di/di.log
+  data_dir: .di/data
 ```
 
 No API keys are needed: everything points at the in-repo mock provider.
