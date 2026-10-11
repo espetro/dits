@@ -5,6 +5,8 @@ import { createDatabase, migrate, ping } from "./store/db";
 import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
 import { createApp, serveApp } from "./api/app";
+import { sttProviderOf, ttsProviderOf } from "./voice/providers";
+import { warmBuiltinModels } from "./voice/builtin/models";
 
 export async function main(argv: string[]): Promise<number> {
   const { values } = parseArgs({
@@ -44,6 +46,11 @@ export async function main(argv: string[]): Promise<number> {
 
   const app = await createApp({ config, db, testMode, webAssets });
   const server = serveApp(app, config.server.port, { config, db });
+  // builtin voice engines: pull models in the background so the first
+  // session doesn't wait on the download
+  if (sttProviderOf(config.stt) === "builtin" || ttsProviderOf(config.tts) === "builtin") {
+    warmBuiltinModels(config);
+  }
   console.log(
     `[di] listening on http://localhost:${config.server.port}${testMode ? " (test mode)" : ""}`,
   );
@@ -117,8 +124,19 @@ async function check(
 
   const providers = await probeProviders(config);
   for (const [name, ok] of Object.entries(providers)) {
-    const endpoint = name === "llm" || name === "stt" || name === "tts" ? config[name] : undefined;
-    results.push([`${name} provider`, ok, endpoint?.base_url ?? ""]);
+    const endpoint =
+      name === "stt"
+        ? sttProviderOf(config.stt) === "builtin"
+          ? "builtin wasm"
+          : config.stt.base_url
+        : name === "tts"
+          ? ttsProviderOf(config.tts) === "builtin"
+            ? "builtin wasm"
+            : config.tts.base_url
+          : name === "llm"
+            ? config.llm.base_url
+            : undefined;
+    results.push([`${name} provider`, ok, endpoint ?? ""]);
   }
 
   const allOk = results.every(([, ok]) => ok);

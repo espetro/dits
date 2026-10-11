@@ -7,6 +7,6 @@
 import { expose } from "kkrpc/streaming";
 import { workerSelfTransport } from "kkrpc/worker";
 
-import { createKittenApi } from "./kitten-api";
+import { createKittenApi } from "@di/voice-engines/kitten";
 
 expose(createKittenApi(), workerSelfTransport());

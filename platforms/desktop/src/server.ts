@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { createApp, serveApp } from "@di/server/api/app";
 import { loadConfig } from "@di/server/config/load";
 import { createDatabase, migrate } from "@di/server/store/db";
+import { warmBuiltinModels } from "@di/server/voice/builtin/models";
 import type { Db } from "@di/server/store/db";
 
 import { appendLog, setLogFile } from "./logbuffer";
@@ -112,6 +113,8 @@ async function doStart(): Promise<number> {
   });
 
   const server = serveApp(app, port, { config, db });
+  // builtin voice engines: pull models in the background (cli.ts does the same)
+  warmBuiltinModels(config);
   const actual = server.port ?? desired;
   current = { server, db, port: actual };
   appendLog(`[desktop] di listening on http://localhost:${actual}`);

@@ -9,7 +9,9 @@
   "exports": {
     "./api/app": "./src/api/app.ts",
     "./config/load": "./src/config/load.ts",
-    "./store/db": "./src/store/db.ts"
+    "./store/db": "./src/store/db.ts",
+    "./voice/providers": "./src/voice/providers.ts",
+    "./voice/builtin/models": "./src/voice/builtin/models.ts"
   },
   "scripts": {
     "test": "bun run --bun vitest run",
@@ -17,11 +19,14 @@
   },
   "dependencies": {
     "@di/shared": "workspace:*",
+    "@di/voice-engines": "workspace:*",
     "@hono/node-server": "^2.1.1",
     "@hono/valibot-validator": "^0.5",
     "@libsql/client": "^0.15",
     "drizzle-orm": "^0.45",
     "hono": "^4",
+    "kkrpc": "^2.1.0",
+    "sherpa-onnx": "^1.13.8",
     "valibot": "^1",
     "yaml": "^2"
   }

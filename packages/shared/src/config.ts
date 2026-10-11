@@ -41,19 +41,30 @@ export const ProviderSchema = v.object({
 export type Provider = v.InferOutput<typeof ProviderSchema>;
 
 export const SttSchema = v.object({
-  base_url: v.pipe(v.string(), v.url()),
+  /**
+   * "remote" = OpenAI-compatible http service; "builtin" = bundled wasm
+   * engines (zero-conf). Inferred from the shape when omitted: base_url
+   * present => remote, absent => builtin.
+   */
+  provider: v.optional(v.picklist(["remote", "builtin"])),
+  base_url: v.optional(v.pipe(v.string(), v.url())),
   api_key: v.optional(v.string()),
-  model: v.string(),
-  /** Transport is streaming (WS frames); recognition is per-utterance buffered. Kept for compat. */
-  mode: v.picklist(["buffered", "streaming"]),
+  /** remote: provider model id; builtin: ignored (manifest fixed). */
+  model: v.optional(v.string()),
+  /** remote transport mode; builtin engines are always streaming-native. */
+  mode: v.optional(v.picklist(["buffered", "streaming"])),
 });
 export type Stt = v.InferOutput<typeof SttSchema>;
 
 export const TtsSchema = v.object({
-  base_url: v.pipe(v.string(), v.url()),
+  /** "remote" = OpenAI-compatible http service; "builtin" = bundled wasm engine. */
+  provider: v.optional(v.picklist(["remote", "builtin"])),
+  base_url: v.optional(v.pipe(v.string(), v.url())),
   api_key: v.optional(v.string()),
-  model: v.string(),
-  voice: v.string(),
+  /** remote: provider model id; builtin: ignored (manifest fixed). */
+  model: v.optional(v.string()),
+  /** remote: provider voice id; builtin: voices.npz entry name. */
+  voice: v.optional(v.string()),
 });
 export type Tts = v.InferOutput<typeof TtsSchema>;
 
@@ -64,8 +75,9 @@ export const ConfigSchema = v.object({
     auth: v.optional(v.picklist(["none", "token"]), "none"),
   }),
   llm: ProviderSchema,
-  stt: SttSchema,
-  tts: TtsSchema,
+  /** Voice engines. Omitted sections resolve to the bundled wasm engines. */
+  stt: v.optional(SttSchema, {}),
+  tts: v.optional(TtsSchema, {}),
   embeddings: v.optional(
     v.object({
       base_url: v.pipe(v.string(), v.url()),

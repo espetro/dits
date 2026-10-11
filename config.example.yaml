@@ -10,15 +10,27 @@ llm:
   base_url: http://localhost:9000/v1
   model: mock-llm
 
+# stt/tts default to the bundled wasm engines (sherpa-onnx + kitten-tts):
+# zero-config voice — the ~50MB model bundle downloads into files.data_dir
+# on first run. To point at remote providers instead, set provider: remote
+# plus base_url/model (/v1-compatible), e.g. the mock provider:
+#
+# stt:
+#   provider: remote
+#   base_url: http://localhost:9000/v1
+#   model: mock-stt
+#   mode: buffered
+# tts:
+#   provider: remote
+#   base_url: http://localhost:9000/v1
+#   model: mock-tts
+#   voice: alloy
+
 stt:
-  base_url: http://localhost:9000/v1
-  model: mock-stt
-  mode: buffered
+  provider: builtin
 
 tts:
-  base_url: http://localhost:9000/v1
-  model: mock-tts
-  voice: alloy
+  provider: builtin
 
 # optional: enables document ingestion (RAG). omit to disable file uploads.
 embeddings:

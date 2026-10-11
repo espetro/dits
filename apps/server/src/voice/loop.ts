@@ -29,6 +29,8 @@ import { WhisperStt } from "./stt/whisper-stt.ts";
 import { StreamingWhisperStt } from "./stt/streaming-stt.ts";
 import type { StreamingSttPort } from "./stt/streaming-stt.ts";
 import { PocketTts } from "./tts/pocket-tts.ts";
+import { BuiltinKittenTts, BuiltinSherpaStt } from "./builtin/engines.ts";
+import { requireRemoteStt, requireRemoteTts, sttProviderOf, ttsProviderOf } from "./providers.ts";
 import { OpenAiChatClient } from "./llm.ts";
 import type { LlmMessage, LlmResult, ToolDef } from "./llm.ts";
 
@@ -134,25 +136,53 @@ export class VoiceLoop {
       postEvent: (sid: string, type: string, payload?: unknown) =>
         this.postEvent(sid, type, payload),
     };
-    this.stt =
-      deps.stt ??
-      new WhisperStt({
-        baseUrl: this.config.stt.base_url,
-        apiKey: this.config.stt.api_key,
-        model: this.config.stt.model,
-        events,
-        sessionId: this.sessionId,
-      });
+    if (sttProviderOf(this.config.stt) === "builtin") {
+      // bundled wasm sherpa: streaming-native, covers both ports; an
+      // injected stub is expected to satisfy whichever ports get exercised
+      const builtin = (deps.streamingStt ??
+        deps.stt ??
+        new BuiltinSherpaStt({ dataDir: this.config.files.data_dir })) as VoiceStt &
+        StreamingSttPort;
+      this.stt = builtin;
+      this.streamingStt = builtin;
+    } else {
+      const remote = requireRemoteStt(this.config.stt);
+      this.stt =
+        deps.stt ??
+        new WhisperStt({
+          baseUrl: remote.baseUrl,
+          apiKey: remote.apiKey,
+          model: remote.model,
+          events,
+          sessionId: this.sessionId,
+        });
+      if (remote.mode === "streaming") {
+        this.streamingStt =
+          deps.streamingStt ??
+          new StreamingWhisperStt({
+            baseUrl: remote.baseUrl,
+            apiKey: remote.apiKey,
+            model: remote.model,
+            events,
+            sessionId: this.sessionId,
+          });
+      }
+    }
     this.tts =
       deps.tts ??
-      new PocketTts({
-        baseUrl: this.config.tts.base_url,
-        apiKey: this.config.tts.api_key,
-        model: this.config.tts.model,
-        voice: this.config.tts.voice,
-        events,
-        sessionId: this.sessionId,
-      });
+      (ttsProviderOf(this.config.tts) === "builtin"
+        ? new BuiltinKittenTts({ dataDir: this.config.files.data_dir })
+        : (() => {
+            const remote = requireRemoteTts(this.config.tts);
+            return new PocketTts({
+              baseUrl: remote.baseUrl,
+              apiKey: remote.apiKey,
+              model: remote.model,
+              voice: remote.voice,
+              events,
+              sessionId: this.sessionId,
+            });
+          })());
     this.llm =
       deps.llm ??
       new OpenAiChatClient({
@@ -166,17 +196,6 @@ export class VoiceLoop {
         events,
         sessionId: this.sessionId,
       });
-    if (this.config.stt.mode === "streaming") {
-      this.streamingStt =
-        deps.streamingStt ??
-        new StreamingWhisperStt({
-          baseUrl: this.config.stt.base_url,
-          apiKey: this.config.stt.api_key,
-          model: this.config.stt.model,
-          events,
-          sessionId: this.sessionId,
-        });
-    }
   }
 
   /** Call on WS connection open: binds session context and emits agent.started. */
@@ -337,6 +356,10 @@ export class VoiceLoop {
     this.abort?.abort();
     this.abort = undefined;
     this.buffer.clear();
+    // builtin wasm workers live per-loop; remote engines have no dispose
+    for (const engine of [this.stt, this.tts]) {
+      (engine as { terminate?: () => void }).terminate?.();
+    }
   }
 
   private async runTurn(pcm: Uint8Array, t0: number, vadMs: number): Promise<void> {
