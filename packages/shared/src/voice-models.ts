@@ -35,3 +35,47 @@ export const VoiceModelManifestSchema = v.object({
   models: v.record(v.string(), VoiceModelEntrySchema),
 });
 export type VoiceModelManifest = v.InferOutput<typeof VoiceModelManifestSchema>;
+
+/**
+ * Server-side voice model cache status (GET /v1/voice/models): reports which
+ * providers resolved to builtin wasm and the on-disk state of their model
+ * pack under files.data_dir/models. Remote providers still get an entry
+ * (installed flags meaningless — they own no local files).
+ */
+export const VoiceProviderKindSchema = v.picklist(["remote", "builtin"]);
+export type VoiceProviderKind = v.InferOutput<typeof VoiceProviderKindSchema>;
+
+export const VoiceModelCacheEntrySchema = v.object({
+  installed: v.boolean(),
+  /** manifest bytes currently present on disk */
+  bytes_installed: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  /** manifest bytes expected when fully installed */
+  bytes_total: v.pipe(v.number(), v.integer(), v.minValue(0)),
+});
+export interface VoiceModelCacheEntry {
+  installed: boolean;
+  bytes_installed: number;
+  bytes_total: number;
+}
+
+export const VoiceModelsStatusSchema = v.object({
+  providers: v.object({
+    stt: VoiceProviderKindSchema,
+    tts: VoiceProviderKindSchema,
+  }),
+  models: v.object({
+    stt: VoiceModelCacheEntrySchema,
+    tts: VoiceModelCacheEntrySchema,
+  }),
+  /** absolute path of the model cache dir */
+  dir: v.pipe(v.string(), v.minLength(1)),
+  /** active download, or null when idle */
+  download: v.nullable(
+    v.object({
+      path: v.string(),
+      bytes_done: v.pipe(v.number(), v.integer(), v.minValue(0)),
+      bytes_total: v.pipe(v.number(), v.integer(), v.minValue(0)),
+    }),
+  ),
+});
+export type VoiceModelsStatus = v.InferOutput<typeof VoiceModelsStatusSchema>;

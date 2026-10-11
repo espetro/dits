@@ -359,6 +359,7 @@
   "settings.section.tts.title": "音声合成の選択肢",
   "settings.section.voice": "音声",
   "settings.section.voiceDesc": "どう答えるか — 音声合成",
+  "settings.serverPack.label": "ディサーバー {kind}",
   "settings.status.action.download": "voice で修正",
   "settings.status.action.llm": "voice で修正",
   "settings.status.action.retry": "voice で修正",

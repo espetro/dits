@@ -359,6 +359,7 @@
   "settings.section.tts.title": "Opções de texto para fala",
   "settings.section.voice": "voz",
   "settings.section.voiceDesc": "como responde — texto para voz",
+  "settings.serverPack.label": "servidor {kind}",
   "settings.status.action.download": "corrigir em voice",
   "settings.status.action.llm": "corrigir em voice",
   "settings.status.action.retry": "corrigir em voice",

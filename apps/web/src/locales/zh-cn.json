@@ -359,6 +359,7 @@
   "settings.section.tts.title": "文字转语音选项",
   "settings.section.voice": "声音",
   "settings.section.voiceDesc": "如何回答 — 语音合成",
+  "settings.serverPack.label": "服务器 {kind}",
   "settings.status.action.download": "在 voice 中修复",
   "settings.status.action.llm": "在 voice 中修复",
   "settings.status.action.retry": "在 voice 中修复",

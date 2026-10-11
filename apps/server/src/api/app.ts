@@ -5,6 +5,7 @@ import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
 import { embeddingsClientFromConfig } from "../rag/ingest";
 import { OpenAiChatClient } from "../voice/llm";
+import { sttProviderOf, ttsProviderOf } from "../voice/providers";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 
@@ -46,6 +47,13 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
       testMode: deps.testMode,
       embeddings: embeddingsClientFromConfig(deps.config.embeddings),
       documents: deps.config.documents,
+      voiceModels: {
+        providers: {
+          stt: sttProviderOf(deps.config.stt),
+          tts: ttsProviderOf(deps.config.tts),
+        },
+        dataDir: deps.config.files.data_dir,
+      },
       reportLlm: new OpenAiChatClient({
         baseUrl: deps.config.llm.base_url,
         apiKey: deps.config.llm.api_key,
@@ -145,6 +153,25 @@ function openApiSpec(config: Config): Record<string, unknown> {
           responses: {
             "200": { description: "OK" },
             "404": { description: "Not found" },
+          },
+        },
+      },
+      "/v1/voice/models": {
+        get: {
+          summary: "Builtin voice model cache status",
+          responses: { "200": { description: "OK" } },
+        },
+        delete: {
+          summary: "Clear the builtin voice model cache",
+          responses: { "200": { description: "OK" } },
+        },
+      },
+      "/v1/voice/models/pull": {
+        post: {
+          summary: "Download builtin voice models (sha256-verified, idempotent)",
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "No builtin providers configured" },
           },
         },
       },

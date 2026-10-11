@@ -359,6 +359,7 @@
   "settings.section.tts.title": "Sprachausgabe (TTS)",
   "settings.section.voice": "stimme",
   "settings.section.voiceDesc": "wie es antwortet — text zu sprache",
+  "settings.serverPack.label": "von Server {kind}",
   "settings.status.action.download": "in voice beheben",
   "settings.status.action.llm": "in voice beheben",
   "settings.status.action.retry": "in voice beheben",

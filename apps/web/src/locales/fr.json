@@ -359,6 +359,7 @@
   "settings.section.tts.title": "Options de synthèse vocale",
   "settings.section.voice": "voix",
   "settings.section.voiceDesc": "comment il répond — texte vers voix",
+  "settings.serverPack.label": "de serveur {kind}",
   "settings.status.action.download": "corriger dans voix",
   "settings.status.action.llm": "corriger dans voix",
   "settings.status.action.retry": "corriger dans voix",

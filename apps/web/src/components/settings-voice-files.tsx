@@ -20,12 +20,176 @@ function fmtMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1);
 }
 
+interface ServerModelsStatus {
+  providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
+  models: Record<
+    "stt" | "tts",
+    { installed: boolean; bytes_installed: number; bytes_total: number }
+  >;
+  dir: string;
+  download: { path: string; bytes_done: number; bytes_total: number } | null;
+}
+
+const API_BASE = (import.meta.env.VITE_DI_API_BASE as string | undefined) ?? "";
+
+async function serverModelsStatus(): Promise<ServerModelsStatus | null> {
+  try {
+    const res = await fetch(`${API_BASE}/v1/voice/models`);
+    if (!res.ok) return null;
+    return (await res.json()) as ServerModelsStatus;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Server-side builtin model pack row (the files.data_dir/models cache),
+ * mirroring VoicePackFiles for the di-server stt/tts layers.
+ * Renders nothing when the server is unreachable, the layer's provider
+ * isn't builtin, or the layer is neither active nor holding cached files.
+ */
+function ServerPackFiles(props: { kind: "stt" | "tts"; active: boolean }) {
+  const intl = useIntl();
+  const [status, setStatus] = React.useState<ServerModelsStatus | null>(null);
+  const [busy, setBusy] = React.useState(false);
+
+  const refresh = React.useCallback(async () => {
+    setStatus(await serverModelsStatus());
+  }, []);
+  React.useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  // poll while a pull is in flight (progress arrives via GET)
+  const downloading = status?.download != null;
+  React.useEffect(() => {
+    if (!downloading) return;
+    const t = setInterval(() => void refresh(), 1000);
+    return () => clearInterval(t);
+  }, [downloading, refresh]);
+
+  const act = React.useCallback(
+    async (method: "POST" | "DELETE") => {
+      setBusy(true);
+      try {
+        const res = await fetch(`${API_BASE}/v1/voice/models${method === "POST" ? "/pull" : ""}`, {
+          method,
+        });
+        if (!res.ok) throw new Error(`${res.status}`);
+        setStatus((await res.json()) as ServerModelsStatus);
+      } catch {
+        toast.error(intl.formatMessage({ id: "settings.voicePane.downloadFailed" }));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [intl],
+  );
+
+  if (!status || status.providers[props.kind] !== "builtin") return null;
+  const entry = status.models[props.kind];
+  if (!props.active && entry.bytes_installed === 0) return null;
+  const dl = status.download;
+
+  const text = dl
+    ? intl.formatMessage(
+        { id: "settings.voicePane.downloading" },
+        {
+          percent: Math.round((dl.bytes_done / Math.max(1, dl.bytes_total)) * 100),
+          done: fmtMb(dl.bytes_done),
+          total: fmtMb(dl.bytes_total),
+        },
+      )
+    : entry.installed
+      ? intl.formatMessage(
+          { id: "settings.voicePack.size" },
+          { size: fmtMb(entry.bytes_installed) },
+        )
+      : intl.formatMessage({ id: "settings.voicePane.notInstalled" });
+
+  return (
+    <div className="space-y-2 pl-1">
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={busy || downloading}
+          onClick={() => void act("POST")}
+          aria-busy={busy || downloading}
+        >
+          {entry.installed ? (
+            <>
+              <RefreshCw className="size-3.5" aria-hidden="true" />
+              <FormattedMessage id="settings.voicePane.redownload" />
+            </>
+          ) : (
+            <>
+              <Download className="size-3.5" aria-hidden="true" />
+              <FormattedMessage id="settings.voicePane.download" />
+            </>
+          )}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={busy || downloading || entry.bytes_installed === 0}
+          onClick={() => void act("DELETE")}
+          aria-label={intl.formatMessage({ id: "settings.downloads.remove" })}
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+        </Button>
+        <span className="text-xs text-muted-foreground" title={status.dir}>
+          <FormattedMessage id="settings.serverPack.label" values={{ kind: props.kind }} />
+          {" · "}
+          {text}
+        </span>
+      </div>
+      {dl && (
+        <Progress
+          value={(dl.bytes_done / Math.max(1, dl.bytes_total)) * 100}
+          className="w-[calc(100%-0.5rem)]"
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * The single voice-model management surface for a layer: one block that
+ * lists a row per model cache in play — "on this device" (browser
+ * CacheStorage/OPFS, the wasm pick) and/or "di server" (the binary's
+ * files.data_dir cache, the server pick / auto-driven builtin). A row
+ * also stays visible while its cache holds files, so a stale cache left
+ * behind by a pick switch remains removable.
+ */
+export function ModelPackFiles(props: {
+  kind: "stt" | "tts";
+  /** the layer's engine pick resolves to browser-side wasm */
+  device: boolean;
+  /** the layer's engine pick resolves to the di server */
+  server: boolean;
+}) {
+  const installed = useStore($voiceModelsInstalled);
+  const showDevice = props.device || installed?.[props.kind] === true;
+  // ServerPackFiles always mounts: it self-hides unless the provider is
+  // builtin AND (active pick or non-empty cache), which also covers a
+  // stale server cache after a pick switch.
+  return (
+    <div className="space-y-2 pl-1">
+      {showDevice && <VoicePackFiles />}
+      <ServerPackFiles kind={props.kind} active={props.server} />
+    </div>
+  );
+}
+
 /**
  * The on-device voice pack file management (download / progress / delete)
  * shown inside a wasm layer conditional — the same controls the old
  * downloads pane rendered, inlined where the layer is configured.
  */
-export function VoicePackFiles() {
+function VoicePackFiles() {
   const intl = useIntl();
   const download = useStore($voiceDownload);
   const consent = useStore($voiceModelsConsent);

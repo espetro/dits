@@ -359,6 +359,7 @@
   "settings.section.tts.title": "Text-to-speech options",
   "settings.section.voice": "voice",
   "settings.section.voiceDesc": "how it answers — text to speech",
+  "settings.serverPack.label": "di server {kind}",
   "settings.status.action.download": "fix in voice",
   "settings.status.action.llm": "fix in voice",
   "settings.status.action.retry": "fix in voice",
