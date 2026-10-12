@@ -56,7 +56,10 @@ export function VoiceSection() {
   );
 
   const pick = (value: string) => {
-    const v = value as TtsLayerPick;
+    // "auto" is the select's display value; the stored pick is "" —
+    // pickWantsServer("auto") is false, so storing it raw would flip
+    // server-driven resolution off until the next decode on load.
+    const v = value === "auto" ? "" : (value as TtsLayerPick);
     $voiceTtsEngine.set(v);
     // a different layer means a different engine — drop stale clip/playback
     setTest({ status: "idle" });
