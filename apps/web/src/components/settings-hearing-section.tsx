@@ -73,7 +73,10 @@ export function HearingSection() {
   };
 
   const pick = (value: string) => {
-    const v = value as SttLayerPick;
+    // "auto" is the select's display value; the stored pick is "" —
+    // pickWantsServer("auto") is false, so storing it raw would flip
+    // server-driven resolution off until the next decode on load.
+    const v = value === "auto" ? "" : (value as SttLayerPick);
     $voiceSttEngine.set(v);
     // a different layer means a different engine — drop stale results and
     // release the mic if a test was still listening

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { atom } from "nanostores";
 import { useStore } from "@nanostores/react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Download, RefreshCw, Trash2 } from "lucide-react";
@@ -43,6 +44,18 @@ async function serverModelsStatus(): Promise<ServerModelsStatus | null> {
 }
 
 /**
+ * Shared copy of the server status: both ServerPackFiles rows (stt +
+ * tts) describe the SAME files.data_dir/models cache, so a mutation in
+ * one row must refresh the other — a per-instance fetch would leave the
+ * sibling showing bytes the other just deleted.
+ */
+const $serverModels = atom<ServerModelsStatus | null>(null);
+
+async function refreshServerModels(): Promise<void> {
+  $serverModels.set(await serverModelsStatus());
+}
+
+/**
  * Server-side builtin model pack row (the files.data_dir/models cache),
  * mirroring VoicePackFiles for the di-server stt/tts layers.
  * Renders nothing when the server is unreachable, the layer's provider
@@ -50,23 +63,21 @@ async function serverModelsStatus(): Promise<ServerModelsStatus | null> {
  */
 function ServerPackFiles(props: { kind: "stt" | "tts"; active: boolean }) {
   const intl = useIntl();
-  const [status, setStatus] = React.useState<ServerModelsStatus | null>(null);
+  const status = useStore($serverModels);
   const [busy, setBusy] = React.useState(false);
 
-  const refresh = React.useCallback(async () => {
-    setStatus(await serverModelsStatus());
-  }, []);
   React.useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void refreshServerModels();
+  }, []);
 
-  // poll while a pull is in flight (progress arrives via GET)
+  // poll while a pull is in flight (progress arrives via GET) or our own
+  // POST is parked server-side waiting for the download to finish
   const downloading = status?.download != null;
   React.useEffect(() => {
-    if (!downloading) return;
-    const t = setInterval(() => void refresh(), 1000);
+    if (!downloading && !busy) return;
+    const t = setInterval(() => void refreshServerModels(), 1000);
     return () => clearInterval(t);
-  }, [downloading, refresh]);
+  }, [downloading, busy]);
 
   const act = React.useCallback(
     async (method: "POST" | "DELETE") => {
@@ -76,7 +87,7 @@ function ServerPackFiles(props: { kind: "stt" | "tts"; active: boolean }) {
           method,
         });
         if (!res.ok) throw new Error(`${res.status}`);
-        setStatus((await res.json()) as ServerModelsStatus);
+        $serverModels.set((await res.json()) as ServerModelsStatus);
       } catch {
         toast.error(intl.formatMessage({ id: "settings.voicePane.downloadFailed" }));
       } finally {
