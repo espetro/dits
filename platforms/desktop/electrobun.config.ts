@@ -12,7 +12,7 @@ const cefFlags = {
 
 const config: ElectrobunConfig = {
   app: {
-    name: "di.",
+    name: "di",
     identifier: "com.di.app",
     version,
   },
@@ -22,10 +22,12 @@ const config: ElectrobunConfig = {
     mac: {
       bundleCEF: !isBuild,
       chromiumFlags: isBuild ? undefined : cefFlags,
+      icons: "icon.iconset",
     },
     win: {
       // WebView2 ships with Windows; no CEF needed.
       bundleCEF: false,
+      icon: "../../apps/web/public/icon-512.png",
     },
     linux: {
       // CEF keeps the linux leg self-contained (no webkit2gtk at runtime).
