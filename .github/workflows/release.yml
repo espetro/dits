@@ -33,10 +33,14 @@ jobs:
           files: dist/releases/*.tar.gz
           generate_release_notes: true
 
-  desktop-macos:
-    # electrobun builds for the host arch only; macos-latest is arm64 and is
-    # the only macOS arch its release matrix publishes a core artifact for
-    runs-on: macos-latest
+  desktop:
+    # electrobun builds for the host arch only; macos-latest is arm64 (the only
+    # macOS arch its release matrix publishes a core artifact for)
+    strategy:
+      fail-fast: false # one platform's installer must not sink the others
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.platform }}
     # toolchain download + native build can stall; cap well under the 6h default
     timeout-minutes: 60
     steps:
@@ -47,11 +51,24 @@ jobs:
       - name: Install JS deps
         run: bun install --frozen-lockfile
 
-      - name: Build electrobun app (web SPA + vendor voice + dmg)
+      - name: Build electrobun app (web SPA + vendor voice + installer)
         working-directory: platforms/desktop
         run: bun run scripts/build.ts
 
-      - name: Upload dmg to release
+        # electrobun names artifacts stable-<os>-<arch>-di<suffix>; normalize to
+        # di-stable-<os>-<arch><suffix> (dmg / Setup.zip / tar.zst / update.json)
+      - name: Normalize artifact names to di-stable-*
+        shell: bash
+        run: |
+          cd platforms/desktop/artifacts
+          for f in stable-*; do
+            [ -f "$f" ] || continue
+            rest=${f#stable-}
+            mv -v "$f" "di-stable-${rest//-di/}"
+          done
+          ls -la
+
+      - name: Upload installers to release
         uses: softprops/action-gh-release@v2
         with:
-          files: platforms/desktop/artifacts/*.dmg
+          files: platforms/desktop/artifacts/di-stable-*

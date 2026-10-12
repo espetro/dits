@@ -1,5 +1,5 @@
 /**
- * Release archive builder. Produces dist/releases/di-<version>-<target>.tar.gz
+ * Release archive builder. Produces dist/releases/di-cli-<version>-<target>.tar.gz
  * containing:
  *   di                       compiled binary (bun build --compile; di.exe on windows)
  *   apps/web/dist/client/    SPA assets
@@ -109,7 +109,7 @@ rmSync(OUT, { recursive: true, force: true });
 
 for (const target of targets) {
   const triple = TRIPLES[target];
-  const stage = join(OUT, `di-${version}-${triple}`);
+  const stage = join(OUT, `di-cli-${version}-${triple}`);
   rmSync(stage, { recursive: true, force: true });
   mkdirSync(stage, { recursive: true });
 
@@ -133,15 +133,15 @@ for (const target of targets) {
   cpSync(join(ROOT, "config.example.yaml"), join(stage, "config.example.yaml"));
   writeFileSync(join(stage, "README.md"), readme(target));
 
-  const archive = join(OUT, `di-${version}-${triple}.tar.gz`);
+  const archive = join(OUT, `di-cli-${version}-${triple}.tar.gz`);
   console.log(`==> archiving ${archive}`);
-  await $`tar -czf ${archive} -C ${OUT} ${`di-${version}-${triple}`}`;
+  await $`tar -czf ${archive} -C ${OUT} ${`di-cli-${version}-${triple}`}`;
   rmSync(stage, { recursive: true, force: true });
 }
 
 console.log(`\nrelease archives in ${OUT}:`);
 for (const target of targets) {
-  const p = join(OUT, `di-${version}-${TRIPLES[target]}.tar.gz`);
+  const p = join(OUT, `di-cli-${version}-${TRIPLES[target]}.tar.gz`);
   const f = Bun.file(p);
   if (await f.exists()) console.log(`  ${p} (${(f.size / 1024 / 1024).toFixed(1)} MB)`);
 }
