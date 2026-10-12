@@ -10,6 +10,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +37,8 @@ jobs:
     # electrobun builds for the host arch only; macos-latest is arm64 and is
     # the only macOS arch its release matrix publishes a core artifact for
     runs-on: macos-latest
+    # toolchain download + native build can stall; cap well under the 6h default
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
