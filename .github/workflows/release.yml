@@ -31,3 +31,24 @@ jobs:
         with:
           files: dist/releases/*.tar.gz
           generate_release_notes: true
+
+  desktop-macos:
+    # electrobun builds for the host arch only; macos-latest is arm64 and is
+    # the only macOS arch its release matrix publishes a core artifact for
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install JS deps
+        run: bun install --frozen-lockfile
+
+      - name: Build electrobun app (web SPA + vendor voice + dmg)
+        working-directory: platforms/desktop
+        run: bun run scripts/build.ts
+
+      - name: Upload dmg to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: platforms/desktop/artifacts/*.dmg
