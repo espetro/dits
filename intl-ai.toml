@@ -1,7 +1,7 @@
 version = 1
 locale_dir = "apps/web/src/locales"
 source = "en"
-targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn"]
+targets = ["ar", "de", "es", "fr", "it", "ja", "ko", "pt-br", "zh-cn", "hi", "vi"]
 
 
 # `check` is offline; `fill` needs a real provider. This replay stub keeps the

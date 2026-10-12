@@ -6,6 +6,8 @@ import FlagDe from "~icons/circle-flags/de";
 import FlagEn from "~icons/circle-flags/us";
 import FlagEs from "~icons/circle-flags/es";
 import FlagFr from "~icons/circle-flags/fr";
+import FlagHi from "~icons/circle-flags/in";
+import FlagVi from "~icons/circle-flags/vn";
 import FlagIt from "~icons/circle-flags/it";
 import FlagJa from "~icons/circle-flags/jp";
 import FlagKo from "~icons/circle-flags/kr";
@@ -53,6 +55,8 @@ export const LOCALE_LABELS = {
   ko: { native: "한국어" },
   it: { native: "Italiano" },
   ar: { native: "العربية" },
+  hi: { native: "हिन्दी" },
+  vi: { native: "Tiếng Việt" },
 } as const satisfies Record<(typeof LOCALES)[number], { native: string }>;
 
 type FlagIcon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -68,6 +72,8 @@ export const LOCALE_FLAGS: Record<(typeof LOCALES)[number], FlagIcon> = {
   ko: FlagKo,
   it: FlagIt,
   ar: FlagAr,
+  hi: FlagHi,
+  vi: FlagVi,
 };
 
 function LocaleFlag({ locale }: { locale: (typeof LOCALES)[number] }) {
