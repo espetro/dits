@@ -1,0 +1,4177 @@
+version = 1
+
+[entries."a11y.account"]
+value = "खाता"
+source_hash = "ca20728d35f00c3a4c21b1fc8b0086b59f89df2d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.agentStage"]
+value = "एजेंट स्टेज"
+source_hash = "38205b85770356aa063dffe54a9b41d1382b6382"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.close"]
+value = "बंद करें"
+source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.editor"]
+value = "संपादक"
+source_hash = "ab41949825606da179db7c89ddcedcc167b64847"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.github"]
+value = "गिटहब"
+source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.language"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.moreTools"]
+value = "अधिक उपकरण"
+source_hash = "4915a1a2232aaf565e67e7938c370dc84ffb8faa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.runtimeMode"]
+value = "रनटाइम मोड"
+source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."a11y.status"]
+value = "सिस्टम स्थिति"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."account.guest"]
+value = "अतिथि"
+source_hash = "face83ee3014bdc8f98203cc94e2e89222452e90"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."account.guestEmail"]
+value = "स्थानीय सत्र · कोई खाता नहीं"
+source_hash = "7735a832cbb5244c99add6ac5eb984dddef8415d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."account.history"]
+value = "पिछले सत्र"
+source_hash = "b7b7c25bc3bb53f3f6e790f9623e9010bb0498c0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."account.language"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."account.settings"]
+value = "सेटिंग्स"
+source_hash = "c7f73bb54d928922c3838bb789ee9fb8a5b1eb37"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.llmDown"]
+value = "एलएलएम डाउन"
+source_hash = "0668a19afd2b77155a29d3a839e98b220d32a103"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.offline"]
+value = "ऑफलाइन"
+source_hash = "d1ffda5dc9903c9a42d66636aea9405e311c6f85"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.sttDown"]
+value = "एसटीटी डाउन"
+source_hash = "d8b58f6a74fbb521b0e7a079c5d221751dbc6cbb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.title"]
+value = "सिस्टम स्थिति"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.ttsDown"]
+value = "टीटीएस डाउन"
+source_hash = "e61f68e1d7c0c205db212dade724116a9af32bec"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."chip.unstable"]
+value = "अस्थिर"
+source_hash = "fd2a7e1cb00c329990c65763cacd331b6ddf577d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."common.github"]
+value = "गिटहब"
+source_hash = "64b2b6d12bfe4baae7dad3d018f8cbf6b0e7a044"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."editor.language"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."editor.theme"]
+value = "संपादक थीम"
+source_hash = "33860dfca35401715a368ddbeb5306cbf2841664"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."error.home"]
+value = "होम पर वापस"
+source_hash = "877ba514defadf05453d8b9bc258c2b3f000f53f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."error.message"]
+value = "इस पृष्ठ को रेंडर करते समय एक अप्रत्याशित त्रुटि हुई।"
+source_hash = "7dc1fff62efd103289adbac42bc86383f8719dea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."error.retry"]
+value = "फिर से प्रयास करें"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."error.title"]
+value = "कुछ गलत हो गया"
+source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.cap"]
+value = "अपलोड अस्वीकृत"
+source_hash = "c80857313cde3499977ed6547cc49fdffc0e4d0a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.createSession"]
+value = "सत्र नहीं बना सका"
+source_hash = "64fc79ba40b721d6b5185fff36a06ad52cc0df68"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.document_not_found"]
+value = "दस्तावेज़ नहीं मिला"
+source_hash = "f427adfad7d04ea82c85747055aaa163cd482502"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.file_cap"]
+value = "बहुत अधिक फ़ाइलें"
+source_hash = "2c0034d5f7407417a34c50ffee42bac6c8b38486"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.getReport"]
+value = "रिपोर्ट लोड नहीं कर सका"
+source_hash = "22cb28eddbcb19a63cbd9c53cdad39508ecd28b4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.getSession"]
+value = "सत्र लोड नहीं कर सका"
+source_hash = "f92072f9fa56dec21dfa574abb25e51072546e49"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.getTurns"]
+value = "ट्रांसक्रिप्ट लोड नहीं कर सका"
+source_hash = "8a0c5aed5a7cf37ed0feccece35044db5039e4f1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.listSessions"]
+value = "सत्र लोड नहीं कर सका"
+source_hash = "8a1bf37741848afa8b4300803d9817393065cd5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.no_embeddings"]
+value = "इस सर्वर पर कोई एम्बेडिंग प्रदाता कॉन्फ़िगर नहीं है"
+source_hash = "c98252fd8de1c0bece5f3c9cb4dedd6e052c329c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.no_files"]
+value = "कोई फ़ाइल अपलोड नहीं की गई"
+source_hash = "a73e4d6dd88fad8a2d9c7f9339ffb6dcd178482b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.not_found"]
+value = "नहीं मिला"
+source_hash = "094b763b4cfcc0b05e5d040581cd513c3ca08067"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.postTurn"]
+value = "संदेश नहीं भेज सका"
+source_hash = "e6e44156829e9f0a757b23dc4faa82473b006e37"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.pushToolState"]
+value = "टूल स्टेट नहीं बचा सका"
+source_hash = "2df05b2d173442c3d72ab17a68121c1eea701258"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.report_failed"]
+value = "सर्वर पर रिपोर्ट जनरेशन विफल"
+source_hash = "7a9a5070abb8981740f59f2efd17ccc68c615196"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.report_unconfigured"]
+value = "इस सर्वर पर रिपोर्ट जनरेशन कॉन्फ़िगर नहीं है"
+source_hash = "68626c91b7405b4672a86c9c52437fddfe7503bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.requestReport"]
+value = "रिपोर्ट नहीं बना सका"
+source_hash = "848d8a21b72040b79f0cef290b78d7ba4239c53a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.session_id_mismatch"]
+value = "सत्र मेल नहीं खाता"
+source_hash = "1cb12602762c4a0e3f95d549cbe65b1415e0c295"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.session_not_found"]
+value = "सत्र नहीं मिला"
+source_hash = "fefdba8f6adb339f3aa485a0e14bb027a0e55cb1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.size_cap"]
+value = "फ़ाइलें बहुत बड़ी हैं"
+source_hash = "a76d7453fd59d1583b963a77d5bb74bb705bfc18"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.unsupported_type"]
+value = "असमर्थित फ़ाइल प्रकार"
+source_hash = "6add681318d86be4c7b95218e63e647fa9fdd72e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.updateSession"]
+value = "सत्र अपडेट नहीं कर सका"
+source_hash = "f702943dbe3feed976edf4868527c858769cceb0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.upgrade_required"]
+value = "यह एंडपॉइंट वेबसॉकेट अपग्रेड की अपेक्षा करता है"
+source_hash = "ab58aaec5a9440e2c651ca29cb9b0b130aa4d850"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.api.upload"]
+value = "फ़ाइल अपलोड विफल"
+source_hash = "e854e51f2caeef2083845a196fc86770f3dbfab6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.http"]
+value = "अनुरोध विफल ({status})"
+source_hash = "6ca71bddc1a7e14410895157898c5b354c4f8f9f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.llm.chat"]
+value = "मॉडल अनुरोध विफल ({status})"
+source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.llm.notLoaded"]
+value = "इन-ब्राउज़र मॉडल अभी तक लोड नहीं हुआ है"
+source_hash = "8527789365910ca457a684911fd4296fb74f779a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.llm.timeout"]
+value = "मॉडल लोड टाइमआउट ({seconds}s)"
+source_hash = "61fe27fc018b1d3f7922e1adaf954532c8082eb6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.llm.unsupported"]
+value = "इस ब्राउज़र में इन-ब्राउज़र मॉडल समर्थित नहीं हैं"
+source_hash = "888a624eb37fbe932d6e50b859e7b4150ddcc3b5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.disposed"]
+value = "वॉइस इंजन बंद हो गया"
+source_hash = "06b72ebfb32991595d61e16a2b21cc092e8b8392"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.download"]
+value = "मॉडल डाउनलोड विफल"
+source_hash = "748992e15f9f76d120e79330fd480d7355c32e05"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.manifest"]
+value = "वॉइस मॉडल मैनिफेस्ट नहीं ला सका ({status})"
+source_hash = "f8f606b7adc54d841a3618fce5f9e44d642e4c53"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.noStorage"]
+value = "वॉइस मॉडल के लिए कोई स्थायी स्टोरेज उपलब्ध नहीं है"
+source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.sha256"]
+value = "मॉडल डाउनलोड सत्यापन विफल"
+source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.size"]
+value = "मॉडल डाउनलोड ट्रंकेटेड था"
+source_hash = "686765ea8916904c067463fe44cd8736b7596533"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.sttEngine"]
+value = "ऑन-डिवाइस स्पीच मॉडल इंस्टॉल नहीं है"
+source_hash = "8921d69ccf03195911dfdf6e873887a8445bcc4d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.sttWorker"]
+value = "स्पीच इंजन शुरू होने में विफल"
+source_hash = "82ac3f17596f9fa64ab253b100ff6d0a46291fd3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.ttsEngine"]
+value = "ऑन-डिवाइस वॉइस मॉडल इंस्टॉल नहीं है"
+source_hash = "0108250d0b60b59d59a21c81a7d451c852c5e9ac"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.ttsWorker"]
+value = "वॉइस इंजन शुरू होने में विफल"
+source_hash = "057f9ca139cb8f3b5a1faf2aef3d3c446bd8cf0d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.models.unknown"]
+value = "अज्ञात वॉइस मॉडल: {id}"
+source_hash = "3ab1249fb5cf2fd5766b46b7e27465e437d38504"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.report.noSession"]
+value = "कोई प्रदाता प्रोफ़ाइल या सत्र नहीं"
+source_hash = "65f36fde270ce89e21272e2ca1e289bec2de55e1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.langUnsupported"]
+value = "स्पीच सेवा इस भाषा का समर्थन नहीं करती"
+source_hash = "78327f07b761f005a171472907d939e0f5f16514"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.network"]
+value = "स्पीच सेवा पहुँच योग्य नहीं — डेस्कटॉप क्रोम माइक ऑडियो को गूगल के सर्वर पर भेजता है, इसलिए वीपीएन, फ़ायरवॉल, या एडब्लॉकर इसे ब्लॉक कर सकते हैं (मोबाइल क्रोम अक्सर काम करता है)"
+source_hash = "670d2ed5363180f025bcab01b915f862d3ef5c03"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.noMic"]
+value = "कोई माइक्रोफ़ोन नहीं मिला"
+source_hash = "8464fe3e7c99ff2d6050e17c123d769fd39aef3c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.noSpeech"]
+value = "कोई भाषण नहीं पता चला"
+source_hash = "e547e94a30f8e6630cb3da21969d256d03626120"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.notAllowed"]
+value = "माइक्रोफ़ोन की अनुमति अस्वीकृत"
+source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.unknown"]
+value = "भाषण पहचान विफल"
+source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.stt.unsupported"]
+value = "इस ब्राउज़र में भाषण पहचान समर्थित नहीं है"
+source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.tts.builtin"]
+value = "भाषण संश्लेषण विफल"
+source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.tts.empty"]
+value = "भाषण एंडपॉइंट ने कोई ऑडियो नहीं लौटाया"
+source_hash = "6e955bf06ab4b725f7a9544dcd63245fc3083f5e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.tts.endpoint"]
+value = "भाषण एंडपॉइंट विफल ({status})"
+source_hash = "b7fcc45b1372cbfa7daa68a42cbfeee8b3376cce"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.tts.pcm"]
+value = "अप्रत्याशित ऑडियो प्रारूप"
+source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.tts.wav"]
+value = "अप्रत्याशित ऑडियो प्रारूप"
+source_hash = "cacb24e75c89d49d9905dc9caf53737c3e6d445f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.unknown"]
+value = "कुछ गलत हो गया"
+source_hash = "eb17cfb540b8aea36a5917fe43d3b2b587b8c6ef"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.boot"]
+value = "वॉइस शुरू नहीं हो सका"
+source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.captureRate"]
+value = "असमर्थित माइक्रोफ़ोन सैंपल रेट ({rate})"
+source_hash = "47373a15eb7820c99c604cda277e04c88252c93f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.connect"]
+value = "वॉइस से कनेक्ट नहीं हो सका"
+source_hash = "a3d414886c5a975c6ad2d1d9949d510af1883224"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.llm"]
+value = "एजेंट मॉडल विफल"
+source_hash = "65337ddda34f56f114ac4ae971c43a6ada82ef9a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.mic"]
+value = "माइक्रोफ़ोन कैप्चर नहीं कर सका"
+source_hash = "bdd31a34ba6bee49d2a3b64a90490dcfe03bdb88"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.micDenied"]
+value = "माइक्रोफ़ोन की अनुमति अस्वीकृत"
+source_hash = "13ad5a57d3669239697be47cd68efdefb012667a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.micUnavailable"]
+value = "कोई माइक्रोफ़ोन उपलब्ध नहीं"
+source_hash = "d8d337ca75f5968e4761b35b7935b36db8fc697d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.noResponse"]
+value = "एजेंट ने प्रतिक्रिया देना बंद कर दिया"
+source_hash = "63febd925fc41a73ca6b5a39764a92ad8a74e8a8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.reconnectExhausted"]
+value = "वॉइस कनेक्शन ड्रॉप हो गया और फिर से कनेक्ट नहीं हो सका"
+source_hash = "8273ea33b0d914910d797f9c5dbfa7a988d2db92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.restart"]
+value = "वॉइस फिर से शुरू नहीं हो सका"
+source_hash = "4a77cce47e5139faac25847326cff81d481079a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.server"]
+value = "वॉइस सर्वर पर त्रुटि हुई"
+source_hash = "50f6bc11368a95ec2af9dc95cde18bdc3c9a4649"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.socket"]
+value = "वॉइस कनेक्शन विफल"
+source_hash = "47e397fc0f3c039fa918534ed95cef6674a72db4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.socketTimeout"]
+value = "वॉइस कनेक्शन टाइमआउट"
+source_hash = "9cebd9ed4b82c51d045c2639d88bfd233ba82a6a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.start"]
+value = "वॉइस शुरू नहीं हो सका"
+source_hash = "ea10702467061e583eb23b462ea080d0243370c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.stt"]
+value = "भाषण पहचान विफल"
+source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.sttUnsupported"]
+value = "इस ब्राउज़र में भाषण पहचान समर्थित नहीं है"
+source_hash = "3b25b54819516c121e507a95fc868f7d50f75836"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.tool"]
+value = "टूल कॉल विफल"
+source_hash = "9b13b5838afd9401cd1f12783d6be47bd6440af8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."errors.voice.tts"]
+value = "भाषण संश्लेषण विफल"
+source_hash = "77ea436ba7fc8f5320718bb6689777847133c76c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.buildFailed"]
+value = "आपकी रिपोर्ट नहीं बना सका — ट्रांसक्रिप्ट सुरक्षित है"
+source_hash = "ed1d42d6246b147849d1008f0dbc7bd55befc7a7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.building"]
+value = "आपकी रिपोर्ट बना रहा है"
+source_hash = "802b0b7905c308fabedcc2841c96e15ac00539b7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.complete"]
+value = "इंटरव्यू पूर्ण"
+source_hash = "3663e2dd20881caafc1121761e13103cff51b26c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.discard"]
+value = "फेंक दें"
+source_hash = "f57e38069445fdec820e61935325ba944c1c8fe4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.downloadJson"]
+value = "JSON के रूप में डाउनलोड करें"
+source_hash = "a1d275877b2701e98c3a6c1cb855e5476894d425"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.fallbackTitle"]
+value = "सत्र"
+source_hash = "fcbdc4c271c889825d8338d2d8f10b6e5e95c171"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.getTranscript"]
+value = "ट्रांसक्रिप्ट प्राप्त करें"
+source_hash = "6f9c4d5953c094aac95fdc382994e890c3f81ef9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.moreFormats"]
+value = "अधिक ट्रांसक्रिप्ट प्रारूप"
+source_hash = "370da964f110cfb2f87eab72debd752e8f968922"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.openReport"]
+value = "रिपोर्ट खोलें"
+source_hash = "721f5ee4bf88d25bd30e1e63884be0f51731492d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.summary"]
+value = "{duration} मिनट · {turns} टर्न"
+source_hash = "77232618be68a4ab45f1c082922b35926c2f74be"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."finish.tryAgain"]
+value = "फिर से प्रयास करें"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.clear"]
+value = "सभी साफ़ करें"
+source_hash = "8151d29bc4072a5a7d904dd1aa0aadbafc36fff5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.clearCancel"]
+value = "रद्द करें"
+source_hash = "4fd0653c4f2aef3b19a3c145bbdc5f4740715a09"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.clearConfirm"]
+value = "क्या आप इस डिवाइस पर हर सहेजे गए सत्र को हटाना चाहते हैं?"
+source_hash = "bd924a62db7347223b660feea61da8bb905efefb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.clearDo"]
+value = "सभी हटाएं"
+source_hash = "d32ab1daabcf0664e151d437006e5711eca69a9e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.daysAgo"]
+value = "{n} दिन पहले"
+source_hash = "e827dc07e2114e0f231de315608b40679388af0e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.empty"]
+value = "अभी तक कोई सत्र नहीं — जाओ और ग्रील्ड हो जाओ।"
+source_hash = "a693a66c1841c4c3e74713183b96b266b436f892"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.loading"]
+value = "लोड हो रहा है…"
+source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.status.created"]
+value = "बनाया गया"
+source_hash = "21c50805b553b7a40e48394a5d77d442587ddee2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.status.discarded"]
+value = "फेंक दिया गया"
+source_hash = "4056ef88d506d5bff7494229c59837f06989f4b4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.status.finished"]
+value = "पूर्ण"
+source_hash = "f957097d7a22775f6bea41b46cae4d14274dac9f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.status.interviewing"]
+value = "इंटरव्यू कर रहा है"
+source_hash = "b20b93f57967c066d87b35085c5a5801f38fa1b7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.status.reported"]
+value = "रिपोर्ट किया गया"
+source_hash = "6d3551d70d7d8b06562ccb87bbdb7261682616fa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.title"]
+value = "इतिहास"
+source_hash = "66f79d8a6327c82c9033e6d65ff03322a3766c87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.today"]
+value = "आज"
+source_hash = "2dd2bed725678b4f963f27d5e847a4f21db31cd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.weeksAgo"]
+value = "{n} सप्ताह पहले"
+source_hash = "09ba505895afb74ec5625eb1de879f86893ae286"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."history.yesterday"]
+value = "कल"
+source_hash = "1aa96b8f44f6515a65f3c132ce1b8842a9bd9e87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.codeLanguage"]
+value = "कोड भाषा"
+source_hash = "d6b67ab3eea610bb5fc52dcd4c543d89da68381f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.codePlaceholder"]
+value = "यहाँ कोड लिखें या पेस्ट करें…"
+source_hash = "9555bfbd0c27822bcde2f2f5811b7dab86242d7a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.codeSyntaxError"]
+value = "सिंटैक्स त्रुटि"
+source_hash = "2c4f85fcddbb9d4aafff48a6f33e59be855c88b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.controls"]
+value = "कॉल नियंत्रण"
+source_hash = "302635afc29fd3086579087ccb8ea029fa7aa7c8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.conversation"]
+value = "बातचीत"
+source_hash = "78b6f944434eac18e14622952e12e32551b19977"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.editorLanguages"]
+value = "कोड भाषाएँ"
+source_hash = "3b30e04281e21f41bea9d0dc2c44f8ee472224d7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.editorPlaceholder"]
+value = "यहाँ अपना समाधान लिखें या पेस्ट करें…"
+source_hash = "5e0210d0842f50fa54707218746fdc4f979587b7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endConfirmBody"]
+value = "अब तक का ट्रांसक्रिप्ट रखा गया है, और आप अभी भी उससे एक रिपोर्ट बना सकते हैं।"
+source_hash = "b57b681b270346fad72e4c09c7fce8a214d2380d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endConfirmTitle"]
+value = "क्या आप इंटरव्यू समाप्त करना चाहते हैं?"
+source_hash = "bff1775dd9d113e993e4f1c9620e87f0c1358ce8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endEarly"]
+value = "जल्दी समाप्त करें"
+source_hash = "dbcf3146b77abb759da4f5d2b62a26c18168d5a7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endInterview"]
+value = "इंटरव्यू समाप्त करें"
+source_hash = "4a21283d21b6b934553a765d27422033cedbb45a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endedBadge"]
+value = "समाप्त"
+source_hash = "ba92ed73c97b30bcc4639724ab6aa8ae87f92601"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endedBody"]
+value = "यह इंटरव्यू समाप्त हो गया है — नीचे दिया गया ट्रांसक्रिप्ट केवल पढ़ने के लिए है।"
+source_hash = "d4f6f302eb19daf188b3a1e5302a9da151d26abe"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.endedEmpty"]
+value = "इस सत्र में कोई टर्न रिकॉर्ड नहीं किया गया।"
+source_hash = "d4478151af5da32494a85a8fd6f2065bae26a91d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.leave"]
+value = "छोड़ें"
+source_hash = "31aed9e37eb93350fa0862e61ae686529394cfa7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.leaveBody"]
+value = "इंटरव्यू अभी भी प्रगति में है — छोड़ने से यह जल्दी समाप्त हो जाएगा।"
+source_hash = "ec476282cc3a66733241714dd20c8873347abc1c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.leaveTitle"]
+value = "क्या आप इंटरव्यू छोड़ना चाहते हैं?"
+source_hash = "c0ce31a3fa9976a6107cfbf33c3ab5e089cffdfa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.micWaveform"]
+value = "लाइव माइक्रोफ़ोन स्तर"
+source_hash = "c955b61f28451cdf64809efb9f9b9559f970a37b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.mute"]
+value = "म्यूट"
+source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.muteMic"]
+value = "माइक्रोफ़ोन म्यूट करें"
+source_hash = "23ccd3fc107e6c98b5f50778f3bf9a32aa0ccdc7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.newSession"]
+value = "नया सत्र"
+source_hash = "e2df0567f0f8da5e75b0218fe08043833cc909d7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.noSpeechDetected"]
+value = "कोई भाषण नहीं पता चला? इसके बजाय टाइप करें।"
+source_hash = "d09fc49bdeac2340f12125fbbc4f4bc1a241f53b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.phase.agentSpeaking"]
+value = "एजेंट बोल रहा है"
+source_hash = "1c977dfa25bdb4902f955d10745df5a0bd4e8786"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.phase.interrupted"]
+value = "बाधित"
+source_hash = "d897bf481c6d3038f32cd50b3a8b5f6cf56b6348"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.phase.listening"]
+value = "सुन रहा है"
+source_hash = "2db9d9c80ff405af3e38d8b2a405252df2693b08"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.phase.thinking"]
+value = "सोच रहा है"
+source_hash = "beac9eac1cee74c35b4209abeb168938202b092d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.phase.userSpeaking"]
+value = "आप बोल रहे हैं"
+source_hash = "ce24fae1158b00d3ef3f7f5f69aaf9328712a98e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.preparing"]
+value = "एजेंट आपका पहला प्रश्न तैयार कर रहा है…"
+source_hash = "499c8222b326ee95f0037a75e35b8a22b8883b98"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.question"]
+value = "वर्तमान प्रश्न"
+source_hash = "40a498963210e6d61ba1a02f0fda1950322509a3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.questionN"]
+value = "प्रश्न {n}"
+source_hash = "469fefd6d32a49ffba78c31fcabb2c849cb31b47"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.stay"]
+value = "रहें"
+source_hash = "396f9974da4e60ff2d8ccc90121dbaf5d58ef9e6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.switchToTyping"]
+value = "टाइपिंग पर स्विच करें"
+source_hash = "2b4dcb0e61a6b93062bb8697b9340eb68807c83f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.tab.code"]
+value = "कोड"
+source_hash = "e6fb06210fafc02fd7479ddbed2d042cc3a5155e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.tab.editor"]
+value = "नोट्स"
+source_hash = "3add7b9612102f2a7dbe4ed4fe886e07e847c24d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.tab.whiteboard"]
+value = "व्हाइटबोर्ड"
+source_hash = "d70ea575012f340f84f713ef4de453ab27a6fac1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.talkOrType"]
+value = "बोलें या टाइप करें…"
+source_hash = "ea3d8d636f927d139d5f46074c77a1d4a65d64cc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.type"]
+value = "टाइप करें"
+source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.typeInstead"]
+value = "इसके बजाय टाइप करें…"
+source_hash = "b060d5ec1b0a8d64209b4514b153c9f63161c5e0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.typeInsteadHint"]
+value = "इसके बजाय अपना उत्तर टाइप करें"
+source_hash = "6ad7308bc544204c667075edc69a0aaaa696666c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.unmute"]
+value = "अनम्यूट"
+source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.unmuteMic"]
+value = "माइक्रोफ़ोन अनम्यूट करें"
+source_hash = "c97efc7f8f78a0ff195f3c61fff5473c7b40bc80"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.viewReport"]
+value = "रिपोर्ट देखें"
+source_hash = "96109ce947f8d80834aaffb931ebbc7035dfa82c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceActive"]
+value = "एजेंट वॉइस सक्रिय"
+source_hash = "72b5ae6d20b3964264efbf93274c48270e963abc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceConnected"]
+value = "वॉइस कनेक्टेड"
+source_hash = "a8ceb8bdbd7672017ddea5ed3d1bf54f9dc08cc2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceConnecting"]
+value = "कनेक्ट हो रहा है…"
+source_hash = "f8f4714587575060f58c44a8eb833ed4dcfef366"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceError"]
+value = "वॉइस त्रुटि"
+source_hash = "e663f93e9728a03ea760bae625932939a69051ab"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceErrorToast"]
+value = "वॉइस टोस्ट"
+source_hash = "992d001606d503c20ea696b46720e89de31b3c72"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceIdle"]
+value = "वॉइस आइडल"
+source_hash = "034d1791213453a16dd85ce89a8ea3a72383d237"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceMuted"]
+value = "एजेंट वॉइस म्यूटेड"
+source_hash = "f5c921cab6e6d18b2991c6b98c49281d84855f26"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceReconnecting"]
+value = "पुनः कनेक्ट हो रहा है…"
+source_hash = "6b1600447eb8f356235c28f31f7d6a32af4cd839"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.voiceRetry"]
+value = "वॉइस पुनः प्रयास करें"
+source_hash = "a74b34751ed93a877fa72e4f3d8e5ad60f6894c0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.whiteboardLoading"]
+value = "व्हाइटबोर्ड लोड हो रहा है"
+source_hash = "f821dc56dc72292d9489d61c3f18948b6eb252e9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."interview.youMic"]
+value = "आप · माइक"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.badge"]
+value = "मॉक इंटरव्यू"
+source_hash = "663e93166b09edcdc5815f3a03909205e308bba0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.cta"]
+value = "मुझे ग्रील्ड करो"
+source_hash = "522e6dbc7b1e4e97cbd9ef7e2b3cacf946353368"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.heading"]
+value = "वह AI एजेंट जिसके साथ आप <em>अभ्यास</em> कर सकते हैं अपने इंटरव्यू के लिए।"
+source_hash = "b62f1a5cadc63d39625f1e62ab324ae2b2c196b9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.demo"]
+value = "वेब डेमो चलाएं"
+source_hash = "147c0a4fde3f3ccb8d42ce3e432a23d05e5d298f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.demoHint"]
+value = "पूरी तरह से आपके ब्राउज़र में चलता है — चीजें अस्थिर हो सकती हैं"
+source_hash = "782a8561e13083378e55bb130a8842d88bbb7ff9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.download"]
+value = "ऐप डाउनलोड करें"
+source_hash = "ac716b42db601334cc5e8d00e79cee9ae48260f5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.downloadHint"]
+value = "मैकओएस · लिनक्स · विंडोज — डाउनलोड करें और चलाएं"
+source_hash = "e77876c30f6723c9a6f200019e438d1f1a282b30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.experimental"]
+value = "प्रयोगात्मक"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.mise"]
+value = "या इसे mise के साथ चलाएं"
+source_hash = "4beadd4040259722b55b39e5b35dc09c12904aa0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.install.title"]
+value = "चलाएं <em>di</em>"
+source_hash = "dc854c7e464bf1fb8b8485eb2ad89db6ecbe9895"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.aria"]
+value = "लाइव इंटरव्यू का पूर्वावलोकन"
+source_hash = "bbcefd17c1db605bae2affde968f601a3ecddf0c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.caption"]
+value = "मुझे बताएं कि आपने कब विफल होने का अनुभव किया।"
+source_hash = "370306ac43ea563f2ec5e2f3a9832d0fc1150e89"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.line.agent1"]
+value = "आपके रिज्यूमे में कहाँ लिखा है कि आप प्रोड आउटेज को संभाल सकते हैं?"
+source_hash = "3e274960acdf7da193cbca6cdc66910214cc9590"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.line.agent2"]
+value = "क्या टूटा, और आपने सबसे पहले क्या किया?"
+source_hash = "5d1078aa92cec4e678e4dd6022b0b9d12ad92cbd"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.line.you1"]
+value = "मेरी पिछली नौकरी में मैंने बिलिंग पाइपलाइन का मालिकाना हक रखा…"
+source_hash = "19de73eb8328bb2d8376072a1dcf81addb2ac82f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.micLabel"]
+value = "आप · माइक"
+source_hash = "e635f944358dfa89f84c1290b745287beb601e87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.note1"]
+value = "<b>विफलता कहानी</b> — बिलिंग पाइपलाइन आउटेज"
+source_hash = "50c768a2d6935c2cdb20d53c8bf1867b80d04ea3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.note2"]
+value = "<b>प्रोबिंग</b> — पहला प्रतिक्रिया, हीरोइक नहीं"
+source_hash = "759809bc616214ef640ad6184dc9e4e428f9960b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.notes"]
+value = "नोट्स"
+source_hash = "3add7b9612102f2a7dbe4ed4fe886e07e847c24d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.qchip"]
+value = "प्रश्न 2 / 5"
+source_hash = "cd69a8d1df19e208fced5aaf896bee29b77dbbd8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.scenario"]
+value = "सिस्टम डिज़ाइन · मिड-लेवल"
+source_hash = "fc0e610a518fd438a1ea88ee2b674b86e818f3ff"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.time"]
+value = "07:41 / 20:00"
+source_hash = "3a6986d13d57de594058ef3d7a10169ec53acee3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.who.agent"]
+value = "एजेंट"
+source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.peek.who.you"]
+value = "आप"
+source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."landing.subtitle"]
+value = "एक एजेंट के साथ वॉइस इंटरव्यू जो वास्तव में प्रतिक्रिया देता है। फिर रसीदें प्राप्त करें।"
+source_hash = "b4cd8fb80386ecc2c08188765fcf2b5abde7fa58"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."locale.label"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."meta.title.index"]
+value = "डीआई — मॉक इंटरव्यू"
+source_hash = "d5721531ceec4ce88fcafa05a47b1d12f079255b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."meta.title.setup"]
+value = "सेटअप — डीआई"
+source_hash = "e1033f919701dcc3981964ea1047daf4be49b11f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."meta.title.voiceHarness"]
+value = "वॉइस हार्नेस — डीआई"
+source_hash = "9727ba98461b727bb907d9188481291063c5a9ec"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.devicesFailed"]
+value = "ऑडियो डिवाइस नहीं प्राप्त कर सका"
+source_hash = "349d719d660415f0be2894ae6ea3e7c622342328"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.fallback"]
+value = "माइक्रोफ़ोन {id}"
+source_hash = "ef17b0afd967fb33d1a7ae0edcbd4ad7cfe92c16"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.loading"]
+value = "लोड हो रहा है…"
+source_hash = "fd3e3d92bc674e9353efdc9f8358a482a4a22477"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.loadingDevices"]
+value = "डिवाइस लोड हो रहे हैं…"
+source_hash = "54a2d73e75d77824c343a1a58ff9c90760946ba5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.mute"]
+value = "म्यूट"
+source_hash = "c38ad78f4410fc5c927a7a97b487c2e2832a7bd1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.none"]
+value = "कोई माइक्रोफ़ोन नहीं"
+source_hash = "ca34a76fee685e1a201eb2da3fb4097e299253d9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.unmute"]
+value = "अनम्यूट"
+source_hash = "c2abdaf0de20938070cbc806880ceda6595618fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."micSelector.waveform"]
+value = "माइक्रोफ़ोन स्तर पूर्वावलोकन"
+source_hash = "28cb7803a767a635a3b07423c80336330ae32727"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."nav.history"]
+value = "इतिहास"
+source_hash = "66f79d8a6327c82c9033e6d65ff03322a3766c87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."notfound.home"]
+value = "होम पर वापस"
+source_hash = "877ba514defadf05453d8b9bc258c2b3f000f53f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."notfound.message"]
+value = "यह पृष्ठ मौजूद नहीं है — शायद लिंक पुराना है या पता गलत टाइप किया गया है।"
+source_hash = "2320b588062bfd85ed716d9cb1720de7d5137db8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."notfound.title"]
+value = "404"
+source_hash = "c35a9fc52bb556c79f8fa540df587a2bf465b940"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.backToTranscript"]
+value = "ट्रांसक्रिप्ट पर वापस"
+source_hash = "b9d3a0ab2912eafc8820795e1abf7db451427de0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.coachSeed"]
+value = "मुझे {name} पर कोच करें। एक केंद्रित अभ्यास सत्र चलाएं और विशिष्टताओं के लिए जांच करें।"
+source_hash = "776586d2757db14459d56affe4ee45c942e47e0c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.competencies"]
+value = "क्षमताएँ"
+source_hash = "5fa70ac96d57944f4ee1930a3c0e0aaed302f158"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.coverage"]
+value = "कवरेज"
+source_hash = "6dafbcf610e9f81897b65ee9142715ab2e793f9e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.failed"]
+value = "एजेंट इस सत्र को स्कोर करने में विफल"
+source_hash = "d0fc26dcf9a7b160fc5f5dbe2c6ec8e1ebb0ca27"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.failedBody"]
+value = "एजेंट इस सत्र को स्कोर करने में विफल — अपने AI प्रदाता सेटिंग्स की जाँच करें, फिर फिर से प्रयास करें।"
+source_hash = "216a400ab1fa1f01d009d703bd6b05f670887ce1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.header"]
+value = "रिपोर्ट: {title}"
+source_hash = "9798c5753df23b3f652917c2365d323ed415ca1a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.noReportYet"]
+value = "अभी तक कोई रिपोर्ट नहीं"
+source_hash = "6ebef6dae8f3d819b2d1a2bb5716b408ac71194b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.overall"]
+value = "समग्र"
+source_hash = "63a711c71609725e5c25334ad085d65ad431414a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.practiceHint"]
+value = "अपने सबसे कमजोर क्षेत्र से एक कोच सत्र शुरू करें"
+source_hash = "700cae6649f34472f7518a243d050e909e2be283"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.practiceWeak"]
+value = "कमजोर क्षेत्रों का अभ्यास करें"
+source_hash = "9b39844223257d3fb709f1d36cfb26bb5ff55848"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.scoring"]
+value = "आपके सत्र को स्कोर कर रहा है…"
+source_hash = "2d107b721d509e0b04e723294933291269bc83e7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.scoringSlow"]
+value = "मुफ्त मॉडल पर यह एक मिनट ले सकता है।"
+source_hash = "fdeac11369c77d3620977ee1cab76dc14a6a3d75"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.session"]
+value = "सत्र"
+source_hash = "fcbdc4c271c889825d8338d2d8f10b6e5e95c171"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.tryAgain"]
+value = "फिर से प्रयास करें"
+source_hash = "758bd36cbf12780684d54f39dca954eb4dea3622"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.turn"]
+value = "टर्न {n}"
+source_hash = "f2aebf246f58ceb17f91990b6a2223fc7d2a2f83"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."report.weakestFallback"]
+value = "आपके सबसे कमजोर क्षेत्र"
+source_hash = "0289acb39e22d7747ff711c12366d420f9302011"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.custom"]
+value = "कस्टम एंडपॉइंट"
+source_hash = "17b767eb4b24ba319cc836c7a7f88f79a0eaf4f2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.degradedTitle"]
+value = "चुना गया: {chosen}, प्रभावी: {effective}"
+source_hash = "9ad3a06c7b25609347be1c627293462eea258c35"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.inBrowser"]
+value = "इन-ब्राउज़र"
+source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.label"]
+value = "रनटाइम"
+source_hash = "f2e18ffc17e2595362b5468aac34221e09934bf8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.server"]
+value = "सर्वर"
+source_hash = "3de4f901fffb30ac720b0e7eb654b4faa2dd03fa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."runtime.unreachable"]
+value = "सर्वर पहुँच योग्य नहीं — {fallback} का उपयोग कर रहा है"
+source_hash = "276faa08367bbf36e374f99edffb1c2caf71f863"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.advanced.endpointBuiltin"]
+value = "ब्राउज़र बिल्ट-इन"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.advanced.endpoints"]
+value = "कस्टम एंडपॉइंट्स"
+source_hash = "1ad0b3cf0f91b5149aa11a3a82ca08993a88db9a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.advanced.endpoints.stt"]
+value = "बोलने से टेक्स्ट सेवा"
+source_hash = "0b6d69eda54868a387ee7b2450873df163d829de"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.advanced.endpoints.tts"]
+value = "टेक्स्ट से बोलने की सेवा"
+source_hash = "43173e8b115210fe524c33cb6840b608989bec59"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.advanced.intro"]
+value = "अधिकांश लोगों को इसकी कभी आवश्यकता नहीं होती।"
+source_hash = "1d2096224cde7b1c1c2c87311021f8383b1b78ea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.advanced.runtime"]
+value = "रनटाइम मोड"
+source_hash = "d2425aa43922eebff692c6ef865c4f79277738a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.advanced.runtime.custom"]
+value = "ब्राउज़र + कस्टम एंडपॉइंट्स"
+source_hash = "ddc9ccf8894e6265d8d68344ccbd1abdcc490c2e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.advanced.runtime.in-browser"]
+value = "यह ब्राउज़र"
+source_hash = "a1cac7d8d6b76a1b86062f87ccdc9868b26708f1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.advanced.runtime.server"]
+value = "डेस्कटॉप ऐप"
+source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.advanced.runtimeDesc"]
+value = "इंटरव्यू कौन चलाता है: डेस्कटॉप ऐप, आपकी अपनी सेवाएँ, या सिर्फ यह ब्राउज़र।"
+source_hash = "2c5adab5b12d948dcfed9950a22f1c6980c3e6b0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.demo"]
+value = "डेमो एआई"
+source_hash = "94fa378053f958f0159deabefad90d5782c3af01"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.demoDesc"]
+value = "सीमाओं के साथ एक मुफ्त होस्टेड इंटरव्यूअर। कोई खाता या सेटअप आवश्यक नहीं।"
+source_hash = "c362f8afc129fb13b6f2e175a956459d078873bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.demoLimits"]
+value = "डेमो इंटरव्यूअर एक साझा, दर-सीमित एंडपॉइंट का उपयोग करता है — ऐप को आज़माने के लिए ठीक है, भारी उपयोग के लिए नहीं।"
+source_hash = "a4d52e132de61ce58a83adcd37bdf18cf9aebb50"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.experimental"]
+value = "प्रयोगात्मक"
+source_hash = "2216470a6aacb2edec4887e9eadec834847afc5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.onDevice"]
+value = "इस डिवाइस पर"
+source_hash = "9fa6762eeafca4a05bfa17ba49605613fec17d7f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.onDeviceDesc"]
+value = "एक छोटा मॉडल जो इस ब्राउज़र में रहता है। निजी, लेकिन धीमा और कम तीक्ष्ण।"
+source_hash = "77335f95a6143ee1da97a0d77232e16c593e40c7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.own"]
+value = "आपका अपना एआई खाता"
+source_hash = "f0298d1a9317f085c0ca99c3a7648f692682fd20"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.ownDesc"]
+value = "एक सेवा से API कुंजी प्लग करें जिसके लिए आप भुगतान करते हैं।"
+source_hash = "e8e05e132bdede009b11c121b4a8fcb0f1222e47"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.recommended"]
+value = "सिफारिश किया गया"
+source_hash = "13941e19549508716dacf14d5672ccd8b66f58dd"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.test"]
+value = "इसे टेस्ट करें"
+source_hash = "5e64185f90b7a501b497d5c12ecb637693ed3bb8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.ai.testDesc"]
+value = "इंटरव्यूअर को हैलो भेजता है और जाँच करता है कि वह जवाब देता है।"
+source_hash = "c6e7455ef674fbfa4d44f24bec0766d0ab00d2bc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.aiProvider"]
+value = "एआई प्रदाता"
+source_hash = "f81714b57309b6c32065a1d1c2804f1c4658bb33"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.apiKey"]
+value = "API कुंजी"
+source_hash = "cf678cab87dc1f7d1b95b964f15375e088461679"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.apiKeyHelp"]
+value = "Bearer टोकन के रूप में भेजा जाता है; केवल इस ब्राउज़र में संग्रहीत।"
+source_hash = "ce287cc50d872abd9fe105e5ba1bd4a22616a4f1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.apiKeyHide"]
+value = "API कुंजी छिपाएँ"
+source_hash = "29538b53771fff5bad78e3a48a3a8f88c2f141d2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.apiKeySaved"]
+value = "सहेजा गया: {key}"
+source_hash = "474a31b09c5abe5801f5967b6b7d073c7c24c048"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.apiKeyShow"]
+value = "API कुंजी दिखाएँ"
+source_hash = "8d24e5afd2e9b40d21e4300c893a486aab979795"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.autosaveNote"]
+value = "परिवर्तन स्वचालित रूप से सहेजे जाते हैं।"
+source_hash = "b3fdb8cbae2acc0bd60bc46fcf2d951115b70742"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.baseUrl"]
+value = "बेस URL"
+source_hash = "1dbd61f556fe3f920e0c1bc1a21ce34dd73099d6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.baseUrlHelp"]
+value = "जहाँ OpenAI-संगत API रहता है, उदाहरण के लिए https://api.openai.com/v1"
+source_hash = "440127bdc80bd2d8e8e253dbfec1e5f542022f8c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.baseUrlHelpAnthropic"]
+value = "Anthropic API बेस, उदाहरण के लिए https://api.anthropic.com"
+source_hash = "32f36b25745d159996a4530e70161f8748edc6cd"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.close"]
+value = "बंद करें"
+source_hash = "da38860cb875cb64092e402d80d9fe29c4865b18"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.customEndpoint"]
+value = "कस्टम एंडपॉइंट"
+source_hash = "15ed9a3dc5f6aaf908f3378df358b1a28c12396c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.demoLlm.badge"]
+value = "डेमो"
+source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.demoLlm.customize"]
+value = "एक कस्टम एंडपॉइंट का उपयोग करें"
+source_hash = "e792a41e1c404e93d5452601f571a7d84d47d6e3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.demoLlm.endpointLabel"]
+value = "डेमो API"
+source_hash = "b1ea5ce46fbcb467932fa1e25921d2a7316d8a6c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.demoLlm.fill"]
+value = "प्रबंधित डेमो एंडपॉइंट का उपयोग करें — कोई कुंजी आवश्यक नहीं"
+source_hash = "0a459c914a6c114179ab3e8f07f0f15c012da553"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.demoLlm.upsell"]
+value = "असीमित जीरो-कॉन्फ़ की आवश्यकता है? हमें बताएं"
+source_hash = "715ffd1b5221fc4a19b1b71e89b9294c08d6da29"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.installedSize"]
+value = "इस डिवाइस पर {size} एमबी"
+source_hash = "21122c876745da95d5573bd7f0a837ded8c1fbb2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.intro"]
+value = "ऐप जो कुछ भी इस डिवाइस पर रखता है। इसे फिर से डाउनलोड करें या किसी भी चीज़ को हटाएँ।"
+source_hash = "e1dc86a56dfd15fe840290b90b59496caf201c08"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.llm"]
+value = "ऑन-डिवाइस इंटरव्यूअर मॉडल"
+source_hash = "bb211f5b0e15897d75d404896b2c27791453920b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.llmInstalled"]
+value = "इंस्टॉल किया गया ({size} एमबी)"
+source_hash = "114bc63349a4f15cdb009d4772bf6e1a161179b4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.llmNotInstalled"]
+value = "डाउनलोड नहीं किया गया ({size} एमबी)"
+source_hash = "cfbe72c456522f12162fc481cb0b4fce80074782"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.remove"]
+value = "हटाएँ"
+source_hash = "db99845855b2ecbfecca9a095062b96c3e27703f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.voice"]
+value = "ऑन-डिवाइस वॉइस पैक"
+source_hash = "df276c5b55c116ccc7a77fbeae2bd62eb690ea74"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.downloads.voiceDesc"]
+value = "भाषण मॉडल (~50 एमबी) जो इस डिवाइस पर वॉइस के लिए चलते हैं।"
+source_hash = "4d87f98773b0b1a04e33922bc3273c76220cff08"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.flavor"]
+value = "एपीआई फ़्लेवर"
+source_hash = "3b12f9806de959d3c6b2fa924afe079b15d9bfe0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.flavor.anthropic"]
+value = "अनथ्रोपिक-संगत"
+source_hash = "8b9b1b04a0b7fb69f816178469c9c6ecfaa14877"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.flavor.openai"]
+value = "OpenAI-संगत"
+source_hash = "b10d74b5bb37c5ca2fda6aa4bac22f8a6a9018a0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.flavorHelp"]
+value = "एंडपॉइंट जो प्रोटोकॉल बोलता है। Anthropic-संगत का उपयोग api.anthropic.com या /v1/messages गेटवे के लिए करें।"
+source_hash = "8c0a8c0f44794f1eff5f73367eeda1fc49dfa440"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.freeProvidersLabel"]
+value = "अभी तक कोई कुंजी नहीं? मुफ्त प्रदाता:"
+source_hash = "bf6313390c0ec65748373a19c978816c013a02a4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.history"]
+value = "पिछले सत्र"
+source_hash = "d8eeeccca789c74d163c8cf0f5536bc590c620cb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.inBrowser"]
+value = "इन-ब्राउज़र"
+source_hash = "57788e654e6002efd00722e87379ed19b7460cb3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.incomplete"]
+value = "सक्षम लेकिन अपूर्ण — नीचे दिए गए फ़ील्ड्स भरें या बंद करें ताकि आपका सहेजा गया कॉन्फ़िगरेशन बना रहे"
+source_hash = "399d4e7df71dc6c80aee32c7031b176e0ad6898b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.invalid"]
+value = "कुछ एंडपॉइंट फ़ील्ड्स अमान्य हैं (URL, कुंजी या मॉडल गायब है)।"
+source_hash = "68ea6a7eb0a66e3866c2a13f58e4d3d4f287b093"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.language.app"]
+value = "ऐप भाषा"
+source_hash = "20696edf43c8b7fcd65d52169410a31a1df9e6ff"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.language.appDesc"]
+value = "कौन से मेनू और बटन लिखे गए हैं।"
+source_hash = "3e2cfe52ee22624d7f6d76c9617238326c348d31"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.language.interview"]
+value = "इंटरव्यू भाषा"
+source_hash = "f1c3fde369af5896af2c831078e24ca791a7bc07"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.language.interviewDesc"]
+value = "इंटरव्यूअर क्या बोलता है और किस भाषा में ग्रेड देता है।"
+source_hash = "f4909afc475339ffd1d66cacc0a404b7bd40695f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.auto"]
+value = "स्वचालित"
+source_hash = "ebe8872498bd7a369441cf75f56db2bf3701eef9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.cloud"]
+value = "क्लाउड एंडपॉइंट"
+source_hash = "8b620a0e16d12c82709da727ac89dcaafb1eb00b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.comingSoon"]
+value = "जल्द आ रहा है"
+source_hash = "9549bf8d0d30a9496159e0bde5fb063fdb817905"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.inBrowser"]
+value = "इन-ब्राउज़र"
+source_hash = "cca38739c6a3bdd948aafc6afbe7cf10efe0119c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.llm"]
+value = "इंटरव्यूअर मॉडल"
+source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.llmDesc"]
+value = "बातचीत चलाता है"
+source_hash = "9a7506132330dd30bd5330e21f2cb10e186e35ef"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.server"]
+value = "डेस्कटॉप ऐप"
+source_hash = "30ae3cf51fa5baba7d8267a340dd164cbf4549a4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.serverOwned"]
+value = "डेस्कटॉप ऐप द्वारा संभाला जाता है — यह परत वहाँ चलती है"
+source_hash = "4212c88be5d521fc218576da0749196d382dd480"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.serverUnreachable"]
+value = "डेस्कटॉप ऐप पहुँच योग्य नहीं है — यह परत इन-ब्राउज़र पर वापस आ जाती है"
+source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.stt"]
+value = "एसटीटी परत"
+source_hash = "813ea48cc01d5fee62a9ad13611e9aea06e2c77e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.sttDesc"]
+value = "आपकी आवाज़ को पाठ में बदलता है"
+source_hash = "4571742e15718a7a2c4863b177ce3f918911cd34"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.tts"]
+value = "टीटीएस परत"
+source_hash = "3aa7b7961d6a2c428435a2fa50a1de4ad1f715ca"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.ttsDesc"]
+value = "उत्तरों को भाषण में बदलता है"
+source_hash = "6c34a8dd80565fb04353e0e6e2ab2dc3147304ae"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.layer.wasm"]
+value = "ऑन-डिवाइस वास्म"
+source_hash = "73916856ff327eedc5b8d91e226f2117ecce574b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.llm"]
+value = "बड़ी भाषा मॉडल"
+source_hash = "370515d5b19f82bba11495fd9229cf64fb15aec0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.llm.browserEngine"]
+value = "इंजन"
+source_hash = "c1f65ddb75ed7d97e701168af35171410be8f9e7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.browserModel"]
+value = "मॉडल"
+source_hash = "68c2cc7f0ceaa3e499ecb4db331feb4debbbcc23"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.cloudRecommended"]
+value = "सर्वोत्तम अनुभव के लिए क्लाउड एंडपॉइंट की सिफारिश की जाती है।"
+source_hash = "72e7f3d4ac5f6f5b127d167c35621a74404a6ad2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.comingSoonDesc"]
+value = "ऑन-डिवाइस इंटरव्यूर मॉडल जल्द ही यहां उतरेंगे — अभी उपलब्ध नहीं।"
+source_hash = "078c1fb3639ffb6b44e8f3f9799b951a798d7672"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.delete"]
+value = "हटाएं"
+source_hash = "f6fdbe48dc54dd86f63097a03bd24094dedd713a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.download"]
+value = "डाउनलोड करें"
+source_hash = "a479c9c34e878d07b4d67a73a48f432ad7dc53c8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.downloading"]
+value = "डाउनलोड हो रहा है… {percent}%"
+source_hash = "1ac3747cd357ca3897ce70db4f33b39118e8e4a5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.engineGemini"]
+value = "जेमिनी नैनो (Chrome में एम्बेडेड)"
+source_hash = "ffc82a80a1d5bd45d79976db9187d2faaf07b857"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.engineTransformers"]
+value = "Transformers.js (WebGPU, डाउनलोड करने योग्य मॉडल)"
+source_hash = "a2b1258553e9b06d4006e458d62d4aafef037d4e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.geminiEnableLink"]
+value = "Chrome का उपयोग कर रहे हैं? Gemini Nano को सक्षम करें →"
+source_hash = "f994ea2d228572dbd118f5d28ddabaabbad81b82"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.geminiReady"]
+value = "Chrome द्वारा प्रबंधित; डाउनलोड/अपडेट स्वतः होते हैं।"
+source_hash = "81e352082ccaff67ad3e10254e3564229613379e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.geminiUnavailable"]
+value = "इस ब्राउज़र में Gemini Nano उपलब्ध नहीं है। Chrome 148+ का उपयोग करें या Transformers.js इंजन चुनें।"
+source_hash = "70001b1887cad1a71e7b7b961a3ff7aefec6ae43"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.inBrowserWarning"]
+value = "इन-ब्राउज़र मॉडल आपके उपकरण पर WebGPU के माध्यम से चलते हैं: वे महत्वपूर्ण स्मृति/CPU का उपभोग करते हैं और क्लाउड मॉडल की तुलना में इंटरव्यूर निर्देशों का पालन करते हुए काफी कम विश्वसनीय होते हैं।"
+source_hash = "d7fd725f785317d1eaf71eccfc7571a67554dd6f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.installed"]
+value = "इंस्टॉल किया गया"
+source_hash = "85841abddb12dc3591a5990c6527df65a5e63c87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.outputPlaceholder"]
+value = "यहाँ जवाब स्ट्रीम हो रहा है…"
+source_hash = "d6ed24603fb55638b563655e72a0dea36dd99eb5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.reDownload"]
+value = "फिर से डाउनलोड करें"
+source_hash = "7cd09bcda1b8fb8ec6b0760adf1687fa17771252"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.removeAll"]
+value = "सभी मॉडल हटाएं"
+source_hash = "faa8cfe91e87aec31aef0b9ce5ba9bf23d96afa5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.statusDot"]
+value = "इंजन स्थिति"
+source_hash = "d8f4585716e0a763a5fec3f562770be6f49c8d3b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llm.testOk"]
+value = "मॉडल ने जवाब दिया"
+source_hash = "e91e6d874ab5b0dd3e17cd308417e2ac16913e09"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.llmRequired"]
+value = "एक एलएलएम एंडपॉइंट आवश्यक है। इन-ब्राउज़र एलएलएम दुर्लभ हैं: केवल क्रोम 148+ एक प्रदान करता है (जेमिनी नैनो, उच्च हार्डवेयर आवश्यकताएँ)।"
+source_hash = "534b246055deb05512143d12cb1123131bd7d90d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.model"]
+value = "मॉडल"
+source_hash = "68c2cc7f0ceaa3e499ecb4db331feb4debbbcc23"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.modelHelp"]
+value = "मॉडल आईडी ठीक वैसा ही जैसा एंडपॉइंट इसे प्रदर्शित करता है, उदाहरण के लिए gpt-4o-mini।"
+source_hash = "f692c9350bee139c97e3ff5f2aac847e055c6182"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.modelId"]
+value = "मॉडल आईडी"
+source_hash = "c7eb22a300dfb99911806d81a8bc2c25166b01db"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.modelPlaceholder"]
+value = "सूची से चुनें या आईडी टाइप करें"
+source_hash = "7a24d9aa4394f2b1fe8593801bb6a6697fc2a48f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.advanced"]
+value = "उन्नत"
+source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.ai"]
+value = "इंटरव्यूअर एआई"
+source_hash = "e924e62211be65b4dcbb861f68cca3a1eb2ccadc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.downloads"]
+value = "डाउनलोड"
+source_hash = "a2a55e68a147ddb026454c38213bc01a3979f52c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.history"]
+value = "पिछले इंटरव्यू"
+source_hash = "fdc7bb745dc22fd922a7b2ef72b57efb12814f92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.language"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.preferences"]
+value = "उपयोगकर्ता प्राथमिकताएँ"
+source_hash = "8f86ede9757e85be28f448f1dc706a545fbfa189"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.status"]
+value = "सिस्टम स्थिति"
+source_hash = "010009ca87fcd0c55e214d44688fc15739598c20"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.nav.voice"]
+value = "वॉइस और व्यक्तित्व"
+source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.brain"]
+value = "दिमाग"
+source_hash = "8b9248a4e0b64bbccf82e7723a3734279bf9bbc4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.brainDesc"]
+value = "इंटरव्यूअर मॉडल"
+source_hash = "b89e65c26a8c8aab2f6d831c54f831d29bbe3db8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.hearing"]
+value = "सुनना"
+source_hash = "33b9bc376d79ed72c4d5f58a883fa08aa9d3f5be"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.hearingDesc"]
+value = "यह किससे सुनता है — माइक और भाषण से पाठ"
+source_hash = "ee9ad162a816a3a6b3663745b1b5fbb2aaf11764"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.llm.providers"]
+value = "OpenAI-संगत एंडपॉइंट्स (OpenAI, OpenRouter, Groq, Cerebras, Google AI Studio, Ollama, llama.cpp) या Anthropic-संगत (claude.ai API)।"
+source_hash = "8db357bad26d456064d25718aa91151cbb2c24c6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.llm.title"]
+value = "एलएलएम विकल्प"
+source_hash = "5c0e55a514c0183df3f61510e3baa8c1792f6cb9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.stt.providers"]
+value = "कोई भी OpenAI-संगत ट्रांसक्रिप्शन एंडपॉइंट काम करता है: whisper.cpp सर्वर, Speaches, या Groq whisper।"
+source_hash = "99fc9543b717acebf2cf0b2d0391f1d8f9bc464a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.stt.title"]
+value = "भाषण-से-पाठ विकल्प"
+source_hash = "7bbd3a3c58d70a8d3bfd3092c684e4a28ee86ae7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.tts.providers"]
+value = "कोई भी OpenAI-संगत /audio/speech एंडपॉइंट काम करता है: Piper (एक OpenAI-संगत शिम के माध्यम से), Kokoro, या Speaches।"
+source_hash = "6b86dd938c699fc6d8154bff4bc251b7e9ae447a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.tts.title"]
+value = "पाठ-से-भाषण विकल्प"
+source_hash = "03880944af3b05eb0ec3f1b5b22ad044dbc31fca"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.voice"]
+value = "वॉइस"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.section.voiceDesc"]
+value = "यह कैसे जवाब देता है — पाठ से भाषण"
+source_hash = "35fd5848c954c2df1e748a04d0a8b88016141edc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.serverPack.label"]
+value = "डीआई सर्वर {kind}"
+source_hash = "bbc4f61f84a9943e44ea1ee062bcbd0b562c8caf"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.download"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.llm"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.retry"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.server"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.sttEndpoint"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.ttsEndpoint"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.action.unsupported"]
+value = "वॉइस में ठीक करें"
+source_hash = "68d7bce9534c07d9935faa6b3f821b862f81c4a2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.down"]
+value = "डाउन"
+source_hash = "77346d0447daff959358a0ecbeec83bfd9ec86bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.intro"]
+value = "प्रत्येक इंटरव्यू परत और क्या वह अभी उपयोग योग्य है।"
+source_hash = "db9d8d52923f68f58adf00e494cc7333469bfac5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.ok"]
+value = "तैयार"
+source_hash = "75c0533730caf1f78561c0883fb87bc8d98ef04b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.consent"]
+value = "ऑन-डिवाइस मॉडल डाउनलोड की आवश्यकता है"
+source_hash = "a32043dedbfe6d512fc471a619a8c199606e0744"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.error"]
+value = "पिछला प्रयास विफल"
+source_hash = "38b946fc39f2c7d111abcd4d58a2eef4e5b350e1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.llmUnconfigured"]
+value = "कोई इंटरव्यूअर मॉडल कॉन्फ़िगर नहीं है"
+source_hash = "1fca7e06b3727ce4dd11b753bebababcd7e0b993"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.noEndpoint"]
+value = "कोई एंडपॉइंट कॉन्फ़िगर नहीं है"
+source_hash = "5f8b6c36b7f24be96298e7caa8175a915c8c0881"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.notDownloaded"]
+value = "मॉडल फ़ाइलें डाउनलोड नहीं की गई हैं"
+source_hash = "c425954f10fc4cbf86aada29b1461b7feb0ac48b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.server"]
+value = "डेस्कटॉप ऐप पहुँच योग्य नहीं है"
+source_hash = "5ee1de5d64f7c5507ce243be49ae65240b69b326"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reason.unsupported"]
+value = "इस ब्राउज़र में समर्थित नहीं"
+source_hash = "83112c29cbe3c8ee9d88e7cfcba50a5c62503a5d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reportHint"]
+value = "निदान के साथ एक गिटहब मुद्दा खोलता है — बताएं कि क्या हुआ।"
+source_hash = "8506987a066fc3444cfcc9ad55d57ec85949ca5c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.reportIssue"]
+value = "मुद्दा रिपोर्ट करें"
+source_hash = "4f49ed7432b43a906b411a57f9182fd38c83408f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.seam.llm"]
+value = "इंटरव्यूअर मॉडल"
+source_hash = "02996b7ddfe8e833446364b63036f0528176cb30"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.seam.stt"]
+value = "भाषण से पाठ"
+source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.seam.tts"]
+value = "पाठ से भाषण"
+source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.status.up"]
+value = "अप"
+source_hash = "7c0a25c06ea30bae50e39a37a5997e31a1a96e20"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.stt"]
+value = "स्पीच टू टेक्स्ट"
+source_hash = "eaf1450c665c16e051fa898568278cb816f7031f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.stt.listening"]
+value = "सुन रहा है…"
+source_hash = "cc45fd2e52d3e67e1ab7161803751cc916ee69c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.micHelp"]
+value = "सेटअप पेज पर माइक चेक के साथ साझा किया गया।"
+source_hash = "65f46458617d303144a7bbdaf1396b26caa684bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.micLabel"]
+value = "माइक्रोफ़ोन"
+source_hash = "242805378404a310345cf70839197bf474f74005"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.noSpeech"]
+value = "नहीं बोला गया पता चला — चुने हुए माइक्रोफ़ोन की जांच करें"
+source_hash = "b1de9da413849eacbbdf95b72ceb93cdd962d037"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.readHelp"]
+value = "टेस्ट क्लिक करें, नमूना वाक्य पढ़ें, और आपके शब्द नीचे दिखाई देंगे।"
+source_hash = "f486f550e4c6ae2ca97f0fdab6dd992cc96e1f87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.readPlaceholder"]
+value = "आपकी बोली यहाँ…"
+source_hash = "6079e20392413968e740bf98a812390b307ba3c3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.stt.readTitle"]
+value = "नीचे दिए गए पाठ को जोर से पढ़ें"
+source_hash = "6a4eb67112abc72dd5ee093f2a0961f1932f4c0f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.test"]
+value = "परीक्षा"
+source_hash = "640ab2bae07bedc4c163f679a746f7ab7fb5d1fa"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.test.inBrowser"]
+value = "इन-ब्राउज़र मोड, टेस्ट के लिए कुछ नहीं"
+source_hash = "daa69ebb9e395fd192c2deb000dc41e895bec8da"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.test.unsupported"]
+value = "इस ब्राउज़र में समर्थित नहीं"
+source_hash = "7fa9453e8681907029de21de523e2175c05858bd"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.testFailed"]
+value = "विफल: {message}"
+source_hash = "53c3b86b8e2313060d6ac2c530604823deb89c0a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.testOk"]
+value = "कार्यरत"
+source_hash = "3b4dfc9713939494fccae84898c2f135073206de"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.testing"]
+value = "टेस्ट हो रहा है…"
+source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.title"]
+value = "सेटिंग्स"
+source_hash = "3cc1d5a427a45820b04fe30f78a972b784952460"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.tts"]
+value = "पाठ से भाषण"
+source_hash = "d0f1029e2cacf9b69b972fc1ccafb34bec081e80"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voice"]
+value = "आवाज़"
+source_hash = "3091c8446f8d3a942bef5cf971f537e62fdefab8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."settings.voice.builtin"]
+value = "ब्राउज़र built-in"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.consentDeclined"]
+value = "ब्राउज़र built-in का उपयोग — कभी भी स्विच करें"
+source_hash = "87621c1e4d15f3aa09059c7bacc595ecb1b7eacf"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.endpoint"]
+value = "अपनी सेवा"
+source_hash = "d2416d8ad806f87b934e849d6d50ea2ec3aa6cfb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.manage"]
+value = "प्रबंधित करें"
+source_hash = "3f282fcba8933e03a65a6dc92a27de8396961e2f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.mic"]
+value = "माइक्रोफ़ोन"
+source_hash = "17d396020d8a4d80d4d4f29227e3b7e2a610ece1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.micDesc"]
+value = "जिस माइक पर इंटरव्यूर आपको सुनता है।"
+source_hash = "5e1da5dc2b7fe3018ccc18ac8157b831da00bb61"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.models"]
+value = "ऑन-डिवाइस वॉइस पैक"
+source_hash = "df276c5b55c116ccc7a77fbeae2bd62eb690ea74"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.modelsDesc"]
+value = "~50 एमबी डाउनलोड जो इस डिवाइस पर आवाज़ें चलाता है।"
+source_hash = "0da4b9e9d9a77b5b51052985cad139bbda6a54b1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.onDevice"]
+value = "इस डिवाइस पर"
+source_hash = "9fa6762eeafca4a05bfa17ba49605613fec17d7f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.sample"]
+value = "परीक्षण आवाज़"
+source_hash = "c5becf9cbb2e3226b72dc35e39ac972bea8238e7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.sampleCta"]
+value = "नमूना चलाएं"
+source_hash = "f2c5ce6dbca9b0b6f6fe55605e9e96a4b9b5f4d2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.sampleDesc"]
+value = "चुने हुए TTS इंजन के माध्यम से एक लाइन सुनें।"
+source_hash = "ddca427f636757e6408878b87bed044e23130b17"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.stt"]
+value = "आपको समझता है"
+source_hash = "3eb1483a01ab1666f07b304c80c247f1562846a5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.sttDesc"]
+value = "ऐप कैसे आपके जवाब सुनता है। इस डिवाइस पर तेज़ है; built-in को कोई डाउनलोड नहीं चाहिए।"
+source_hash = "bfaccf68448ffaee8a7ae6b90c4a0d0d95b2ac53"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.test"]
+value = "परीक्षण कॉल"
+source_hash = "96fd4eac95e0d1cc5907d265e32e4cccadccee0d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.testCta"]
+value = "परीक्षण चलाएं"
+source_hash = "b7d52fe2087061a822cd8d7667ed6c27cc50626b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.testDesc"]
+value = "नमस्ते कहता है, फिर आप एक लाइन जोर से पढ़ते हुए सुनता है।"
+source_hash = "9c41dce3f892d33c45f75f32bfce438d5e9e72ea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.testPhrase"]
+value = "नमस्ते, आज आपके इंटरव्यूर हैं। जब आप तैयार हों तो बताएं।"
+source_hash = "6068dd011fcfccd310fd78a87c58f213b96db72f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.tts"]
+value = "आपको आवाज़ देता है"
+source_hash = "af214d3c3cc4df7d7fc72bd038af49a1ac0cfd45"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voice.ttsDesc"]
+value = "इंटरव्यूर की आवाज़। इस डिवाइस पर सबसे बेहतर है; built-in को कोई डाउनलोड नहीं चाहिए।"
+source_hash = "880fdbdf434ae909642c5fb457558d4846e36845"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."settings.voiceHelp"]
+value = "वॉइस नाम जो एंडपॉइंट द्वारा समर्थित है, उदाहरण के लिए alloy।"
+source_hash = "fb2fa90115603a2d2dae0d4c1aa448cfeead9932"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePack.size"]
+value = "{size} एमबी"
+source_hash = "9f00fb90db266e6139441d61b5ac27ed34acc98d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.builtin"]
+value = "ब्राउज़र बिल्ट-इन"
+source_hash = "9803e36b44e3c940b01dac171c312d4b52084fb4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.clear"]
+value = "कैश साफ़ करें"
+source_hash = "c004cc3343fdf44773fff77fc6ccb3d3b209b238"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.consentDeclinedHint"]
+value = "ऑन-डिवाइस इंजन बंद हैं; ऑन-डिवाइस चुनने से मॉडल डाउनलोड होते हैं और उन्हें सक्षम किया जाता है।"
+source_hash = "54d0841e661736cada4b0271a357b028999fa2d3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.customEndpoint"]
+value = "कस्टम एंडपॉइंट"
+source_hash = "17b767eb4b24ba319cc836c7a7f88f79a0eaf4f2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.download"]
+value = "डाउनलोड करें"
+source_hash = "817248fb77fb5c2cef3f2c732ad257cb1fb9c5e4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.downloadFailed"]
+value = "मॉडल डाउनलोड विफल, फिर से प्रयास करें"
+source_hash = "559a39aab1350a5d5f72c8a4bd170b644f622973"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.downloading"]
+value = "डाउनलोड हो रहा है {percent}% ({done} / {total} एमबी)"
+source_hash = "09ade323d9bf57c9ad2f0d9a6c205ed829f38e13"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.error"]
+value = "डाउनलोड विफल: {message}"
+source_hash = "405e7ebb05407ce69f072c092309353baadf60c0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.installed"]
+value = "इंस्टॉल किया गया ({total} एमबी)"
+source_hash = "0412d706adb3118a5c8fad0aa924fdab9b4c0ee9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.models"]
+value = "ऑन-डिवाइस मॉडल"
+source_hash = "dc26dfa3ee6d0c59485f1633cf2363573fa19c1c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.nav"]
+value = "वॉइस"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.notInstalled"]
+value = "डाउनलोड नहीं किया गया"
+source_hash = "90e7ca8212a799ad01ec6ac54555c2f585739cbc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.onDevice"]
+value = "ऑन-डिवाइस (मॉडल डाउनलोड करता है)"
+source_hash = "bcd3bdd22780716ae9f5552064838b9ee3abf017"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.redownload"]
+value = "फिर से डाउनलोड करें"
+source_hash = "62685a87426ebc4c5abafa2fb742e09999b6e3d5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.stt"]
+value = "भाषण से पाठ"
+source_hash = "f04ad14be4ca2e1f1bbddf9c30c36f944869c7b2"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.tts"]
+value = "पाठ से भाषण"
+source_hash = "920a5ea0d29ed1e231fc440a85327f5378b26837"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."settings.voicePane.unsupported"]
+value = "यह ब्राउज़र ऑन-डिवाइस वॉइस का समर्थन नहीं करता (वास्म + सिम्ड की आवश्यकता है)।"
+source_hash = "02231375adaa269f8d21af8a111264907a881382"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.advanced"]
+value = "उन्नत विकल्प"
+source_hash = "4ebc4058b083d2fb47d5ebaf6cbf298e44ef1f08"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.coachHint"]
+value = "आपके पहले रिपोर्ट के बाद उपलब्ध"
+source_hash = "7dae169c4ed58575839e0f0a050af4ee76f4f819"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.defaultTitle"]
+value = "अभ्यास सत्र"
+source_hash = "c28555c96e8bd9dc12bec96dd6ab3dce5a97573a"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.difficulty"]
+value = "जटिलता"
+source_hash = "bf1a879257521137fc6dc619b89ed11951c319c4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."setup.difficulty.easy"]
+value = "आसान"
+source_hash = "861c4f67e887dec85292d36ab05cd7a1a7275228"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.difficulty.hard"]
+value = "कठिन"
+source_hash = "cae5970fc939e302346d8b50d4fb711b7e515c4b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.difficulty.medium"]
+value = "मध्यम"
+source_hash = "20af418657698863db8d966f4b42ed8dc7d0bd54"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.dropHint"]
+value = "फ़ाइलें छोड़ें या ब्राउज़ करने के लिए क्लिक करें"
+source_hash = "441eab1733179f2a4d4c866d0a679b1af81a2633"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.duration"]
+value = "अवधि"
+source_hash = "5d3f344b5bd21e9500c69ca575a3286c85b28f1c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.fileRemove"]
+value = "{name} हटाएँ"
+source_hash = "1c5b7670d4cb373a2cddbe8e196ad231bfa7176f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.files"]
+value = "फ़ाइलें"
+source_hash = "a1f13b3bc20a296e08c212be9c56c706c10abc4f"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.filesBadType"]
+value = "{name}: असमर्थित प्रकार (केवल pdf, md, txt, docx)"
+source_hash = "7ccc32ecfdb7fb60380bce94aefbe660520619bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.filesHint"]
+value = "केवल पाठ: pdf md txt docx — अधिकतम 10 फ़ाइलें / 20एमबी"
+source_hash = "c013f51c8a52a48b2226f9e8b2f6920aa0758c2e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.filesServerOnly"]
+value = "दस्तावेज़ अपलोड के लिए सर्वर रनटाइम की आवश्यकता है — फ़ाइलें ब्राउज़र मोड में संग्रहीत नहीं हैं"
+source_hash = "5223e7743ac2ce6f17dab8dc78fdca401a6b2ae4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.filesTooBig"]
+value = "कुल आकार 20एमबी से अधिक है"
+source_hash = "2ce00d3786ac21e189f3a8147e42923c9ecd5a23"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.filesTooMany"]
+value = "अधिकतम {max} फ़ाइलें"
+source_hash = "dda6ffe1bdeec363eb4e92df80cf2ac346bd38e1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.language"]
+value = "भाषा"
+source_hash = "e11523c5ff23fc1600aca2d8ee5adb542c5ce4b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.llmMissing"]
+value = "कोई एलएलएम कॉन्फ़िगर नहीं है"
+source_hash = "1a8154d80681d00f36a3210e33d638c0cfb8b841"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.mic"]
+value = "माइक्रोफ़ोन"
+source_hash = "17d396020d8a4d80d4d4f29227e3b7e2a610ece1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.mode"]
+value = "विधा"
+source_hash = "e78fe7049341b36116d8054f5a3e00d01f245fcc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."setup.mode.coach"]
+value = "कोच"
+source_hash = "c63c8ec7f6e2308874076f269e863af55d2cc22e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.mode.interview"]
+value = "साक्षात्कार"
+source_hash = "af537eebeeb24855a28737cdc62c8125a0c0916d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.needsProvider"]
+value = "अभी तक कोई एआई प्रदाता कॉन्फ़िगर नहीं है। सेटिंग्स में एक एलएलएम एंडपॉइंट जोड़ें ताकि आप डीआई सर्वर के बिना एक सत्र चला सकें।"
+source_hash = "e42618263c73889e7c47f8370ed78753425ff5bb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.needsProviderToast"]
+value = "एलएलएम एंडपॉइंट आवश्यक है"
+source_hash = "177b13f7839f74b88831b833db2a38c07a8145de"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.openProviderSettings"]
+value = "प्रदाता सेटिंग्स खोलें"
+source_hash = "ed48b43a0619007a5e405ced7e27d7b841f1ed87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.pickScenario"]
+value = "एक परिदृश्य चुनें"
+source_hash = "93d3eb3c1337766c44ce08a939c612369c525732"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.preset.behavioral"]
+value = "व्यवहारिक"
+source_hash = "0149c71b3ea4cad4de3529681e9cd38974802f49"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.preset.custom"]
+value = "कस्टम"
+source_hash = "f9ac14b63a75faf57d8db6f919bfabb2502d273c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.preset.frontend"]
+value = "फ्रंटएंड"
+source_hash = "9ecc8459ea5f39f9da55cb4d71a70b5d1e0f0b80"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.preset.ml"]
+value = "एमएल"
+source_hash = "7058849d4ff0e3150b247cf2d3e39bb52e9ec9a1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.preset.sysDesign"]
+value = "सिस्टम डिज़ाइन"
+source_hash = "27b4ea3fb9e5c6fa1304337421000124b7a331fc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.presets"]
+value = "प्रीसेट्स"
+source_hash = "75ab5a83ff30f713ad3c4387f1de374b5418add3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.promptLabel"]
+value = "कस्टम प्रॉम्प्ट"
+source_hash = "0a4fc467199187c5769499cdac89662b060d4481"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.promptPlaceholder"]
+value = "एक नौकरी का विवरण, अपने रिज्यूमे का संदर्भ, या कुछ भी जो एजेंट को पता होना चाहिए… पेस्ट करें"
+source_hash = "21538a4114e1049b1376213784639b0ac79772ce"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.behavioral.goal1"]
+value = "संघर्ष कहानी"
+source_hash = "f0792a4ecbeca6974dae13c44f7e755b7852d44b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.behavioral.goal2"]
+value = "मालिकी"
+source_hash = "9fea7940736058d4511e313a4c31ec8a07f660b5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.behavioral.goal3"]
+value = "विफलता"
+source_hash = "d68049bb85454c0b8c56ffbb73c45e8adee41b21"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.behavioral.narrative"]
+value = "फॉलो-अप के साथ स्टार कहानियाँ"
+source_hash = "a17a69c449bfc7d5c26b4d691fa65fe677c80ad1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.behavioral.prompt"]
+value = "स्टार विधि का उपयोग करके एक व्यवहारिक इंटरव्यू चलाएं। विशिष्टताओं के लिए जांच करें।"
+source_hash = "11882f07553cb782e153d3c23276fc5ea3ae2ee6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.custom.narrative"]
+value = "अपना प्रॉम्प्ट लाएं"
+source_hash = "ff2bc8fbe325d3463aaf570f8ce9727cdd115fab"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.frontend.goal1"]
+value = "लेआउट"
+source_hash = "207b877e13437b35b3fbae5c20219eecd6c828f1"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.frontend.goal2"]
+value = "एक्सेसिबिलिटी"
+source_hash = "758908d4c222164172f53e764caeebb73e9a2048"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.frontend.goal3"]
+value = "प्रदर्शन"
+source_hash = "f47039fbb1f7f212938b642944291fc3b2e603c6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.frontend.narrative"]
+value = "डोम, सीएसएस, रिएक्ट"
+source_hash = "b247974805de9ea5623a59e84861366d9a085e3c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.frontend.prompt"]
+value = "एक फ्रंटएंड इंटरव्यू चलाएं। घटक डिज़ाइन और जेएस मूलभूत बातों का मिश्रण।"
+source_hash = "99ec669ad93913b67dd8928c20d55d2083c14b96"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.ml.goal1"]
+value = "मापदंड"
+source_hash = "966b9734015a6d617d09dae170c907a100bded72"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.ml.goal2"]
+value = "लीकेज"
+source_hash = "8f071fb158cbeced7cac621189311a5f541e935c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.ml.goal3"]
+value = "विफलता मोड"
+source_hash = "5fb6293f4921b8ca79200ce44e1b237c4bfe261e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.ml.narrative"]
+value = "डेटा स्वच्छता के लिए मॉडल चयन"
+source_hash = "fa05a11fe8ea91ca116449f7a39bbfd053ddf56d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.ml.prompt"]
+value = "एक मशीन लर्निंग इंटरव्यू चलाएं। मॉडल चयन, मूल्यांकन, और डेटा स्वच्छता।"
+source_hash = "7c525476d3783a8cb9bd2a6fed26646475b2b0b3"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.sysDesign.goal1"]
+value = "आवश्यकताएँ"
+source_hash = "ed2eb3742618bb10d3b2ba0231ab69fecc8d716b"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.sysDesign.goal2"]
+value = "क्षमता गणित"
+source_hash = "00ace74915a8ffe84cbbda42d6fbe4ff8d3146d6"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.sysDesign.goal3"]
+value = "व्यापार-बंद"
+source_hash = "b76e427542cf71ab2fceca2ee98f3ed450b074f8"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.sysDesign.narrative"]
+value = "दबाव में एक सेवा को स्केल करें"
+source_hash = "45b68f13557fd11422e11338edee435c5c9bffb0"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.scenario.sysDesign.prompt"]
+value = "एक सिस्टम डिज़ाइन इंटरव्यू चलाएं। स्केलिंग, कैशिंग और व्यापार-बंद तर्क पर ध्यान केंद्रित करें।"
+source_hash = "e78498b79a0d8c6a524e660165626070cd7fa09c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.skipValidation"]
+value = "प्रमाणीकरण के बिना आगे बढ़ें"
+source_hash = "cd1779a98d1fd3396925d4b55f77de036f7c17ac"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.start"]
+value = "शुरू करें"
+source_hash = "2b020927d3c6eb407223a1baa3d6ce3597a3f88d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.startFailedToast"]
+value = "सत्र शुरू नहीं कर सका"
+source_hash = "382408e405f1652fa0bfdfe6b1153de11fa40476"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.startWithPlan"]
+value = "योजना जाँच के साथ शुरू करें"
+source_hash = "331c8ec7694ff03db61026275012039b1bb2298e"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.title"]
+value = "इंटरव्यू कॉन्फ़िगर करें"
+source_hash = "a9877243e65764a896e6fe0ad017381cb8d1d6f7"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.tone"]
+value = "टोन"
+source_hash = "4429f68570da76c21d9b01323ea1cc4332085616"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:42Z"
+
+[entries."setup.tone.challenging"]
+value = "चुनौतीपूर्ण"
+source_hash = "c7d9332297a0b0397c1708f47e53b0fbfe4d20e4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.tone.friendly"]
+value = "मित्रवत"
+source_hash = "41209342f36141100dd8dc887e9ab9dae2f71f87"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.tone.neutral"]
+value = "न्यूट्रल"
+source_hash = "e7fb41a6a0544d8a8aa178232034311f9d725555"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T20:01:02Z"
+
+[entries."setup.toolsLabel"]
+value = "उपकरण:"
+source_hash = "ee8c6631b587828b546d180e7ccd1d15672d634d"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."setup.validate"]
+value = "इंटरव्यू शुरू करें"
+source_hash = "f801cf4c1d8ca3d20c284fa1321688cdcf37beee"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."transcript.source.text"]
+value = "पाठ"
+source_hash = "372ea08cab33e71c02c651dbc83a474d32c676ea"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."transcript.source.voice"]
+value = "वॉइस"
+source_hash = "47ef65890ddbd7da73531268916c1d5697dd13e5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."transcript.who.agent"]
+value = "एजेंट"
+source_hash = "0608c4054662dd902e1314f7e450e3eaa81c1143"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."transcript.who.user"]
+value = "आप"
+source_hash = "8af56de68279cb6f5ed022f31af18b9fcdcc2e92"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.comingLater"]
+value = "प्रमाणीकरण बाद में आएगा"
+source_hash = "3bd927562da138fa329d1484539ecae6f37c9dc4"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.comingLaterBody"]
+value = "पूर्व-इंटरव्यू योजना चैट भविष्य के पुनरावृत्ति में आएगी। आपका सत्र कॉन्फ़िगर और तैयार है।"
+source_hash = "1e4d5fd81e16c384567424811050a3288c441ecb"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.duration"]
+value = "अवधि"
+source_hash = "5d3f344b5bd21e9500c69ca575a3286c85b28f1c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.header"]
+value = "प्रमाणित करें: {title}"
+source_hash = "c00a12c1b0b06a81e57c9e9b80b88a9610e2c538"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.mode"]
+value = "मोड"
+source_hash = "e78fe7049341b36116d8054f5a3e00d01f245fcc"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.plan"]
+value = "इंटरव्यू योजना"
+source_hash = "ed76e8681dec90ae5ef342e84aae645210834aba"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.start"]
+value = "अच्छा लगता है, शुरू करें"
+source_hash = "5d9a842054bf2b86857358340a0431896c54e995"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."validate.type"]
+value = "प्रकार"
+source_hash = "d0a3e7f81a9885e99049d1cae0336d269d5e47a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."voiceConsent.accept"]
+value = "डाउनलोड करें और सक्षम करें"
+source_hash = "11a73b1701a923ec1b33d282424a57c2a29893a9"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."voiceConsent.body"]
+value = "ऐप एक इष्टतम अनुभव के लिए एक डाउनलोड (~50 एमबी) की आवश्यकता करता है: ऑन-डिवाइस भाषण पहचान और वॉइस, कुछ भी क्लाउड को नहीं भेजा जाता है। नहीं कहें और ब्राउज़र का बिल्ट-इन वॉइस काम करता रहेगा।"
+source_hash = "b626559f0e2e2023b0cab22d702e92ff926e86a5"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."voiceConsent.decline"]
+value = "बिल्ट-इन रखें"
+source_hash = "305fbcbf0a28768edb1e05e2e65162dcf03d2806"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"
+
+[entries."voiceConsent.title"]
+value = "बेहतर वॉइस, आपके डिवाइस पर"
+source_hash = "8b1c2a593cb4f35b39f6987738304d44aa57b72c"
+origin = "ai"
+reviewed = false
+model = "openrouter/free"
+updated_at = "2026-10-12T19:55:13Z"

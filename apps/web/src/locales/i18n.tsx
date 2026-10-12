@@ -10,10 +10,12 @@ import ar from "./ar.json";
 import en from "./en.json";
 import es from "./es.json";
 import fr from "./fr.json";
+import hi from "./hi.json";
 import it from "./it.json";
 import ja from "./ja.json";
 import ko from "./ko.json";
 import ptBR from "./pt-br.json";
+import vi from "./vi.json";
 import zhCN from "./zh-cn.json";
 
 /** intl-ai `fill` emits nested objects for dotted keys; locale files are flat. */
@@ -43,6 +45,8 @@ const MESSAGES: Record<string, Record<string, string>> = Object.fromEntries(
     ko,
     it,
     ar,
+    hi,
+    vi,
   }).map(([locale, msgs]) => [locale, { ...flattenMessages(en), ...flattenMessages(msgs) }]),
 );
 

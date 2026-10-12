@@ -77,7 +77,20 @@ describe("replaceLocale", () => {
   });
 
   it("round-trips through every locale", () => {
-    for (const target of ["en", "es", "fr", "de", "ja", "pt-br", "zh-cn", "ko", "it", "ar"]) {
+    for (const target of [
+      "en",
+      "es",
+      "fr",
+      "de",
+      "ja",
+      "pt-br",
+      "zh-cn",
+      "ko",
+      "it",
+      "ar",
+      "hi",
+      "vi",
+    ]) {
       expect(replaceLocale("/es/setup", target)).toBe(
         target === "en" ? "/setup" : `/${target}/setup`,
       );

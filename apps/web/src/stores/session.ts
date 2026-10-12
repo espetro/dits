@@ -86,7 +86,20 @@ export const $editorLanguage = persistentAtom<string>("di:editor:language", "mar
 export const $editorTheme = persistentAtom<"light" | "dark">("di:editor:theme", "dark");
 
 /** Locales shipped in apps/web/src/locales (lowercase BCP-47 url codes). */
-export const LOCALES = ["en", "de", "es", "fr", "ja", "pt-br", "zh-cn", "ko", "it", "ar"] as const;
+export const LOCALES = [
+  "en",
+  "de",
+  "es",
+  "fr",
+  "ja",
+  "pt-br",
+  "zh-cn",
+  "ko",
+  "it",
+  "ar",
+  "hi",
+  "vi",
+] as const;
 
 /** Locales rendered right-to-left. */
 export const RTL_LOCALES: readonly string[] = ["ar"];
