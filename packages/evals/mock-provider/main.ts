@@ -243,7 +243,16 @@ export function startServer(port: number, fixture?: MockFixture, opts: MockServe
 }
 
 if (import.meta.main) {
-  const params = new URLSearchParams(process.argv.slice(2).join("&"));
+  // accept `--port 9000`, `--port=9000` and bare flags like `--no-cors`
+  const params = new URLSearchParams();
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]!.replace(/^-+/, "");
+    const next = argv[i + 1];
+    if (arg.includes("=")) params.set(...(arg.split("=", 2) as [string, string]));
+    else if (next !== undefined && !next.startsWith("-")) params.set(arg, argv[++i]!);
+    else params.set(arg, "");
+  }
   const port = Number(params.get("port") ?? 9000);
   const server = startServer(port, undefined, { noCors: params.has("no-cors") });
   console.log(`mock provider listening on http://localhost:${server.port}`);
