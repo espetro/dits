@@ -221,20 +221,30 @@ function withCors(res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
-export function startServer(port: number, fixture?: MockFixture) {
+export interface MockServerOptions {
+  /** Emulate CORS-hostile providers (openrouter, bifrost): no access-control-*
+   * headers and OPTIONS preflight rejected with 403. Default stays CORS `*`. */
+  noCors?: boolean;
+}
+
+export function startServer(port: number, fixture?: MockFixture, opts: MockServerOptions = {}) {
   const app = createApp(fixture);
   return Bun.serve({
     port,
     async fetch(req) {
       if (req.method === "OPTIONS")
-        return new Response(null, { status: 204, headers: CORS_HEADERS });
-      return withCors(await app.fetch(req));
+        return opts.noCors
+          ? new Response(null, { status: 403 })
+          : new Response(null, { status: 204, headers: CORS_HEADERS });
+      const res = await app.fetch(req);
+      return opts.noCors ? res : withCors(res);
     },
   });
 }
 
 if (import.meta.main) {
-  const port = Number(new URLSearchParams(process.argv.slice(2).join("&")).get("port") ?? 9000);
-  const server = startServer(port);
+  const params = new URLSearchParams(process.argv.slice(2).join("&"));
+  const port = Number(params.get("port") ?? 9000);
+  const server = startServer(port, undefined, { noCors: params.has("no-cors") });
   console.log(`mock provider listening on http://localhost:${server.port}`);
 }
