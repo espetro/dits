@@ -1,9 +1,11 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import * as v from "valibot";
 import {
   CreateSessionRequestSchema,
   DEFAULT_SESSION_TOOLS,
   DocumentSchema,
+  RelayQuerySchema,
   ReportSchema,
   SessionContextResponseSchema,
   SessionEventSchema,
@@ -35,6 +37,56 @@ import {
 } from "../voice/builtin/models.ts";
 
 const TurnInputSchema = v.omit(TurnSchema, ["session_id"]);
+
+/** Request headers the relay forwards upstream; everything else (cookies, origin, ...) is dropped. */
+const RELAY_FORWARD_HEADERS = ["authorization", "content-type", "cf-turnstile-response"] as const;
+
+interface RelayUpstreamInit {
+  method: string;
+  headers: Record<string, string>;
+  body: ReadableStream<unknown> | null;
+  signal: AbortSignal | null;
+  redirect: RequestRedirect;
+}
+
+function relayForwardHeaders(req: Request): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const name of RELAY_FORWARD_HEADERS) {
+    const value = req.headers.get(name);
+    if (value !== null) headers[name] = value;
+  }
+  return headers;
+}
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === "AbortError";
+}
+
+class RelayUpstreamError extends Error {
+  constructor(cause: unknown) {
+    super(`upstream fetch failed: ${cause}`);
+    this.cause = cause;
+  }
+}
+
+/** Streams a relayed Response with content-type only; null body degrades to empty. */
+function relayResponse(c: Context, upstream: Response): Response {
+  const contentType = upstream.headers.get("content-type");
+  const headers: Record<string, string> = {};
+  if (contentType) headers["content-type"] = contentType;
+  // upstream.body is null only for empty upstream responses (204/304, HEAD),
+  // where c.body(null) is already the empty response.
+  return c.body(upstream.body, upstream.status, headers);
+}
+
+async function relayFetchUpstream(upstream: string, init: RelayUpstreamInit): Promise<Response> {
+  try {
+    return await fetch(upstream, init);
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new RelayUpstreamError(err);
+  }
+}
 
 /** sessions.tools is stored as JSON text; absent pre-p3 rows mean the default toolset. */
 function parseSessionTools(raw: string | null | undefined): Record<string, string> {
@@ -319,6 +371,44 @@ export function apiRoutes(
     if (!row) return c.json({ error: "not found", code: "not_found" }, 404);
     return c.json(JSON.parse(row.data));
   });
+
+  /**
+   * Streaming passthrough relay for browser-mode provider calls (the SPA
+   * cannot fetch openrouter/bifrost/... cross-origin). Method and body stream
+   * through untouched so the client-side SSE parsing is reused verbatim;
+   * only the allowlisted headers cross the boundary. Keys are never logged.
+   */
+  api.all(
+    "/relay",
+    vValidator("query", RelayQuerySchema, (result, c) => {
+      if (!result.success) {
+        return c.json({ error: "invalid url query parameter", code: "relay_bad_url" }, 400);
+      }
+    }),
+    async (c) => {
+      const { url: upstream } = c.req.valid("query");
+      const init: RelayUpstreamInit = {
+        method: c.req.method,
+        headers: relayForwardHeaders(c.req.raw),
+        body: c.req.raw.body,
+        signal: c.req.raw.signal,
+        redirect: "manual",
+      };
+      let upstreamRes: Response;
+      try {
+        upstreamRes = await relayFetchUpstream(upstream, init);
+      } catch (err) {
+        if (err instanceof RelayUpstreamError) {
+          // network-level failure (dns, refused, tls), not a client abort
+          return c.json({ error: "upstream fetch failed", code: "relay_upstream" }, 502);
+        }
+        // client abort: rethrow so Bun tears down the socket alongside the
+        // already-aborted upstream request (fetch shares c.req.raw.signal).
+        throw err;
+      }
+      return relayResponse(c, upstreamRes);
+    },
+  );
 
   // Voice WebSocket endpoint. Bun upgrades this in serveApp before the Hono
   // app sees it; this route only handles non-upgrade requests (documented

@@ -156,6 +156,24 @@ function openApiSpec(config: Config): Record<string, unknown> {
           },
         },
       },
+      "/v1/relay": {
+        post: {
+          summary: "Relay a provider call (browser-mode provider bridge)",
+          responses: {
+            "200": { description: "Upstream response streamed through" },
+            "400": { description: "Invalid or missing url query parameter" },
+            "502": { description: "Upstream fetch failed" },
+          },
+        },
+        get: {
+          summary: "Relay a provider GET (e.g. /v1/models probe; browser-mode provider bridge)",
+          responses: {
+            "200": { description: "Upstream response streamed through" },
+            "400": { description: "Invalid or missing url query parameter" },
+            "502": { description: "Upstream fetch failed" },
+          },
+        },
+      },
       "/v1/voice/models": {
         get: {
           summary: "Builtin voice model cache status",
