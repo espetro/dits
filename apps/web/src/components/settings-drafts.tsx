@@ -7,6 +7,7 @@ import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from
 import { $providerProfile } from "../lib/runtime";
 import { smokeTestModel } from "../lib/agent/browser-provider";
 import { isDemoLlm } from "../lib/demo-llm";
+import { relayOrDirectFetch } from "../lib/relay";
 import { synthesizeSpeech } from "../lib/agent/tts";
 import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
 import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
@@ -117,14 +118,20 @@ export function useSettingsDrafts(): SettingsDrafts {
 export function useModelOptions(draft: SectionDraft): string[] {
   const [modelOptions, setModelOptions] = React.useState<string[]>([]);
   React.useEffect(() => {
-    if (!draft.enabled || !draft.baseUrl || !draft.apiKey) {
+    // keyless gateways (bifrost) probe too: relay mode has no preflight,
+    // and browser-direct keyless still works when the gateway allows it
+    if (!draft.enabled || !draft.baseUrl) {
       setModelOptions([]);
       return;
     }
     let cancelled = false;
     const timer = setTimeout(() => {
       const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-      fetch(`${base}/v1/models`, { headers: { authorization: `Bearer ${draft.apiKey}` } })
+      // keyless must send no authorization header at all (empty Bearer
+      // forces a CORS preflight some gateways reject; relay adds none)
+      const headers: Record<string, string> = {};
+      if (draft.apiKey) headers["authorization"] = `Bearer ${draft.apiKey}`;
+      relayOrDirectFetch(draft.baseUrl)(`${base}/v1/models`, { headers })
         .then((res) => (res.ok ? res.json() : null))
         .then((json: { data?: Array<{ id?: string }> } | null) => {
           if (cancelled || !json) return;
@@ -306,7 +313,7 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
         if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
         const model = createOpenAiCompatibleModel(
           { baseUrl: d.baseUrl, apiKey: d.apiKey, model: d.model },
-          {},
+          { fetchImpl: relayOrDirectFetch(d.baseUrl) as typeof fetch },
         );
         const { streamText } = await import("ai");
         let reply = "";

@@ -1,6 +1,7 @@
 import { TTS_TEST_TIMEOUT_MS } from "./timeouts";
 import { DiError } from "./errors";
 import { turnstileTokenFor } from "./turnstile";
+import { relayActive, relayFetch } from "./relay";
 import { startCapture } from "./voice/capture";
 import type { SttEngine } from "./voice/engines";
 /**
@@ -176,11 +177,15 @@ export async function probeModels(draft: ProbeDraft): Promise<void> {
   // Bearer still forces a CORS preflight some gateways reject
   const headers: Record<string, string> = {};
   if (draft.apiKey) headers["authorization"] = `Bearer ${draft.apiKey}`;
-  // the managed demo worker requires a fresh turnstile token on /v1/models
+  const relay = relayActive(draft.baseUrl);
+  // relay mode is same-origin (no turnstile needed); the demo endpoint is
+  // excluded from relay anyway, so browser-direct keeps solving tokens.
+  // The managed demo worker requires a fresh turnstile token on /v1/models
   // too — but a configured key is itself the credential and skips the gate
-  const turnstile = draft.apiKey ? null : await turnstileTokenFor(draft.baseUrl);
+  const turnstile = relay || draft.apiKey ? null : await turnstileTokenFor(draft.baseUrl);
   if (turnstile) headers["cf-turnstile-response"] = turnstile;
-  const res = await fetch(`${base}/v1/models`, { headers });
+  const doFetch = relay ? relayFetch : fetch;
+  const res = await doFetch(`${base}/v1/models`, { headers });
   if (!res.ok) throw new DiError("http", { status: res.status }, `HTTP ${res.status}`);
 }
 

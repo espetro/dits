@@ -7,6 +7,7 @@ import type {
 import type { BrowserLlmSection, LlmSection, RemoteLlmSection } from "@di/shared";
 import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
 import { DiError } from "../errors";
+import { relayOrDirectFetch } from "../relay";
 import { envStr } from "../env";
 
 /**
@@ -287,7 +288,10 @@ export function createLlmModel(
 ): { model: AnyLanguageModel; browser?: BrowserModelHandles } | null {
   if (isRemoteLlm(section)) {
     const remote = createOpenAiCompatibleModel(section, {
-      fetchImpl: opts.fetchImpl,
+      // remote sections default to the relay-aware fetch: same-origin
+      // through the di server when active, browser-direct otherwise.
+      // an explicit fetchImpl (tests, report-generator callers) wins.
+      fetchImpl: (opts.fetchImpl ?? relayOrDirectFetch(section.baseUrl)) as typeof fetch,
     });
     return { model: remote as unknown as AnyLanguageModel };
   }
