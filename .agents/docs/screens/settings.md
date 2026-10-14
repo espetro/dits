@@ -2,11 +2,11 @@
 
 One centered dialog is the single settings surface, opened from the
 account dropdown, the navbar status chip, or any `openSettings(pane)`
-call site. Three nav panes — past interviews, user preferences, voice &
-personality — plus a hidden system-status view the chip opens
+call site. Four nav panes — past interviews, user preferences, voice &
+personality, data (danger zone, separated by a rule) — plus a hidden system-status view the chip opens
 (pane=status). Desktop: borderless left sidebar nav + inset rounded
 content card. Mobile: full-screen with a top pane select. URL-driven:
-`?settings=1&pane=…` (pane ∈ history | preferences | voice | status;
+`?settings=1&pane=…` (pane ∈ history | preferences | voice | data | status;
 legacy ids — `ai`, `downloads`, `advanced`, `aiProvider` → voice;
 `language` → preferences).
 
@@ -89,7 +89,19 @@ driver otherwise.
 - Past interviews pane: client-only OPFS list via listClientSessions
   (Empty block when none), rows link to /interview/$id, /finish/$id or
   /report/$id by status, plus a two-step "clear all" footer that wipes
-  every saved session via clearClientSessions.
+  every saved session via clearClientSessions and, when the di server is
+  reachable, DELETE /v1/sessions/:id for each server session (the
+  sidecar sqlite is not left behind).
+- Data pane: one destructive "reset everything" row inside a
+  destructive-bordered block. Opens a dialog with a typed confirmation
+  word (locale `settings.data.confirmWord`); on confirm it calls
+  DELETE /v1/data when the server is reachable (db rows, builtin model
+  cache, log), then clears OPFS sessions, voice model cache, transformers
+  cache and every `di.*` / `di:*` localStorage key, and hard-reloads into
+  first-run state. Failures render in a destructive alert inside the
+  dialog. The desktop shell has a separate control route
+  (`POST /api/reset`) that also removes db files, data dir, log and
+  config.yaml (keys) and restarts the sidecar.
 - User preferences pane: app language select (drives the url locale
   prefix via a full navigation) and the interview language (new
   sessions start with `di.interview-language`, kept in sync with
