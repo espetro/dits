@@ -105,3 +105,12 @@ curl -sf -m 10 "${DI_URL:-http://localhost:3000}/v1/test/smoke" | jq -e '.ok == 
 description = "Run Playwright e2e specs in tests/e2e (requires DI server in test mode running; DI_URL to override)"
 run = "bun x playwright test"
 dir = "tests/e2e"
+
+# Relay specs: additionally requires the web dev server started with the di
+# server as its API base (cd apps/web && VITE_DI_API_BASE=$DI_URL bun run
+# dev; DI_WEB_URL to override). The no-CORS mock provider is spawned by the
+# spec itself on MOCK_NOCORS_PORT (default 9100).
+[tasks.e2e-relay]
+description = "Run provider-relay Playwright specs (requires DI server in test mode + web dev server with VITE_DI_API_BASE; mock spawned by the spec)"
+run = "bun x playwright test provider-relay.spec.ts"
+dir = "tests/e2e"
