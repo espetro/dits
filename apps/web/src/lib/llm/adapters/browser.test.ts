@@ -6,7 +6,7 @@ import {
   isBrowserLlm,
   isRemoteLlm,
   transformersModelInstalled,
-} from "./browser-provider";
+} from "./browser";
 
 describe("browser provider seam", () => {
   it("classifies sections", () => {

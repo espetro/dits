@@ -2,7 +2,7 @@ import { toJsonSchema } from "@valibot/to-json-schema";
 import { ReportSchema, buildReportPrompt } from "@di/shared/report";
 import type { Report, ReportPromptContext } from "@di/shared/report";
 import type { LlmSection } from "@di/shared";
-import { createLlmModel } from "./browser-provider";
+import { createLlmModel } from "../llm";
 import { DiError } from "../errors";
 
 /**

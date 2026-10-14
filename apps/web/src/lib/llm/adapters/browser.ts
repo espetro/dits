@@ -5,10 +5,10 @@ import type {
   LanguageModelV4StreamPart,
 } from "@ai-sdk/provider";
 import type { BrowserLlmSection, LlmSection, RemoteLlmSection } from "@di/shared";
-import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
-import { DiError } from "../errors";
-import { relayOrDirectFetch } from "../relay";
-import { envStr } from "../env";
+import { createOpenAiCompatibleModel } from "./openai-compatible";
+import { DiError } from "../../errors";
+import { relayOrDirectFetch } from "../../relay";
+import { envStr } from "../../env";
 
 /**
  * In-browser LLM provider seam. `createLlmModel` picks the right

@@ -1,7 +1,7 @@
 import { $serverReachable, API_BASE } from "./runtime";
 import { clearClientSessions } from "./opfs-store";
 import { clearVoiceModels } from "./voice/models";
-import { deleteAllTransformersModels } from "./agent/browser-provider";
+import { deleteAllTransformersModels } from "./llm";
 
 /** localStorage namespaces owned by the app (`di.*` stores, `di:*` flags). */
 const OWNED_KEY_PREFIXES = ["di.", "di:"] as const;

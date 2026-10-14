@@ -12,8 +12,8 @@ import type {
 } from "@ai-sdk/provider";
 import { providerEndpoint } from "@di/shared";
 import type { ProviderEndpoint } from "@di/shared";
-import { DiError } from "../errors";
-import { turnstileTokenFor } from "../turnstile";
+import { DiError } from "../../errors";
+import { turnstileTokenFor } from "../../turnstile";
 
 /**
  * Minimal OpenAI-compatible LanguageModelV3 provider for client-only mode.

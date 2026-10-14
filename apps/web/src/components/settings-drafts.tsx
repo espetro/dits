@@ -7,7 +7,7 @@ import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from
 import { $providerProfile, $serverReachable } from "../lib/runtime";
 import { isDemoLlm } from "../lib/demo-llm";
 import { errorDetail } from "../lib/errors";
-import { probeModels } from "../lib/settings-tests";
+import { probeModels } from "../lib/llm";
 import { useSsrStore } from "../lib/ssr";
 
 /**

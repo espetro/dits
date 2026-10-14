@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { turnstileTokenFor } from "../turnstile";
-import { createOpenAiCompatibleModel } from "./openai-compatible-provider";
+import { turnstileTokenFor } from "../../turnstile";
+import { createOpenAiCompatibleModel } from "./openai-compatible";
 
-vi.mock("../turnstile", () => ({ turnstileTokenFor: vi.fn(async () => "ts-tok") }));
+vi.mock("../../turnstile", () => ({ turnstileTokenFor: vi.fn(async () => "ts-tok") }));
 
 const PROFILE = {
   baseUrl: "http://t.local/v1",
