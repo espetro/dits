@@ -163,3 +163,74 @@ describe("mock provider state endpoint", () => {
     throw new Error("inflight never drained after abort");
   });
 });
+
+describe("mock provider failure injection", () => {
+  const failServer = startServer(0, fixture);
+  const fb = `http://localhost:${failServer.port}`;
+  const setFail = (mode: string | null) =>
+    fetch(`${fb}/__fail`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode }),
+    });
+  const chat = (stream: boolean) =>
+    fetch(`${fb}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "mock-llm",
+        stream,
+        messages: [{ role: "user", content: "hi" }],
+      }),
+    });
+
+  afterAll(() => failServer.stop(true));
+
+  it("rejects unknown modes", async () => {
+    expect((await setFail("nope")).status).toBe(400);
+  });
+
+  it("401 mode fails chat and models with a json error, clears with null", async () => {
+    await setFail("401");
+    const res = await chat(true);
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as { error: { message: string } }).error.message).toMatch(
+      /invalid api key/,
+    );
+    expect((await fetch(`${fb}/v1/models`)).status).toBe(401);
+    await setFail(null);
+    expect((await chat(false)).status).toBe(200);
+    expect((await fetch(`${fb}/v1/models`)).status).toBe(200);
+  });
+
+  it("html-models mode answers 200 html on /models and /v1/models", async () => {
+    await setFail("html-models");
+    for (const path of ["/models", "/v1/models"]) {
+      const res = await fetch(`${fb}${path}`);
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toMatch(/text\/html/);
+    }
+    await setFail(null);
+  });
+
+  it("html-root mode breaks only /models, /v1/models stays valid", async () => {
+    await setFail("html-root");
+    expect((await fetch(`${fb}/models`)).headers.get("content-type")).toMatch(/text\/html/);
+    expect(
+      ((await (await fetch(`${fb}/v1/models`)).json()) as { data: unknown[] }).data.length,
+    ).toBe(fixture.models.length);
+    await setFail(null);
+    expect((await fetch(`${fb}/models`)).status).toBe(404);
+  });
+
+  it("sse-error mode streams an in-band error chunk on a 200, inflight drains", async () => {
+    await setFail("sse-error");
+    const res = await chat(true);
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    expect(text).toMatch(/"error":\{"message":"upstream exploded/);
+    const state = (await (await fetch(`${fb}/__state`)).json()) as { inflight: number };
+    expect(state.inflight).toBe(0);
+    await setFail(null);
+  });
+});

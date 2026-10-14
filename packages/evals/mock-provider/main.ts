@@ -55,11 +55,31 @@ type Handler = (
 ) => Response | Promise<Response>;
 
 /** Test-tooling state: last request headers per path + live chat stream count. */
+export type FailMode =
+  /** chat and models answer HTTP 401 with an openai-style json error */
+  | "401"
+  /** GET /models and /v1/models answer 200 text/html (a login or landing page) */
+  | "html-models"
+  /** only GET /models (no version path) answers html: /v1/models stays valid, so a root base url gets a suggestion */
+  | "html-root"
+  /** streamed chat answers 200 with an in-band sse error chunk */
+  | "sse-error";
+
+export const FAIL_MODES: readonly FailMode[] = ["401", "html-models", "html-root", "sse-error"];
+
 export interface MockServerState {
+  /** active failure injection; set via POST /__fail {mode} or --fail. null = healthy. */
+  fail: FailMode | null;
   /** lowercased header snapshot of the most recent request per path */
   lastHeaders: Map<string, Record<string, string>>;
   /** in-flight POST /v1/chat/completions requests (streams not yet closed) */
   inflight: number;
+}
+
+const HTML_PAGE = "<!doctype html><html><body><h1>Sign in</h1></body></html>";
+
+function htmlPage(): Response {
+  return new Response(HTML_PAGE, { headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
 function recordHeaders(state: MockServerState, req: Request): void {
@@ -119,6 +139,12 @@ const routes: [string, string, Handler][] = [
     "POST",
     "/v1/chat/completions",
     async (req, fx, state) => {
+      if (state.fail === "401") {
+        return Response.json(
+          { error: { message: "invalid api key (mock 401)", type: "invalid_request_error" } },
+          { status: 401 },
+        );
+      }
       state.inflight++;
       const body = (await req.json().catch(() => ({}))) as {
         stream?: boolean;
@@ -173,6 +199,13 @@ const routes: [string, string, Handler][] = [
             created,
             model: "mock-llm",
           };
+          if (state.fail === "sse-error") {
+            send({ error: { message: "upstream exploded (mock in-band error)" } });
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+            state.inflight--;
+            return;
+          }
           send({
             ...base,
             choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
@@ -215,7 +248,11 @@ const routes: [string, string, Handler][] = [
   [
     "GET",
     "/v1/models",
-    (_req, fx) => {
+    (_req, fx, state) => {
+      if (state.fail === "401") {
+        return Response.json({ error: { message: "invalid api key (mock 401)" } }, { status: 401 });
+      }
+      if (state.fail === "html-models") return htmlPage();
       return Response.json({
         object: "list",
         data: fx.models.map((id) => ({
@@ -225,6 +262,14 @@ const routes: [string, string, Handler][] = [
         })),
       });
     },
+  ],
+  [
+    "GET",
+    "/models",
+    (_req, _fx, state) =>
+      state.fail === "html-models" || state.fail === "html-root"
+        ? htmlPage()
+        : Response.json({ error: { message: "no route: GET /models" } }, { status: 404 }),
   ],
   ["GET", "/health", () => Response.json({ ok: true })],
   // test tooling: e2e specs assert on the recorded request headers and the
@@ -236,11 +281,26 @@ const routes: [string, string, Handler][] = [
       return Response.json(stateSnapshot(state));
     },
   ],
+  // test tooling: flip failure injection at runtime ({"mode": null} clears)
+  [
+    "POST",
+    "/__fail",
+    async (req, _fx, state) => {
+      const body = (await req.json().catch(() => ({}))) as { mode?: unknown };
+      const mode = body.mode ?? null;
+      if (mode !== null && !FAIL_MODES.includes(mode as FailMode)) {
+        return Response.json({ error: `unknown fail mode: ${String(mode)}` }, { status: 400 });
+      }
+      state.fail = mode as FailMode | null;
+      return Response.json({ fail: state.fail });
+    },
+  ],
 ];
 
 export function createApp(
   fixture: MockFixture = loadFixture(),
   state: MockServerState = {
+    fail: null,
     lastHeaders: new Map(),
     inflight: 0,
   },
@@ -279,10 +339,12 @@ export interface MockServerOptions {
   /** Emulate CORS-hostile providers (openrouter, bifrost): no access-control-*
    * headers and OPTIONS preflight rejected with 403. Default stays CORS `*`. */
   noCors?: boolean;
+  /** start with a failure mode already active (see FailMode) */
+  fail?: FailMode;
 }
 
 export function startServer(port: number, fixture?: MockFixture, opts: MockServerOptions = {}) {
-  const state: MockServerState = { lastHeaders: new Map(), inflight: 0 };
+  const state: MockServerState = { fail: opts.fail ?? null, lastHeaders: new Map(), inflight: 0 };
   const app = createApp(fixture, state);
   return Bun.serve({
     port,
@@ -309,6 +371,9 @@ if (import.meta.main) {
     else params.set(arg, "");
   }
   const port = Number(params.get("port") ?? 9000);
-  const server = startServer(port, undefined, { noCors: params.has("no-cors") });
+  const server = startServer(port, undefined, {
+    noCors: params.has("no-cors"),
+    ...(params.get("fail") ? { fail: params.get("fail") as FailMode } : {}),
+  });
   console.log(`mock provider listening on http://localhost:${server.port}`);
 }
