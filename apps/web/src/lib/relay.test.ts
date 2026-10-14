@@ -93,6 +93,29 @@ describe("relayFetch", () => {
     expect(init.signal).toBe(ctrl.signal);
   });
 
+  it("passes FormData through untouched and never forwards a content-type for it", async () => {
+    const body = new FormData();
+    body.set("file", new Blob([new Uint8Array(1_200_000)], { type: "audio/wav" }), "audio.wav");
+    body.set("model", "whisper-1");
+    await relayFetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { authorization: "Bearer k", "content-type": "multipart/form-data" },
+      body,
+    });
+    const init = lastCall()[1] as RequestInit;
+    expect(init.body).toBe(body);
+    expect(init.headers).toEqual({ authorization: "Bearer k" });
+  });
+
+  it("sends FormData with no content-type when the caller sets none", async () => {
+    const body = new FormData();
+    body.set("model", "m");
+    await relayFetch(UPSTREAM, { method: "POST", body });
+    const init = lastCall()[1] as RequestInit;
+    expect(init.body).toBe(body);
+    expect(init.headers).toEqual({});
+  });
+
   it("defaults to GET when no method is given", async () => {
     await relayFetch(UPSTREAM);
     expect(lastCall()[1]?.method).toBeUndefined();
