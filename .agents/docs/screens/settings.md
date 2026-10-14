@@ -151,7 +151,14 @@ driver otherwise.
   wasm → device pack row, server → di-server pack row — cloud → tts
   endpoint fields) and the test row that synthesizes the localized
   test phrase into a minimal audio player (play/stop + linear
-  progress; speechSynthesis gets an estimated bar). Picks persist to
+  progress; speechSynthesis gets an estimated bar) with the measured
+  synth time ("{ms} ms") beside it. When the server drives tts the test
+  posts `POST /v1/voice/tts-test` so the configured server layer
+  (builtin kitten or remote endpoint) is the one measured; the in-browser
+  layer fails loudly when speechSynthesis or its voices are missing, and
+  a rejected `play()` surfaces as an error toast instead of silence.
+  Setting rows wrap their control under the text below ~48 rem of
+  content width rather than squeezing the player. Picks persist to
   `di.voice.sttEngine`/`di.voice.ttsEngine`; a stored `di.runtime-mode`
   migrates once ("server" → both layers "server").
 - Consent is point-of-need, never silent: `requestVoiceConsent()` arms

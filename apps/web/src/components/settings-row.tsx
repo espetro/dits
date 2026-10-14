@@ -13,13 +13,15 @@ export function SettingsRow(props: {
 }) {
   return (
     <Item size="sm" className="px-0">
-      <ItemContent>
+      <ItemContent className="min-w-48">
         <ItemTitle className="text-sm font-medium">{props.title}</ItemTitle>
         <ItemDescription className="text-xs text-muted-foreground">
           {props.description}
         </ItemDescription>
       </ItemContent>
-      {props.children ? <ItemActions>{props.children}</ItemActions> : null}
+      {props.children ? (
+        <ItemActions className="ml-auto flex-wrap justify-end">{props.children}</ItemActions>
+      ) : null}
     </Item>
   );
 }

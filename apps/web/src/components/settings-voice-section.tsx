@@ -16,7 +16,8 @@ import { $voiceModelsConsent, $voiceTtsEngine, requestVoiceConsent } from "../st
 import type { TtsLayerPick } from "../stores/voice";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
 import { WasmTts } from "../lib/voice/wasm-engines";
-import { testBrowserTts } from "../lib/settings-tests";
+import { DiError, errorDetail } from "../lib/errors";
+import { testBrowserTts, testServerTts } from "../lib/settings-tests";
 import { synthesizeSpeech as synthesizeEndpoint } from "../lib/agent/tts";
 import { encodeWav, encodeWavPcm16 } from "../lib/voice/wav";
 import { toast } from "sonner";
@@ -24,6 +25,8 @@ import { markSeamOp } from "../lib/seam-health";
 
 interface TestState {
   status: "idle" | "synth" | "ready";
+  /** measured synthesis time of the last test, when the layer reports it */
+  ms?: number;
 }
 
 /**
@@ -50,7 +53,7 @@ export function VoiceSection() {
   React.useEffect(
     () => () => {
       engine.current?.dispose();
-      speechSynthesis?.cancel();
+      globalThis.speechSynthesis?.cancel();
     },
     [],
   );
@@ -65,9 +68,15 @@ export function VoiceSection() {
     setTest({ status: "idle" });
     setClip(null);
     setBuiltin(false);
-    speechSynthesis?.cancel();
+    globalThis.speechSynthesis?.cancel();
     if (v === "wasm" && consent !== "granted") requestVoiceConsent();
   };
+
+  function reportTestError(err: unknown) {
+    const msg = errorDetail(intl, err);
+    markSeamOp("tts", false, msg);
+    toast.error(msg);
+  }
 
   /** really synthesize the test phrase through the resolved layer */
   async function runTest() {
@@ -76,13 +85,20 @@ export function VoiceSection() {
     setClip(null);
     setBuiltin(false);
     try {
+      let ms: number | undefined;
+      const t0 = performance.now();
       const engines = await resolveInstalledVoiceEngines();
-      if (engines.tts === "wasm") {
+      if (serverTest) {
+        const out = await testServerTts(phrase);
+        setClip(out.clip);
+        ms = out.ms;
+      } else if (engines.tts === "wasm") {
         const e = (engine.current ??= new WasmTts());
         const frames: Float32Array[] = [];
         for await (const chunk of e.speak(phrase)) frames.push(chunk);
         if (!frames.length) throw new Error("empty audio");
         setClip(new Blob([encodeWav(frames, 24_000).buffer as ArrayBuffer], { type: "audio/wav" }));
+        ms = Math.round(performance.now() - t0);
       } else if (engines.tts === "endpoint" && profile?.tts) {
         const pcm = await synthesizeEndpoint(profile.tts, phrase);
         if (!pcm.length) throw new Error("empty audio");
@@ -91,15 +107,16 @@ export function VoiceSection() {
             type: "audio/wav",
           }),
         );
+        ms = Math.round(performance.now() - t0);
       } else {
+        if (!globalThis.speechSynthesis?.getVoices().length) throw new DiError("tts.builtin");
         setBuiltin(true);
       }
-      setTest({ status: "ready" });
+      setTest({ status: "ready", ms });
       markSeamOp("tts", true);
     } catch (err) {
       setTest({ status: "idle" });
-      markSeamOp("tts", false, err instanceof Error ? err.message : String(err));
-      toast.error(err instanceof Error ? err.message : String(err));
+      reportTestError(err);
     }
   }
 
@@ -170,46 +187,46 @@ export function VoiceSection() {
         title={intl.formatMessage({ id: "settings.test" })}
         description={intl.formatMessage({ id: "settings.voice.sampleDesc" })}
       >
-        {serverTest ? (
-          <span className="text-xs text-muted-foreground">
-            <FormattedMessage id="settings.layer.serverOwned" />
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void runTest()}
-              disabled={test.status === "synth"}
-              aria-busy={test.status === "synth"}
-            >
-              {test.status === "synth" ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                  <FormattedMessage id="settings.testing" />
-                </>
-              ) : (
-                <FormattedMessage id="settings.voice.sampleCta" />
-              )}
-            </Button>
-            {test.status === "ready" && (
-              <AudioClipPlayer
-                src={clip ?? undefined}
-                onBuiltinStart={
-                  builtin
-                    ? () =>
-                        void testBrowserTts(
-                          intl.formatMessage({ id: "settings.voice.testPhrase" }),
-                        ).catch(() => undefined)
-                    : undefined
-                }
-                onBuiltinStop={() => speechSynthesis.cancel()}
-                estimatedMs={intl.formatMessage({ id: "settings.voice.testPhrase" }).length * 70}
-              />
+        <span className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void runTest()}
+            disabled={test.status === "synth"}
+            aria-busy={test.status === "synth"}
+          >
+            {test.status === "synth" ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                <FormattedMessage id="settings.testing" />
+              </>
+            ) : (
+              <FormattedMessage id="settings.voice.sampleCta" />
             )}
-          </span>
-        )}
+          </Button>
+          {test.status === "ready" && (
+            <AudioClipPlayer
+              src={clip ?? undefined}
+              onBuiltinStart={
+                builtin
+                  ? () =>
+                      void testBrowserTts(
+                        intl.formatMessage({ id: "settings.voice.testPhrase" }),
+                      ).catch(reportTestError)
+                  : undefined
+              }
+              onBuiltinStop={() => globalThis.speechSynthesis?.cancel()}
+              onError={reportTestError}
+              estimatedMs={intl.formatMessage({ id: "settings.voice.testPhrase" }).length * 70}
+            />
+          )}
+          {test.status === "ready" && test.ms !== undefined && (
+            <span className="text-xs tabular-nums text-muted-foreground">
+              <FormattedMessage id="settings.voice.sampleMs" values={{ ms: test.ms }} />
+            </span>
+          )}
+        </span>
       </SettingsRow>
     </div>
   );
