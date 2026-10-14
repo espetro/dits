@@ -1,10 +1,7 @@
+import type { EventSink } from "../events.ts";
 import { encodeWav } from "./wav.ts";
+import type { SttPort } from "./port.ts";
 import { providerEndpoint } from "@di/shared";
-
-/** Minimal in-process event sink the voice loop implements against the db. */
-export interface EventSink {
-  postEvent(sessionId: string, type: string, payload?: unknown): Promise<void>;
-}
 
 export interface WhisperSttOptions {
   baseUrl: string;
@@ -23,7 +20,7 @@ export interface WhisperSttOptions {
  * (field `file`, model from config). Non-streaming by design (v1 mode): the
  * client's VAD delimits utterances, we transcribe each completed one.
  */
-export class WhisperStt {
+export class WhisperStt implements SttPort {
   readonly label = "di_whisper_stt";
   private opts: WhisperSttOptions;
 

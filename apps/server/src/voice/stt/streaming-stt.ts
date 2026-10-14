@@ -1,12 +1,7 @@
-import type { EventSink } from "./whisper-stt.ts";
+import type { EventSink } from "../events.ts";
+import type { StreamingSttPort } from "./port.ts";
 import { encodePcmWav } from "./whisper-stt.ts";
 import { providerEndpoint } from "@di/shared";
-
-/** Incremental STT port: feed audio frames, finish() closes the utterance. */
-export interface StreamingSttPort {
-  feed(pcm: Uint8Array, opts?: { signal?: AbortSignal }): Promise<void>;
-  finish(opts?: { signal?: AbortSignal }): Promise<string>;
-}
 
 export interface StreamingWhisperSttOptions {
   baseUrl: string;

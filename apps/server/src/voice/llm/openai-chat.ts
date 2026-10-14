@@ -1,24 +1,6 @@
-import type { EventSink } from "./stt/whisper-stt.ts";
 import { anthropicMessagesUrl, providerEndpoint } from "@di/shared";
-
-/** OpenAI function-tool definition (name/description/parameters JSON schema). */
-export interface ToolDef {
-  name: string;
-  description: string;
-  parameters: Record<string, unknown>;
-}
-
-export interface LlmMessage {
-  role: "system" | "user" | "assistant" | "tool";
-  content: string;
-  tool_call_id?: string;
-  tool_calls?: { id: string; name: string; arguments: string }[];
-}
-
-export interface LlmResult {
-  content: string;
-  toolCalls: { name: string; args: Record<string, unknown> }[];
-}
+import type { EventSink } from "../events.ts";
+import type { LlmMessage, LlmPort, LlmResult, ToolDef } from "./port.ts";
 
 export interface OpenAiChatOptions {
   baseUrl: string;
@@ -49,7 +31,7 @@ export interface OpenAiChatOptions {
  * rides an OpenAI-compatible gateway (e.g. Bifrost) at the configured
  * base_url, so the same request shape is used for all providers.
  */
-export class OpenAiChatClient {
+export class OpenAiChatClient implements LlmPort {
   constructor(private opts: OpenAiChatOptions) {}
 
   async chat(

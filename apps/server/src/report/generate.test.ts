@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { generateReport } from "./generate";
 import type { ReportLlm } from "./generate";
-import type { LlmMessage, LlmResult } from "../voice/llm";
+import type { LlmMessage, LlmResult } from "../voice/llm/port";
 
 const sessionId = "075a126f-5808-4781-b4a8-caf1fba16b5b";
 const ctx = {

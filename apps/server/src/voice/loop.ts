@@ -27,37 +27,18 @@ import type { Db } from "../store/db";
 import { WavBuffer } from "./stt/wav.ts";
 import { WhisperStt } from "./stt/whisper-stt.ts";
 import { StreamingWhisperStt } from "./stt/streaming-stt.ts";
-import type { StreamingSttPort } from "./stt/streaming-stt.ts";
+import type { SttPort, StreamingSttPort } from "./stt/port.ts";
+import type { TtsPort } from "./tts/port.ts";
 import { PocketTts } from "./tts/pocket-tts.ts";
 import { BuiltinKittenTts, BuiltinSherpaStt } from "./builtin/engines.ts";
 import { requireRemoteStt, requireRemoteTts, sttProviderOf, ttsProviderOf } from "./providers.ts";
-import { OpenAiChatClient } from "./llm.ts";
-import type { LlmMessage, LlmResult, ToolDef } from "./llm.ts";
+import { OpenAiChatClient } from "./llm/openai-chat.ts";
+import type { LlmMessage, LlmPort, ToolDef } from "./llm/port.ts";
 
-/** Injectable voice pipeline pieces (tests stub these). */
-export interface VoiceStt {
-  transcribePcm(pcm: Uint8Array, opts?: { signal?: AbortSignal }): Promise<string>;
-}
-export interface VoiceTts {
-  synthesizeToPcm(text: string, opts?: { signal?: AbortSignal }): Promise<Uint8Array>;
-}
-export interface VoiceLlm {
-  chat(
-    messages: LlmMessage[],
-    tools?: readonly ToolDef[],
-    opts?: { signal?: AbortSignal },
-  ): Promise<LlmResult>;
-  /** Streaming variant for pipelined sentence TTS; falls back to chat() if absent. */
-  streamChat?(
-    messages: LlmMessage[],
-    tools?: readonly ToolDef[],
-    opts?: {
-      signal?: AbortSignal;
-      onFirstToken?: () => void;
-      onText?: (delta: string) => void;
-    },
-  ): Promise<LlmResult>;
-}
+/** Injectable voice pipeline pieces (tests stub these); aliases of the slice ports. */
+export type VoiceStt = SttPort;
+export type VoiceTts = TtsPort;
+export type VoiceLlm = LlmPort;
 
 export interface VoiceLoopDeps {
   sessionId: string;

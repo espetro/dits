@@ -1,4 +1,5 @@
-import type { EventSink } from "../stt/whisper-stt.ts";
+import type { EventSink } from "../events.ts";
+import type { TtsPort } from "./port.ts";
 import { decodeWav, resamplePcm16 } from "../stt/wav.ts";
 import { providerEndpoint } from "@di/shared";
 
@@ -28,7 +29,7 @@ export interface PocketTtsOptions {
  * provider returns WAV at a different sample rate, we nearest-neighbor
  * resample to 24k (mock returns 8k, we resample; pass-through at 24k).
  */
-export class PocketTts {
+export class PocketTts implements TtsPort {
   readonly label = "di_pocket_tts";
 
   constructor(private opts: PocketTtsOptions) {}
