@@ -3,6 +3,10 @@ import { Hono } from "hono";
 import type { Config } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
+import type { TtsTestPort } from "./routes";
+import { BuiltinKittenTts } from "../voice/builtin/engines";
+import { PocketTts } from "../voice/tts/pocket-tts";
+import { requireRemoteTts } from "../voice/providers";
 import { embeddingsClientFromConfig } from "../rag/ingest";
 import { OpenAiChatClient } from "../voice/llm";
 import { sttProviderOf, ttsProviderOf } from "../voice/providers";
@@ -16,11 +20,20 @@ export interface AppDeps {
   /** Embedded web UI assets; omitted in dev when apps/web/ is served separately. */
   webAssets?: { root: string; path: string };
   /** Test injection for the voice WS loop (stub STT/TTS/LLM). */
-  voiceDeps?: Pick<VoiceDeps, "loopFactory">;
+  voiceDeps?: Pick<VoiceDeps, "loopFactory"> & { ttsTest?: () => TtsTestPort };
+}
+
+/** Same adapter selection the voice loop makes, minus the per-session event sink. */
+function buildTtsTestPort(config: Config): TtsTestPort {
+  if (ttsProviderOf(config.tts) === "builtin")
+    return new BuiltinKittenTts({ dataDir: config.files.data_dir });
+  const remote = requireRemoteTts(config.tts);
+  return new PocketTts(remote);
 }
 
 export async function createApp(deps: AppDeps): Promise<Hono> {
   const app = new Hono();
+  let ttsTest: TtsTestPort | undefined;
 
   // Dev CORS: when the SPA runs under a vite dev server (different origin
   // from this API), the health probe and driver fetches are cross-origin.
@@ -54,6 +67,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
           tts: ttsProviderOf(deps.config.tts),
         },
         dataDir: deps.config.files.data_dir,
+        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= buildTtsTestPort(deps.config))),
       },
       reportLlm: new OpenAiChatClient({
         baseUrl: deps.config.llm.base_url,

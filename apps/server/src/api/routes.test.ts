@@ -528,3 +528,54 @@ describe("DELETE /sessions/:id and /data", () => {
     expect(await (await app.request("/v1/sessions")).json()).toEqual([]);
   });
 });
+
+describe("POST /voice/tts-test", () => {
+  async function makeTtsApp(tts?: () => { synthesizeToPcm(text: string): Promise<Uint8Array> }) {
+    const db = createDatabase(":memory:");
+    migrate(db);
+    const app = new Hono();
+    app.route(
+      "/v1",
+      apiRoutes(db, {
+        testMode: false,
+        voiceModels: {
+          providers: { stt: "builtin", tts: "builtin" },
+          dataDir: "/tmp/di-tts-test-unused",
+          tts,
+        },
+      }),
+    );
+    return app;
+  }
+  const post = (app: Hono, body: unknown) =>
+    app.request("/v1/voice/tts-test", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+  it("returns a wav with the measured synth time", async () => {
+    const app = await makeTtsApp(() => ({ synthesizeToPcm: async () => new Uint8Array(480) }));
+    const res = await post(app, { text: "hello" });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("audio/wav");
+    expect(Number(res.headers.get("x-synth-ms"))).toBeGreaterThanOrEqual(0);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    expect(bytes.byteLength).toBe(44 + 480);
+    expect(String.fromCharCode(...bytes.slice(0, 4))).toBe("RIFF");
+  });
+
+  it("rejects empty text and reports empty audio and adapter failures", async () => {
+    const empty = await makeTtsApp(() => ({ synthesizeToPcm: async () => new Uint8Array(0) }));
+    expect((await post(empty, { text: "  " })).status).toBe(400);
+    expect((await post(empty, { text: "hi" })).status).toBe(502);
+    const boom = await makeTtsApp(() => ({
+      synthesizeToPcm: async () => {
+        throw new Error("model missing");
+      },
+    }));
+    const res = await post(boom, { text: "hi" });
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as { error: string }).error).toBe("model missing");
+  });
+});

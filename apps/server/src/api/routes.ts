@@ -30,6 +30,7 @@ import {
   loadVectors,
 } from "../rag/ingest";
 import { retrieve } from "../rag/embeddings";
+import { encodeWav } from "../voice/stt/wav.ts";
 import {
   builtinModelsStatus,
   builtinPullProgress,
@@ -37,6 +38,14 @@ import {
   clearBuiltinModels,
   ensureBuiltinModels,
 } from "../voice/builtin/models.ts";
+
+/** The slice of a tts adapter the test route needs: text in, pcm16 mono 24k out. */
+export interface TtsTestPort {
+  synthesizeToPcm(text: string, opts?: { signal?: AbortSignal }): Promise<Uint8Array>;
+}
+
+const TTS_TEST_RATE = 24_000;
+const TTS_TEST_MAX_CHARS = 280;
 
 const TurnInputSchema = v.omit(TurnSchema, ["session_id"]);
 
@@ -121,6 +130,8 @@ export function apiRoutes(
     voiceModels?: {
       providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
       dataDir: string;
+      /** lazily builds the configured tts adapter (cached by the caller) for POST /voice/tts-test. */
+      tts?: () => TtsTestPort;
     };
     /** log file truncated by DELETE /data; empty/undefined = logging disabled. */
     logPath?: string;
@@ -528,6 +539,37 @@ export function apiRoutes(
       // idempotent: shares the inflight run with the boot warm / lazy boot
       await ensureBuiltinModels(voiceModels.dataDir, { modelIds: ids });
       return c.json(await status());
+    });
+
+    // desktop tts test: really synthesizes through the configured server
+    // layer (builtin kitten or remote endpoint) so the settings Test button
+    // measures the same path an interview uses
+    api.post("/voice/tts-test", async (c) => {
+      if (!voiceModels.tts)
+        return c.json({ error: "tts test unavailable", code: "tts_test_off" }, 503);
+      const body = (await c.req.json().catch(() => ({}))) as { text?: unknown };
+      const text =
+        typeof body.text === "string" ? body.text.trim().slice(0, TTS_TEST_MAX_CHARS) : "";
+      if (!text) return c.json({ error: "text required", code: "tts_test_bad_text" }, 400);
+      const startedAt = performance.now();
+      try {
+        const pcm = await voiceModels.tts().synthesizeToPcm(text, { signal: c.req.raw.signal });
+        if (pcm.byteLength === 0)
+          return c.json({ error: "tts returned no audio", code: "tts_empty" }, 502);
+        const wav = encodeWav([pcm], { sampleRate: TTS_TEST_RATE, channels: 1 });
+        return new Response(new Uint8Array(wav), {
+          headers: {
+            "content-type": "audio/wav",
+            "x-synth-ms": String(Math.round(performance.now() - startedAt)),
+            "access-control-expose-headers": "x-synth-ms",
+          },
+        });
+      } catch (err) {
+        return c.json(
+          { error: err instanceof Error ? err.message : String(err), code: "tts_failed" },
+          502,
+        );
+      }
     });
 
     api.delete("/voice/models", async (c) => {
