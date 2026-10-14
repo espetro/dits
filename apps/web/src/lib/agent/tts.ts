@@ -1,4 +1,4 @@
-import { TTS_SAMPLE_RATE } from "@di/shared";
+import { TTS_SAMPLE_RATE, providerEndpoint } from "@di/shared";
 import type { TtsEndpoint } from "@di/shared";
 import { DiError } from "../errors";
 
@@ -80,13 +80,12 @@ export async function synthesizeSpeech(
   signal?: AbortSignal,
   fetchImpl: typeof fetch = fetch,
 ): Promise<Uint8Array> {
-  const base = tts.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
   // see createOpenAiCompatibleModel: an empty Bearer still forces a CORS
   // preflight, which zero-key gateways without `authorization` in
   // access-control-allow-headers reject
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (tts.apiKey) headers["authorization"] = `Bearer ${tts.apiKey}`;
-  const res = await fetchImpl(`${base}/v1/audio/speech`, {
+  const res = await fetchImpl(providerEndpoint(tts.baseUrl, "/audio/speech"), {
     method: "POST",
     headers,
     body: JSON.stringify({

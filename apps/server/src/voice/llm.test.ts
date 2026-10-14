@@ -21,7 +21,7 @@ describe("OpenAiChatClient.chat", () => {
   it("posts the OpenAI request shape and parses content", async () => {
     let captured: { url: string; body: any; headers: Record<string, string> } | undefined;
     const llm = new OpenAiChatClient({
-      baseUrl: "http://fake.local/",
+      baseUrl: "http://fake.local/v1/",
       model: "mock-llm",
       apiKey: "sk-test",
       fetchImpl: fetchStub((url, init) => {

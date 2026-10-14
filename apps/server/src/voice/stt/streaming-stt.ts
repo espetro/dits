@@ -1,6 +1,6 @@
 import type { EventSink } from "./whisper-stt.ts";
 import { encodePcmWav } from "./whisper-stt.ts";
-import { providerUrl } from "../provider-url.ts";
+import { providerEndpoint } from "@di/shared";
 
 /** Incremental STT port: feed audio frames, finish() closes the utterance. */
 export interface StreamingSttPort {
@@ -119,7 +119,7 @@ export class StreamingWhisperStt implements StreamingSttPort {
     };
 
     void (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/audio/transcriptions?stream=true&model=${encodeURIComponent(this.opts.model)}`,
+      `${providerEndpoint(this.opts.baseUrl, "/audio/transcriptions")}?stream=true&model=${encodeURIComponent(this.opts.model)}`,
       {
         method: "POST",
         headers,
@@ -195,7 +195,7 @@ export class StreamingWhisperStt implements StreamingSttPort {
     const headers: Record<string, string> = {};
     if (this.opts.apiKey) headers.authorization = `Bearer ${this.opts.apiKey}`;
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/audio/transcriptions`,
+      providerEndpoint(this.opts.baseUrl, "/audio/transcriptions"),
       { method: "POST", headers, body: form, signal },
     );
     if (!res.ok) {

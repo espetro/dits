@@ -1,5 +1,5 @@
 import { encodeWav } from "./wav.ts";
-import { providerUrl } from "../provider-url.ts";
+import { providerEndpoint } from "@di/shared";
 
 /** Minimal in-process event sink the voice loop implements against the db. */
 export interface EventSink {
@@ -66,7 +66,7 @@ export class WhisperStt {
       headers.authorization = `Bearer ${this.opts.apiKey}`;
     }
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/audio/transcriptions`,
+      providerEndpoint(this.opts.baseUrl, "/audio/transcriptions"),
       { method: "POST", headers, body: form, signal: abortSignal },
     );
     const latency_ms = Date.now() - startedAt;

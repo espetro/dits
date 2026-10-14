@@ -1,5 +1,5 @@
 import type { EventSink } from "./stt/whisper-stt.ts";
-import { providerUrl } from "./provider-url.ts";
+import { anthropicMessagesUrl, providerEndpoint } from "@di/shared";
 
 /** OpenAI function-tool definition (name/description/parameters JSON schema). */
 export interface ToolDef {
@@ -75,7 +75,7 @@ export class OpenAiChatClient {
       headers.authorization = `Bearer ${this.opts.apiKey}`;
     }
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/chat/completions`,
+      providerEndpoint(this.opts.baseUrl, "/chat/completions"),
       {
         method: "POST",
         headers,
@@ -176,19 +176,16 @@ export class OpenAiChatClient {
           }
         : {}),
     };
-    const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/messages`,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(this.opts.apiKey ? { "x-api-key": this.opts.apiKey } : {}),
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify(body),
-        signal: opts?.signal,
+    const res = await (this.opts.fetchImpl ?? fetch)(anthropicMessagesUrl(this.opts.baseUrl), {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(this.opts.apiKey ? { "x-api-key": this.opts.apiKey } : {}),
+        "anthropic-version": "2023-06-01",
       },
-    );
+      body: JSON.stringify(body),
+      signal: opts?.signal,
+    });
     const latency_ms = Date.now() - startedAt;
     if (!res.ok) {
       const errBody = await res.text().catch(() => "");
@@ -256,7 +253,7 @@ export class OpenAiChatClient {
       headers.authorization = `Bearer ${this.opts.apiKey}`;
     }
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/chat/completions`,
+      providerEndpoint(this.opts.baseUrl, "/chat/completions"),
       {
         method: "POST",
         headers,

@@ -1,3 +1,4 @@
+import { providerEndpoint } from "@di/shared";
 import type { ProviderEndpoint } from "@di/shared";
 import type { SttEngine, SttEngineCallbacks } from "./engines";
 import { encodeWav } from "./wav";
@@ -38,8 +39,7 @@ export class EndpointStt implements SttEngine {
       "audio.wav",
     );
     body.set("model", this.endpoint.model);
-    const base = this.endpoint.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-    const res = await fetch(`${base}/v1/audio/transcriptions`, {
+    const res = await fetch(providerEndpoint(this.endpoint.baseUrl, "/audio/transcriptions"), {
       method: "POST",
       headers: this.endpoint.apiKey
         ? { authorization: `Bearer ${this.endpoint.apiKey}` }

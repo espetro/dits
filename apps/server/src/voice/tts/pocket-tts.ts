@@ -1,6 +1,6 @@
 import type { EventSink } from "../stt/whisper-stt.ts";
 import { decodeWav, resamplePcm16 } from "../stt/wav.ts";
-import { providerUrl } from "../provider-url.ts";
+import { providerEndpoint } from "@di/shared";
 
 const SAMPLE_RATE = 24_000;
 
@@ -65,7 +65,7 @@ export class PocketTts {
       .catch((err) => console.warn(`[voice] failed to log tts.request: ${err}`));
     const startedAt = Date.now();
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/audio/speech`,
+      providerEndpoint(this.opts.baseUrl, "/audio/speech"),
       {
         method: "POST",
         headers,
