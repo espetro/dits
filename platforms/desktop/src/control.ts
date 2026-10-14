@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 import { dashboardHtml } from "./dashboard";
+import { resetDesktopData } from "./reset";
 import { tailLog } from "./logbuffer";
 import {
   appUrl,
@@ -88,6 +89,16 @@ export function startControlServer(deps: ControlDeps): { port: number } {
       }
       if (req.method === "POST" && pathname === "/api/stop") {
         await stopServer();
+        return json(stateBody());
+      }
+      // destructive factory reset (db, models, log, config + keys); the
+      // dashboard asks for confirmation before it ever calls this
+      if (req.method === "POST" && pathname === "/api/reset") {
+        try {
+          await resetDesktopData();
+        } catch (e) {
+          return json({ error: e instanceof Error ? e.message : String(e) }, 500);
+        }
         return json(stateBody());
       }
       if (req.method === "POST" && pathname === "/api/open") {
