@@ -104,21 +104,19 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect.poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 }).toBe(
-      fixture.models.length,
-    );
-    const options = await page.locator("#llm-models option").evaluateAll((els) =>
-      els.map((el) => el.getAttribute("value")),
-    );
+    await expect
+      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
+      .toBe(fixture.models.length);
+    const options = await page
+      .locator("#llm-models option")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("value")));
     expect(options).toEqual(fixture.models);
 
     // the request went through the relay: recorded on the mock, no preflight
     // was ever needed. CORS blocks surface as console errors; none allowed.
     const state = await mockState(NOCOR_MOCK_PORT);
     expect(state.lastHeaders["/v1/models"]).toBeTruthy();
-    expect(
-      errors.filter((e) => /blocked by CORS/i.test(e)),
-    ).toEqual([]);
+    expect(errors.filter((e) => /blocked by CORS/i.test(e))).toEqual([]);
   });
 
   test("dropdown populates via relay with key, no-CORS upstream", async ({ page }) => {
@@ -131,9 +129,9 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect.poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 }).toBe(
-      fixture.models.length,
-    );
+    await expect
+      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
+      .toBe(fixture.models.length);
 
     // authorization survives the relay hop (header allowlist forwards it)
     const state = await mockState(NOCOR_MOCK_PORT);
@@ -234,9 +232,9 @@ test.describe("browser-direct fallback (no di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect.poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 }).toBe(
-      fixture.models.length,
-    );
+    await expect
+      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
+      .toBe(fixture.models.length);
     expect(errors.filter((e) => /blocked by CORS/i.test(e))).toEqual([]);
   });
 });

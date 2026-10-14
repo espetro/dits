@@ -48,7 +48,11 @@ export function makeWav(): Uint8Array {
   return new Uint8Array(buf);
 }
 
-type Handler = (req: Request, fixture: MockFixture, state: MockServerState) => Response | Promise<Response>;
+type Handler = (
+  req: Request,
+  fixture: MockFixture,
+  state: MockServerState,
+) => Response | Promise<Response>;
 
 /** Test-tooling state: last request headers per path + live chat stream count. */
 export interface MockServerState {
@@ -234,10 +238,13 @@ const routes: [string, string, Handler][] = [
   ],
 ];
 
-export function createApp(fixture: MockFixture = loadFixture(), state: MockServerState = {
-  lastHeaders: new Map(),
-  inflight: 0,
-}) {
+export function createApp(
+  fixture: MockFixture = loadFixture(),
+  state: MockServerState = {
+    lastHeaders: new Map(),
+    inflight: 0,
+  },
+) {
   return {
     fetch(req: Request): Response | Promise<Response> {
       recordHeaders(state, req);
