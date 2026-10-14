@@ -51,9 +51,16 @@ interface OpenAiUsage {
   completion_tokens?: number;
 }
 
+interface OpenAiStreamError {
+  message?: string;
+  code?: string | number;
+}
+
 interface OpenAiStreamChunk {
   choices?: OpenAiStreamChoice[];
   usage?: OpenAiUsage;
+  /** in-band gateway/upstream error delivered inside a 200 SSE stream */
+  error?: OpenAiStreamError;
 }
 
 /** Normalize a base URL like the server's providerUrl() does: strip trailing /v1. */
@@ -240,6 +247,7 @@ export function createOpenAiCompatibleModel(
         },
       };
       let sawTextStart = false;
+      let streamError: DiError | null = null;
 
       const stream = new ReadableStream<LanguageModelV3StreamPart>({
         async start(controller) {
@@ -260,6 +268,17 @@ export function createOpenAiCompatibleModel(
                 try {
                   chunk = JSON.parse(payload);
                 } catch {
+                  continue;
+                }
+                if (chunk.error) {
+                  // some gateways surface upstream failures only in-band, on
+                  // a 200 stream: without this the stream ends empty and the
+                  // caller misreads it as a config problem
+                  streamError = new DiError(
+                    "llm.chat",
+                    { status: 0 },
+                    `llm chat stream error: ${chunk.error.message ?? "unknown"}`,
+                  );
                   continue;
                 }
                 if (chunk.usage) {
@@ -291,6 +310,10 @@ export function createOpenAiCompatibleModel(
             }
           } finally {
             reader.releaseLock?.();
+          }
+          if (streamError) {
+            controller.error(streamError);
+            return;
           }
           if (sawTextStart) controller.enqueue({ type: "text-end", id: textId });
           const { calls: finished, hasTools } = tools.finish();

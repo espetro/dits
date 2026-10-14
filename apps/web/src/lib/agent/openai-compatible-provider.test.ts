@@ -158,6 +158,25 @@ describe("openai-compatible provider", () => {
     await expect(model.doStream({ prompt: PROMPT } as never)).rejects.toThrow("500");
   });
 
+  it("errors the stream on an in-band SSE error chunk (200 stream)", async () => {
+    // gateways can surface upstream failures only in-band, on a 200 stream;
+    // without this the stream ends empty and callers misread it as invalid config
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        sseResponse([{ error: { message: "upstream quota exceeded", code: 429 } }]),
+      );
+    const model = createOpenAiCompatibleModel(PROFILE, {
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    const { stream } = await model.doStream({ prompt: PROMPT } as never);
+    const parts: any[] = [];
+    await expect(async () => {
+      for await (const p of stream) parts.push(p);
+    }).rejects.toThrow("upstream quota exceeded");
+    expect(parts.some((p) => p.type === "text-delta")).toBe(false);
+  });
+
   it("doGenerate accumulates a streamed completion", async () => {
     const fetchMock = vi
       .fn()
