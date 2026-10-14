@@ -48,7 +48,34 @@ export function makeWav(): Uint8Array {
   return new Uint8Array(buf);
 }
 
-type Handler = (req: Request, fixture: MockFixture) => Response | Promise<Response>;
+type Handler = (req: Request, fixture: MockFixture, state: MockServerState) => Response | Promise<Response>;
+
+/** Test-tooling state: last request headers per path + live chat stream count. */
+export interface MockServerState {
+  /** lowercased header snapshot of the most recent request per path */
+  lastHeaders: Map<string, Record<string, string>>;
+  /** in-flight POST /v1/chat/completions requests (streams not yet closed) */
+  inflight: number;
+}
+
+function recordHeaders(state: MockServerState, req: Request): void {
+  const headers: Record<string, string> = {};
+  req.headers.forEach((value, key) => {
+    headers[key.toLowerCase()] = value;
+  });
+  state.lastHeaders.set(new URL(req.url).pathname, headers);
+}
+
+/** Snapshot helper for /__state responses. */
+export function stateSnapshot(state: MockServerState): {
+  lastHeaders: Record<string, Record<string, string>>;
+  inflight: number;
+} {
+  return {
+    lastHeaders: Object.fromEntries(state.lastHeaders),
+    inflight: state.inflight,
+  };
+}
 
 /** Deterministic embedding: 64-dim token-hash bag-of-words, L2-normalized. */
 export function mockEmbed(text: string, dims = 64): number[] {
@@ -87,7 +114,8 @@ const routes: [string, string, Handler][] = [
   [
     "POST",
     "/v1/chat/completions",
-    async (req, fx) => {
+    async (req, fx, state) => {
+      state.inflight++;
       const body = (await req.json().catch(() => ({}))) as {
         stream?: boolean;
         messages?: { content?: string }[];
@@ -108,6 +136,7 @@ const routes: [string, string, Handler][] = [
         });
       }
       if (!body.stream) {
+        state.inflight--;
         return Response.json({
           id: "chatcmpl-mock",
           object: "chat.completion",
@@ -124,9 +153,13 @@ const routes: [string, string, Handler][] = [
         });
       }
       // real sse: the browser llm client always requests stream:true, so
-      // evals/e2e exercise the same parse path as a live provider.
+      // evals/e2e exercise the same parse path as a live provider. inflight
+      // drains when the stream finishes, errors or the client cancels.
       const encoder = new TextEncoder();
       const stream = new ReadableStream<Uint8Array>({
+        cancel() {
+          state.inflight--;
+        },
         start(controller) {
           const send = (obj: unknown) =>
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
@@ -149,6 +182,7 @@ const routes: [string, string, Handler][] = [
           send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] });
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
+          state.inflight--;
         },
       });
       return new Response(stream, {
@@ -189,15 +223,28 @@ const routes: [string, string, Handler][] = [
     },
   ],
   ["GET", "/health", () => Response.json({ ok: true })],
+  // test tooling: e2e specs assert on the recorded request headers and the
+  // in-flight chat count (abort propagation) via this snapshot
+  [
+    "GET",
+    "/__state",
+    (_req, _fx, state) => {
+      return Response.json(stateSnapshot(state));
+    },
+  ],
 ];
 
-export function createApp(fixture: MockFixture = loadFixture()) {
+export function createApp(fixture: MockFixture = loadFixture(), state: MockServerState = {
+  lastHeaders: new Map(),
+  inflight: 0,
+}) {
   return {
     fetch(req: Request): Response | Promise<Response> {
+      recordHeaders(state, req);
       const url = new URL(req.url);
       for (const [method, path, handler] of routes) {
         if (req.method === method && url.pathname === path) {
-          return handler(req, fixture);
+          return handler(req, fixture, state);
         }
       }
       return Response.json(
@@ -228,7 +275,8 @@ export interface MockServerOptions {
 }
 
 export function startServer(port: number, fixture?: MockFixture, opts: MockServerOptions = {}) {
-  const app = createApp(fixture);
+  const state: MockServerState = { lastHeaders: new Map(), inflight: 0 };
+  const app = createApp(fixture, state);
   return Bun.serve({
     port,
     async fetch(req) {

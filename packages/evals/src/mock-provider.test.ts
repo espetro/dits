@@ -95,3 +95,71 @@ describe("mock provider cors", () => {
     expect(preflight.headers.get("access-control-allow-origin")).toBeNull();
   });
 });
+
+describe("mock provider state endpoint", () => {
+  it("/__state records the last request headers per path", async () => {
+    await fetch(`${base}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer test-key" },
+      body: JSON.stringify({
+        model: "mock-llm",
+        messages: [{ role: "user", content: "hi" }],
+      }),
+    });
+    const res = await fetch(`${base}/__state`);
+    const state = (await res.json()) as {
+      lastHeaders: Record<string, Record<string, string>>;
+      inflight: number;
+    };
+    expect(state.lastHeaders["/v1/chat/completions"]?.authorization).toBe("Bearer test-key");
+    expect(state.inflight).toBe(0);
+  });
+
+  it("inflight drains to zero after a streamed response completes", async () => {
+    const res = await fetch(`${base}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "mock-llm",
+        stream: true,
+        messages: [{ role: "user", content: "hi" }],
+      }),
+    });
+    expect(res.body).toBeTruthy();
+    // drain the stream to completion
+    const reader = res.body!.getReader();
+    while (true) {
+      const { done } = await reader.read();
+      if (done) break;
+    }
+    const state = (await (await fetch(`${base}/__state`)).json()) as { inflight: number };
+    expect(state.inflight).toBe(0);
+  });
+
+  it("inflight drains to zero when the client aborts mid-stream", async () => {
+    const ctrl = new AbortController();
+    const res = await fetch(`${base}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "mock-llm",
+        stream: true,
+        messages: [{ role: "user", content: "hi" }],
+      }),
+      signal: ctrl.signal,
+    });
+    const reader = res.body!.getReader();
+    await reader.read();
+    ctrl.abort();
+    await reader.cancel().catch(() => undefined);
+    // the cancel hook is asynchronous; poll briefly for the drain
+    for (let i = 0; i < 50; i++) {
+      const state = (await (await fetch(`${base}/__state`)).json()) as {
+        inflight: number;
+      };
+      if (state.inflight === 0) return;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    throw new Error("inflight never drained after abort");
+  });
+});
