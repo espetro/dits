@@ -496,3 +496,35 @@ describe("POST /sessions/:id/report", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("DELETE /sessions/:id and /data", () => {
+  it("deletes one session with its children and 404s afterwards", async () => {
+    const app = await makeApp();
+    const id = await makeSession(app);
+    const other = await makeSession(app);
+    await app.request(`/v1/sessions/${id}/tools`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ editor: "x" }),
+    });
+    expect((await app.request(`/v1/sessions/${id}`, { method: "DELETE" })).status).toBe(204);
+    expect((await app.request(`/v1/sessions/${id}`)).status).toBe(404);
+    expect((await app.request(`/v1/sessions/${id}`, { method: "DELETE" })).status).toBe(404);
+    expect((await app.request(`/v1/sessions/${other}`)).status).toBe(200);
+  });
+
+  it("DELETE /data wipes every session and reports the count", async () => {
+    const app = await makeApp();
+    await makeSession(app);
+    const id = await makeSession(app);
+    await app.request(`/v1/sessions/${id}/tools`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ editor: "x" }),
+    });
+    const res = await app.request("/v1/data", { method: "DELETE" });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, sessions: 2 });
+    expect(await (await app.request("/v1/sessions")).json()).toEqual([]);
+  });
+});

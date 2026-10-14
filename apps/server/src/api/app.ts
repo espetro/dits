@@ -47,6 +47,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
       testMode: deps.testMode,
       embeddings: embeddingsClientFromConfig(deps.config.embeddings),
       documents: deps.config.documents,
+      logPath: deps.config.files.log_path,
       voiceModels: {
         providers: {
           stt: sttProviderOf(deps.config.stt),

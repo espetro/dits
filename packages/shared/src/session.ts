@@ -89,3 +89,11 @@ export const SessionEventSchema = v.object({
   at: v.pipe(v.string(), v.isoTimestamp()),
 });
 export type SessionEvent = v.InferOutput<typeof SessionEventSchema>;
+
+/** DELETE /v1/data: wipes all server-side interview data (sessions, turns, reports, documents). */
+export const DataResetResponseSchema = v.object({
+  ok: v.literal(true),
+  /** number of sessions removed */
+  sessions: v.pipe(v.number(), v.integer(), v.minValue(0)),
+});
+export type DataResetResponse = v.InferOutput<typeof DataResetResponseSchema>;

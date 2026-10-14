@@ -16,10 +16,12 @@ import {
 } from "@di/shared";
 import { vValidator } from "@hono/valibot-validator";
 import type { Db } from "../store/db";
-import type { Config } from "@di/shared";
+import type { Config, DataResetResponse } from "@di/shared";
+import { writeFile } from "node:fs/promises";
 import type { ReportLlm } from "../report/generate";
 import { generateReport } from "../report/generate";
 import { testRoutes } from "./test-mode";
+import { deleteAllData, deleteSession } from "../store/reset";
 import {
   CapError,
   deleteDocument,
@@ -120,6 +122,8 @@ export function apiRoutes(
       providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
       dataDir: string;
     };
+    /** log file truncated by DELETE /data; empty/undefined = logging disabled. */
+    logPath?: string;
   },
 ): Hono {
   const api = new Hono();
@@ -206,6 +210,23 @@ export function apiRoutes(
         tools: parseSessionTools(row.tools),
       }),
     );
+  });
+
+  api.delete("/sessions/:id", async (c) => {
+    const ok = await deleteSession(db, c.req.param("id"));
+    return ok ? c.body(null, 204) : c.json({ error: "not found", code: "not_found" }, 404);
+  });
+
+  /**
+   * Full server-side reset: every interview row, the builtin voice model
+   * cache and the log file. Destructive; the web Settings "Data" pane is the
+   * only caller and gates it behind a typed confirmation.
+   */
+  api.delete("/data", async (c) => {
+    const sessions = await deleteAllData(db);
+    if (opts.voiceModels) await clearBuiltinModels(opts.voiceModels.dataDir);
+    if (opts.logPath) await writeFile(opts.logPath, "").catch(() => undefined);
+    return c.json({ ok: true as const, sessions } satisfies DataResetResponse);
   });
 
   api.post("/sessions/:id/turns", vValidator("json", TurnInputSchema), async (c) => {
