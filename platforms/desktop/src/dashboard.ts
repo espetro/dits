@@ -1,3 +1,5 @@
+import { createResetFlow } from "./resetflow";
+
 /**
  * Dashboard markup for the control shell. Uses the app's design system
  * (theme.css tokens: cream ground, espresso ink, persimmon accent, Fraunces
@@ -294,40 +296,20 @@ export function dashboardHtml(): string {
 
   $("open").onclick = () => post("open");
 
-  // two-step destructive reset: first click arms, second click calls the api
-  let armed = false;
-  const disarm = () => {
-    armed = false;
-    $("reset").textContent = "reset all data…";
-    $("resetcancel").hidden = true;
-  };
-  $("resetcancel").onclick = () => { disarm(); $("resetmsg").textContent = ""; };
-  $("reset").onclick = async () => {
-    if (!armed) {
-      armed = true;
-      $("reset").textContent = "yes, erase everything";
-      $("resetcancel").hidden = false;
-      $("resetmsg").textContent = "this deletes the database, models, logs, config and keys. it cannot be undone.";
-      return;
-    }
-    disarm();
-    $("reset").disabled = true;
-    $("resetmsg").textContent = "resetting…";
-    try {
-      const res = await fetch("/api/reset", { method: "POST" });
-      if (res.ok) {
-        $("resetmsg").textContent = "all data erased";
-      } else {
-        let m = "reset failed";
-        try { m = (await res.json()).error || m; } catch {}
-        $("resetmsg").textContent = "reset failed: " + m;
-      }
-    } catch (e) {
-      $("resetmsg").textContent = "reset failed: control api unreachable";
-    }
-    $("reset").disabled = false;
-    await refresh();
-  };
+  // two-step destructive reset; state machine lives in resetflow.ts
+  const createResetFlow = ${createResetFlow.toString()};
+  const resetFlow = createResetFlow({
+    fetch: (path, init) => fetch(path, init),
+    render: (v) => {
+      $("reset").textContent = v.label;
+      $("reset").disabled = v.disabled;
+      $("resetcancel").hidden = v.cancelHidden;
+      $("resetmsg").textContent = v.message;
+    },
+    afterReset: refresh,
+  });
+  $("resetcancel").onclick = () => resetFlow.cancel();
+  $("reset").onclick = () => resetFlow.click();
   $("copylog").onclick = async () => {
     if (!lastLogPath) return;
     try {
