@@ -1,3 +1,4 @@
+import type { SttEngine, SttEngineCallbacks } from "../stt/port";
 import type { TtsEngine } from "../tts/port";
 import { $voiceModelsConsent, $voiceSttEngine, $voiceTtsEngine } from "../../stores/voice";
 import { $providerProfile } from "../runtime";
@@ -25,25 +26,7 @@ import {
  * which case the seam falls back to the auto chain.
  */
 
-export interface SttEngineCallbacks {
-  onFinal(text: string): void;
-  onInterim(text: string): void;
-  onSpeechStart(): void;
-}
-
-export interface SttEngine {
-  start(opts: SttEngineCallbacks): Promise<void>;
-  /** 16kHz mono Float32 frames straight from MicCaptureImpl. */
-  feed(frame: Float32Array): void;
-  /**
-   * Utterance boundary (the main-thread vad fires this on speech end):
-   * drain the stream and emit onFinal with whatever was heard.
-   */
-  flush(): Promise<void>;
-  stop(): Promise<void>;
-}
-
-export type { TtsEngine };
+export type { SttEngine, SttEngineCallbacks, TtsEngine };
 export type SttEngineId = "wasm" | "builtin" | "endpoint";
 export type TtsEngineId = "wasm" | "builtin" | "endpoint";
 

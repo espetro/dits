@@ -1,7 +1,8 @@
 import { providerEndpoint } from "@di/shared";
 import type { ProviderEndpoint } from "@di/shared";
-import type { SttEngine, SttEngineCallbacks } from "./engines";
-import { encodeWav } from "./wav";
+import { relayOrDirectFetch } from "../../relay";
+import { encodeWav } from "../../voice/wav";
+import type { SttEngine, SttEngineCallbacks } from "../port";
 
 /**
  * Cloud stt seam: an OpenAI-compatible /v1/audio/transcriptions endpoint.
@@ -39,13 +40,18 @@ export class EndpointStt implements SttEngine {
       "audio.wav",
     );
     body.set("model", this.endpoint.model);
-    const res = await fetch(providerEndpoint(this.endpoint.baseUrl, "/audio/transcriptions"), {
-      method: "POST",
-      headers: this.endpoint.apiKey
-        ? { authorization: `Bearer ${this.endpoint.apiKey}` }
-        : undefined,
-      body,
-    });
+    // relay-aware like the llm: same-origin through the di server when
+    // active, browser-direct otherwise
+    const res = await relayOrDirectFetch(this.endpoint.baseUrl)(
+      providerEndpoint(this.endpoint.baseUrl, "/audio/transcriptions"),
+      {
+        method: "POST",
+        headers: this.endpoint.apiKey
+          ? { authorization: `Bearer ${this.endpoint.apiKey}` }
+          : undefined,
+        body,
+      },
+    );
     if (!res.ok) throw new Error(`stt endpoint ${res.status}`);
     const json: unknown = await res.json();
     const text =

@@ -18,9 +18,7 @@ import { $micDeviceId } from "../stores/devices";
 import { $voiceModelsConsent, $voiceSttEngine, requestVoiceConsent } from "../stores/voice";
 import type { SttLayerPick } from "../stores/voice";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
-import { WasmStt } from "../lib/voice/wasm-engines";
-import { EndpointStt } from "../lib/voice/endpoint-stt";
-import { hasBrowserStt, startEngineSttTest, startLiveStt } from "../lib/settings-tests";
+import { EndpointStt, WasmStt, hasBrowserStt, startEngineSttTest, startLiveStt } from "../lib/stt";
 import { codeMessage, errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
 

@@ -13,7 +13,7 @@ import { synthesizeSpeech } from "../tts";
 import { resolveInstalledVoiceEngines } from "./engines";
 import type { ResolvedVoiceEngines, SttEngine, TtsEngine } from "./engines";
 import { WasmStt, WasmTts } from "./wasm-engines";
-import { EndpointStt } from "./endpoint-stt";
+import { EndpointStt } from "../stt";
 import { startCapture } from "./capture";
 import type { MicCapture } from "./capture";
 import { createVadGate } from "./vad";
