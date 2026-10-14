@@ -116,12 +116,23 @@ driver otherwise.
   show/hide toggle — the saved-key placeholder is redactKey-masked,
   never raw — model datalist, free-provider callout) plus an
   incomplete alert; the test row streams a
-  real one-word completion into a read-only textarea.
-  The model datalist probes `${base}/v1/models` once the
-  section is enabled and a base url is set (600ms debounce,
-  silent failure leaves the field free-text; no api key needed):
-  through the server relay (`/v1/relay`) when the di server is
-  reachable, so keyless gateways (bifrost) and CORS-hostless
+  real one-word completion into a read-only textarea; any failure
+  (http status, relay 502, in-band sse error) shows its upstream detail
+  in the status line, and only a genuinely empty successful stream says
+  "fields invalid". Test is enabled for keyless local hosts (loopback,
+  private network) once url and model are set.
+  The base url is authoritative: only trailing slashes are trimmed, then
+  `/models` and `/chat/completions` are appended; no `/v1` is stripped
+  or injected (zAI `/v4`, google `/v1beta/openai`, openrouter `/api/v1`).
+  The model datalist probes `${base}/models` once the
+  section is enabled and a base url parses (600ms debounce, re-run when
+  the server probe settles; the model field always stays free-text).
+  A failed probe renders its reason under the model field (http status,
+  "not a model list", "network or CORS", unexpected shape) and, for html
+  or 404 answers, suggests a base url candidate (`/v1`, `/v4`,
+  `/api/v1`) that does serve JSON; the hint is never applied silently.
+  Probes go through the server relay (`/v1/relay`) when the di server is
+  reachable, so keyless gateways (bifrost) and CORS-hostile
   endpoints (openrouter) still populate; browser-direct on the
   public site build, which requires a CORS-enabled endpoint. Voice: tts
   layer select mirroring Hearing (same ModelPackFiles block —

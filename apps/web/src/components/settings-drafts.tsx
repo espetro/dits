@@ -1,11 +1,13 @@
 import * as React from "react";
 import * as v from "valibot";
+import { useIntl } from "react-intl";
 
 import { ProviderSectionsSchema } from "@di/shared";
 import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
-import { $providerProfile } from "../lib/runtime";
+import { $providerProfile, $serverReachable } from "../lib/runtime";
 import { isDemoLlm } from "../lib/demo-llm";
-import { relayOrDirectFetch } from "../lib/relay";
+import { errorDetail } from "../lib/errors";
+import { probeModels } from "../lib/settings-tests";
 import { useSsrStore } from "../lib/ssr";
 
 /**
@@ -92,50 +94,67 @@ export function useSettingsDrafts(): SettingsDrafts {
   return ctx;
 }
 
+export interface ModelOptions {
+  options: string[];
+  /** localized reason the list is empty; null when fine or not probed. */
+  error: string | null;
+}
+
 /**
  * /models poll for a draft's Model ID datalist (custom endpoint mode).
- * Failures are silent: the field stays free-text.
+ * Failures never block: the field stays free-text, but the reason is
+ * surfaced next to it. Re-runs when the server probe settles, since the
+ * relay choice depends on it.
  */
-export function useModelOptions(draft: SectionDraft): string[] {
-  const [modelOptions, setModelOptions] = React.useState<string[]>([]);
+export function useModelOptions(draft: SectionDraft): ModelOptions {
+  const intl = useIntl();
+  const reachable = useSsrStore($serverReachable, null);
+  const [state, setState] = React.useState<ModelOptions>({ options: [], error: null });
   React.useEffect(() => {
-    // keyless gateways (bifrost) probe too: relay mode has no preflight,
-    // and browser-direct keyless still works when the gateway allows it
-    if (!draft.enabled || !draft.baseUrl) {
-      setModelOptions([]);
+    if (!draft.enabled || !draft.baseUrl || !URL.canParse(draft.baseUrl)) {
+      setState({ options: [], error: null });
       return;
     }
     let cancelled = false;
     const timer = setTimeout(() => {
-      const base = draft.baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-      // keyless must send no authorization header at all (empty Bearer
-      // forces a CORS preflight some gateways reject; relay adds none)
-      const headers: Record<string, string> = {};
-      if (draft.apiKey) headers["authorization"] = `Bearer ${draft.apiKey}`;
-      relayOrDirectFetch(draft.baseUrl)(`${base}/v1/models`, { headers })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((json: { data?: Array<{ id?: string }> } | null) => {
-          if (cancelled || !json) return;
-          const ids = (json.data ?? [])
-            .map((m) => m.id ?? "")
-            .filter(Boolean)
-            .sort();
-          setModelOptions(ids);
-        })
-        .catch(() => undefined);
+      probeModels(draft).then(
+        (options) => {
+          if (!cancelled) setState({ options, error: null });
+        },
+        (err: unknown) => {
+          if (!cancelled) setState({ options: [], error: errorDetail(intl, err) });
+        },
+      );
     }, 600);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [draft.enabled, draft.baseUrl, draft.apiKey]);
-  return modelOptions;
+    // intl identity is stable per locale; draft fields are the real inputs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft.enabled, draft.baseUrl, draft.apiKey, reachable]);
+  return state;
+}
+
+/** Loopback / private-network hosts: local gateways (ollama, bifrost) run keyless. */
+export function isLocalHost(baseUrl: string): boolean {
+  if (!URL.canParse(baseUrl)) return false;
+  const host = new URL(baseUrl).hostname;
+  return (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host === "127.0.0.1" ||
+    host === "[::1]" ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host)
+  );
 }
 
 /** True when an enabled remote-section draft is missing fields (never persisted). */
 export function sectionIncomplete(key: SectionKey, draft: SectionDraft): boolean {
   const isUrl = (s: string): boolean => URL.canParse(s);
-  const keyMissing = !draft.apiKey && !(key === "llm" && isDemoLlm(draft.baseUrl));
+  const keyMissing =
+    !draft.apiKey && !(key === "llm" && isDemoLlm(draft.baseUrl)) && !isLocalHost(draft.baseUrl);
   return (
     draft.enabled &&
     (key === "llm" ? draft.llmMode === "remote" : true) &&
@@ -204,7 +223,7 @@ function buildProfile(drafts: Record<SectionKey, SectionDraft>): ProviderSection
   } else if (
     drafts.llm.enabled &&
     drafts.llm.baseUrl &&
-    (drafts.llm.apiKey || isDemoLlm(drafts.llm.baseUrl)) &&
+    (drafts.llm.apiKey || isDemoLlm(drafts.llm.baseUrl) || isLocalHost(drafts.llm.baseUrl)) &&
     drafts.llm.model
   ) {
     out.llm = {
@@ -215,7 +234,12 @@ function buildProfile(drafts: Record<SectionKey, SectionDraft>): ProviderSection
       model: drafts.llm.model,
     };
   }
-  if (drafts.stt.enabled && drafts.stt.baseUrl && drafts.stt.apiKey && drafts.stt.model) {
+  if (
+    drafts.stt.enabled &&
+    drafts.stt.baseUrl &&
+    (drafts.stt.apiKey || isLocalHost(drafts.stt.baseUrl)) &&
+    drafts.stt.model
+  ) {
     out.stt = {
       flavor: drafts.stt.flavor,
       baseUrl: drafts.stt.baseUrl,
@@ -223,7 +247,12 @@ function buildProfile(drafts: Record<SectionKey, SectionDraft>): ProviderSection
       model: drafts.stt.model,
     };
   }
-  if (drafts.tts.enabled && drafts.tts.baseUrl && drafts.tts.apiKey && drafts.tts.model) {
+  if (
+    drafts.tts.enabled &&
+    drafts.tts.baseUrl &&
+    (drafts.tts.apiKey || isLocalHost(drafts.tts.baseUrl)) &&
+    drafts.tts.model
+  ) {
     out.tts = {
       flavor: drafts.tts.flavor,
       baseUrl: drafts.tts.baseUrl,

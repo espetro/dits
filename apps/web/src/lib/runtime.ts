@@ -103,7 +103,6 @@ let probeStarted = false;
 export function ensureRuntimeProbe(): void {
   if (probeStarted) return;
   probeStarted = true;
-  if ($serverReachable.get() !== true) {
-    void probeServer();
-  }
+  // always re-verify: a persisted `true` can be stale (server stopped since)
+  void probeServer();
 }

@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "./vendor/input";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 import { redactKey } from "../lib/runtime";
+import type { ModelOptions } from "./settings-drafts";
 
 const fieldClass = "block text-xs text-muted-foreground";
 const helperClass = "mt-1 text-xs text-muted-foreground";
@@ -15,13 +16,22 @@ const helperClass = "mt-1 text-xs text-muted-foreground";
 export function SettingsField(props: {
   label: string;
   helper?: string;
+  /** render the helper as an error (destructive tone, announced) */
+  helperError?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <label className="block">
       <span className={fieldClass}>{props.label}</span>
       <span className="mt-1 block">{props.children}</span>
-      {props.helper && <span className={helperClass}>{props.helper}</span>}
+      {props.helper && (
+        <span
+          className={props.helperError ? `${helperClass} text-destructive` : helperClass}
+          role={props.helperError ? "alert" : undefined}
+        >
+          {props.helper}
+        </span>
+      )}
     </label>
   );
 }
@@ -71,7 +81,7 @@ export function EndpointFields(props: {
     voice: string;
   };
   savedApiKey: string | null;
-  modelOptions: string[];
+  modelOptions: ModelOptions;
   onChange: (
     patch: Partial<{ baseUrl: string; apiKey: string; model: string; voice: string }>,
   ) => void;
@@ -163,7 +173,8 @@ export function EndpointFields(props: {
       </SettingsField>
       <SettingsField
         label={intl.formatMessage({ id: "settings.modelId" })}
-        helper={intl.formatMessage({ id: "settings.modelHelp" })}
+        helper={props.modelOptions.error ?? intl.formatMessage({ id: "settings.modelHelp" })}
+        helperError={props.modelOptions.error !== null}
       >
         <>
           <Input
@@ -171,13 +182,13 @@ export function EndpointFields(props: {
             onChange={(e) => props.onChange({ model: e.target.value })}
             list={`${tab}-models`}
             placeholder={
-              props.modelOptions.length === 0
+              props.modelOptions.options.length === 0
                 ? intl.formatMessage({ id: "settings.modelPlaceholder" })
                 : undefined
             }
           />
           <datalist id={`${tab}-models`}>
-            {props.modelOptions.map((id) => (
+            {props.modelOptions.options.map((id) => (
               <option key={id} value={id} />
             ))}
           </datalist>

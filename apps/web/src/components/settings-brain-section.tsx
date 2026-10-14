@@ -12,8 +12,7 @@ import { sectionIncomplete, useModelOptions, useSettingsDrafts } from "./setting
 import { $providerProfile } from "../lib/runtime";
 import { useSsrStore } from "../lib/ssr";
 import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
-import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
-import { relayOrDirectFetch } from "../lib/relay";
+import { runLlmTest } from "../lib/settings-tests";
 import { TRANSFORMERS_CATALOG } from "../lib/agent/browser-provider";
 import { errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
@@ -80,23 +79,7 @@ export function BrainSection() {
     setTest({ status: "running" });
     setOutput("");
     try {
-      const model = createOpenAiCompatibleModel(
-        { baseUrl: draft.baseUrl, apiKey: draft.apiKey, model: draft.model },
-        // probe/CORS-hostile endpoints only work through the server relay
-        // when the di server is reachable (same rule as the dropdown probe)
-        { fetchImpl: relayOrDirectFetch(draft.baseUrl) as typeof fetch },
-      );
-      const { streamText } = await import("ai");
-      const { textStream } = streamText({
-        model,
-        prompt: "Reply with the single word: ok",
-        maxOutputTokens: 5,
-      });
-      let text = "";
-      for await (const delta of textStream) {
-        text += delta;
-        setOutput(text);
-      }
+      const text = await runLlmTest(draft, setOutput);
       if (text.trim()) {
         setTest({ status: "ok" });
         markSeamOp("llm", true);

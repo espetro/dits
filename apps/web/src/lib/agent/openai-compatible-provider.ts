@@ -10,6 +10,7 @@ import type {
   LanguageModelV3ToolCall,
   LanguageModelV3Usage,
 } from "@ai-sdk/provider";
+import { providerEndpoint } from "@di/shared";
 import type { ProviderEndpoint } from "@di/shared";
 import { DiError } from "../errors";
 import { turnstileTokenFor } from "../turnstile";
@@ -63,11 +64,21 @@ interface OpenAiStreamChunk {
   error?: OpenAiStreamError;
 }
 
-/** Normalize a base URL like the server's providerUrl() does: strip trailing /v1. */
+/** Chat endpoint: the configured base is authoritative (no /v1 stripping or injection). */
 function chatUrl(baseUrl: string): string {
-  const trimmed = baseUrl.replace(/\/+$/, "");
-  const bare = trimmed.replace(/\/v1$/, "");
-  return `${bare}/v1/chat/completions`;
+  return providerEndpoint(baseUrl, "/chat/completions");
+}
+
+/** Short upstream error text: the json `error.message` when present, else the raw body head. */
+function upstreamDetail(body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { error?: { message?: unknown } | string };
+    const msg = typeof parsed.error === "string" ? parsed.error : parsed.error?.message;
+    if (typeof msg === "string" && msg) return msg.slice(0, 200);
+  } catch {
+    // not json (html error page, relay text): fall through to the raw head
+  }
+  return body.replace(/\s+/g, " ").trim().slice(0, 120);
 }
 
 /** Map a v3 prompt to OpenAI wire messages. */
@@ -223,7 +234,7 @@ export function createOpenAiCompatibleModel(
         const body = await res.text().catch(() => "");
         throw new DiError(
           "llm.chat",
-          { status: res.status },
+          { status: res.status, detail: upstreamDetail(body) },
           `llm chat failed: ${res.status} ${body}`,
         );
       }
@@ -276,7 +287,7 @@ export function createOpenAiCompatibleModel(
                   // caller misreads it as a config problem
                   streamError = new DiError(
                     "llm.chat",
-                    { status: 0 },
+                    { status: 0, detail: chunk.error.message ?? "unknown" },
                     `llm chat stream error: ${chunk.error.message ?? "unknown"}`,
                   );
                   continue;
