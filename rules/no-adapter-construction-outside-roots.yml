@@ -1,0 +1,21 @@
+id: no-adapter-construction-outside-roots
+language: TypeScript
+severity: warning
+message: >
+  Adapters are constructed only in composition roots (apps/server/src/api/app.ts,
+  apps/server/src/voice/loop.ts) and tests. Depend on the port interface and
+  receive the adapter by injection (ADR 0005, #80).
+files:
+  - "apps/**/*.ts"
+  - "apps/**/*.tsx"
+ignores:
+  - "apps/server/src/api/app.ts"
+  - "apps/server/src/voice/loop.ts"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/node_modules/**"
+rule:
+  kind: new_expression
+  has:
+    field: constructor
+    regex: "^(OpenAiChatClient|PocketTts|WhisperStt|BuiltinKittenTts|BuiltinSherpaStt)$"
