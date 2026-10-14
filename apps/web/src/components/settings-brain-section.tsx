@@ -12,8 +12,7 @@ import { sectionIncomplete, useModelOptions, useSettingsDrafts } from "./setting
 import { $providerProfile } from "../lib/runtime";
 import { useSsrStore } from "../lib/ssr";
 import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
-import { runLlmTest } from "../lib/llm";
-import { TRANSFORMERS_CATALOG } from "../lib/llm";
+import { TRANSFORMERS_CATALOG, runLlmTest } from "../lib/llm";
 import { errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
 

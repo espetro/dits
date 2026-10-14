@@ -17,10 +17,10 @@ import type { TtsLayerPick } from "../stores/voice";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
 import { DiError, errorDetail } from "../lib/errors";
 import {
+  WasmTts,
+  synthesizeSpeech as synthesizeEndpoint,
   testBrowserTts,
   testServerTts,
-  synthesizeSpeech as synthesizeEndpoint,
-  WasmTts,
 } from "../lib/tts";
 import { encodeWav, encodeWavPcm16 } from "../lib/voice/wav";
 import { toast } from "sonner";
