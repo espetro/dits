@@ -87,7 +87,7 @@ run = "bun run bench/voice.ts"
 dir = "packages/evals"
 
 [tasks."bench:browser"]
-description = "Time cloud stt/tts/llm in the headless dev app via playwright-cli (BENCH_WASM=1 adds on-device engines)"
+description = "Time cloud stt/tts/llm and the ClientAgent turn in the headless app via playwright-cli (BENCH_WASM=1 builds web, adds wasm engines + tts->stt round trip)"
 run = "bun run bench/browser.ts"
 dir = "packages/evals"
 

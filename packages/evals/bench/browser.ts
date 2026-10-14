@@ -2,9 +2,14 @@
  * Browser voice bench: drives the vite dev app headlessly through the
  * playwright-cli (never raw @playwright/test), imports the stt/tts slice
  * indexes in-page and times the cloud endpoint engines against the mock
- * provider. Optional wasm engines (BENCH_WASM=1) download the models, boot
- * WasmStt/WasmTts and report the window.voiceHealth timings. No thresholds;
- * prints JSON plus a compact table like bench/voice.ts.
+ * provider, and drives the real ClientAgent turn (llm.turn health event).
+ * Optional wasm engines (BENCH_WASM=1) download the models, boot WasmStt and
+ * WasmTts, round trip the TTS output back through STT (WER vs the phrase) and
+ * report the window.voiceHealth timings. vite dev serves the sherpa stt worker
+ * as an ES module (it must be classic), so with BENCH_WASM=1 the web app is
+ * built, dist/client is served statically, the built classic worker runs from
+ * there and VITE_SHERPA_ASSETS_BASE points the dev page at its assets.
+ * No thresholds; prints JSON plus a compact table like bench/voice.ts.
  *
  *   bun run packages/evals/bench/browser.ts                 # spawns mock + `portless di-bench`
  *   BENCH_WEB_URL=http://localhost:5173 bun run packages/evals/bench/browser.ts
@@ -30,12 +35,21 @@ interface BrowserBench {
   stt: { final_ms: number; text: string };
   tts: { total_ms: number; bytes: number };
   llm: { ttft_ms: number; total_ms: number; chars: number };
+  agent: {
+    llm_turn_ms?: number;
+    ttft_ms?: number;
+    total_ms: number;
+    chars: number;
+    error?: string;
+  };
   wasm: {
     ran: boolean;
     error?: string;
     stt_boot_ms?: number;
     first_partial_ms?: number;
     flush_ms?: number;
+    roundtrip_text?: string;
+    roundtrip_wer?: number;
     tts_boot_ms?: number;
     tts_speak_ms?: number;
   };
@@ -62,13 +76,45 @@ async function evalJson<T>(fn: string): Promise<T> {
   return (typeof parsed === "string" ? JSON.parse(parsed) : parsed) as T;
 }
 
-async function webUrl(): Promise<{ url: string; stop: () => void }> {
+const WEB_DIR = new URL("../../../apps/web/", import.meta.url).pathname;
+
+interface Prod {
+  base: string;
+  workerUrl: string;
+  stop: () => void;
+}
+
+/** build apps/web and serve dist/client (cors open: the dev page loads assets cross-origin) */
+async function serveProd(): Promise<Prod> {
+  const build =
+    env.BENCH_NO_BUILD === "1"
+      ? { exitCode: 0, stderr: "" }
+      : Bun.spawnSync(["bun", "run", "build"], { cwd: WEB_DIR, stdout: "ignore", stderr: "pipe" });
+  if (build.exitCode !== 0)
+    throw new Error(`web build failed: ${String(build.stderr).slice(-400)}`);
+  const root = `${WEB_DIR}dist/client`;
+  const worker = [...new Bun.Glob("assets/stt-worker-*.js").scanSync(root)][0];
+  if (!worker) throw new Error("built stt worker not found in dist/client/assets");
+  const server = Bun.serve({
+    port: 0,
+    async fetch(req) {
+      const path = decodeURIComponent(new URL(req.url).pathname);
+      const file = Bun.file(`${root}${path}`);
+      if (path.includes("..") || !(await file.exists())) return new Response("nf", { status: 404 });
+      return new Response(file, { headers: { "access-control-allow-origin": "*" } });
+    },
+  });
+  const base = `http://localhost:${server.port}`;
+  return { base, workerUrl: `${base}/${worker}`, stop: () => void server.stop(true) };
+}
+
+async function webUrl(prod: Prod | null): Promise<{ url: string; stop: () => void }> {
   if (env.BENCH_WEB_URL) return { url: env.BENCH_WEB_URL.replace(/\/+$/, ""), stop: () => {} };
-  const dir = new URL("../../../apps/web/", import.meta.url).pathname;
   const proc = Bun.spawn(["portless", "di-bench", "bun", "run", "dev"], {
-    cwd: dir,
+    cwd: WEB_DIR,
     stdout: "ignore",
     stderr: "ignore",
+    env: prod ? { ...env, VITE_SHERPA_ASSETS_BASE: `${prod.base}/sherpa` } : env,
   });
   for (let i = 0; i < 60; i++) {
     await Bun.sleep(500);
@@ -131,6 +177,19 @@ function pageFn(cfg: object): string {
     }
   }
   out.llm = { ttft_ms: Math.round(ttft), total_ms: Math.round(performance.now() - t0), chars };
+  // real llm path: ClientAgent (openai-compatible model + streamText) -> llm.turn health event
+  try {
+    const { ClientAgent } = await import('/src/lib/agent/client-agent.ts');
+    const agent = await ClientAgent.create(
+      { mode: 'remote', baseUrl: cfg.base, apiKey: cfg.apiKey || '', model: cfg.llmModel },
+      { update_question: async () => 'ok', read_editor: async () => '', read_whiteboard: async () => '' },
+      () => ({ mode: 'interview' }),
+    );
+    let m = null, chars2 = 0, errMsg;
+    t0 = performance.now();
+    await agent.respond(cfg.phrase, { onText: (d) => { chars2 += d.length; }, onMetrics: (x) => { m = x; }, onError: (e) => { errMsg = String(e && e.message || e); } });
+    out.agent = { ttft_ms: m && m.llm_ttft_ms, total_ms: Math.round(performance.now() - t0), chars: chars2, error: errMsg };
+  } catch (e) { out.agent = { total_ms: 0, chars: 0, error: String(e && e.message || e) }; }
   if (cfg.wasm) {
     out.wasm.ran = true;
     try {
@@ -139,18 +198,45 @@ function pageFn(cfg: object): string {
       $voiceModelsConsent.set('granted');
       await models.downloadVoiceModels();
       const errs = [];
-      try {
-        const ws = new WasmStt();
-        await ws.start({ onFinal() {}, onInterim() {}, onSpeechStart() {} });
-        frames.forEach((fr) => ws.feed(fr));
-        await ws.flush();
-        await ws.stop();
-      } catch (e) { errs.push('stt: ' + (e && e.message || e)); }
+      // classic worker from the production build (dev serves it as an ES module)
+      const workerFactory = () => new Worker(URL.createObjectURL(new Blob(['importScripts(' + JSON.stringify(cfg.workerUrl) + ')'])));
+      let tts16 = null;
       try {
         const wt = new WasmTts();
-        for await (const _c of wt.speak(cfg.phrase)) { /* drain */ }
+        const chunks = [];
+        for await (const c of wt.speak(cfg.phrase)) chunks.push(c);
         wt.dispose();
+        const n = chunks.reduce((a, c) => a + c.length, 0);
+        const all = new Float32Array(n);
+        let o = 0; for (const c of chunks) { all.set(c, o); o += c.length; }
+        const ratio = 24000 / 16000, len = Math.floor(n / ratio);
+        tts16 = new Float32Array(len);
+        for (let i = 0; i < len; i++) {
+          const x = i * ratio, i0 = Math.floor(x), f = x - i0;
+          tts16[i] = all[i0] * (1 - f) + (all[Math.min(i0 + 1, n - 1)] * f);
+        }
       } catch (e) { errs.push('tts: ' + (e && e.message || e)); }
+      try {
+        const ws = new WasmStt({ workerFactory });
+        let final = '';
+        await ws.start({ onFinal: (t) => { final += (final ? ' ' : '') + t; }, onInterim() {}, onSpeechStart() {} });
+        // speech sample: the wasm tts output (tone fallback if tts failed), 100ms frames + 0.5s silence tail
+        const src = tts16 || frames.reduce((a, f) => { const r = new Float32Array(a.length + f.length); r.set(a); r.set(f, a.length); return r; }, new Float32Array(0));
+        for (let i = 0; i < src.length; i += 1600) ws.feed(src.subarray(i, Math.min(i + 1600, src.length)));
+        for (let i = 0; i < 5; i++) ws.feed(new Float32Array(1600));
+        const tf = performance.now();
+        await ws.flush();
+        out.wasm.flush_ms = Math.round(performance.now() - tf);
+        await ws.stop();
+        out.wasm.roundtrip_text = final;
+        const norm = (s) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, ' ').split(/\\s+/).filter(Boolean);
+        const r = norm(cfg.phrase), h = norm(final);
+        const d = Array.from({ length: r.length + 1 }, (_, i) => [i, ...Array(h.length).fill(0)]);
+        for (let j = 1; j <= h.length; j++) d[0][j] = j;
+        for (let i = 1; i <= r.length; i++) for (let j = 1; j <= h.length; j++)
+          d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (r[i-1] === h[j-1] ? 0 : 1));
+        out.wasm.roundtrip_wer = +(d[r.length][h.length] / r.length).toFixed(3);
+      } catch (e) { errs.push('stt: ' + (e && e.message || e)); }
       if (errs.length) out.wasm.error = errs.join(' | ');
     } catch (e) { out.wasm.error = String(e && e.message || e); }
   }
@@ -162,7 +248,8 @@ function pageFn(cfg: object): string {
 async function main(): Promise<void> {
   const mock = env.BENCH_BASE_URL ? null : startServer(0);
   const base = env.BENCH_BASE_URL ?? `http://localhost:${mock!.port}/v1`;
-  const web = await webUrl();
+  const prod = WASM ? await serveProd() : null;
+  const web = await webUrl(prod);
   try {
     await pw("open", `${web.url}/dev/voice-harness`);
     // dev-only window.voiceHealth is populated after the module graph loads
@@ -175,6 +262,7 @@ async function main(): Promise<void> {
         ttsModel: env.BENCH_TTS_MODEL ?? "mock-tts",
         phrase: PHRASE,
         wasm: WASM,
+        workerUrl: prod?.workerUrl ?? "",
       }),
     );
     const health = r.health ?? [];
@@ -184,26 +272,35 @@ async function main(): Promise<void> {
       ...r.wasm,
       stt_boot_ms: ms("engine.boot", "stt"),
       first_partial_ms: ms("stt.firstPartial"),
-      flush_ms: ms("stt.flush"),
+      flush_ms: r.wasm.flush_ms ?? ms("stt.flush"),
       tts_boot_ms: ms("engine.boot", "tts"),
       tts_speak_ms: ms("tts.speak"),
     };
+    r.agent.llm_turn_ms = ms("llm.turn");
     console.log(JSON.stringify(r));
     console.table({
       stt: { ms: r.stt.final_ms },
       tts: { ms: r.tts.total_ms, bytes: r.tts.bytes },
       llm: { ms: r.llm.ttft_ms, total_ms: r.llm.total_ms },
+      llm_turn: { ms: r.agent.llm_turn_ms ?? null, total_ms: r.agent.total_ms },
       ...(WASM
         ? {
-            wasm_stt: { ms: r.wasm.first_partial_ms ?? null, boot_ms: r.wasm.stt_boot_ms ?? null },
+            wasm_stt: {
+              ms: r.wasm.first_partial_ms ?? null,
+              boot_ms: r.wasm.stt_boot_ms ?? null,
+              flush_ms: r.wasm.flush_ms ?? null,
+              wer: r.wasm.roundtrip_wer ?? null,
+            },
             wasm_tts: { ms: r.wasm.tts_speak_ms ?? null, boot_ms: r.wasm.tts_boot_ms ?? null },
           }
         : {}),
     });
     if (r.wasm.error) console.error(`wasm: ${r.wasm.error}`);
+    if (r.agent.error) console.error(`agent: ${r.agent.error}`);
   } finally {
     await pw("close");
     web.stop();
+    prod?.stop();
     mock?.stop(true);
   }
 }
