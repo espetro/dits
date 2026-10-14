@@ -86,6 +86,11 @@ description = "Time stt, tts, llm and a chained turn (mock provider, or BENCH_BA
 run = "bun run bench/voice.ts"
 dir = "packages/evals"
 
+[tasks."bench:browser"]
+description = "Time cloud stt/tts/llm in the headless dev app via playwright-cli (BENCH_WASM=1 adds on-device engines)"
+run = "bun run bench/browser.ts"
+dir = "packages/evals"
+
 [tasks.logs]
 description = "Tail .di/logs/*.log, pretty-printing JSON lines via jq (no logger dependency — the server just writes ndjson)"
 run = '''
