@@ -1,19 +1,12 @@
 import * as React from "react";
-import { useIntl } from "react-intl";
 import * as v from "valibot";
 
 import { ProviderSectionsSchema } from "@di/shared";
 import type { LlmSection, ProviderEndpoint, ProviderSections, TtsEndpoint } from "@di/shared";
 import { $providerProfile } from "../lib/runtime";
-import { smokeTestModel } from "../lib/agent/browser-provider";
 import { isDemoLlm } from "../lib/demo-llm";
 import { relayOrDirectFetch } from "../lib/relay";
-import { synthesizeSpeech } from "../lib/agent/tts";
-import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
-import { hasBrowserStt, probeModels, startLiveStt, testBrowserTts } from "../lib/settings-tests";
-import { DiError, codeMessage, errorDetail } from "../lib/errors";
 import { useSsrStore } from "../lib/ssr";
-import { LLM_SMOKE_TEST_TIMEOUT_MS } from "../lib/timeouts";
 
 /**
  * Shared editable state for the settings panes. Each of the three provider
@@ -86,21 +79,9 @@ function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined)
   };
 }
 
-export interface TestState {
-  status: "idle" | "running" | "ok" | "err";
-  message?: string;
-}
-
 export interface SettingsDrafts {
   drafts: Record<SectionKey, SectionDraft>;
   update(key: SectionKey, patch: Partial<SectionDraft>): void;
-  testState: Partial<Record<SectionKey, TestState>>;
-  testing: SectionKey | null;
-  runTest(key: SectionKey): Promise<void>;
-  /** in-browser stt read-aloud transcript output */
-  sttOutput: string;
-  /** true when the llm pick resolves to the managed demo endpoint */
-  llmIsDemo: boolean;
 }
 
 const DraftsContext = React.createContext<SettingsDrafts | null>(null);
@@ -163,7 +144,6 @@ export function sectionIncomplete(key: SectionKey, draft: SectionDraft): boolean
 }
 
 export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
-  const intl = useIntl();
   const profile = useSsrStore($providerProfile, null);
   const [drafts, setDrafts] = React.useState<Record<SectionKey, SectionDraft>>(() => ({
     stt: draftFromEndpoint(profile?.stt),
@@ -184,17 +164,9 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
       llm: draftFromLlm(profile.llm),
     });
   }, [profile]);
-  const [testing, setTesting] = React.useState<SectionKey | null>(null);
-  const [testState, setTestState] = React.useState<Partial<Record<SectionKey, TestState>>>({});
-  // STT read-aloud block: live transcript shown in a read-only textarea.
-  const [sttOutput, setSttOutput] = React.useState("");
-  const liveStt = React.useRef<{ stop: () => void } | null>(null);
-  React.useEffect(() => () => liveStt.current?.stop(), []);
-
   function update(key: SectionKey, patch: Partial<SectionDraft>) {
     hydrated.current = true;
     setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
-    setTestState((prev) => ({ ...prev, [key]: undefined }));
   }
 
   // Autosave: every edit is validated and persisted after a short debounce,
@@ -210,160 +182,11 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
     }, 600);
     return () => clearTimeout(timer);
   }, [drafts]);
-
-  async function runTest(key: SectionKey) {
-    const draft = drafts[key];
-    // Browser-mode LLM test skips the endpoint guards; the manager handles it.
-    if (key === "llm" && draft.llmMode === "browser") {
-      setTesting(key);
-      setTestState((prev) => ({ ...prev, llm: { status: "running" } }));
-      try {
-        await smokeTestModel(
-          {
-            mode: "browser",
-            engine: draft.engine,
-            ...(draft.browserModelId ? { modelId: draft.browserModelId } : {}),
-          },
-          // a cached model loads in seconds; a cold 450MB download belongs
-          // behind the manager's Download button, not the test.
-          { timeoutMs: LLM_SMOKE_TEST_TIMEOUT_MS },
-        );
-        setTestState((prev) => ({
-          ...prev,
-          llm: { status: "ok", message: intl.formatMessage({ id: "settings.llm.testOk" }) },
-        }));
-      } catch (err) {
-        setTestState((prev) => ({
-          ...prev,
-          llm: { status: "err", message: errorDetail(intl, err) },
-        }));
-      } finally {
-        setTesting(null);
-      }
-      return;
-    }
-    // Client-side guard: an empty baseUrl/model would otherwise hit a
-    // relative fetch or an empty completion and look like a false "ok".
-    // Managed demo llm endpoints need no key.
-    const needsKey = key !== "tts" && !(key === "llm" && isDemoLlm(draft.baseUrl));
-    if (draft.enabled && (!draft.baseUrl || !draft.model || (needsKey && !draft.apiKey))) {
-      setTestState((prev) => ({
-        ...prev,
-        [key]: { status: "err", message: intl.formatMessage({ id: "settings.invalid" }) },
-      }));
-      return;
-    }
-    if (key === "stt" && !draft.enabled) {
-      // in-browser STT: run the read-aloud test with the selected mic
-      if (!hasBrowserStt()) {
-        setTestState((prev) => ({
-          ...prev,
-          stt: { status: "err", message: intl.formatMessage({ id: "settings.test.unsupported" }) },
-        }));
-        return;
-      }
-      setTesting(key);
-      setTestState((prev) => ({ ...prev, stt: { status: "running" } }));
-      setSttOutput("");
-      liveStt.current?.stop();
-      liveStt.current = startLiveStt({
-        onText: (text) => setSttOutput(text),
-        onError: (code) => {
-          liveStt.current = null;
-          setTesting(null);
-          setTestState((prev) => ({
-            ...prev,
-            stt: { status: "err", message: codeMessage(intl, code) },
-          }));
-        },
-        timeoutMs: 15_000,
-      });
-      // the session ends via its own timeout/stop; success is judged by
-      // whether any transcript was captured, checked when it finishes
-      const checkDone = setInterval(() => {
-        if (!liveStt.current) {
-          clearInterval(checkDone);
-          return;
-        }
-      }, 500);
-      setTimeout(() => {
-        clearInterval(checkDone);
-        if (liveStt.current) {
-          liveStt.current.stop();
-          liveStt.current = null;
-          setTesting(null);
-          setSttOutput((output) => {
-            setTestState((prev) => ({
-              ...prev,
-              stt: output.trim()
-                ? { status: "ok" }
-                : { status: "err", message: intl.formatMessage({ id: "settings.stt.noSpeech" }) },
-            }));
-            return output;
-          });
-        }
-      }, 15_500);
-      return;
-    }
-    setTesting(key);
-    setTestState((prev) => ({ ...prev, [key]: { status: "running" } }));
-    try {
-      if (key === "llm") {
-        const d = draft;
-        if (!d.enabled) throw new Error(intl.formatMessage({ id: "settings.test.inBrowser" }));
-        const model = createOpenAiCompatibleModel(
-          { baseUrl: d.baseUrl, apiKey: d.apiKey, model: d.model },
-          { fetchImpl: relayOrDirectFetch(d.baseUrl) as typeof fetch },
-        );
-        const { streamText } = await import("ai");
-        let reply = "";
-        const { textStream } = streamText({
-          model,
-          prompt: "Reply with the single word: ok",
-          maxOutputTokens: 5,
-        });
-        for await (const delta of textStream) reply += delta;
-        setTestState((prev) => ({ ...prev, llm: { status: "ok", message: reply.slice(0, 40) } }));
-      } else if (key === "tts") {
-        const d = draft;
-        if (!d.enabled) {
-          await testBrowserTts();
-          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
-        } else {
-          const pcm = await synthesizeSpeech(
-            {
-              baseUrl: d.baseUrl,
-              apiKey: d.apiKey,
-              model: d.model || "tts-1",
-              voice: d.voice,
-            },
-            "hello",
-          );
-          if (pcm.length === 0) throw new DiError("tts.empty", undefined, "empty audio");
-          setTestState((prev) => ({ ...prev, tts: { status: "ok" } }));
-        }
-      } else {
-        await probeModels(draft);
-        setTestState((prev) => ({ ...prev, stt: { status: "ok" } }));
-      }
-    } catch (err) {
-      setTestState((prev) => ({
-        ...prev,
-        [key]: { status: "err", message: errorDetail(intl, err) },
-      }));
-    } finally {
-      setTesting(null);
-    }
-  }
-
+  // (per-section test flows live in the section components; the old shared
+  // runTest here was dead code since the two-pane settings rework)
   const value: SettingsDrafts = {
     drafts,
     update,
-    testState,
-    testing,
-    runTest,
-    sttOutput,
-    llmIsDemo: isDemoLlm(drafts.llm.baseUrl),
   };
   return <DraftsContext.Provider value={value}>{props.children}</DraftsContext.Provider>;
 }
