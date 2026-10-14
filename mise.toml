@@ -81,6 +81,11 @@ description = "Run evals vitest suite"
 run = "bun run --bun vitest run"
 dir = "packages/evals"
 
+[tasks.bench]
+description = "Time stt, tts, llm and a chained turn (mock provider, or BENCH_BASE_URL)"
+run = "bun run bench/voice.ts"
+dir = "packages/evals"
+
 [tasks.logs]
 description = "Tail .di/logs/*.log, pretty-printing JSON lines via jq (no logger dependency — the server just writes ndjson)"
 run = '''
