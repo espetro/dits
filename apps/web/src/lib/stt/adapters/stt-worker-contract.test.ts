@@ -12,13 +12,13 @@ import { describe, expect, it } from "vitest";
 // top-level vars must land on the worker global scope at runtime), and
 // the vendored glue is the browser build with the stub .data patch.
 // vitest's cwd is apps/web; import.meta.url is not a file:// url here
-const workerSrc = readFileSync(resolve("src/lib/voice/sherpa/stt-worker.ts"), "utf8");
-const apiSrc = readFileSync(resolve("src/lib/voice/sherpa/stt-api.ts"), "utf8");
-const enginesSrc = readFileSync(resolve("src/lib/voice/wasm-engines.ts"), "utf8");
+const workerSrc = readFileSync(resolve("src/lib/stt/adapters/sherpa/stt-worker.ts"), "utf8");
+const apiSrc = readFileSync(resolve("src/lib/stt/adapters/sherpa/stt-api.ts"), "utf8");
+const enginesSrc = readFileSync(resolve("src/lib/stt/adapters/wasm.ts"), "utf8");
 const glueSrc = readFileSync(resolve("public/sherpa/sherpa-onnx-wasm-main-asr.js"), "utf8");
 
 describe("sherpa stt worker contract", () => {
-  it("is spawned with type: classic in wasm-engines.ts", () => {
+  it("is spawned with type: classic in stt/adapters/wasm.ts", () => {
     const spawn = enginesSrc.match(
       /new Worker\(new URL\("\.\/sherpa\/stt-worker\.ts"[\s\S]*?\{[^}]*\}\)/,
     );
