@@ -6,10 +6,9 @@ import { apiRoutes } from "./routes";
 import type { TtsTestPort } from "./routes";
 import { BuiltinKittenTts } from "../voice/builtin/engines";
 import { PocketTts } from "../voice/tts/pocket-tts";
-import { requireRemoteTts } from "../voice/providers";
+import { requireRemoteTts, sttProviderOf, ttsProviderOf } from "../voice/providers";
 import { embeddingsClientFromConfig } from "../rag/ingest";
 import { OpenAiChatClient } from "../voice/llm";
-import { sttProviderOf, ttsProviderOf } from "../voice/providers";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 
