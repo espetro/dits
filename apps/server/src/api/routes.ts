@@ -75,8 +75,9 @@ function relayResponse(c: Context, upstream: Response): Response {
   const headers: Record<string, string> = {};
   if (contentType) headers["content-type"] = contentType;
   // upstream.body is null only for empty upstream responses (204/304, HEAD),
-  // where c.body(null) is already the empty response.
-  return c.body(upstream.body, upstream.status, headers);
+  // where an empty body is already the correct response. Hono's c.body
+  // overloads reject mixed shapes, so build the Response directly.
+  return new Response(upstream.body, { status: upstream.status, headers });
 }
 
 async function relayFetchUpstream(upstream: string, init: RelayUpstreamInit): Promise<Response> {
