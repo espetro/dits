@@ -24,16 +24,12 @@ import {
   VoiceClientMessageSchema,
 } from "@di/shared/voice";
 import type { Db } from "../store/db";
-import { WavBuffer } from "./stt/wav.ts";
-import { WhisperStt } from "./stt/whisper-stt.ts";
-import { StreamingWhisperStt } from "./stt/streaming-stt.ts";
-import type { SttPort, StreamingSttPort } from "./stt/port.ts";
-import type { TtsPort } from "./tts/port.ts";
-import { PocketTts } from "./tts/pocket-tts.ts";
-import { BuiltinKittenTts, BuiltinSherpaStt } from "./builtin/engines.ts";
-import { requireRemoteStt, requireRemoteTts, sttProviderOf, ttsProviderOf } from "./providers.ts";
-import { OpenAiChatClient } from "./llm/openai-chat.ts";
-import type { LlmMessage, LlmPort, ToolDef } from "./llm/port.ts";
+import { WavBuffer, createSttFromConfig } from "./stt/index.ts";
+import type { SttPort, StreamingSttPort } from "./stt/index.ts";
+import { createTtsFromConfig } from "./tts/index.ts";
+import type { TtsPort } from "./tts/index.ts";
+import { createLlmFromConfig } from "./llm/index.ts";
+import type { LlmMessage, LlmPort, ToolDef } from "./llm/index.ts";
 
 /** Injectable voice pipeline pieces (tests stub these); aliases of the slice ports. */
 export type VoiceStt = SttPort;
@@ -126,66 +122,16 @@ export class VoiceLoop {
       postEvent: (sid: string, type: string, payload?: unknown) =>
         this.postEvent(sid, type, payload),
     };
-    if (sttProviderOf(this.config.stt) === "builtin") {
-      // bundled wasm sherpa: streaming-native, covers both ports; an
-      // injected stub is expected to satisfy whichever ports get exercised
-      const builtin = (deps.streamingStt ??
-        deps.stt ??
-        new BuiltinSherpaStt({ dataDir: this.config.files.data_dir })) as VoiceStt &
-        StreamingSttPort;
-      this.stt = builtin;
-      this.streamingStt = builtin;
-    } else {
-      const remote = requireRemoteStt(this.config.stt);
-      this.stt =
-        deps.stt ??
-        new WhisperStt({
-          baseUrl: remote.baseUrl,
-          apiKey: remote.apiKey,
-          model: remote.model,
-          events,
-          sessionId: this.sessionId,
-        });
-      if (remote.mode === "streaming") {
-        this.streamingStt =
-          deps.streamingStt ??
-          new StreamingWhisperStt({
-            baseUrl: remote.baseUrl,
-            apiKey: remote.apiKey,
-            model: remote.model,
-            events,
-            sessionId: this.sessionId,
-          });
-      }
-    }
-    this.tts =
-      deps.tts ??
-      (ttsProviderOf(this.config.tts) === "builtin"
-        ? new BuiltinKittenTts({ dataDir: this.config.files.data_dir })
-        : (() => {
-            const remote = requireRemoteTts(this.config.tts);
-            return new PocketTts({
-              baseUrl: remote.baseUrl,
-              apiKey: remote.apiKey,
-              model: remote.model,
-              voice: remote.voice,
-              events,
-              sessionId: this.sessionId,
-            });
-          })());
-    this.llm =
-      deps.llm ??
-      new OpenAiChatClient({
-        baseUrl: this.config.llm.base_url,
-        apiKey: this.config.llm.api_key,
-        model: this.config.llm.model,
-        flavor: this.config.llm.flavor,
-        reasoningExclude: this.config.llm.reasoning_exclude,
-        thinkingDisabled: this.config.llm.thinking_disabled,
-        maxTokens: this.config.llm.max_tokens,
-        events,
-        sessionId: this.sessionId,
-      });
+    const factoryOpts = { events, sessionId: this.sessionId };
+    const { stt, streamingStt } = createSttFromConfig(this.config, {
+      ...factoryOpts,
+      stt: deps.stt,
+      streamingStt: deps.streamingStt,
+    });
+    this.stt = stt;
+    this.streamingStt = streamingStt;
+    this.tts = deps.tts ?? createTtsFromConfig(this.config, factoryOpts);
+    this.llm = deps.llm ?? createLlmFromConfig(this.config.llm, factoryOpts);
   }
 
   /** Call on WS connection open: binds session context and emits agent.started. */

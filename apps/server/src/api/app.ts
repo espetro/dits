@@ -4,11 +4,10 @@ import type { Config } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
 import type { TtsTestPort } from "./routes";
-import { BuiltinKittenTts } from "../voice/builtin/engines";
-import { PocketTts } from "../voice/tts/pocket-tts";
-import { requireRemoteTts, sttProviderOf, ttsProviderOf } from "../voice/providers";
+import { sttProviderOf, ttsProviderOf } from "../voice/providers";
+import { createTtsFromConfig } from "../voice/tts";
+import { createLlmFromConfig } from "../voice/llm";
 import { embeddingsClientFromConfig } from "../rag/ingest";
-import { OpenAiChatClient } from "../voice/llm/openai-chat";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 
@@ -20,14 +19,6 @@ export interface AppDeps {
   webAssets?: { root: string; path: string };
   /** Test injection for the voice WS loop (stub STT/TTS/LLM). */
   voiceDeps?: Pick<VoiceDeps, "loopFactory"> & { ttsTest?: () => TtsTestPort };
-}
-
-/** Same adapter selection the voice loop makes, minus the per-session event sink. */
-function buildTtsTestPort(config: Config): TtsTestPort {
-  if (ttsProviderOf(config.tts) === "builtin")
-    return new BuiltinKittenTts({ dataDir: config.files.data_dir });
-  const remote = requireRemoteTts(config.tts);
-  return new PocketTts(remote);
 }
 
 export async function createApp(deps: AppDeps): Promise<Hono> {
@@ -66,17 +57,9 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
           tts: ttsProviderOf(deps.config.tts),
         },
         dataDir: deps.config.files.data_dir,
-        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= buildTtsTestPort(deps.config))),
+        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= createTtsFromConfig(deps.config))),
       },
-      reportLlm: new OpenAiChatClient({
-        baseUrl: deps.config.llm.base_url,
-        apiKey: deps.config.llm.api_key,
-        model: deps.config.llm.model,
-        flavor: deps.config.llm.flavor,
-        reasoningExclude: deps.config.llm.reasoning_exclude,
-        thinkingDisabled: deps.config.llm.thinking_disabled,
-        maxTokens: deps.config.llm.max_tokens,
-      }),
+      reportLlm: createLlmFromConfig(deps.config.llm),
     }),
   );
 

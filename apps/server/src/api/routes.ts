@@ -30,7 +30,7 @@ import {
   loadVectors,
 } from "../rag/ingest";
 import { retrieve } from "../rag/embeddings";
-import { encodeWav } from "../voice/stt/wav.ts";
+import { encodeWav } from "../voice/stt";
 import {
   builtinModelsStatus,
   builtinPullProgress,
