@@ -15,6 +15,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
 const NOCOR_MOCK_PORT = Number(process.env.MOCK_NOCORS_PORT ?? 9100);
 const CORS_MOCK_PORT = Number(process.env.MOCK_CORS_PORT ?? 9101);
+const FAIL_MOCK_PORT = Number(process.env.MOCK_FAIL_PORT ?? 9102);
 
 function repoRoot(): string {
   // tests/e2e/<this file> -> repo root two levels up
@@ -44,6 +45,45 @@ function tapConsoleErrors(page: Page): string[] {
 }
 
 let noCorsMock: ChildProcess | null = null;
+let failMock: ChildProcess | null = null;
+
+function spawnMock(port: number, extra: string[] = []): ChildProcess {
+  return spawn(
+    "bun",
+    ["run", `${repoRoot()}packages/evals/mock-provider/main.ts`, "--port", String(port), ...extra],
+    { stdio: "ignore", detached: true },
+  );
+}
+
+async function waitMock(port: number): Promise<void> {
+  for (let i = 0; i < 50; i++) {
+    try {
+      if ((await fetch(`http://localhost:${port}/health`)).ok) return;
+    } catch {
+      // not up yet
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error(`mock provider never became ready on :${port}`);
+}
+
+function killMock(child: ChildProcess | null): void {
+  if (!child?.pid) return;
+  try {
+    // detached + negative pid kills the whole process group
+    process.kill(-child.pid, "SIGTERM");
+  } catch {
+    // already gone
+  }
+}
+
+async function setFail(port: number, mode: string | null): Promise<void> {
+  await fetch(`http://localhost:${port}/__fail`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ mode }),
+  });
+}
 
 test.describe("provider relay (no-CORS upstream via di server)", () => {
   test.beforeAll(async () => {
@@ -71,7 +111,19 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     throw new Error(`no-CORS mock provider never became ready on :${NOCOR_MOCK_PORT}`);
   });
 
+  test.beforeAll(async () => {
+    // separate failure-injection mock so flipping modes never races the
+    // happy-path specs above on the shared no-CORS mock
+    failMock = spawnMock(FAIL_MOCK_PORT, ["--no-cors"]);
+    await waitMock(FAIL_MOCK_PORT);
+  });
+
+  test.afterEach(async () => {
+    await setFail(FAIL_MOCK_PORT, null);
+  });
+
   test.afterAll(() => {
+    killMock(failMock);
     if (noCorsMock?.pid) {
       try {
         // detached + negative pid kills the whole process group
@@ -157,6 +209,44 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     const state = await mockState(NOCOR_MOCK_PORT);
     expect(state.lastHeaders["/v1/chat/completions"]).toBeTruthy();
     expect(errors.filter((e) => /blocked by CORS/i.test(e))).toEqual([]);
+  });
+
+  async function fillLlm(page: Page, baseUrl: string) {
+    await openSettingsLlm(page);
+    await chooseCloud(page);
+    await page.getByLabel("Base URL").fill(baseUrl);
+    await page.getByLabel("Model ID").fill("mock-llm");
+    await page.getByRole("textbox", { name: /^API key/ }).fill("relay-test-key");
+  }
+
+  test("llm test surfaces upstream http 401 detail", async ({ page }) => {
+    await setFail(FAIL_MOCK_PORT, "401");
+    await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}/v1`);
+    await page.getByRole("button", { name: "test it", exact: true }).click();
+    await expect(page.getByText(/model request failed \(401\)/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/invalid api key \(mock 401\)/).first()).toBeVisible();
+  });
+
+  test("models html 200 shows not a model list", async ({ page }) => {
+    await setFail(FAIL_MOCK_PORT, "html-models");
+    await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}/v1`);
+    await expect(page.getByText(/not a model list/)).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("models html 200 on a root base url suggests the working /v1", async ({ page }) => {
+    await setFail(FAIL_MOCK_PORT, "html-root");
+    await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}`);
+    await expect(page.getByText(/no model list at this base URL/)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(`http://localhost:${FAIL_MOCK_PORT}/v1`).first()).toBeVisible();
+  });
+
+  test("llm test surfaces an in-band sse error", async ({ page }) => {
+    await setFail(FAIL_MOCK_PORT, "sse-error");
+    await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}/v1`);
+    await page.getByRole("button", { name: "test it", exact: true }).click();
+    await expect(page.getByText(/upstream exploded \(mock in-band error\)/).first()).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("abort propagates, no zombie upstream", async ({ page }) => {

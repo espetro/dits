@@ -31,6 +31,22 @@ Settings llm remote section against the no-CORS mock; the Test button streams
 a short completion and reports ok; the mock recorded the
 `/v1/chat/completions` hit; zero CORS console errors.
 
+## llm test surfaces upstream http 401 detail
+
+A separate failure-injection mock (`MOCK_FAIL_PORT`, default 9102, flipped via `POST /__fail`) answers chat with HTTP 401 and a json error body. The Test button reports `model request failed (401)` with the upstream message `invalid api key (mock 401)`.
+
+## models html 200 shows not a model list
+
+The mock answers `/v1/models` with a 200 html page. The Model ID helper text says the endpoint answered with something that is not a model list.
+
+## models html 200 on a root base url suggests the working /v1
+
+Base URL is the mock root and only `/models` answers html. The helper text says there is no model list at this base URL and names the working `<root>/v1` candidate.
+
+## llm test surfaces an in-band sse error
+
+The mock streams a 200 sse response whose only chunk is an error object. The Test button shows the upstream message instead of a generic invalid-fields message.
+
 ## abort propagates, no zombie upstream
 
 A streaming chat request through `/v1/relay` aborted client-side drains the
