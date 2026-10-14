@@ -95,6 +95,15 @@ function parseToolsColumn(raw: string | null | undefined): Record<string, string
  * synthesize speech and stream it back as framed PCM chunks. All in-process;
  * replaces the former @livekit/agents worker.
  */
+/** Turn start (utterance end) per metrics object, so latencies stay durations, not wall-clock stamps. */
+const TURN_START = new WeakMap<TurnMetrics, number>();
+
+/** Record first_audio_ms once, as ms since the turn started. */
+function markFirstAudio(metrics: TurnMetrics): void {
+  if (metrics.first_audio_ms !== undefined) return;
+  metrics.first_audio_ms = Date.now() - (TURN_START.get(metrics) ?? Date.now());
+}
+
 export class VoiceLoop {
   private readonly sessionId: string;
   private readonly config: Config;
@@ -367,6 +376,7 @@ export class VoiceLoop {
     this.abort = new AbortController();
     const { signal } = this.abort;
     const metrics: TurnMetrics = { vad_ms: vadMs, total_ms: 0 };
+    TURN_START.set(metrics, t0);
     try {
       const sttStart = Date.now();
       const text = (
@@ -403,6 +413,7 @@ export class VoiceLoop {
     const { signal } = this.abort;
     const t0 = Date.now();
     const metrics: TurnMetrics = { vad_ms: 0, total_ms: 0 };
+    TURN_START.set(metrics, t0);
     try {
       await this.runAgentReply(text, source, signal, metrics);
     } catch (err) {
@@ -624,8 +635,7 @@ export class VoiceLoop {
         return;
       }
       for (let off = 0, seq = 0; off < pcm.length; off += TTS_CHUNK_BYTES, seq++) {
-        if (off === 0 && metrics && metrics.first_audio_ms === undefined)
-          metrics.first_audio_ms = Date.now();
+        if (off === 0 && metrics) markFirstAudio(metrics);
         const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
         const frame = new Uint8Array(AUDIO_HEADER_BYTES + chunk.length);
         new DataView(frame.buffer).setUint32(0, seq, false); // BE seq
@@ -799,9 +809,7 @@ class SentenceSpeechPipeline {
     }
     for (let off = 0; off < pcm.length; off += TTS_CHUNK_BYTES) {
       if (this.opts.signal.aborted) return;
-      if (this.opts.metrics && this.opts.metrics.first_audio_ms === undefined) {
-        this.opts.metrics.first_audio_ms = Date.now();
-      }
+      if (this.opts.metrics) markFirstAudio(this.opts.metrics);
       const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
       this.sendChunk(chunk);
     }
