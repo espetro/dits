@@ -214,6 +214,15 @@ export function dashboardHtml(): string {
     word-break: break-all;
     user-select: text;
   }
+  button.danger {
+    background: #c0392b;
+    color: var(--cream);
+    border-color: #c0392b;
+  }
+  button.danger:hover:not(:disabled) { background: #a02e22; border-color: #a02e22; }
+  .reset { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+  .reset .actions { margin: 8px 0 4px; }
+  #resetmsg { font-size: 12.5px; color: var(--espresso-soft); min-height: 20px; }
   button.copy {
     padding: 3px 10px;
     font-size: 11px;
@@ -232,6 +241,14 @@ export function dashboardHtml(): string {
       <button id="open" class="primary">open di →</button>
     </div>
     <div id="err"></div>
+    <div class="reset">
+      <span class="microlabel">danger zone</span>
+      <div class="actions">
+        <button id="reset" class="danger">reset all data…</button>
+        <button id="resetcancel" hidden>cancel</button>
+      </div>
+      <div id="resetmsg"></div>
+    </div>
     <details id="logpanel">
       <summary><span class="chev">▸</span><span class="microlabel">server log (<span id="logcount">0</span>)</span></summary>
       <div class="logpath"><span class="microlabel">saved to</span><code id="logpath">–</code><button id="copylog" class="copy">copy</button></div>
@@ -276,6 +293,41 @@ export function dashboardHtml(): string {
   }
 
   $("open").onclick = () => post("open");
+
+  // two-step destructive reset: first click arms, second click calls the api
+  let armed = false;
+  const disarm = () => {
+    armed = false;
+    $("reset").textContent = "reset all data…";
+    $("resetcancel").hidden = true;
+  };
+  $("resetcancel").onclick = () => { disarm(); $("resetmsg").textContent = ""; };
+  $("reset").onclick = async () => {
+    if (!armed) {
+      armed = true;
+      $("reset").textContent = "yes, erase everything";
+      $("resetcancel").hidden = false;
+      $("resetmsg").textContent = "this deletes the database, models, logs, config and keys. it cannot be undone.";
+      return;
+    }
+    disarm();
+    $("reset").disabled = true;
+    $("resetmsg").textContent = "resetting…";
+    try {
+      const res = await fetch("/api/reset", { method: "POST" });
+      if (res.ok) {
+        $("resetmsg").textContent = "all data erased";
+      } else {
+        let m = "reset failed";
+        try { m = (await res.json()).error || m; } catch {}
+        $("resetmsg").textContent = "reset failed: " + m;
+      }
+    } catch (e) {
+      $("resetmsg").textContent = "reset failed: control api unreachable";
+    }
+    $("reset").disabled = false;
+    await refresh();
+  };
   $("copylog").onclick = async () => {
     if (!lastLogPath) return;
     try {
