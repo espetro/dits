@@ -7,6 +7,16 @@ import { appendLog } from "./logbuffer";
 import { ensureConfigFile } from "./storage";
 import { getConfigPath, serverState, startServer, stopServer } from "./server";
 
+/** The slice of server.ts the reset needs; injectable for tests. */
+export interface Supervisor {
+  getConfigPath: () => string | null;
+  serverState: () => { running: boolean; port: number | null };
+  startServer: () => Promise<number>;
+  stopServer: () => Promise<void>;
+}
+
+const defaultSupervisor: Supervisor = { getConfigPath, serverState, startServer, stopServer };
+
 export interface ResetPaths {
   dbPath: string;
   dataDir: string;
@@ -41,12 +51,12 @@ export async function removeDataFiles(root: string, paths: ResetPaths): Promise<
  * cache, log, config.yaml with its keys), re-seed the config and restart if
  * it was running. Destructive: only wired to a user-triggered control route.
  */
-export async function resetDesktopData(): Promise<void> {
-  const configPath = getConfigPath();
+export async function resetDesktopData(sup: Supervisor = defaultSupervisor): Promise<void> {
+  const configPath = sup.getConfigPath();
   if (!configPath) throw new Error("config path not set");
   const { files } = loadConfig(configPath);
-  const wasRunning = serverState().running;
-  await stopServer();
+  const wasRunning = sup.serverState().running;
+  await sup.stopServer();
   const root = dirname(configPath);
   await removeDataFiles(root, {
     dbPath: files.db_path,
@@ -57,5 +67,5 @@ export async function resetDesktopData(): Promise<void> {
   appendLog("[desktop] data reset: db, models, log and config removed");
   // re-seed the default config so the next start has something to load
   ensureConfigFile(root);
-  if (wasRunning) await startServer();
+  if (wasRunning) await sup.startServer();
 }

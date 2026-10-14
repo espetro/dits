@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 import { dashboardHtml } from "./dashboard";
-import { resetDesktopData } from "./reset";
+import { resetDesktopData, type Supervisor } from "./reset";
 import { tailLog } from "./logbuffer";
 import {
   appUrl,
@@ -18,6 +18,8 @@ import {
 export interface ControlDeps {
   /** Open a URL in the user's default browser (electrobun Utils.openExternal). */
   openExternal: (url: string) => void;
+  /** Override the in-process di server supervisor (tests). */
+  supervisor?: Supervisor;
 }
 
 interface StateBody {
@@ -29,8 +31,8 @@ interface StateBody {
   logs: string[];
 }
 
-function stateBody(): StateBody {
-  const { running, port } = serverState();
+function stateBody(sup?: Supervisor): StateBody {
+  const { running, port } = (sup?.serverState ?? serverState)();
   return {
     running,
     port,
@@ -55,7 +57,7 @@ const html = (body: string) =>
  * di server so it stays up when di is stopped. No RPC bridge needed — the
  * dashboard is a plain fetch() client, which keeps it debuggable with curl.
  */
-export function startControlServer(deps: ControlDeps): { port: number } {
+export function startControlServer(deps: ControlDeps): { port: number; stop: () => void } {
   const server = Bun.serve({
     port: parseInt(process.env.DI_DESKTOP_CONTROL_PORT ?? "0", 10),
     hostname: "127.0.0.1",
@@ -95,11 +97,11 @@ export function startControlServer(deps: ControlDeps): { port: number } {
       // dashboard asks for confirmation before it ever calls this
       if (req.method === "POST" && pathname === "/api/reset") {
         try {
-          await resetDesktopData();
+          await resetDesktopData(deps.supervisor);
         } catch (e) {
           return json({ error: e instanceof Error ? e.message : String(e) }, 500);
         }
-        return json(stateBody());
+        return json(stateBody(deps.supervisor));
       }
       if (req.method === "POST" && pathname === "/api/open") {
         const target = appUrl();
@@ -114,5 +116,5 @@ export function startControlServer(deps: ControlDeps): { port: number } {
 
   const port = server.port;
   if (port === undefined) throw new Error("control server failed to bind");
-  return { port };
+  return { port, stop: () => void server.stop(true) };
 }
