@@ -25,7 +25,7 @@
       }
     ],
     "no-restricted-imports": [
-      "warn",
+      "error",
       {
         "patterns": [
           {
