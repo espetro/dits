@@ -53,7 +53,7 @@ function startEchoUpstream(): string {
 }
 
 /** Realistic 16-bit mono 16k WAV, ~2.4 MB of pseudo random (incompressible, boundary-hostile) samples. */
-function makeWav(seconds: number): Uint8Array {
+function makeWav(seconds: number): Uint8Array<ArrayBuffer> {
   const samples = 16_000 * seconds;
   const data = new Uint8Array(samples * 2);
   crypto.getRandomValues(data);
