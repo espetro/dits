@@ -23,7 +23,52 @@
       {
         "ignoreDeclarationSort": true
       }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "**/lib/llm/*",
+              "!**/lib/llm/index",
+              "!**/lib/llm/port",
+              "**/voice/llm/*",
+              "!**/voice/llm/index",
+              "!**/voice/llm/port",
+              "**/lib/tts/*",
+              "!**/lib/tts/index",
+              "!**/lib/tts/port",
+              "**/voice/tts/*",
+              "!**/voice/tts/index",
+              "!**/voice/tts/port",
+              "**/lib/stt/*",
+              "!**/lib/stt/index",
+              "!**/lib/stt/port",
+              "**/voice/stt/*",
+              "!**/voice/stt/index",
+              "!**/voice/stt/port"
+            ],
+            "message": "slice isolation (ADR 0005): import llm/tts/stt only through the slice index or port, not deep paths."
+          }
+        ]
+      }
     ]
   },
-  "ignorePatterns": ["apps/web/src/components/vendor/**"]
+  "ignorePatterns": ["apps/web/src/components/vendor/**"],
+  "overrides": [
+    {
+      "files": [
+        "apps/web/src/lib/llm/**",
+        "apps/web/src/lib/tts/**",
+        "apps/web/src/lib/stt/**",
+        "apps/server/src/voice/llm/**",
+        "apps/server/src/voice/tts/**",
+        "apps/server/src/voice/stt/**"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
 }
