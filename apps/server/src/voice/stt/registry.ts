@@ -2,7 +2,7 @@ import type { Config } from "@di/shared";
 import { BuiltinSherpaStt } from "../builtin/engines.ts";
 import type { EventSink } from "../events.ts";
 import { requireRemoteStt, sttProviderOf } from "../providers.ts";
-import type { SttPort, StreamingSttPort } from "./port.ts";
+import type { StreamingSttPort, SttPort } from "./port.ts";
 import { StreamingWhisperStt } from "./streaming-stt.ts";
 import { WhisperStt } from "./whisper-stt.ts";
 

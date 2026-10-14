@@ -1,35 +1,21 @@
 import * as v from "valibot";
-import {
-  DEFAULT_SESSION_TOOLS,
-  KICKOFF_DELAY_MS,
-  KICKOFF_UTTERANCE,
-  VOICE_TOOLS,
-  buildPrompt,
-  cutSentences,
-  describeWhiteboardSnapshot,
-  voiceToolsFor,
-} from "@di/shared";
-import type {
-  Config,
-  SessionContext,
-  Turn,
-  TurnMetrics,
-  UpdateQuestionArgs,
-  VoiceServerMessage,
-} from "@di/shared";
+import { KICKOFF_DELAY_MS, KICKOFF_UTTERANCE, voiceToolsFor } from "@di/shared";
+import type { Config, Turn, VoiceServerMessage } from "@di/shared";
 import {
   AUDIO_HEADER_BYTES,
   CAPTURE_SAMPLE_RATE,
-  TTS_SAMPLE_RATE,
   VoiceClientMessageSchema,
 } from "@di/shared/voice";
 import type { Db } from "../store/db";
 import { WavBuffer, createSttFromConfig } from "./stt/index.ts";
-import type { SttPort, StreamingSttPort } from "./stt/index.ts";
+import type { StreamingSttPort, SttPort } from "./stt/index.ts";
 import { createTtsFromConfig } from "./tts/index.ts";
 import type { TtsPort } from "./tts/index.ts";
 import { createLlmFromConfig } from "./llm/index.ts";
-import type { LlmMessage, LlmPort, ToolDef } from "./llm/index.ts";
+import type { LlmMessage, LlmPort } from "./llm/index.ts";
+import { finishTurnMetrics, startTurnMetrics } from "./metrics.ts";
+import { MAX_TOOL_OUTPUT, ToolExecutor, parseToolsColumn } from "./tools.ts";
+import { TurnRunner } from "./turn-runner.ts";
 
 /** Injectable voice pipeline pieces (tests stub these); aliases of the slice ports. */
 export type VoiceStt = SttPort;
@@ -51,36 +37,12 @@ export interface VoiceLoopDeps {
   kickoffMs?: number;
 }
 
-/** 20ms of PCM16 mono at 24k = 480 samples = 960 bytes. */
-const TTS_CHUNK_BYTES = (TTS_SAMPLE_RATE * 2 * 20) / 1000;
-const MAX_TOOL_OUTPUT = 4000;
-
-/** sessions.tools is a JSON record column; absent/unparseable means default. */
-function parseToolsColumn(raw: string | null | undefined): Record<string, string> {
-  if (!raw) return { ...DEFAULT_SESSION_TOOLS };
-  try {
-    const parsed = JSON.parse(raw) as Record<string, string>;
-    return Object.keys(parsed).length > 0 ? parsed : { ...DEFAULT_SESSION_TOOLS };
-  } catch {
-    return { ...DEFAULT_SESSION_TOOLS };
-  }
-}
-
 /**
  * Per-connection voice loop: accumulate streamed PCM frames, transcribe per
  * utterance (client VAD delimits), run one LLM turn, persist turns/events,
  * synthesize speech and stream it back as framed PCM chunks. All in-process;
  * replaces the former @livekit/agents worker.
  */
-/** Turn start (utterance end) per metrics object, so latencies stay durations, not wall-clock stamps. */
-const TURN_START = new WeakMap<TurnMetrics, number>();
-
-/** Record first_audio_ms once, as ms since the turn started. */
-function markFirstAudio(metrics: TurnMetrics): void {
-  if (metrics.first_audio_ms !== undefined) return;
-  metrics.first_audio_ms = Date.now() - (TURN_START.get(metrics) ?? Date.now());
-}
-
 export class VoiceLoop {
   private readonly sessionId: string;
   private readonly config: Config;
@@ -98,17 +60,12 @@ export class VoiceLoop {
   private firstFrameAt: number | undefined;
   private muted = false;
   private abort: AbortController | undefined;
-  private ctx: SessionContext = { mode: "interview" };
-  private history: LlmMessage[] = [];
-  /** Toolset from the session row; falls back to the default pair. */
-  private voiceTools: ToolDef[] = VOICE_TOOLS;
+  private readonly runner: TurnRunner;
   /** Serializes turns so concurrent utterances keep monotonically increasing seqs. */
   private turnLock = Promise.resolve();
   private closed = false;
   private kickoffTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly kickoffMs: number;
-  /** Truncation budget for tool results fed to the llm (config.voice.max_tool_output). */
-  private readonly maxToolOutput: number;
 
   constructor(deps: VoiceLoopDeps) {
     this.sessionId = deps.sessionId;
@@ -117,7 +74,6 @@ export class VoiceLoop {
     this.send = deps.send;
     this.sendBinary = deps.sendBinary;
     this.kickoffMs = deps.kickoffMs ?? deps.config.voice?.kickoff_ms ?? KICKOFF_DELAY_MS;
-    this.maxToolOutput = deps.config.voice?.max_tool_output ?? MAX_TOOL_OUTPUT;
     const events = {
       postEvent: (sid: string, type: string, payload?: unknown) =>
         this.postEvent(sid, type, payload),
@@ -132,6 +88,21 @@ export class VoiceLoop {
     this.streamingStt = streamingStt;
     this.tts = deps.tts ?? createTtsFromConfig(this.config, factoryOpts);
     this.llm = deps.llm ?? createLlmFromConfig(this.config.llm, factoryOpts);
+    this.runner = new TurnRunner({
+      llm: this.llm,
+      tts: this.tts,
+      tools: new ToolExecutor({
+        sessionId: this.sessionId,
+        db: this.db,
+        send: this.send,
+        postEvent: events.postEvent,
+        getCtx: () => this.runner.ctx,
+        maxToolOutput: deps.config.voice?.max_tool_output ?? MAX_TOOL_OUTPUT,
+      }),
+      send: this.send,
+      sendBinary: this.sendBinary,
+      persistTurn: (speaker, text, source) => this.persistTurn(speaker, text, source),
+    });
   }
 
   /** Call on WS connection open: binds session context and emits agent.started. */
@@ -141,13 +112,13 @@ export class VoiceLoop {
       .selectAll()
       .where("id", "=", this.sessionId)
       .executeTakeFirst();
-    this.ctx = {
+    this.runner.ctx = {
       mode: session?.mode ?? "interview",
       title: session?.title,
       plan: session?.plan ?? undefined,
       prompt: session?.prompt ?? undefined,
     };
-    this.voiceTools = voiceToolsFor(parseToolsColumn(session?.tools));
+    this.runner.voiceTools = voiceToolsFor(parseToolsColumn(session?.tools));
     await this.postEvent(this.sessionId, "agent.started", { transport: "ws" });
     // Seed in-memory history from persisted turns so a reconnecting or
     // text-first session keeps context (REST-posted turns included).
@@ -157,7 +128,7 @@ export class VoiceLoop {
       .where("session_id", "=", this.sessionId)
       .orderBy("seq")
       .execute();
-    this.history.push(
+    this.runner.history.push(
       ...priorTurns.map((t): LlmMessage => ({
         role: t.speaker === "user" ? "user" : "assistant",
         content: t.text,
@@ -173,7 +144,7 @@ export class VoiceLoop {
    * has turns or once real input arrives.
    */
   private armKickoff(): void {
-    if (this.kickoffMs <= 0 || this.history.some((m) => m.role !== "system")) return;
+    if (this.kickoffMs <= 0 || this.runner.history.some((m) => m.role !== "system")) return;
     this.kickoffTimer = setTimeout(() => {
       this.kickoffTimer = undefined;
       this.turnLock = this.turnLock
@@ -302,8 +273,7 @@ export class VoiceLoop {
     if (this.closed) return;
     this.abort = new AbortController();
     const { signal } = this.abort;
-    const metrics: TurnMetrics = { vad_ms: vadMs, total_ms: 0 };
-    TURN_START.set(metrics, t0);
+    const metrics = startTurnMetrics(t0, vadMs);
     try {
       const sttStart = Date.now();
       const text = (
@@ -314,17 +284,16 @@ export class VoiceLoop {
       if (text === "") return;
       metrics.stt_ms = Date.now() - sttStart;
 
-      await this.runAgentReply(text, "voice", signal, metrics);
+      await this.runner.runAgentReply(text, "voice", signal, metrics);
     } catch (err) {
       if (err instanceof Error && (err.name === "AbortError" || String(err).includes("abort")))
         return;
       throw err;
     } finally {
-      metrics.total_ms = Date.now() - t0;
-      if (!signal.aborted) {
-        this.send({ t: "metrics", metrics });
-        this.postEvent(this.sessionId, "turn.metrics", metrics).catch(() => undefined);
-      }
+      finishTurnMetrics(metrics, t0, signal, {
+        send: this.send,
+        postEvent: (type, payload) => this.postEvent(this.sessionId, type, payload),
+      });
       if (this.abort?.signal === signal) this.abort = undefined;
     }
   }
@@ -339,239 +308,25 @@ export class VoiceLoop {
     this.abort = new AbortController();
     const { signal } = this.abort;
     const t0 = Date.now();
-    const metrics: TurnMetrics = { vad_ms: 0, total_ms: 0 };
-    TURN_START.set(metrics, t0);
+    const metrics = startTurnMetrics(t0, 0);
     try {
-      await this.runAgentReply(text, source, signal, metrics);
+      await this.runner.runAgentReply(text, source, signal, metrics);
     } catch (err) {
       if (err instanceof Error && (err.name === "AbortError" || String(err).includes("abort")))
         return;
       throw err;
     } finally {
-      metrics.total_ms = Date.now() - t0;
-      if (!signal.aborted) {
-        this.send({ t: "metrics", metrics });
-        this.postEvent(this.sessionId, "turn.metrics", metrics).catch(() => undefined);
-      }
+      finishTurnMetrics(metrics, t0, signal, {
+        send: this.send,
+        postEvent: (type, payload) => this.postEvent(this.sessionId, type, payload),
+      });
       if (this.abort?.signal === signal) this.abort = undefined;
     }
-  }
-
-  /** Persist the user turn, run the LLM, persist + speak the agent reply. */
-  private async runAgentReply(
-    text: string,
-    source: "voice" | "text",
-    signal: AbortSignal,
-    metrics: TurnMetrics,
-  ): Promise<void> {
-    const userTurn = await this.persistTurn("user", text, source);
-    this.send({ t: "user_transcript", turn: userTurn });
-    this.history.push({ role: "user", content: text });
-
-    if (this.llm.streamChat) {
-      await this.runStreamingSpeechTurn(signal, metrics);
-      return;
-    }
-    const reply = await this.runLlmTurn(signal, metrics);
-
-    const agentTurn = await this.persistTurn("agent", reply.content, "voice");
-    this.history.push({ role: "assistant", content: reply.content });
-    this.send({ t: "agent_transcript", turn: agentTurn });
-
-    if (reply.content.trim() === "") return;
-    await this.streamSpeech(reply.content, signal, metrics);
   }
 
   /** First frame of a fresh buffer marks the utterance's VAD start. */
   private trackFrame(pcm: Uint8Array): void {
     if (this.firstFrameAt === undefined && pcm.byteLength > 0) this.firstFrameAt = Date.now();
-  }
-
-  /** One LLM round-trip, executing tool calls until a plain reply comes back. */
-  private async runLlmTurn(
-    signal: AbortSignal,
-    metrics?: TurnMetrics,
-  ): Promise<{ content: string }> {
-    const messages: LlmMessage[] = [
-      { role: "system", content: buildPrompt(this.ctx) },
-      ...this.history,
-    ];
-    const llmStart = Date.now();
-    for (let hop = 0; hop < 4; hop++) {
-      const result = await this.llm.chat(messages, this.voiceTools, { signal });
-      if (metrics && metrics.llm_ttft_ms === undefined) metrics.llm_ttft_ms = Date.now() - llmStart;
-      if (result.toolCalls.length === 0) return { content: result.content };
-      const toolResults: { name: string; output: string }[] = [];
-      for (const call of result.toolCalls) {
-        toolResults.push({
-          name: call.name,
-          output: await this.executeTool(call.name, call.args),
-        });
-      }
-      messages.push({
-        role: "assistant",
-        content: result.content,
-        tool_calls: result.toolCalls.map((c, i) => ({
-          id: `call_${hop}_${i}`,
-          name: c.name,
-          arguments: JSON.stringify(c.args),
-        })),
-      });
-      for (const [i, tr] of toolResults.entries()) {
-        messages.push({
-          role: "tool",
-          content: tr.output,
-          tool_call_id: `call_${hop}_${i}`,
-        });
-      }
-    }
-    return { content: "" };
-  }
-
-  /**
-   * Streaming turn: pipes LLM text deltas through the shared sentence cutter
-   * into pipelined per-sentence TTS, so synthesis of sentence N+1 overlaps
-   * with sending sentence N's audio. The agent turn is persisted with the
-   * full reply once the stream completes. Tool-call hops drop any streamed
-   * provisional speech and retry buffered (tools need the full result).
-   */
-  private async runStreamingSpeechTurn(signal: AbortSignal, metrics?: TurnMetrics): Promise<void> {
-    const messages: LlmMessage[] = [
-      { role: "system", content: buildPrompt(this.ctx) },
-      ...this.history,
-    ];
-    for (let hop = 0; hop < 4; hop++) {
-      const llmStart = Date.now();
-      const pipe = new SentenceSpeechPipeline({
-        tts: this.tts,
-        send: this.send.bind(this),
-        sendBinary: this.sendBinary.bind(this),
-        signal,
-        metrics,
-      });
-      const result = await this.llm.streamChat!(messages, this.voiceTools, {
-        signal,
-        onFirstToken: () => {
-          if (metrics && metrics.llm_ttft_ms === undefined)
-            metrics.llm_ttft_ms = Date.now() - llmStart;
-        },
-        onText: (delta) => pipe.push(delta),
-      });
-      if (result.toolCalls.length === 0) {
-        pipe.flush();
-        try {
-          await pipe.drain();
-        } finally {
-          pipe.finishSpeaking();
-        }
-        if (result.content.trim() === "") return;
-        const agentTurn = await this.persistTurn("agent", result.content);
-        this.history.push({ role: "assistant", content: result.content });
-        this.send({ t: "agent_transcript", turn: agentTurn });
-        return;
-      }
-      // Tool hop: text streamed alongside tool calls is provisional; drop it.
-      pipe.abandon();
-      const toolResults: { name: string; output: string }[] = [];
-      for (const call of result.toolCalls) {
-        toolResults.push({
-          name: call.name,
-          output: await this.executeTool(call.name, call.args),
-        });
-      }
-      messages.push({
-        role: "assistant",
-        content: result.content,
-        tool_calls: result.toolCalls.map((c, i) => ({
-          id: `call_${hop}_${i}`,
-          name: c.name,
-          arguments: JSON.stringify(c.args),
-        })),
-      });
-      for (const [i, tr] of toolResults.entries()) {
-        messages.push({
-          role: "tool",
-          content: tr.output,
-          tool_call_id: `call_${hop}_${i}`,
-        });
-      }
-    }
-  }
-
-  private async executeTool(name: string, args: Record<string, unknown>): Promise<string> {
-    if (name === "update_question") {
-      const q = args as unknown as UpdateQuestionArgs;
-      this.ctx.currentQuestion = q.question;
-      if (q.hints) this.ctx.hints = q.hints;
-      await this.postEvent(this.sessionId, "question.updated", {
-        question: q.question,
-        hints: q.hints ?? [],
-      });
-      this.send({ t: "question", question: q.question, hints: q.hints ?? [] });
-      return JSON.stringify({ ok: true, question: q.question });
-    }
-    if (name.startsWith("read_")) {
-      const tool = name.slice(5);
-      const state = await this.readToolState();
-      const content = state[tool] ?? "";
-      await this.postEvent(this.sessionId, `tool.${name}`, { length: content.length });
-      const text = tool === "whiteboard" ? describeWhiteboardSnapshot(content) : content;
-      return JSON.stringify({ text: truncate(text, this.maxToolOutput) });
-    }
-    if (name.startsWith("update_")) {
-      const tool = name.slice(7);
-      const text = typeof args.text === "string" ? args.text : "";
-      await this.db
-        .insertInto("tool_states")
-        .values({
-          session_id: this.sessionId,
-          tool,
-          state: text,
-          updated_at: new Date().toISOString(),
-        })
-        .onConflict((oc) =>
-          oc.columns(["session_id", "tool"]).doUpdateSet({
-            state: text,
-            updated_at: new Date().toISOString(),
-          }),
-        )
-        .execute();
-      await this.postEvent(this.sessionId, `tool.${name}`, { length: text.length });
-      return JSON.stringify({ ok: true, tool });
-    }
-    return JSON.stringify({ error: `unknown tool: ${name}` });
-  }
-
-  private async streamSpeech(
-    text: string,
-    signal: AbortSignal,
-    metrics?: TurnMetrics,
-  ): Promise<void> {
-    this.send({ t: "agent_speaking", on: true });
-    try {
-      let pcm: Uint8Array;
-      try {
-        pcm = await this.tts.synthesizeToPcm(text, { signal });
-      } catch (err) {
-        // Same degradation as the streaming path: no audio, but the
-        // transcript has already been sent and the turn completes.
-        this.send({
-          t: "error",
-          message: err instanceof Error ? err.message : String(err),
-        });
-        return;
-      }
-      for (let off = 0, seq = 0; off < pcm.length; off += TTS_CHUNK_BYTES, seq++) {
-        if (off === 0 && metrics) markFirstAudio(metrics);
-        const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
-        const frame = new Uint8Array(AUDIO_HEADER_BYTES + chunk.length);
-        new DataView(frame.buffer).setUint32(0, seq, false); // BE seq
-        frame.set(chunk, AUDIO_HEADER_BYTES);
-        this.sendBinary(frame);
-      }
-    } finally {
-      this.send({ t: "agent_speaking", on: false });
-    }
   }
 
   /** Same sequencing rule as POST /v1/sessions/:id/turns: max seq + 1. */
@@ -603,17 +358,6 @@ export class VoiceLoop {
     return turn;
   }
 
-  private async readToolState(): Promise<Record<string, string>> {
-    const rows = await this.db
-      .selectFrom("tool_states")
-      .select(["tool", "state"])
-      .where("session_id", "=", this.sessionId)
-      .execute();
-    const state: Record<string, string> = {};
-    for (const r of rows) state[r.tool] = r.state;
-    return state;
-  }
-
   /** In-process event write (replaces the worker's HTTP postEvent round-trip). */
   private async postEvent(sessionId: string, type: string, payload?: unknown): Promise<void> {
     await this.db
@@ -625,128 +369,5 @@ export class VoiceLoop {
         at: new Date().toISOString(),
       })
       .execute();
-  }
-}
-
-function truncate(text: string, max = MAX_TOOL_OUTPUT): string {
-  return text.length <= max ? text : `${text.slice(0, max)}… [truncated]`;
-}
-
-/**
- * Pipes streamed LLM text into pipelined per-sentence TTS. Each completed
- * sentence is synthesized and its chunks are sent by a chained promise, so
- * sentence N+1 synthesis starts while sentence N's audio is still being sent
- * while chunk ordering (monotonic seq) is preserved. `agent_speaking on`
- * precedes the first tts chunk; `off` is sent via finishSpeaking().
- */
-class SentenceSpeechPipeline {
-  private pending = "";
-  private seq = 0;
-  private speaking = false;
-  private done = false;
-  /** Set when synthesis failed once — later sentences don't retry. */
-  private failed = false;
-  /** Tail of the send chain: all synthesis/sends are appended behind this. */
-  private tail: Promise<void> = Promise.resolve();
-  private readonly opts: {
-    tts: VoiceTts;
-    send: (msg: VoiceServerMessage) => void;
-    sendBinary: (data: Uint8Array) => void;
-    signal: AbortSignal;
-    metrics?: TurnMetrics;
-  };
-
-  constructor(opts: {
-    tts: VoiceTts;
-    send: (msg: VoiceServerMessage) => void;
-    sendBinary: (data: Uint8Array) => void;
-    signal: AbortSignal;
-    metrics?: TurnMetrics;
-  }) {
-    this.opts = opts;
-  }
-
-  /** Feed one LLM text delta; cut and enqueue complete sentences. */
-  push(delta: string): void {
-    if (this.done || this.opts.signal.aborted) return;
-    this.pending += delta;
-    const { sentences, rest } = cutSentences(this.pending);
-    this.pending = rest;
-    for (const s of sentences) this.enqueue(s);
-  }
-
-  /** End-of-stream: flush the remainder as the final sentence. */
-  flush(): void {
-    if (this.done) return;
-    this.done = true;
-    const rest = this.pending.trim();
-    if (rest !== "") this.enqueue(rest);
-  }
-
-  /** Drop any pending speech (e.g. a tool-call hop after streamed text). */
-  abandon(): void {
-    this.done = true;
-    this.pending = "";
-    this.finishSpeaking();
-  }
-
-  /** Wait for all enqueued synthesis/send work to settle. */
-  drain(): Promise<void> {
-    return this.tail;
-  }
-
-  finishSpeaking(): void {
-    if (this.speaking) {
-      this.speaking = false;
-      this.opts.send({ t: "agent_speaking", on: false });
-    }
-  }
-
-  private enqueue(sentence: string): void {
-    if (this.opts.signal.aborted) return;
-    if (!this.speaking) {
-      this.speaking = true;
-      this.opts.send({ t: "agent_speaking", on: true });
-    }
-    // Chain behind previous sends; synthesis starts as soon as the chain
-    // reaches it, concurrently with LLM stream consumption. Ordering holds
-    // because each sentence's sends are appended to the same promise chain.
-    const task = this.tail.then(() => this.speakSentence(sentence));
-    this.tail = task;
-  }
-
-  private async speakSentence(sentence: string): Promise<void> {
-    if (this.opts.signal.aborted || this.failed) return;
-    let pcm: Uint8Array;
-    try {
-      pcm = await this.opts.tts.synthesizeToPcm(sentence, {
-        signal: this.opts.signal,
-      });
-    } catch (err) {
-      // A tts outage degrades a reply to silent text: stop the pipeline but
-      // let the turn finish so the transcript is still persisted and sent.
-      this.failed = true;
-      this.done = true;
-      this.pending = "";
-      this.opts.send({
-        t: "error",
-        message: err instanceof Error ? err.message : String(err),
-      });
-      return;
-    }
-    for (let off = 0; off < pcm.length; off += TTS_CHUNK_BYTES) {
-      if (this.opts.signal.aborted) return;
-      if (this.opts.metrics) markFirstAudio(this.opts.metrics);
-      const chunk = pcm.subarray(off, off + TTS_CHUNK_BYTES);
-      this.sendChunk(chunk);
-    }
-  }
-
-  private sendChunk(chunk: Uint8Array): void {
-    const seq = this.seq++;
-    const frame = new Uint8Array(AUDIO_HEADER_BYTES + chunk.length);
-    new DataView(frame.buffer).setUint32(0, seq, false); // BE seq
-    frame.set(chunk, AUDIO_HEADER_BYTES);
-    this.opts.sendBinary(frame);
   }
 }
