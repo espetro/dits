@@ -116,7 +116,14 @@ driver otherwise.
   show/hide toggle — the saved-key placeholder is redactKey-masked,
   never raw — model datalist, free-provider callout) plus an
   incomplete alert; the test row streams a
-  real one-word completion into a read-only textarea. Voice: tts
+  real one-word completion into a read-only textarea.
+  The model datalist probes `${base}/v1/models` once the
+  section is enabled and a base url is set (600ms debounce,
+  silent failure leaves the field free-text; no api key needed):
+  through the server relay (`/v1/relay`) when the di server is
+  reachable, so keyless gateways (bifrost) and CORS-hostless
+  endpoints (openrouter) still populate; browser-direct on the
+  public site build, which requires a CORS-enabled endpoint. Voice: tts
   layer select mirroring Hearing (same ModelPackFiles block —
   wasm → device pack row, server → di-server pack row — cloud → tts
   endpoint fields) and the test row that synthesizes the localized
