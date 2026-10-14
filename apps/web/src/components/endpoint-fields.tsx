@@ -1,7 +1,9 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Eye, EyeOff } from "lucide-react";
+import { PROVIDER_PRESETS, presetForBaseUrl } from "@di/shared";
 import { Input } from "./vendor/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 import { redactKey } from "../lib/runtime";
 import type { ModelOptions } from "./settings-drafts";
@@ -33,6 +35,49 @@ export function SettingsField(props: {
         </span>
       )}
     </label>
+  );
+}
+
+const CUSTOM_PRESET = "custom";
+
+/**
+ * Provider preset picker: fills the base url with the preset's
+ * authoritative version path. "Custom" clears a preset url so a hand-typed
+ * one can be entered; a url that matches no preset reads as Custom.
+ */
+function PresetSelect(props: { baseUrl: string; onPick: (baseUrl: string) => void }) {
+  const intl = useIntl();
+  const current = presetForBaseUrl(props.baseUrl)?.id ?? CUSTOM_PRESET;
+  return (
+    <SettingsField
+      label={intl.formatMessage({ id: "settings.preset" })}
+      helper={intl.formatMessage({ id: "settings.presetHelp" })}
+    >
+      <Select
+        value={current}
+        onValueChange={(id) =>
+          props.onPick(PROVIDER_PRESETS.find((p) => p.id === id)?.baseUrl ?? "")
+        }
+      >
+        <SelectTrigger
+          size="sm"
+          className="w-full"
+          aria-label={intl.formatMessage({ id: "settings.preset" })}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PROVIDER_PRESETS.map((p) => (
+            <SelectItem key={p.id} value={p.id}>
+              {p.label}
+            </SelectItem>
+          ))}
+          <SelectItem value={CUSTOM_PRESET}>
+            {intl.formatMessage({ id: "settings.presetCustom" })}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </SettingsField>
   );
 }
 
@@ -96,6 +141,9 @@ export function EndpointFields(props: {
     // a real <form> silences chrome's "password field is not contained in a
     // form" warning on the api-key input; submit is a no-op (draft autosaves).
     <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      {!(tab === "llm" && (isDemoLlm(draft.baseUrl) || draft.flavor === "anthropic")) && (
+        <PresetSelect baseUrl={draft.baseUrl} onPick={(baseUrl) => props.onChange({ baseUrl })} />
+      )}
       <SettingsField
         label={intl.formatMessage({ id: "settings.baseUrl" })}
         helper={

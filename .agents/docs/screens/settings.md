@@ -124,14 +124,20 @@ driver otherwise.
   demo is the default and fills the managed VITE_DEMO_LLM_* endpoint;
   in-browser renders the future options — gemini nano + transformers
   catalog — marked unavailable, no fake engine), cloud reveals the
-  endpoint fields (base url, api key masked inside a <form> with a
+  endpoint fields (a provider preset select above the base url, fed by
+  PROVIDER_PRESETS from @di/shared: picking a preset fills its
+  authoritative version path, "Custom" clears it, an unmatched url reads
+  as Custom; hidden for the demo endpoint and anthropic flavor; same on
+  the stt and tts endpoint fields; base url, api key masked inside a <form> with a
   show/hide toggle — the saved-key placeholder is redactKey-masked,
   never raw — model datalist, free-provider callout) plus an
   incomplete alert; the test row streams a
   real one-word completion into a read-only textarea; any failure
   (http status, relay 502, in-band sse error) shows its upstream detail
   in the status line, and only a genuinely empty successful stream says
-  "fields invalid". Test is enabled for keyless local hosts (loopback,
+  "fields invalid". The llm test builds its model through the llm slice
+  factory (createLlmModel), and the stt and tts endpoint calls use the
+  same relay-or-direct fetch as the llm. Test is enabled for keyless local hosts (loopback,
   private network) once url and model are set.
   The base url is authoritative: only trailing slashes are trimmed, then
   `/models` and `/chat/completions` are appended; no `/v1` is stripped
