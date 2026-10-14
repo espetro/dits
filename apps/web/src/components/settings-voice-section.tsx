@@ -15,10 +15,13 @@ import { useSsrStore } from "../lib/ssr";
 import { $voiceModelsConsent, $voiceTtsEngine, requestVoiceConsent } from "../stores/voice";
 import type { TtsLayerPick } from "../stores/voice";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
-import { WasmTts } from "../lib/voice/wasm-engines";
 import { DiError, errorDetail } from "../lib/errors";
-import { testBrowserTts, testServerTts } from "../lib/settings-tests";
-import { synthesizeSpeech as synthesizeEndpoint } from "../lib/agent/tts";
+import {
+  testBrowserTts,
+  testServerTts,
+  synthesizeSpeech as synthesizeEndpoint,
+  WasmTts,
+} from "../lib/tts";
 import { encodeWav, encodeWavPcm16 } from "../lib/voice/wav";
 import { toast } from "sonner";
 import { markSeamOp } from "../lib/seam-health";

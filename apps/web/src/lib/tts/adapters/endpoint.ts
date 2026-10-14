@@ -1,6 +1,7 @@
 import { TTS_SAMPLE_RATE, providerEndpoint } from "@di/shared";
 import type { TtsEndpoint } from "@di/shared";
-import { DiError } from "../errors";
+import { DiError } from "../../errors";
+import { relayOrDirectFetch } from "../../relay";
 
 /**
  * Client-only TTS: POST ${baseUrl}/v1/audio/speech (OpenAI-compatible) and
@@ -78,7 +79,9 @@ export async function synthesizeSpeech(
   tts: TtsEndpoint,
   text: string,
   signal?: AbortSignal,
-  fetchImpl: typeof fetch = fetch,
+  // relay-aware by default (same seam as the llm): same-origin through the
+  // di server when active, browser-direct otherwise
+  fetchImpl: typeof fetch = relayOrDirectFetch(tts.baseUrl) as typeof fetch,
 ): Promise<Uint8Array> {
   // see createOpenAiCompatibleModel: an empty Bearer still forces a CORS
   // preflight, which zero-key gateways without `authorization` in

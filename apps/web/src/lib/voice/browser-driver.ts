@@ -9,7 +9,7 @@ import type {
 import type { Turn } from "@di/shared/session";
 import { ClientAgent } from "../agent/client-agent";
 import type { AgentToolExecutors } from "../agent/client-agent";
-import { synthesizeSpeech } from "../agent/tts";
+import { synthesizeSpeech } from "../tts";
 import { resolveInstalledVoiceEngines } from "./engines";
 import type { ResolvedVoiceEngines, SttEngine, TtsEngine } from "./engines";
 import { WasmStt, WasmTts } from "./wasm-engines";

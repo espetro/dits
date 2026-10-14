@@ -1,6 +1,4 @@
-import { TTS_TEST_TIMEOUT_MS } from "./timeouts";
 import { DiError } from "./errors";
-import { API_BASE } from "./runtime";
 import { startCapture } from "./voice/capture";
 import type { SttEngine } from "./voice/engines";
 /**
@@ -141,58 +139,6 @@ export function startLiveStt(handlers: {
   recognition.onend = () => stop();
   recognition.start();
   return { stop };
-}
-
-/** In-browser TTS test: resolve on `end`, reject on `error` or timeout. */
-export function testBrowserTts(text = "hello"): Promise<void> {
-  const synth = globalThis.speechSynthesis;
-  if (!synth) return Promise.reject(new DiError("tts.builtin", undefined, "no speechSynthesis"));
-  // desktop shells and headless browsers expose the api with zero voices:
-  // speak() then neither plays nor errors, which looked like a passing test
-  if (synth.getVoices().length === 0)
-    return Promise.reject(new DiError("tts.builtin", undefined, "no voices installed"));
-  return new Promise<void>((resolve, reject) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const timer = setTimeout(() => {
-      synth.cancel();
-      resolve();
-    }, TTS_TEST_TIMEOUT_MS);
-    utterance.onend = () => {
-      clearTimeout(timer);
-      resolve();
-    };
-    utterance.onerror = (event) => {
-      clearTimeout(timer);
-      reject(new DiError("tts.builtin", undefined, event.error));
-    };
-    synth.speak(utterance);
-  });
-}
-
-/**
- * Server-layer tts test: the di server synthesizes through its configured
- * adapter (builtin kitten or remote endpoint) and returns a wav plus the
- * server-measured synth time.
- */
-export async function testServerTts(text: string): Promise<{ clip: Blob; ms: number }> {
-  const t0 = performance.now();
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE}/v1/voice/tts-test`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-  } catch (err) {
-    throw new DiError("tts.server", { status: 0 }, err instanceof Error ? err.message : undefined);
-  }
-  if (!res.ok) {
-    const detail = ((await res.json().catch(() => null)) as { error?: string } | null)?.error;
-    throw new DiError("tts.server", { status: res.status }, detail);
-  }
-  const clip = await res.blob();
-  const ms = Number(res.headers.get("x-synth-ms")) || Math.round(performance.now() - t0);
-  return { clip, ms };
 }
 
 /**
