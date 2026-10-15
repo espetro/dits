@@ -19,6 +19,12 @@ driver selection derives from the resolved stt+tts layers
 for it (server pick or auto + reachable /api/health), the browser
 driver otherwise.
 
+Each layer section (stt, llm, tts) is one `data-testid="layer-test-{stt|llm|tts}"`
+container holding the layer picker, its config and its Test row. After a test
+runs, the container shows a single `role="status"` line: "Working" (plus timing
+or route) on success, "Failed: <detail>" on failure. The tts test also toasts
+failures. e2e specs scope by that testid and assert the status text.
+
 ## ASCII mockup (desktop, default)
 
 ```
