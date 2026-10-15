@@ -109,11 +109,11 @@ curl -sf -m 10 "${DI_URL:-http://localhost:3000}/v1/test/smoke" | jq -e '.ok == 
 '''
 
 # Self-contained: starts the built SPA behind a test-mode server on :3100
-# plus mocks on :3101-3104, runs every spec, tears down. Needs `mise run
+# plus mocks on :3101-3106, runs every spec, tears down. Needs `mise run
 # build` first. Results: tests/e2e/test-results/summary.txt. Extra args go
 # to playwright: mise run e2e -- provider-relay.spec.ts -g "401"
 [tasks.e2e]
-description = "Run every Playwright e2e spec against the built SPA with a self-started stack (ports 3100-3104)"
+description = "Run every Playwright e2e spec against the built SPA with a self-started stack (ports 3100-3106)"
 run = "bun harness/up.ts"
 dir = "tests/e2e"
 

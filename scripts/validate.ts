@@ -9,9 +9,13 @@
  * length are zero-baseline correctness checks, so those stay hard gates.
  *   T2 ~1-2min cold, seconds warm (default)     — T1 + turbo typecheck/test, affected only, queued
  *   T3 slow (--full)                            — T2 + full turbo + knip + oxlint --type-aware, queued
+ * e2e rides the same queue: T2 runs the @smoke tier when the diff touches the app, server,
+ * contracts or e2e itself; T3 builds the SPA and runs the whole suite. Failures print the
+ * summary lines from tests/e2e/test-results/summary.txt (up.ts), not a raw playwright dump.
  * T2/T3 never run two-at-once: routed through `ts -S 1 -L typecheck` (task-spooler).
  */
 import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import task from "tasuku";
 
 interface Step {
@@ -61,6 +65,7 @@ const t1: Step[] = [
   { title: "ast-grep scan", cmd: "bunx", args: ["ast-grep", "scan"] },
   { title: "ratchets", cmd: "bun", args: ["scripts/check-ratchets.ts"] },
   { title: "dscheck", cmd: "bun", args: ["scripts/check-dscheck.ts"] },
+  { title: "e2e seed keys", cmd: "bun", args: ["tests/e2e/harness/check-keys.ts"] },
 ];
 
 const t2: Step[] = [
@@ -69,6 +74,40 @@ const t2: Step[] = [
     cmd: "bunx",
     args: ["turbo", "run", "typecheck", "test", "--filter=...[origin/main]", "--concurrency=1"],
   },
+];
+
+const E2E_PATHS = /^(apps\/web|apps\/server|packages\/shared|tests\/e2e)\//;
+
+function diffTouchesE2eSurface(): boolean {
+  const { stdout } = Bun.spawnSync(["git", "diff", "--name-only", "origin/main"]);
+  return stdout
+    .toString()
+    .split("\n")
+    .some((f) => E2E_PATHS.test(f));
+}
+
+// the prerender crawl intermittently loses its own preview server
+// (ECONNREFUSED/ETIMEDOUT on a random localhost port), so retry once
+const buildWeb: Step = {
+  title: "build web SPA",
+  cmd: "sh",
+  args: ["-c", "bun run --cwd apps/web build || bun run --cwd apps/web build"],
+};
+
+const e2eSmoke: Step[] = diffTouchesE2eSurface()
+  ? [
+      buildWeb,
+      {
+        title: "e2e smoke",
+        cmd: "bun",
+        args: ["tests/e2e/harness/up.ts", "--grep", "@smoke"],
+      },
+    ]
+  : [];
+
+const e2eFull: Step[] = [
+  buildWeb,
+  { title: "e2e (all)", cmd: "bun", args: ["tests/e2e/harness/up.ts"] },
 ];
 
 const t3: Step[] = [
@@ -82,6 +121,7 @@ const t3: Step[] = [
     cmd: "bunx",
     args: ["knip", "--include", "files,dependencies"],
   },
+  ...e2eFull,
 ];
 
 let steps: Step[];
@@ -94,7 +134,7 @@ if (staged) {
   steps = [...t0, ...t1, ...t2, ...t3];
   heavy = true;
 } else {
-  steps = [...t0, ...t1, ...t2];
+  steps = [...t0, ...t1, ...t2, ...e2eSmoke];
   heavy = true;
 }
 
@@ -112,6 +152,12 @@ function run(cmd: string, args: string[]): Promise<{ code: number; output: strin
   child.stderr.on("data", (d) => (output += d.toString()));
   child.on("close", (code) => resolve({ code: code ?? 1, output }));
   return promise;
+}
+
+/** e2e runs end with a one-screen summary; show that, not the full playwright dump. */
+function readableFailure(output: string): string {
+  const at = output.indexOf("== e2e summary");
+  return (at === -1 ? output : output.slice(at)).trim();
 }
 
 function hasTaskSpooler(): boolean {
@@ -133,17 +179,24 @@ async function runHeavy(steps: Step[]): Promise<{ code: number; output: string }
   if (queued) spawn("ts", ["-S", "1"]).unref();
   const results: { code: number; output: string }[] = [];
   for (const step of steps) {
-    results.push(
-      queued
-        ? await run("ts", ["-f", "-L", "typecheck", step.cmd, ...step.args])
-        : await run(step.cmd, step.args),
-    );
+    if (!queued) {
+      results.push(await run(step.cmd, step.args));
+      continue;
+    }
+    // `ts -f` prints only the job id; the job's own output sits in the file `ts -o <id>` names
+    const job = await run("ts", ["-f", "-L", "typecheck", step.cmd, ...step.args]);
+    const id = job.output.trim().split("\n").pop() ?? "";
+    const outFile = /^\d+$/.test(id) ? (await run("ts", ["-o", id])).output.trim() : "";
+    results.push({
+      code: job.code,
+      output: outFile && existsSync(outFile) ? readFileSync(outFile, "utf8") : job.output,
+    });
   }
   return results;
 }
 
 const cheapSteps = heavy
-  ? steps.slice(0, steps.length - (full ? t2.length + t3.length : t2.length))
+  ? steps.slice(0, steps.length - (full ? t2.length + t3.length : t2.length + e2eSmoke.length))
   : steps;
 const heavySteps = heavy ? steps.slice(cheapSteps.length) : [];
 
@@ -171,7 +224,7 @@ if (heavySteps.length > 0 && (!failed || process.argv.includes("--always-heavy")
     if (code !== 0) {
       failed = true;
       console.log(`\n--- ${heavySteps[i]!.title} output ---`);
-      console.log(output.trim());
+      console.log(readableFailure(output));
     } else {
       console.log(`ok: ${heavySteps[i]!.title}`);
     }
