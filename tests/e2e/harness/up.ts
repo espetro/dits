@@ -14,9 +14,12 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import {
   appendFileSync,
+  closeSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
+  openSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -34,12 +37,14 @@ const SERVER = `${root}apps/server/src/cli.ts`;
 
 const children: ChildProcess[] = [];
 
-function start(cmd: string[], env: Record<string, string> = {}): ChildProcess {
+function start(cmd: string[], env: Record<string, string> = {}, logFile?: string): ChildProcess {
+  const out = logFile ? openSync(logFile, "a") : "ignore";
   const child = spawn(cmd[0]!, cmd.slice(1), {
-    stdio: "ignore",
+    stdio: ["ignore", out, out],
     detached: true,
     env: { ...process.env, ...env },
   });
+  if (typeof out === "number") closeSync(out);
   children.push(child);
   return child;
 }
@@ -89,6 +94,8 @@ async function main(): Promise<number> {
   const summary = `${e2eDir}test-results/summary.txt`;
   rmSync(serverLog, { force: true });
   rmSync(summary, { force: true });
+  // playwright wipes test-results/ on start, so the log is copied in after the run
+  const rawLog = join(dir, "server.log");
   const cleanup = () => {
     stopAll();
     rmSync(dir, { recursive: true, force: true });
@@ -140,9 +147,12 @@ files:
         waitFor(`http://localhost:${p}/health`, `mock :${p}`),
       ),
     );
-    start(["bun", "run", SERVER, "--config", join(dir, "config.yaml")], {
-      DI_TEST_MODE: "1",
-    });
+    // the server logs to stdout/stderr; log_path is only the clear-logs target
+    start(
+      ["bun", "run", SERVER, "--config", join(dir, "config.yaml")],
+      { DI_TEST_MODE: "1" },
+      rawLog,
+    );
     await waitFor(`http://localhost:${PORTS.server}/api/health`, "di server");
 
     // the built SPA with NO di server behind it (public-site fallback guard):
@@ -179,6 +189,7 @@ files:
     });
     const code = await new Promise<number>((resolve) => pw.on("exit", (c) => resolve(c ?? 1)));
     void staticServer.stop(true);
+    if (existsSync(rawLog)) copyFileSync(rawLog, serverLog);
     if (existsSync(summary)) {
       if (code !== 0) appendFileSync(summary, `SERVER-LOG  ${serverLog}\n`);
       const lines = readFileSync(summary, "utf8").split("\n");
