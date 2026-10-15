@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { BrowserContext, Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { interviewPage } from "./harness/pom";
 import { KEYS, applySeed, clientOnlyUnconsented, noServer, wasmReady } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-wasm-voice.spec.md.
@@ -181,24 +182,6 @@ function mockVoiceWorkers(context: BrowserContext) {
   });
 }
 
-async function startClientOnlyInterview(page: Page): Promise<string> {
-  await page.goto(`${WEB_URL}/setup`);
-  await expect
-    .poll(
-      async () => {
-        if (!/\/interview\//.test(page.url())) {
-          await page.getByRole("button", { name: "start", exact: true }).first().click();
-        }
-        return /\/interview\//.test(page.url());
-      },
-      { timeout: 10_000, intervals: [500] },
-    )
-    .toBe(true);
-  const match = /\/interview\/([^/?#]+)/.exec(page.url());
-  if (!match) throw new Error(`unexpected url: ${page.url()}`);
-  return match[1]!;
-}
-
 async function seedModelCache(page: Page) {
   const entries = [
     {
@@ -242,7 +225,7 @@ test.describe("wasm voice (mocked models + workers)", () => {
       noServer(),
     );
     await routeModelFiles(page, requested);
-    await startClientOnlyInterview(page);
+    await interviewPage(page).start();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
@@ -276,7 +259,7 @@ test.describe("wasm voice (mocked models + workers)", () => {
       noServer(),
     );
     await routeModelFiles(page, requested);
-    await startClientOnlyInterview(page);
+    await interviewPage(page).start();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
@@ -307,7 +290,7 @@ test.describe("wasm voice (mocked models + workers)", () => {
 
     await page.goto(`${WEB_URL}/setup`);
     await seedModelCache(page);
-    await startClientOnlyInterview(page);
+    await interviewPage(page).start();
 
     // consent was granted and the cache is warm, so the driver picks the
     // sherpa worker path instead of SpeechRecognition

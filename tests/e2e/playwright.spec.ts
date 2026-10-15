@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { interviewPage } from "./harness/pom";
 import { applySeed, clientOnly, noServer } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-text.spec.md (readable .md);
@@ -262,26 +263,7 @@ test.describe("client-only runtime (no di server)", () => {
 
   async function startClientOnlySession(page: Page): Promise<string> {
     await applySeed(page, clientOnly(), noServer());
-    await page.goto(`${WEB_URL}/setup`);
-    // The submit button is only wired up after React hydrates; with seeded
-    // localStorage the SSR tree differs from the first client render (the
-    // provider-profile form appears), so hydration finishes a beat later and a
-    // single early click can be dropped. Keep clicking until the SPA actually
-    // navigates.
-    await expect
-      .poll(
-        async () => {
-          if (!/\/interview\//.test(page.url())) {
-            await page.getByRole("button", { name: "start", exact: true }).first().click();
-          }
-          return /\/interview\//.test(page.url());
-        },
-        { timeout: 10_000, intervals: [500] },
-      )
-      .toBe(true);
-    const match = /\/interview\/([^/?#]+)/.exec(page.url());
-    if (!match) throw new Error(`unexpected url: ${page.url()}`);
-    return match[1]!;
+    return interviewPage(page).start();
   }
 
   test("client-only session creation persists to OPFS", async ({ page }) => {
@@ -311,10 +293,7 @@ test.describe("client-only runtime (no di server)", () => {
     const id = await startClientOnlySession(page);
     // the composer lives at the bottom of the conversation card — the
     // pillbar "switch to typing" button focuses it.
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("hello from e2e");
-    await input.press("Enter");
+    await interviewPage(page).say("hello from e2e");
 
     await expect(page.getByText("mock agent reply").first()).toBeVisible();
     await expect(page.getByText("you · text").first()).toBeVisible();
@@ -339,10 +318,7 @@ test.describe("client-only runtime (no di server)", () => {
       await route.fulfill({ status: 500, body: "mock failure" });
     });
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("this will fail");
-    await input.press("Enter");
+    await interviewPage(page).say("this will fail");
 
     await expect(page.getByText("you · text").first()).toBeVisible();
     // negative assertion: nothing else should ever show up, so poll briefly
@@ -397,10 +373,7 @@ test.describe("client-only runtime (no di server)", () => {
     );
 
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("hello from e2e");
-    await input.press("Enter");
+    await interviewPage(page).say("hello from e2e");
     await expect(page.getByText("mock agent reply").first()).toBeVisible();
 
     // finish auto-builds the report on mount and advances to /report/[id]
