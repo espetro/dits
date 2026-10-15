@@ -55,7 +55,26 @@ export async function isHealthResponse(res: Response): Promise<boolean> {
   }
 }
 
-export async function probeServer(): Promise<boolean> {
+let inflightProbe: Promise<boolean> | null = null;
+
+/**
+ * Resolves once the health probe in flight (if any) has settled. Provider
+ * calls await this before choosing relay vs browser-direct, so a call made
+ * while the probe is pending (stale cache, slow server) is not sent
+ * browser-direct to a CORS-walled endpoint. Bounded by the probe timeout.
+ */
+export async function settleServerProbe(): Promise<void> {
+  await inflightProbe;
+}
+
+export function probeServer(): Promise<boolean> {
+  inflightProbe ??= runProbe().finally(() => {
+    inflightProbe = null;
+  });
+  return inflightProbe;
+}
+
+async function runProbe(): Promise<boolean> {
   const pinned = import.meta.env.VITE_VOICE_DEFAULT;
   if (pinned === "browser") {
     $serverReachable.set(false);
