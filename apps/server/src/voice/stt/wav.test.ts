@@ -137,7 +137,7 @@ describe("WhisperStt", () => {
     }) as unknown as typeof fetch;
 
     const sttImpl = new WhisperStt({
-      baseUrl: "http://fake.local",
+      baseUrl: "http://fake.local/v1",
       model: "whisper-1",
       fetchImpl,
     });

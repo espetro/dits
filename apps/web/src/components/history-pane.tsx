@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { useLocale, withLocale } from "../lib/locale-href";
 import { clearClientSessions, listClientSessions } from "../lib/opfs-store";
+import { deleteServerSessions } from "../lib/data-reset";
 import type { Session } from "@di/shared/session";
 import type { IntlShape } from "react-intl";
 import { Button } from "./vendor/button";
@@ -116,10 +117,12 @@ export function HistoryPane() {
               variant="destructive"
               size="sm"
               onClick={() =>
-                void clearClientSessions().then(() => {
-                  setSessions([]);
-                  setConfirmClear(false);
-                })
+                void Promise.allSettled([clearClientSessions(), deleteServerSessions()]).then(
+                  () => {
+                    setSessions([]);
+                    setConfirmClear(false);
+                  },
+                )
               }
             >
               <FormattedMessage id="history.clearDo" />

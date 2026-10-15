@@ -79,3 +79,10 @@ export const VoiceModelsStatusSchema = v.object({
   ),
 });
 export type VoiceModelsStatus = v.InferOutput<typeof VoiceModelsStatusSchema>;
+
+/** POST /v1/voice/stt-test response: recognized text plus server-measured transcribe time. */
+export const SttTestResponseSchema = v.object({
+  text: v.string(),
+  ms: v.pipe(v.number(), v.integer(), v.minValue(0)),
+});
+export type SttTestResponse = v.InferOutput<typeof SttTestResponseSchema>;

@@ -1,10 +1,7 @@
+import type { EventSink } from "../events.ts";
 import { encodeWav } from "./wav.ts";
-import { providerUrl } from "../provider-url.ts";
-
-/** Minimal in-process event sink the voice loop implements against the db. */
-export interface EventSink {
-  postEvent(sessionId: string, type: string, payload?: unknown): Promise<void>;
-}
+import type { SttPort } from "./port.ts";
+import { providerEndpoint } from "@di/shared";
 
 export interface WhisperSttOptions {
   baseUrl: string;
@@ -23,7 +20,7 @@ export interface WhisperSttOptions {
  * (field `file`, model from config). Non-streaming by design (v1 mode): the
  * client's VAD delimits utterances, we transcribe each completed one.
  */
-export class WhisperStt {
+export class WhisperStt implements SttPort {
   readonly label = "di_whisper_stt";
   private opts: WhisperSttOptions;
 
@@ -66,7 +63,7 @@ export class WhisperStt {
       headers.authorization = `Bearer ${this.opts.apiKey}`;
     }
     const res = await (this.opts.fetchImpl ?? fetch)(
-      `${providerUrl(this.opts.baseUrl)}/v1/audio/transcriptions`,
+      providerEndpoint(this.opts.baseUrl, "/audio/transcriptions"),
       { method: "POST", headers, body: form, signal: abortSignal },
     );
     const latency_ms = Date.now() - startedAt;

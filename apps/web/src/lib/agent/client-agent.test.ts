@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ClientAgent } from "./client-agent";
-import { decodeWav, resamplePcm16, synthesizeSpeech } from "./tts";
+import { decodeWav, resamplePcm16, synthesizeSpeech } from "../tts";
 
 const LLM = {
   mode: "remote" as const,

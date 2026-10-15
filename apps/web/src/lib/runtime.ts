@@ -33,7 +33,7 @@ export const $serverReachable = persistentAtom<boolean | null>("di.server-reacha
   decode: (raw) => (raw === "true" ? true : raw === "false" ? false : null),
 });
 
-const API_BASE = (import.meta.env.VITE_DI_API_BASE as string | undefined) ?? "";
+export const API_BASE = (import.meta.env.VITE_DI_API_BASE as string | undefined) ?? "";
 
 /** Health-probe budget: keep it short — it only gates driver selection. */
 const PROBE_TIMEOUT_MS = envNum("VITE_SERVER_PROBE_TIMEOUT_MS", 2_000);
@@ -103,7 +103,6 @@ let probeStarted = false;
 export function ensureRuntimeProbe(): void {
   if (probeStarted) return;
   probeStarted = true;
-  if ($serverReachable.get() !== true) {
-    void probeServer();
-  }
+  // always re-verify: a persisted `true` can be stale (server stopped since)
+  void probeServer();
 }

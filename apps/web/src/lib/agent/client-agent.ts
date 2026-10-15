@@ -17,10 +17,10 @@ import type {
   UpdateQuestionArgs,
 } from "@di/shared";
 import type { LanguageModelV3, LanguageModelV4 } from "@ai-sdk/provider";
-import { resolveBrowserLlm } from "./browser-provider";
+import { resolveBrowserLlm } from "../llm";
 import { DiError, errorCode } from "../errors";
 import { pushVoiceHealth } from "../voice/health";
-import type { BrowserModelHandles } from "./browser-provider";
+import type { BrowserModelHandles } from "../llm";
 
 /** Model spec version accepted by ai v7's model union. */
 type AnyLanguageModel = LanguageModelV3 | LanguageModelV4;

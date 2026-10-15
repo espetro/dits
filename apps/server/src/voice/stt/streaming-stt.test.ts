@@ -29,7 +29,7 @@ describe("StreamingWhisperStt", () => {
   it("accumulates SSE text deltas across feeds and resolves on finish", async () => {
     const requests: { url: string; init: RequestInit }[] = [];
     const stt = new StreamingWhisperStt({
-      baseUrl: "http://fake.local",
+      baseUrl: "http://fake.local/v1",
       model: "whisper-1",
       apiKey: "sk-test",
       fetchImpl: ((url: string, init: RequestInit) => {

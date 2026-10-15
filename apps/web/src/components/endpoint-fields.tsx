@@ -1,9 +1,13 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Eye, EyeOff } from "lucide-react";
+import { PROVIDER_PRESETS, presetForBaseUrl } from "@di/shared";
 import { Input } from "./vendor/input";
+import { ModelCombobox } from "./model-combobox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 import { redactKey } from "../lib/runtime";
+import type { ModelOptions } from "./settings-drafts";
 
 const fieldClass = "block text-xs text-muted-foreground";
 const helperClass = "mt-1 text-xs text-muted-foreground";
@@ -15,14 +19,66 @@ const helperClass = "mt-1 text-xs text-muted-foreground";
 export function SettingsField(props: {
   label: string;
   helper?: string;
+  /** render the helper as an error (destructive tone, announced) */
+  helperError?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <label className="block">
       <span className={fieldClass}>{props.label}</span>
       <span className="mt-1 block">{props.children}</span>
-      {props.helper && <span className={helperClass}>{props.helper}</span>}
+      {props.helper && (
+        <span
+          className={props.helperError ? `${helperClass} text-destructive` : helperClass}
+          role={props.helperError ? "alert" : undefined}
+        >
+          {props.helper}
+        </span>
+      )}
     </label>
+  );
+}
+
+const CUSTOM_PRESET = "custom";
+
+/**
+ * Provider preset picker: fills the base url with the preset's
+ * authoritative version path. "Custom" clears a preset url so a hand-typed
+ * one can be entered; a url that matches no preset reads as Custom.
+ */
+function PresetSelect(props: { baseUrl: string; onPick: (baseUrl: string) => void }) {
+  const intl = useIntl();
+  const current = presetForBaseUrl(props.baseUrl)?.id ?? CUSTOM_PRESET;
+  return (
+    <SettingsField
+      label={intl.formatMessage({ id: "settings.preset" })}
+      helper={intl.formatMessage({ id: "settings.presetHelp" })}
+    >
+      <Select
+        value={current}
+        onValueChange={(id) =>
+          props.onPick(PROVIDER_PRESETS.find((p) => p.id === id)?.baseUrl ?? "")
+        }
+      >
+        <SelectTrigger
+          size="sm"
+          className="w-full"
+          aria-label={intl.formatMessage({ id: "settings.preset" })}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PROVIDER_PRESETS.map((p) => (
+            <SelectItem key={p.id} value={p.id}>
+              {p.label}
+            </SelectItem>
+          ))}
+          <SelectItem value={CUSTOM_PRESET}>
+            {intl.formatMessage({ id: "settings.presetCustom" })}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </SettingsField>
   );
 }
 
@@ -57,7 +113,7 @@ function FreeProviderLinks() {
 
 /**
  * The shared per-section endpoint fields (base URL, redacted API key,
- * model id with a /models datalist, voice for TTS) plus the per-category
+ * model id combobox over the /models list, voice for TTS) plus the per-category
  * provider hint block. Extracted from settings-dialog to keep that file
  * under the loc ratchet.
  */
@@ -71,7 +127,7 @@ export function EndpointFields(props: {
     voice: string;
   };
   savedApiKey: string | null;
-  modelOptions: string[];
+  modelOptions: ModelOptions;
   onChange: (
     patch: Partial<{ baseUrl: string; apiKey: string; model: string; voice: string }>,
   ) => void;
@@ -86,6 +142,9 @@ export function EndpointFields(props: {
     // a real <form> silences chrome's "password field is not contained in a
     // form" warning on the api-key input; submit is a no-op (draft autosaves).
     <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      {!(tab === "llm" && (isDemoLlm(draft.baseUrl) || draft.flavor === "anthropic")) && (
+        <PresetSelect baseUrl={draft.baseUrl} onPick={(baseUrl) => props.onChange({ baseUrl })} />
+      )}
       <SettingsField
         label={intl.formatMessage({ id: "settings.baseUrl" })}
         helper={
@@ -161,28 +220,32 @@ export function EndpointFields(props: {
           </button>
         </span>
       </SettingsField>
-      <SettingsField
-        label={intl.formatMessage({ id: "settings.modelId" })}
-        helper={intl.formatMessage({ id: "settings.modelHelp" })}
-      >
-        <>
-          <Input
+      <div>
+        {/* not a <label> wrapper: clicks on list options must not re-target the input */}
+        <label htmlFor={`${tab}-model`} className={fieldClass}>
+          <FormattedMessage id="settings.modelId" />
+        </label>
+        <div className="mt-1">
+          <ModelCombobox
+            id={`${tab}-model`}
             value={draft.model}
-            onChange={(e) => props.onChange({ model: e.target.value })}
-            list={`${tab}-models`}
-            placeholder={
-              props.modelOptions.length === 0
-                ? intl.formatMessage({ id: "settings.modelPlaceholder" })
-                : undefined
-            }
+            onChange={(model) => props.onChange({ model })}
+            options={props.modelOptions.options}
+            loading={props.modelOptions.loading}
+            error={props.modelOptions.error}
+            probeable={draft.baseUrl !== "" && URL.canParse(draft.baseUrl)}
+            placeholder={intl.formatMessage({ id: "settings.modelPlaceholder" })}
           />
-          <datalist id={`${tab}-models`}>
-            {props.modelOptions.map((id) => (
-              <option key={id} value={id} />
-            ))}
-          </datalist>
-        </>
-      </SettingsField>
+        </div>
+        <span
+          className={
+            props.modelOptions.error !== null ? `${helperClass} text-destructive` : helperClass
+          }
+          role={props.modelOptions.error !== null ? "alert" : undefined}
+        >
+          {props.modelOptions.error ?? intl.formatMessage({ id: "settings.modelHelp" })}
+        </span>
+      </div>
       {tab === "tts" && (
         <SettingsField
           label={intl.formatMessage({ id: "settings.voice" })}

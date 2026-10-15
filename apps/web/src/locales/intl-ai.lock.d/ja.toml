@@ -390,12 +390,54 @@ model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
 
 [entries."errors.llm.chat"]
-value = "モデルリクエストに失敗しました ({status})"
-source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+value = "モデルリクエストが失敗しました ({status}): {detail}"
+source_hash = "81ebbfefcc618641c8990861a0af6b8775350c03"
 origin = "ai"
 reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T20:19:23Z"
+model = "zai-coding-plan/glm-5.3-flash"
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.empty"]
+value = "エンドポイントは応答しましたがテキストを返しませんでした。モデルがトークンを非表示の推論に使い切った可能性があります。別のモデルを試してください"
+source_hash = "29a95f5565aa88963979adc1620d648889164bec"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.llm.invalidBaseUrl"]
+value = "ベースURLが有効なURLではありません"
+source_hash = "cf9d95e4fcfe543fd9c21fae03be9d051019890c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.llm.missingBaseUrl"]
+value = "先にベースURLを入力してください"
+source_hash = "a02108e299c1932a896aefc73ff0a17e73529c38"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.llm.missingModel"]
+value = "先にモデルIDを入力してください"
+source_hash = "ffe149ceb9a6162b1f8519db54ebb52300fc5d86"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.llm.network.direct"]
+value = "ブラウザがエンドポイントに到達できませんでした(ネットワークエラーまたはCORSによるブロック)。呼び出しを中継するには di サーバーを起動してください"
+source_hash = "08b6fe3f21788aa96cbc8548701d2a4058eaeee4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.llm.network.relay"]
+value = "di サーバーがエンドポイントに到達できませんでした"
+source_hash = "4699956240178557582070ed1d0580debca92c1d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."errors.llm.notLoaded"]
 value = "ブラウザ内モデルがまだ読み込まれていません"
@@ -404,6 +446,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
+
+[entries."errors.llm.testTimeout"]
+value = "{seconds}秒以内に応答がありませんでした"
+source_hash = "1ab7c5b0afb12e3bf9dbe180366869fe580074eb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."errors.llm.timeout"]
 value = "モデルの読み込みが時間外でした ({seconds}s)"
@@ -445,6 +494,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
 
+[entries."errors.models.network"]
+value = "エンドポイントに接続できません (ネットワークエラー、または CORS によりブロックされました。di server かデスクトップアプリを起動して中継してください)"
+source_hash = "5cac0197e41e7e59722f81d1d9dbccc777d27ee8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."errors.models.noStorage"]
 value = "ボイスモデル用の永続ストレージがありません"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
@@ -453,6 +509,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
 
+[entries."errors.models.notJson"]
+value = "エンドポイントの応答がモデル一覧ではありません (ベース URL を確認してください)"
+source_hash = "48e8fb4e83c66e88a6591067915ab12fd1d47851"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."errors.models.sha256"]
 value = "モデルのダウンロード検証に失敗しました"
 source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
@@ -460,6 +523,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
+
+[entries."errors.models.shape"]
+value = "エンドポイントがモデル一覧なしで応答しました (予期しないレスポンス形式)"
+source_hash = "d4411f30b99f920b845dc6d9c8748f990b083dd5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."errors.models.size"]
 value = "モデルのダウンロードが切り詰められました"
@@ -484,6 +554,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
+
+[entries."errors.models.suggest"]
+value = "このベース URL にモデル一覧はありません。こちらは動作します: {url}"
+source_hash = "538193be3dda96f22bd7998767fa98647c27dbb8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."errors.models.ttsEngine"]
 value = "デバイス内ボイスモデルがインストールされていません"
@@ -557,6 +634,20 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
 
+[entries."errors.stt.server"]
+value = "di server が文字起こしできませんでした: {detail}"
+source_hash = "e11aecd004893d55bf6f95ddf9c53c4da3e02a4d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."errors.stt.serverModelMissing"]
+value = "di server の音声認識モデルがまだダウンロードされていません。上でダウンロードしてください"
+source_hash = "64522cf01d10a3e5d54dd71549383895ab2fc39f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."errors.stt.unknown"]
 value = "音声認識に失敗しました"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
@@ -604,6 +695,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:19:23Z"
+
+[entries."errors.tts.server"]
+value = "di server が音声合成できませんでした ({status})"
+source_hash = "1f75fec7882f9f72516e3cf51a278830e1fc0d21"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."errors.tts.wav"]
 value = "予期しないオーディオ形式"
@@ -2037,6 +2135,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:22:39Z"
 
+[entries."settings.data.confirmDesc"]
+value = "保存済みのすべての面接、ダウンロード済みの音声モデル、設定、API キーを、このデバイスと di server から削除します。確認のため {word} と入力してください。"
+source_hash = "041b9b72db8d13916157c477257cfd02d976a079"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.confirmLabel"]
+value = "確認用の語"
+source_hash = "60dfd5d472986cb796a3235a73310f241a254273"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.confirmTitle"]
+value = "すべてリセットしますか?"
+source_hash = "847d66c2fdef644b3f4401233639c6b7d7acf6aa"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.confirmWord"]
+value = "リセット"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.reset"]
+value = "すべてリセット"
+source_hash = "2f51eae0fa732f647ac64d429bcebadb7c595dd6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.resetButton"]
+value = "リセット"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.resetDesc"]
+value = "すべての面接、音声モデル、設定、キーを削除して最初からやり直します。元に戻せません。"
+source_hash = "f5132198a1cd9432ff8ffe1d2205893e6b4efeb6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.data.resetDo"]
+value = "すべて削除"
+source_hash = "b8f9c64b1250fd8ac3a4b4af0a3b37e179a46ec4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."settings.demoLlm.badge"]
 value = "デモ"
 source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
@@ -2268,13 +2422,6 @@ origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
-[entries."settings.layer.serverOwned"]
-value = "デスクトップアプリが担当 — このレイヤーはそこで動作"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "デスクトップアプリに接続できません — このレイヤーはブラウザにフォールバック"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
@@ -2492,6 +2639,41 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:22:39Z"
 
+[entries."settings.modelsEmpty"]
+value = "このエンドポイントはモデルを返しませんでした"
+source_hash = "78dae7a488e2b144cfaeb76298706083371c7615"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.modelsIdle"]
+value = "ベースURLを入力するとモデルを一覧表示します"
+source_hash = "1ee05682fedc1dd3e158212c5bb2bb211806db15"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.modelsLoading"]
+value = "モデルを読み込み中..."
+source_hash = "f14087ac89d4bbe95da0cd76b671e31adfa50146"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.modelsNoMatch"]
+value = "一覧に一致するモデルがありません。入力したテキストをそのまま使用します"
+source_hash = "83777eca4e6029b3465010f9572e0fd62b8e946c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.modelsToggle"]
+value = "モデルを表示"
+source_hash = "cd3000ff3c2cf4b2232315bd8bbfe83f5ee341a3"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."settings.nav.advanced"]
 value = "詳細設定"
 source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
@@ -2505,6 +2687,13 @@ source_hash = "e924e62211be65b4dcbb861f68cca3a1eb2ccadc"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:22:39Z"
+
+[entries."settings.nav.data"]
+value = "データ"
+source_hash = "a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."settings.nav.downloads"]
 value = "ダウンロード"
@@ -2547,6 +2736,27 @@ source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:22:39Z"
+
+[entries."settings.preset"]
+value = "プロバイダー"
+source_hash = "7ceee3f3615a2bbe4ce0ac5a269a311e4821daf4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.presetCustom"]
+value = "カスタム"
+source_hash = "081ae3fdc403609cf6e760849ebb14117b7a50cb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.presetHelp"]
+value = "プロバイダーを選ぶとベース URL が入力されます。独自の URL も使えます。"
+source_hash = "5128e275bedcd02e367f704b1781debde054607e"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."settings.section.brain"]
 value = "ブレイン"
@@ -2892,6 +3102,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:22:39Z"
 
+[entries."settings.testOkReasoning"]
+value = "動作しています(モデルはトークンを推論に使い切り、表示できるテキストを返しませんでした)"
+source_hash = "864b453481a7c55b3492384bc73a0c7c26829887"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.testRoute.direct"]
+value = "ブラウザから直接"
+source_hash = "5cb5aa715a6f7975d605a2de827850d270e83105"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
+[entries."settings.testRoute.relay"]
+value = "di サーバーのリレー経由"
+source_hash = "654ae06a03b04d934050ce4a68d336c13e5a7a20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
+
 [entries."settings.testing"]
 value = "Testing…"
 source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
@@ -3003,6 +3234,13 @@ source_hash = "ddca427f636757e6408878b87bed044e23130b17"
 origin = "human"
 reviewed = false
 updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleMs"]
+value = "{ms} ms"
+source_hash = "c965f5d6d35d31a721ce12466cf058663f5beecf"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:49Z"
 
 [entries."settings.voice.stt"]
 value = "あなたの話を聞く"

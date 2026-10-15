@@ -3,9 +3,12 @@ import { Hono } from "hono";
 import type { Config } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
-import { embeddingsClientFromConfig } from "../rag/ingest";
-import { OpenAiChatClient } from "../voice/llm";
+import type { SttTestPort, TtsTestPort } from "./routes";
 import { sttProviderOf, ttsProviderOf } from "../voice/providers";
+import { createTtsFromConfig } from "../voice/tts";
+import { createSttFromConfig } from "../voice/stt";
+import { createLlmFromConfig } from "../voice/llm";
+import { embeddingsClientFromConfig } from "../rag/ingest";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 
@@ -16,11 +19,16 @@ export interface AppDeps {
   /** Embedded web UI assets; omitted in dev when apps/web/ is served separately. */
   webAssets?: { root: string; path: string };
   /** Test injection for the voice WS loop (stub STT/TTS/LLM). */
-  voiceDeps?: Pick<VoiceDeps, "loopFactory">;
+  voiceDeps?: Pick<VoiceDeps, "loopFactory"> & {
+    ttsTest?: () => TtsTestPort;
+    sttTest?: () => SttTestPort;
+  };
 }
 
 export async function createApp(deps: AppDeps): Promise<Hono> {
   const app = new Hono();
+  let ttsTest: TtsTestPort | undefined;
+  let sttTest: SttTestPort | undefined;
 
   // Dev CORS: when the SPA runs under a vite dev server (different origin
   // from this API), the health probe and driver fetches are cross-origin.
@@ -47,22 +55,17 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
       testMode: deps.testMode,
       embeddings: embeddingsClientFromConfig(deps.config.embeddings),
       documents: deps.config.documents,
+      logPath: deps.config.files.log_path,
       voiceModels: {
         providers: {
           stt: sttProviderOf(deps.config.stt),
           tts: ttsProviderOf(deps.config.tts),
         },
         dataDir: deps.config.files.data_dir,
+        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= createTtsFromConfig(deps.config))),
+        stt: deps.voiceDeps?.sttTest ?? (() => (sttTest ??= createSttFromConfig(deps.config).stt)),
       },
-      reportLlm: new OpenAiChatClient({
-        baseUrl: deps.config.llm.base_url,
-        apiKey: deps.config.llm.api_key,
-        model: deps.config.llm.model,
-        flavor: deps.config.llm.flavor,
-        reasoningExclude: deps.config.llm.reasoning_exclude,
-        thinkingDisabled: deps.config.llm.thinking_disabled,
-        maxTokens: deps.config.llm.max_tokens,
-      }),
+      reportLlm: createLlmFromConfig(deps.config.llm),
     }),
   );
 
@@ -153,6 +156,24 @@ function openApiSpec(config: Config): Record<string, unknown> {
           responses: {
             "200": { description: "OK" },
             "404": { description: "Not found" },
+          },
+        },
+      },
+      "/v1/relay": {
+        post: {
+          summary: "Relay a provider call (browser-mode provider bridge)",
+          responses: {
+            "200": { description: "Upstream response streamed through" },
+            "400": { description: "Invalid or missing url query parameter" },
+            "502": { description: "Upstream fetch failed" },
+          },
+        },
+        get: {
+          summary: "Relay a provider GET (e.g. /v1/models probe; browser-mode provider bridge)",
+          responses: {
+            "200": { description: "Upstream response streamed through" },
+            "400": { description: "Invalid or missing url query parameter" },
+            "502": { description: "Upstream fetch failed" },
           },
         },
       },

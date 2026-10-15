@@ -1,10 +1,11 @@
-import { AudioLines, History, Languages, X } from "lucide-react";
+import { AudioLines, History, Languages, Trash2, X } from "lucide-react";
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { HistoryPane } from "./history-pane";
 import { VoicePane } from "./settings-voice-pane";
 import { PreferencesPane } from "./settings-preferences-pane";
+import { DataPane } from "./settings-data-pane";
 import { StatusPane } from "./settings-status-pane";
 import { SettingsDraftsProvider } from "./settings-drafts";
 import { clearSettings, openSettings, useSettingsSearch } from "./settings-nav";
@@ -79,12 +80,18 @@ const NAV: { id: SettingsPane; label: string; icon: React.ReactNode }[] = [
     label: "settings.nav.voice",
     icon: <AudioLines className="size-4" aria-hidden="true" />,
   },
+  {
+    id: "data",
+    label: "settings.nav.data",
+    icon: <Trash2 className="size-4" aria-hidden="true" />,
+  },
 ];
 
 const PANE_TITLES: Record<SettingsPane, string> = {
   history: "settings.nav.history",
   preferences: "settings.nav.preferences",
   voice: "settings.nav.voice",
+  data: "settings.nav.data",
   status: "settings.nav.status",
 };
 
@@ -96,6 +103,8 @@ function PaneBody({ pane }: { pane: SettingsPane }) {
       return <PreferencesPane />;
     case "voice":
       return <VoicePane />;
+    case "data":
+      return <DataPane />;
     case "status":
       return <StatusPane />;
   }
@@ -109,8 +118,10 @@ export function SettingsDialog({ open, onOpenChange, pane, onPaneChange }: Setti
     <>
       {NAV.map((item, i) => (
         <React.Fragment key={item.id}>
-          {/* cached session data sits apart from actual configuration */}
-          {i === 1 && <div role="separator" className="mx-1 my-2 border-t border-border" />}
+          {/* cached session data and the danger zone sit apart from actual configuration */}
+          {(i === 1 || i === NAV.length - 1) && (
+            <div role="separator" className="mx-1 my-2 border-t border-border" />
+          )}
           <Button
             variant="ghost"
             className={

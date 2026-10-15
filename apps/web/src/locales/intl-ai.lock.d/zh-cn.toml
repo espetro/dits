@@ -390,12 +390,54 @@ model = "openrouter/free"
 updated_at = "2026-09-27T20:13:41Z"
 
 [entries."errors.llm.chat"]
-value = "模型请求失败 ({status})"
-source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+value = "模型请求失败（{status}）：{detail}"
+source_hash = "81ebbfefcc618641c8990861a0af6b8775350c03"
 origin = "ai"
 reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T20:26:30Z"
+model = "zai-coding-plan/glm-5.3-flash"
+updated_at = "2026-10-15T23:04:06Z"
+
+[entries."errors.llm.empty"]
+value = "端点已响应但没有返回文本;模型可能把 token 用在了隐藏的推理上,请换一个模型试试"
+source_hash = "29a95f5565aa88963979adc1620d648889164bec"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.llm.invalidBaseUrl"]
+value = "基础 URL 不是有效的 URL"
+source_hash = "cf9d95e4fcfe543fd9c21fae03be9d051019890c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.llm.missingBaseUrl"]
+value = "请先输入基础 URL"
+source_hash = "a02108e299c1932a896aefc73ff0a17e73529c38"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.llm.missingModel"]
+value = "请先输入模型 ID"
+source_hash = "ffe149ceb9a6162b1f8519db54ebb52300fc5d86"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.llm.network.direct"]
+value = "浏览器无法连接到该端点(网络错误或被 CORS 拦截);请启动 di 服务器来中继该调用"
+source_hash = "08b6fe3f21788aa96cbc8548701d2a4058eaeee4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.llm.network.relay"]
+value = "di 服务器无法连接到该端点"
+source_hash = "4699956240178557582070ed1d0580debca92c1d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."errors.llm.notLoaded"]
 value = "浏览器内模型尚未加载"
@@ -404,6 +446,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
+
+[entries."errors.llm.testTimeout"]
+value = "{seconds} 秒内无响应"
+source_hash = "1ab7c5b0afb12e3bf9dbe180366869fe580074eb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."errors.llm.timeout"]
 value = "模型加载超时 ({seconds}秒)"
@@ -445,6 +494,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
 
+[entries."errors.models.network"]
+value = "无法连接到端点 (网络错误或被 CORS 拦截; 请运行 di server 或桌面应用进行中继)"
+source_hash = "5cac0197e41e7e59722f81d1d9dbccc777d27ee8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."errors.models.noStorage"]
 value = "没有可用的持久存储用于语音模型"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
@@ -453,6 +509,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
 
+[entries."errors.models.notJson"]
+value = "端点返回的内容不是模型列表 (请检查基础 URL)"
+source_hash = "48e8fb4e83c66e88a6591067915ab12fd1d47851"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."errors.models.sha256"]
 value = "模型下载验证失败"
 source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
@@ -460,6 +523,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
+
+[entries."errors.models.shape"]
+value = "端点返回的响应中没有模型列表 (响应格式不符合预期)"
+source_hash = "d4411f30b99f920b845dc6d9c8748f990b083dd5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."errors.models.size"]
 value = "模型下载被截断"
@@ -484,6 +554,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
+
+[entries."errors.models.suggest"]
+value = "此基础 URL 没有模型列表; 这个可用: {url}"
+source_hash = "538193be3dda96f22bd7998767fa98647c27dbb8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."errors.models.ttsEngine"]
 value = "设备端语音模型未安装"
@@ -557,6 +634,20 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
 
+[entries."errors.stt.server"]
+value = "di server 无法转写语音: {detail}"
+source_hash = "e11aecd004893d55bf6f95ddf9c53c4da3e02a4d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."errors.stt.serverModelMissing"]
+value = "di server 的语音模型尚未下载，请在上方下载"
+source_hash = "64522cf01d10a3e5d54dd71549383895ab2fc39f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."errors.stt.unknown"]
 value = "语音识别失败"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
@@ -604,6 +695,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:26:30Z"
+
+[entries."errors.tts.server"]
+value = "di server 无法合成语音 ({status})"
+source_hash = "1f75fec7882f9f72516e3cf51a278830e1fc0d21"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."errors.tts.wav"]
 value = "意外的音频格式"
@@ -2037,6 +2135,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.data.confirmDesc"]
+value = "这将删除此设备和 di server 上所有已保存的面试、已下载的语音模型、设置和 API 密钥。请输入 {word} 以确认。"
+source_hash = "041b9b72db8d13916157c477257cfd02d976a079"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.confirmLabel"]
+value = "确认词"
+source_hash = "60dfd5d472986cb796a3235a73310f241a254273"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.confirmTitle"]
+value = "全部重置?"
+source_hash = "847d66c2fdef644b3f4401233639c6b7d7acf6aa"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.confirmWord"]
+value = "重置"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.reset"]
+value = "全部重置"
+source_hash = "2f51eae0fa732f647ac64d429bcebadb7c595dd6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.resetButton"]
+value = "重置"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.resetDesc"]
+value = "删除所有面试、语音模型、设置和密钥,然后重新开始。此操作无法撤销。"
+source_hash = "f5132198a1cd9432ff8ffe1d2205893e6b4efeb6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.data.resetDo"]
+value = "全部删除"
+source_hash = "b8f9c64b1250fd8ac3a4b4af0a3b37e179a46ec4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."settings.demoLlm.badge"]
 value = "演示"
 source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
@@ -2268,13 +2422,6 @@ origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
-[entries."settings.layer.serverOwned"]
-value = "由桌面应用处理 — 此层在其中运行"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "桌面应用无法连接 — 此层回退到浏览器"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
@@ -2492,6 +2639,41 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.modelsEmpty"]
+value = "该端点未返回任何模型"
+source_hash = "78dae7a488e2b144cfaeb76298706083371c7615"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.modelsIdle"]
+value = "输入基础 URL 以列出其模型"
+source_hash = "1ee05682fedc1dd3e158212c5bb2bb211806db15"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.modelsLoading"]
+value = "正在加载模型..."
+source_hash = "f14087ac89d4bbe95da0cd76b671e31adfa50146"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.modelsNoMatch"]
+value = "列表中没有匹配的模型;将按你输入的文本原样使用"
+source_hash = "83777eca4e6029b3465010f9572e0fd62b8e946c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.modelsToggle"]
+value = "显示模型"
+source_hash = "cd3000ff3c2cf4b2232315bd8bbfe83f5ee341a3"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."settings.nav.advanced"]
 value = "高级"
 source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
@@ -2505,6 +2687,13 @@ source_hash = "e924e62211be65b4dcbb861f68cca3a1eb2ccadc"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.nav.data"]
+value = "数据"
+source_hash = "a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."settings.nav.downloads"]
 value = "下载内容"
@@ -2547,6 +2736,27 @@ source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
+
+[entries."settings.preset"]
+value = "提供商"
+source_hash = "7ceee3f3615a2bbe4ce0ac5a269a311e4821daf4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.presetCustom"]
+value = "自定义"
+source_hash = "081ae3fdc403609cf6e760849ebb14117b7a50cb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.presetHelp"]
+value = "选择提供商以填入基础 URL,或保留自定义的地址。"
+source_hash = "5128e275bedcd02e367f704b1781debde054607e"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."settings.section.brain"]
 value = "大脑"
@@ -2892,6 +3102,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:29:31Z"
 
+[entries."settings.testOkReasoning"]
+value = "正常工作(模型把 token 都用在了推理上,没有返回可见文本)"
+source_hash = "864b453481a7c55b3492384bc73a0c7c26829887"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.testRoute.direct"]
+value = "浏览器直连"
+source_hash = "5cb5aa715a6f7975d605a2de827850d270e83105"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
+[entries."settings.testRoute.relay"]
+value = "通过 di 服务器中继"
+source_hash = "654ae06a03b04d934050ce4a68d336c13e5a7a20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
+
 [entries."settings.testing"]
 value = "Testing…"
 source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
@@ -3003,6 +3234,13 @@ source_hash = "ddca427f636757e6408878b87bed044e23130b17"
 origin = "human"
 reviewed = false
 updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleMs"]
+value = "{ms} 毫秒"
+source_hash = "c965f5d6d35d31a721ce12466cf058663f5beecf"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:02Z"
 
 [entries."settings.voice.stt"]
 value = "听懂你的方式"
