@@ -50,7 +50,7 @@
   "errors.api.upgrade_required": "Dieser Endpunkt erwartet ein WebSocket-Upgrade",
   "errors.api.upload": "Datei-Upload fehlgeschlagen",
   "errors.http": "Anfrage fehlgeschlagen ({status})",
-  "errors.llm.chat": "Modell-Anfrage fehlgeschlagen ({status}): {detail}",
+  "errors.llm.chat": "Modellanfrage fehlgeschlagen ({status}): {detail}",
   "errors.llm.empty": "Der Endpunkt hat geantwortet, aber keinen Text geliefert; das Modell hat seine Tokens evtl. für verdecktes Reasoning verbraucht, probiere ein anderes Modell",
   "errors.llm.invalidBaseUrl": "Die Basis-URL ist keine gültige URL",
   "errors.llm.missingBaseUrl": "Gib zuerst eine Basis-URL ein",

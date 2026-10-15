@@ -50,7 +50,7 @@
   "errors.api.upgrade_required": "此端点需要 WebSocket 升级",
   "errors.api.upload": "文件上传失败",
   "errors.http": "请求失败 ({status})",
-  "errors.llm.chat": "模型请求失败 ({status}): {detail}",
+  "errors.llm.chat": "模型请求失败（{status}）：{detail}",
   "errors.llm.empty": "端点已响应但没有返回文本;模型可能把 token 用在了隐藏的推理上,请换一个模型试试",
   "errors.llm.invalidBaseUrl": "基础 URL 不是有效的 URL",
   "errors.llm.missingBaseUrl": "请先输入基础 URL",

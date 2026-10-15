@@ -50,7 +50,7 @@
   "errors.api.upgrade_required": "このエンドポイントはWebSocketのアップグレードを期待しています",
   "errors.api.upload": "ファイルアップロードに失敗しました",
   "errors.http": "リクエストに失敗しました ({status})",
-  "errors.llm.chat": "モデルリクエストに失敗しました ({status}): {detail}",
+  "errors.llm.chat": "モデルリクエストが失敗しました ({status}): {detail}",
   "errors.llm.empty": "エンドポイントは応答しましたがテキストを返しませんでした。モデルがトークンを非表示の推論に使い切った可能性があります。別のモデルを試してください",
   "errors.llm.invalidBaseUrl": "ベースURLが有効なURLではありません",
   "errors.llm.missingBaseUrl": "先にベースURLを入力してください",

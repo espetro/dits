@@ -50,7 +50,7 @@
   "errors.api.upgrade_required": "ce point de terminaison attend une mise à niveau WebSocket",
   "errors.api.upload": "échec du téléversement du fichier",
   "errors.http": "échec de la requête ({status})",
-  "errors.llm.chat": "La requête au modèle a échoué ({status}) : {detail}",
+  "errors.llm.chat": "Échec de la requête au modèle ({status}) : {detail}",
   "errors.llm.empty": "le point d'accès a répondu sans renvoyer de texte ; le modèle a peut-être dépensé ses jetons en raisonnement masqué, essayez un autre modèle",
   "errors.llm.invalidBaseUrl": "l'URL de base n'est pas une URL valide",
   "errors.llm.missingBaseUrl": "saisissez d'abord une URL de base",

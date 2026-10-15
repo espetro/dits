@@ -50,7 +50,7 @@
   "errors.api.upgrade_required": "questo endpoint richiede un aggiornamento websocket",
   "errors.api.upload": "caricamento del file fallito",
   "errors.http": "richiesta fallita ({status})",
-  "errors.llm.chat": "Richiesta al modello non riuscita ({status}): {detail}",
+  "errors.llm.chat": "richiesta al modello non riuscita ({status}): {detail}",
   "errors.llm.empty": "l'endpoint ha risposto ma non ha restituito testo; il modello potrebbe aver speso i suoi token in ragionamento nascosto, prova un altro modello",
   "errors.llm.invalidBaseUrl": "l'URL di base non è un URL valido",
   "errors.llm.missingBaseUrl": "inserisci prima un URL di base",
