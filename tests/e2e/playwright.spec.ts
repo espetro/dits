@@ -262,6 +262,12 @@ test.describe("client-only runtime (no di server)", () => {
     }, id);
   }
 
+  // The idle kickoff (5s) can land before the typed turn on a loaded host and
+  // adds its own greeting turns; assertions look at what follows the typed one.
+  function turnsFrom(record: { turns: Array<{ text: string }> }, typed: string) {
+    return record.turns.slice(record.turns.findIndex((t) => t.text === typed));
+  }
+
   async function startClientOnlySession(page: Page): Promise<string> {
     await applySeed(page, clientOnly(), noServer());
     return interviewPage(page).start();
@@ -301,13 +307,14 @@ test.describe("client-only runtime (no di server)", () => {
     await expect(page.getByText("agent · text").first()).toBeVisible();
 
     const record = await readOpfsSession(page, id);
-    expect(record.turns).toHaveLength(2);
-    expect(record.turns[0]).toMatchObject({
+    const turns = turnsFrom(record, "hello from e2e");
+    expect(turns).toHaveLength(2);
+    expect(turns[0]).toMatchObject({
       speaker: "user",
       text: "hello from e2e",
       source: "text",
     });
-    expect(record.turns[1]).toMatchObject({
+    expect(turns[1]).toMatchObject({
       speaker: "agent",
       text: "mock agent reply",
       source: "text",
@@ -326,8 +333,9 @@ test.describe("client-only runtime (no di server)", () => {
     // instead of waiting on an event that (by design) never fires.
     await page.waitForTimeout(500);
     const record = await readOpfsSession(page, id);
-    expect(record.turns).toHaveLength(1);
-    expect(record.turns[0].speaker).toBe("user");
+    const turns = turnsFrom(record, "this will fail");
+    expect(turns).toHaveLength(1);
+    expect(turns[0].speaker).toBe("user");
   });
 
   test("finish builds the report and lands on /report/:id", async ({ page }) => {
