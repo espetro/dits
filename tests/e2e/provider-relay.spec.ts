@@ -58,7 +58,17 @@ function modelOptions(page: Page) {
 let noCorsMock: ChildProcess | null = null;
 let failMock: ChildProcess | null = null;
 
-function spawnMock(port: number, extra: string[] = []): ChildProcess {
+async function mockUp(port: number): Promise<boolean> {
+  try {
+    return (await fetch(`http://localhost:${port}/health`)).ok;
+  } catch {
+    return false;
+  }
+}
+
+// null when a mock (e.g. from harness/up.ts) already listens on the port
+async function spawnMock(port: number, extra: string[] = []): Promise<ChildProcess | null> {
+  if (await mockUp(port)) return null;
   return spawn(
     "bun",
     ["run", `${repoRoot()}packages/evals/mock-provider/main.ts`, "--port", String(port), ...extra],
@@ -98,34 +108,11 @@ async function setFail(port: number, mode: string | null): Promise<void> {
 
 test.describe("provider relay (no-CORS upstream via di server)", () => {
   test.beforeAll(async () => {
-    // spawn the CORS-hostile mock; readiness-poll /v1/models
-    noCorsMock = spawn(
-      "bun",
-      [
-        "run",
-        `${repoRoot()}packages/evals/mock-provider/main.ts`,
-        "--port",
-        String(NOCOR_MOCK_PORT),
-        "--no-cors",
-      ],
-      { stdio: "ignore", detached: true },
-    );
-    for (let i = 0; i < 50; i++) {
-      try {
-        const res = await fetch(`http://localhost:${NOCOR_MOCK_PORT}/v1/models`);
-        if (res.ok) return;
-      } catch {
-        // not up yet
-      }
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    throw new Error(`no-CORS mock provider never became ready on :${NOCOR_MOCK_PORT}`);
-  });
-
-  test.beforeAll(async () => {
-    // separate failure-injection mock so flipping modes never races the
-    // happy-path specs above on the shared no-CORS mock
-    failMock = spawnMock(FAIL_MOCK_PORT, ["--no-cors"]);
+    // CORS-hostile mock; separate failure-injection mock so flipping modes
+    // never races the happy-path specs on the shared no-CORS mock
+    noCorsMock = await spawnMock(NOCOR_MOCK_PORT, ["--no-cors"]);
+    failMock = await spawnMock(FAIL_MOCK_PORT, ["--no-cors"]);
+    await waitMock(NOCOR_MOCK_PORT);
     await waitMock(FAIL_MOCK_PORT);
   });
 
@@ -135,14 +122,7 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
 
   test.afterAll(() => {
     killMock(failMock);
-    if (noCorsMock?.pid) {
-      try {
-        // detached + negative pid kills the whole process group
-        process.kill(-noCorsMock.pid, "SIGTERM");
-      } catch {
-        // already gone
-      }
-    }
+    killMock(noCorsMock);
   });
 
   async function openSettingsLlm(page: Page) {

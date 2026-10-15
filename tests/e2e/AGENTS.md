@@ -3,7 +3,13 @@
 Readable scenario source of truth is `specs/*.md`; `playwright.spec.ts` must
 stay in sync with those headings (a check enforces this).
 
-Requires a running test-mode server; target from `DI_URL` (default
+`mise run e2e:settings` is self-contained: `harness/up.ts` starts the built
+SPA behind a test-mode server on :3100 plus mocks on :3101 (cors), :3102
+(no-cors), :3103 (failure injection), runs `provider-relay.spec.ts` and tears
+down. Needs `mise run build` first. Extra args go to playwright
+(`mise run e2e:settings -- -g "401"`).
+
+The other specs require a running test-mode server; target from `DI_URL` (default
 `http://localhost:3000`). `mise run e2e` does not start the server — start it
 yourself first (see `apps/server/AGENTS.md` test-mode recipe).
 
