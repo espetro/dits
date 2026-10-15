@@ -12,13 +12,13 @@ branch work landed as commits cae22ab..b9c4616 on main (not pushed).
   "UnknownLockfileVersion" on CLEAN HEAD. Pre-existing; do not chase it as a
   regression. Needs either bun upgrade or a v1 lockfile regen.
 - tests/e2e is its own install: `bun install` + `bunx playwright install
-  chromium` needed fresh; its committed bun.lock resolves @playwright/test
+chromium` needed fresh; its committed bun.lock resolves @playwright/test
   1.64.0 under `^1`.
 - the di server keeps running after tool-timeout kills (nohup'd bash
   wrappers): check `ps aux | grep cli.ts` + `lsof -iTCP:3000` before e2e;
   a stale server without the relay route cost an hour of debugging. Restart
   with `cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config
-  ../../config.example.yaml` (there is NO --no-supervise flag despite the
+../../config.example.yaml` (there is NO --no-supervise flag despite the
   comment in playwright.config.ts).
 - machine load (foreign vitest/tsc processes from other projects) makes the
   client-only e2e specs (typed turn etc.) flaky with "voice error" timeouts;
