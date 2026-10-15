@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { BrowserContext, Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { KEYS, applySeed, clientOnlyUnconsented, noServer, wasmReady } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-wasm-voice.spec.md.
 // Covers the wasm voice plan phases b-e in a real browser, without shipping
@@ -13,15 +14,6 @@ import { readFileSync } from "node:fs";
 
 const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
 const MODELS_BASE = "/e2e/voice-models";
-
-const PROFILE = {
-  llm: {
-    baseUrl: "http://mock.local/v1",
-    apiKey: "test-key",
-    model: "mock-model",
-    mode: "remote",
-  },
-};
 
 // tiny stand-in artifacts; the manifest below pins them by real sha256
 const STUB_FILES: Record<string, Buffer> = {
@@ -78,21 +70,6 @@ function cacheKey(modelId: string, version: string, path: string): string {
   return `https://di.local/voice-models/${modelId}/${path}?v=${encodeURIComponent(version)}`;
 }
 
-function seedClientOnly(page: Page, extra: Record<string, string> = {}) {
-  return page.addInitScript(
-    ([profile, base, kv]) => {
-      localStorage.setItem("di.voice.sttEngine", "in-browser");
-      localStorage.setItem("di.voice.ttsEngine", "in-browser");
-      localStorage.setItem("di.provider-profile", JSON.stringify(profile));
-      localStorage.setItem("di.voice.models-base", base as string);
-      for (const [k, v] of Object.entries(kv as Record<string, string>)) {
-        localStorage.setItem(k, v);
-      }
-    },
-    [PROFILE, MODELS_BASE, extra] as const,
-  );
-}
-
 // one route for the whole asset root — playwright prefers the last
 // matching route, so a separate manifest route must not sit under a
 // catch-all
@@ -117,41 +94,84 @@ async function routeModelFiles(page: Page, requested: string[]) {
   });
 }
 
-// Replaces window.Worker with a stub that speaks both engine protocols:
-// stt (sherpa): init->ready, feed->partial, final after enough audio.
-// tts (kitten): init->ready, speak->silent pcm. Calls land on __e2eVoice.
+// Replaces window.Worker with a stub that speaks the kkrpc streaming wire
+// protocol the engines use (apps/web/src/lib/{stt,tts}/adapters/wasm.ts):
+//   request  {t:"q", id, op:"call", p:[method], a:[args]}  -> {t:"r", id, v}
+//   callback arg {__kkrpc_next_arg__:"callback", id}       -> {t:"cb", id, a:[..]}
+//   async-iterable result: {__kkrpc_next_stream__:"async-iterable", id: sid},
+//     then each {t:"sq", sid, op:"pull"} is answered with {t:"sr", sid, d, v}
+// stt (sherpa): init registers the callbacks, every feed emits a partial and
+// the 15th emits a final. tts (kitten): init -> ready, speak -> one silent
+// pcm chunk. Calls land on __e2eVoice. If kkrpc changes its wire format this
+// is the one place to update (see node_modules/kkrpc/dist/streaming.js).
 function mockVoiceWorkers(context: BrowserContext) {
   return context.addInitScript(() => {
     const log = { sttInits: 0, sttFeeds: 0, ttsInits: 0, ttsSpeaks: [] as string[] };
     (window as unknown as { __e2eVoice: typeof log }).__e2eVoice = log;
+    let uid = 0;
+    const nextId = () => `e2e-${++uid}`;
+    interface Req {
+      t: string;
+      id: string;
+      op?: string;
+      p?: string[];
+      a?: { __kkrpc_next_arg__?: string; id?: string; v?: unknown }[];
+      sid?: string;
+    }
     class MockWorker {
-      onmessage: ((ev: MessageEvent) => void) | null = null;
       onerror: ((ev: unknown) => void) | null = null;
+      private listeners: ((ev: MessageEvent) => void)[] = [];
       private kind: "stt" | "tts";
+      private onFinal: string | null = null;
+      private onPartial: string | null = null;
+      private streams = new Set<string>();
       constructor(url: string | URL) {
         this.kind = String(url).includes("stt-worker") ? "stt" : "tts";
       }
-      private send(data: unknown) {
-        queueMicrotask(() => this.onmessage?.({ data } as MessageEvent));
+      addEventListener(type: string, fn: (ev: MessageEvent) => void) {
+        if (type === "message") this.listeners.push(fn);
       }
-      postMessage(msg: { type: string; id?: number; text?: string }) {
+      removeEventListener(type: string, fn: (ev: MessageEvent) => void) {
+        this.listeners = this.listeners.filter((l) => l !== fn);
+      }
+      private send(data: unknown) {
+        queueMicrotask(() => this.listeners.forEach((fn) => fn({ data } as MessageEvent)));
+      }
+      private reply(id: string, v?: unknown) {
+        this.send({ t: "r", id, v });
+      }
+      private callback(id: string | null, text: string) {
+        if (id) this.send({ t: "cb", id, a: [{ __kkrpc_next_arg__: "value", v: text }] });
+      }
+      postMessage(msg: Req) {
+        if (msg.t === "sq" && msg.op === "pull" && msg.sid) {
+          if (this.streams.delete(msg.sid)) {
+            this.send({ t: "sr", id: nextId(), sid: msg.sid, d: false, v: new Float32Array(4800) });
+            this.send({ t: "sr", id: nextId(), sid: msg.sid, d: true });
+          }
+          return;
+        }
+        if (msg.t !== "q") return; // cbr acks etc.
+        const method = msg.p?.[0];
         if (this.kind === "stt") {
-          if (msg.type === "init") {
+          if (method === "init") {
             log.sttInits += 1;
-            this.send({ type: "ready" });
-          } else if (msg.type === "feed") {
+            this.onPartial = msg.a?.[1]?.id ?? null;
+            this.onFinal = msg.a?.[2]?.id ?? null;
+          } else if (method === "feed") {
             log.sttFeeds += 1;
-            this.send({ type: "partial", text: "hello" });
-            if (log.sttFeeds === 15) this.send({ type: "final", text: "hello from wasm" });
+            this.callback(this.onPartial, "hello");
+            if (log.sttFeeds === 15) this.callback(this.onFinal, "hello from wasm");
           }
+          this.reply(msg.id);
+        } else if (method === "speak") {
+          log.ttsSpeaks.push(String(msg.a?.[0]?.v ?? msg.a?.[0]));
+          const sid = nextId();
+          this.streams.add(sid);
+          this.reply(msg.id, { __kkrpc_next_stream__: "async-iterable", id: sid });
         } else {
-          if (msg.type === "init") {
-            log.ttsInits += 1;
-            this.send({ type: "ready" });
-          } else if (msg.type === "speak") {
-            log.ttsSpeaks.push(String(msg.text));
-            this.send({ type: "pcm", id: msg.id, pcm: new Float32Array(4800) });
-          }
+          if (method === "init") log.ttsInits += 1;
+          this.reply(msg.id);
         }
       }
       terminate() {}
@@ -215,7 +235,12 @@ test.describe("wasm voice (mocked models + workers)", () => {
     page,
   }) => {
     const requested: string[] = [];
-    await seedClientOnly(page);
+    await applySeed(
+      page,
+      clientOnlyUnconsented(),
+      { storage: { [KEYS.modelsBase]: MODELS_BASE } },
+      noServer(),
+    );
     await routeModelFiles(page, requested);
     await startClientOnlyInterview(page);
 
@@ -244,7 +269,12 @@ test.describe("wasm voice (mocked models + workers)", () => {
 
   test("decline keeps built-in engines and never re-asks", async ({ page }) => {
     const requested: string[] = [];
-    await seedClientOnly(page);
+    await applySeed(
+      page,
+      clientOnlyUnconsented(),
+      { storage: { [KEYS.modelsBase]: MODELS_BASE } },
+      noServer(),
+    );
     await routeModelFiles(page, requested);
     await startClientOnlyInterview(page);
 
@@ -264,7 +294,7 @@ test.describe("wasm voice (mocked models + workers)", () => {
 
   test("wasm engines run a full turn loop on mock workers", async ({ context, page }) => {
     await mockVoiceWorkers(context);
-    await seedClientOnly(page, { "di.voice.modelsConsent": "granted" });
+    await applySeed(page, wasmReady(MODELS_BASE), noServer());
     await routeModelFiles(page, []);
     await page.route("**/v1/chat/completions", async (route) => {
       const chunk = { choices: [{ delta: { content: "mock wasm reply." } }] };

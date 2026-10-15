@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { applySeed, clientOnly, noServer } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-text.spec.md (readable .md);
 // this spec executes it. Requires di running in test mode:
@@ -249,29 +250,6 @@ test("full-loop spec md scenarios all have executed counterparts", () => {
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
   const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
-  // Storage keys mirror packages/shared/src/providers.ts
-  // PROVIDER_PROFILE_STORAGE_KEY and the di.voice.* engine picks; not imported since this package has no
-  // workspace dependency on @di/shared.
-  const PROFILE = {
-    llm: {
-      baseUrl: "http://mock.local/v1",
-      apiKey: "test-key",
-      model: "mock-model",
-      mode: "remote",
-    },
-  };
-
-  async function seedClientOnly(page: Page) {
-    await page.addInitScript(
-      ([profile]) => {
-        localStorage.setItem("di.voice.sttEngine", "in-browser");
-        localStorage.setItem("di.voice.ttsEngine", "in-browser");
-        localStorage.setItem("di.provider-profile", JSON.stringify(profile));
-      },
-      [PROFILE] as const,
-    );
-  }
-
   async function readOpfsSession(page: Page, id: string) {
     return page.evaluate(async (sid) => {
       const opfsRoot = await navigator.storage.getDirectory();
@@ -283,7 +261,7 @@ test.describe("client-only runtime (no di server)", () => {
   }
 
   async function startClientOnlySession(page: Page): Promise<string> {
-    await seedClientOnly(page);
+    await applySeed(page, clientOnly(), noServer());
     await page.goto(`${WEB_URL}/setup`);
     // The submit button is only wired up after React hydrates; with seeded
     // localStorage the SSR tree differs from the first client render (the
@@ -339,7 +317,7 @@ test.describe("client-only runtime (no di server)", () => {
     await input.press("Enter");
 
     await expect(page.getByText("mock agent reply").first()).toBeVisible();
-    await expect(page.getByText("user · text").first()).toBeVisible();
+    await expect(page.getByText("you · text").first()).toBeVisible();
     await expect(page.getByText("agent · text").first()).toBeVisible();
 
     const record = await readOpfsSession(page, id);
@@ -366,7 +344,7 @@ test.describe("client-only runtime (no di server)", () => {
     await input.fill("this will fail");
     await input.press("Enter");
 
-    await expect(page.getByText("user · text").first()).toBeVisible();
+    await expect(page.getByText("you · text").first()).toBeVisible();
     // negative assertion: nothing else should ever show up, so poll briefly
     // instead of waiting on an event that (by design) never fires.
     await page.waitForTimeout(500);
@@ -380,7 +358,7 @@ test.describe("client-only runtime (no di server)", () => {
       const body = route.request().postData() ?? "";
       // Report prompts carry the `overall_score` rubric and a `session_id:`
       // line (buildReportPrompt): answer with a schema-valid report via the
-      // non-streaming shape doGenerate uses.
+      // stream shape doGenerate accumulates.
       if (body.includes("overall_score")) {
         const sid = /session_id:\s*([0-9a-f-]{36})/i.exec(body)?.[1] ?? crypto.randomUUID();
         const report = {
@@ -397,22 +375,13 @@ test.describe("client-only runtime (no di server)", () => {
           model_answers: [],
           generated_at: new Date().toISOString(),
         };
+        // doGenerate accumulates a doStream call (stream-only gateways), so
+        // the report JSON travels as SSE content deltas
+        const chunk = { choices: [{ delta: { content: JSON.stringify(report) } }] };
         await route.fulfill({
           status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            id: "chatcmpl-mock",
-            object: "chat.completion",
-            created: 0,
-            model: "mock-llm",
-            choices: [
-              {
-                index: 0,
-                message: { role: "assistant", content: JSON.stringify(report) },
-                finish_reason: "stop",
-              },
-            ],
-          }),
+          contentType: "text/event-stream",
+          body: `data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`,
         });
         return;
       }
