@@ -2464,14 +2464,6 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
-[entries."settings.layer.serverOwned"]
-value = "được xử lý bởi ứng dụng máy tính để bàn — lớp này chạy ở đó"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-10-12T20:13:39Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "ứng dụng máy tính để bàn không thể truy cập — lớp này chuyển sang trong trình duyệt"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"

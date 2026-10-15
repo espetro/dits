@@ -2268,13 +2268,6 @@ origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
-[entries."settings.layer.serverOwned"]
-value = "lo gestiona la app de escritorio — esta capa se ejecuta ahí"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "la app de escritorio no responde — esta capa usa el navegador"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"

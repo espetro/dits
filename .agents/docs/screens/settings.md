@@ -217,9 +217,17 @@ driver otherwise.
   reads `di.voice.modelsInstalled`) + last-op outcomes (voice health
   events, driver onError codes, llm turn results), cleared on next
   success.
-- Tests (per layer): stt test runs the resolved engine on a ~12s mic
-  window (builtin read-aloud or capture→flush for wasm/endpoint);
-  llm test streams a short completion; tts test really synthesizes
+- Tests (per layer): the test row is always rendered for stt, tts and
+  llm, whatever layer is picked. stt test runs the resolved engine on a
+  ~12s mic window (builtin read-aloud or capture→flush for
+  wasm/endpoint); when the di server drives stt (auto or "server") it
+  records ~6s from the selected mic, converts it to a 16k mono pcm16
+  wav and posts `POST /v1/voice/stt-test` (wav, or raw `audio/L16`), so
+  the configured server layer (builtin sherpa or remote whisper)
+  transcribes it; the recognized text, the server-measured "{ms} ms"
+  and the ok/failed status render like the other paths, with typed
+  errors (`stt_model_missing` 409, `stt_failed` 502 carrying the
+  upstream detail). llm test streams a short completion; tts test really synthesizes
   and plays — never a file-presence check.
 - Demo LLM (p2 zero-conf): demo is the default interviewer pick and
   fills the managed endpoint (VITE_DEMO_LLM_* at build time, url never

@@ -2464,14 +2464,6 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T19:55:13Z"
 
-[entries."settings.layer.serverOwned"]
-value = "डेस्कटॉप ऐप द्वारा संभाला जाता है — यह परत वहाँ चलती है"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-10-12T19:55:13Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "डेस्कटॉप ऐप पहुँच योग्य नहीं है — यह परत इन-ब्राउज़र पर वापस आ जाती है"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
