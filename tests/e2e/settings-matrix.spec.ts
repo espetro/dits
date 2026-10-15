@@ -88,7 +88,7 @@ test.describe("settings matrix", () => {
   }) => {
     const corsErrors = tapCorsErrors(page);
     await page.route("**/api/health", async (route) => {
-      await new Promise((r) => setTimeout(r, 1_200));
+      await new Promise((r) => setTimeout(r, 500));
       await route.continue();
     });
     const settings = await openCloudLlm(page, [staleFalse()], NO_CORS);

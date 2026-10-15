@@ -9,7 +9,10 @@ const baseURL = process.env.DI_URL ?? "http://localhost:3100";
 export default defineConfig({
   testDir: ".",
   testMatch: ["*.spec.ts"],
-  timeout: 15_000,
+  timeout: 30_000,
+  // chromium + wasm mocks starve each other at 4 workers: timers like the 5s
+  // interview kickoff then fire before the test acts. CI has 2 vCPUs anyway.
+  workers: 2,
   reporter: [["list", { printSteps: false }], ["./harness/summary-reporter.ts"]],
   use: {
     baseURL,

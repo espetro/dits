@@ -86,12 +86,12 @@ function diffTouchesE2eSurface(): boolean {
     .some((f) => E2E_PATHS.test(f));
 }
 
-// the prerender crawl intermittently loses its own preview server
-// (ECONNREFUSED/ETIMEDOUT on a random localhost port), so retry once
+// build:e2e skips the prerender crawl (its vite preview server intermittently
+// dies with ECONNREFUSED) and renders the html shells in-process instead
 const buildWeb: Step = {
   title: "build web SPA",
-  cmd: "sh",
-  args: ["-c", "bun run --cwd apps/web build || bun run --cwd apps/web build"],
+  cmd: "bun",
+  args: ["run", "--cwd", "apps/web", "build:e2e"],
 };
 
 const e2eSmoke: Step[] = diffTouchesE2eSurface()
