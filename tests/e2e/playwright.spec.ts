@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { DI_URL, WEB_URL } from "./harness/env";
+import { interviewPage } from "./harness/pom";
+import { applySeed, clientOnly, noServer } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-text.spec.md (readable .md);
 // this spec executes it. Requires di running in test mode:
@@ -86,8 +89,7 @@ test.describe("text mode (di server)", () => {
   // Full-loop coverage (specs/e2e-full-loop.spec.md): exercises the real
   // transport + generator rather than the api-only round-trips above.
 
-  const wsUrl = (id: string) =>
-    `${(process.env.DI_URL ?? "http://localhost:3000").replace(/^http/, "ws")}/v1/sessions/${id}/voice`;
+  const wsUrl = (id: string) => `${DI_URL.replace(/^http/, "ws")}/v1/sessions/${id}/voice`;
 
   interface VoiceMsg {
     t: string;
@@ -127,7 +129,9 @@ test.describe("text mode (di server)", () => {
     });
   }
 
-  test("voice ws text turn reaches the agent and persists both sides", async ({ request }) => {
+  test("voice ws text turn reaches the agent and persists both sides @smoke", async ({
+    request,
+  }) => {
     const create = await request.post("/v1/sessions", {
       data: { title: "e2e ws", mode: "interview", duration_min: 15 },
     });
@@ -248,30 +252,6 @@ test("full-loop spec md scenarios all have executed counterparts", () => {
 // real LLM. Requires the web dev server running: cd apps/web && bun run dev
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
-  const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
-  // Storage keys mirror packages/shared/src/providers.ts
-  // PROVIDER_PROFILE_STORAGE_KEY and the di.voice.* engine picks; not imported since this package has no
-  // workspace dependency on @di/shared.
-  const PROFILE = {
-    llm: {
-      baseUrl: "http://mock.local/v1",
-      apiKey: "test-key",
-      model: "mock-model",
-      mode: "remote",
-    },
-  };
-
-  async function seedClientOnly(page: Page) {
-    await page.addInitScript(
-      ([profile]) => {
-        localStorage.setItem("di.voice.sttEngine", "in-browser");
-        localStorage.setItem("di.voice.ttsEngine", "in-browser");
-        localStorage.setItem("di.provider-profile", JSON.stringify(profile));
-      },
-      [PROFILE] as const,
-    );
-  }
-
   async function readOpfsSession(page: Page, id: string) {
     return page.evaluate(async (sid) => {
       const opfsRoot = await navigator.storage.getDirectory();
@@ -282,28 +262,15 @@ test.describe("client-only runtime (no di server)", () => {
     }, id);
   }
 
+  // The idle kickoff (5s) can land before the typed turn on a loaded host and
+  // adds its own greeting turns; assertions look at what follows the typed one.
+  function turnsFrom(record: { turns: Array<{ text: string }> }, typed: string) {
+    return record.turns.slice(record.turns.findIndex((t) => t.text === typed));
+  }
+
   async function startClientOnlySession(page: Page): Promise<string> {
-    await seedClientOnly(page);
-    await page.goto(`${WEB_URL}/setup`);
-    // The submit button is only wired up after React hydrates; with seeded
-    // localStorage the SSR tree differs from the first client render (the
-    // provider-profile form appears), so hydration finishes a beat later and a
-    // single early click can be dropped. Keep clicking until the SPA actually
-    // navigates.
-    await expect
-      .poll(
-        async () => {
-          if (!/\/interview\//.test(page.url())) {
-            await page.getByRole("button", { name: "start", exact: true }).first().click();
-          }
-          return /\/interview\//.test(page.url());
-        },
-        { timeout: 10_000, intervals: [500] },
-      )
-      .toBe(true);
-    const match = /\/interview\/([^/?#]+)/.exec(page.url());
-    if (!match) throw new Error(`unexpected url: ${page.url()}`);
-    return match[1]!;
+    await applySeed(page, clientOnly(), noServer());
+    return interviewPage(page).start();
   }
 
   test("client-only session creation persists to OPFS", async ({ page }) => {
@@ -313,7 +280,7 @@ test.describe("client-only runtime (no di server)", () => {
     expect(record.turns).toEqual([]);
   });
 
-  test("typed turn round-trips through a mocked SSE response and appears in the transcript", async ({
+  test("typed turn round-trips through a mocked SSE response and appears in the transcript @smoke", async ({
     page,
   }) => {
     await page.route("**/v1/chat/completions", async (route) => {
@@ -333,23 +300,21 @@ test.describe("client-only runtime (no di server)", () => {
     const id = await startClientOnlySession(page);
     // the composer lives at the bottom of the conversation card — the
     // pillbar "switch to typing" button focuses it.
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("hello from e2e");
-    await input.press("Enter");
+    await interviewPage(page).say("hello from e2e");
 
     await expect(page.getByText("mock agent reply").first()).toBeVisible();
-    await expect(page.getByText("user · text").first()).toBeVisible();
+    await expect(page.getByText("you · text").first()).toBeVisible();
     await expect(page.getByText("agent · text").first()).toBeVisible();
 
     const record = await readOpfsSession(page, id);
-    expect(record.turns).toHaveLength(2);
-    expect(record.turns[0]).toMatchObject({
+    const turns = turnsFrom(record, "hello from e2e");
+    expect(turns).toHaveLength(2);
+    expect(turns[0]).toMatchObject({
       speaker: "user",
       text: "hello from e2e",
       source: "text",
     });
-    expect(record.turns[1]).toMatchObject({
+    expect(turns[1]).toMatchObject({
       speaker: "agent",
       text: "mock agent reply",
       source: "text",
@@ -361,18 +326,16 @@ test.describe("client-only runtime (no di server)", () => {
       await route.fulfill({ status: 500, body: "mock failure" });
     });
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("this will fail");
-    await input.press("Enter");
+    await interviewPage(page).say("this will fail");
 
-    await expect(page.getByText("user · text").first()).toBeVisible();
+    await expect(page.getByText("you · text").first()).toBeVisible();
     // negative assertion: nothing else should ever show up, so poll briefly
     // instead of waiting on an event that (by design) never fires.
     await page.waitForTimeout(500);
     const record = await readOpfsSession(page, id);
-    expect(record.turns).toHaveLength(1);
-    expect(record.turns[0].speaker).toBe("user");
+    const turns = turnsFrom(record, "this will fail");
+    expect(turns).toHaveLength(1);
+    expect(turns[0].speaker).toBe("user");
   });
 
   test("finish builds the report and lands on /report/:id", async ({ page }) => {
@@ -380,7 +343,7 @@ test.describe("client-only runtime (no di server)", () => {
       const body = route.request().postData() ?? "";
       // Report prompts carry the `overall_score` rubric and a `session_id:`
       // line (buildReportPrompt): answer with a schema-valid report via the
-      // non-streaming shape doGenerate uses.
+      // stream shape doGenerate accumulates.
       if (body.includes("overall_score")) {
         const sid = /session_id:\s*([0-9a-f-]{36})/i.exec(body)?.[1] ?? crypto.randomUUID();
         const report = {
@@ -397,22 +360,13 @@ test.describe("client-only runtime (no di server)", () => {
           model_answers: [],
           generated_at: new Date().toISOString(),
         };
+        // doGenerate accumulates a doStream call (stream-only gateways), so
+        // the report JSON travels as SSE content deltas
+        const chunk = { choices: [{ delta: { content: JSON.stringify(report) } }] };
         await route.fulfill({
           status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            id: "chatcmpl-mock",
-            object: "chat.completion",
-            created: 0,
-            model: "mock-llm",
-            choices: [
-              {
-                index: 0,
-                message: { role: "assistant", content: JSON.stringify(report) },
-                finish_reason: "stop",
-              },
-            ],
-          }),
+          contentType: "text/event-stream",
+          body: `data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`,
         });
         return;
       }
@@ -428,10 +382,7 @@ test.describe("client-only runtime (no di server)", () => {
     );
 
     const id = await startClientOnlySession(page);
-    await page.getByRole("button", { name: "switch to typing" }).click();
-    const input = page.getByPlaceholder("talk or type…");
-    await input.fill("hello from e2e");
-    await input.press("Enter");
+    await interviewPage(page).say("hello from e2e");
     await expect(page.getByText("mock agent reply").first()).toBeVisible();
 
     // finish auto-builds the report on mount and advances to /report/[id]

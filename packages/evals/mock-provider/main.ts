@@ -16,7 +16,7 @@ export function loadFixture(name = "default"): MockFixture {
 }
 
 /** Minimal valid 16-bit PCM mono WAV, 1 second at 8kHz. */
-export function makeWav(): Uint8Array {
+export function makeWav(): Uint8Array<ArrayBuffer> {
   const sampleRate = 8000;
   const numSamples = sampleRate;
   const dataSize = numSamples * 2;
@@ -63,9 +63,23 @@ export type FailMode =
   /** only GET /models (no version path) answers html: /v1/models stays valid, so a root base url gets a suggestion */
   | "html-root"
   /** streamed chat answers 200 with an in-band sse error chunk */
-  | "sse-error";
+  | "sse-error"
+  /** GET /v1/models answers 200 with a valid but empty list */
+  | "empty-models"
+  /** streamed chat thinks for a while: reasoning deltas after a delay, then the answer */
+  | "slow-reasoning";
 
-export const FAIL_MODES: readonly FailMode[] = ["401", "html-models", "html-root", "sse-error"];
+export const FAIL_MODES: readonly FailMode[] = [
+  "401",
+  "html-models",
+  "html-root",
+  "sse-error",
+  "empty-models",
+  "slow-reasoning",
+];
+
+/** first-token delay of slow-reasoning mode; long enough to show a pending state */
+export const SLOW_REASONING_DELAY_MS = 4_000;
 
 export interface MockServerState {
   /** active failure injection; set via POST /__fail {mode} or --fail. null = healthy. */
@@ -190,7 +204,7 @@ const routes: [string, string, Handler][] = [
         cancel() {
           state.inflight--;
         },
-        start(controller) {
+        async start(controller) {
           const send = (obj: unknown) =>
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
           const base = {
@@ -205,6 +219,21 @@ const routes: [string, string, Handler][] = [
             controller.close();
             state.inflight--;
             return;
+          }
+          if (state.fail === "slow-reasoning") {
+            await new Promise((resolve) => setTimeout(resolve, SLOW_REASONING_DELAY_MS));
+            for (let i = 0; i < 20; i++) {
+              send({
+                ...base,
+                choices: [
+                  {
+                    index: 0,
+                    delta: { reasoning_content: `thinking step ${i} ` },
+                    finish_reason: null,
+                  },
+                ],
+              });
+            }
           }
           send({
             ...base,
@@ -255,7 +284,7 @@ const routes: [string, string, Handler][] = [
       if (state.fail === "html-models") return htmlPage();
       return Response.json({
         object: "list",
-        data: fx.models.map((id) => ({
+        data: (state.fail === "empty-models" ? [] : fx.models).map((id) => ({
           id,
           object: "model",
           owned_by: "mock",

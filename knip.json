@@ -23,6 +23,9 @@
     "scripts/pocket-shim.ts",
     "scripts/repack-sherpa-stt.ts",
     "scripts/seed-demo.ts",
+    "tests/e2e/harness/check-keys.ts",
+    "tests/e2e/harness/summary-reporter.ts",
+    "tests/e2e/harness/up.ts",
     "tests/e2e/playwright.config.ts"
   ],
   "ignoreDependencies": [

@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { WEB_URL } from "./harness/env";
 import { readFileSync } from "node:fs";
 
 // Scenario source of truth lives in specs/e2e-voice-harness.spec.md.
 // Targets the web dev server (DI_WEB_URL, default http://localhost:5173);
 // the SPA calls the di test-mode server itself via VITE_DI_API_BASE, so the
 // di server must run in test mode with the mock provider before this suite.
-
-const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
 
 test.describe("voice functional harness (mock provider)", () => {
   test("voice harness runs a full turn loop without a mic", async ({ page }) => {

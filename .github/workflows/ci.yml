@@ -47,5 +47,21 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      # tests/e2e is not a workspace member: it owns its deps and browsers
+      - name: Install e2e deps and chromium
+        working-directory: tests/e2e
+        run: |
+          bun install --frozen-lockfile
+          bun x playwright install --with-deps chromium
+
       - name: Validate (T3 — full typecheck + test + knip, the local `mise run validate:full` equivalent)
         run: bun scripts/validate.ts --full
+
+      - name: Upload e2e results (summary.txt, server.log, traces)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: tests/e2e/test-results/
+          if-no-files-found: ignore
+          retention-days: 7

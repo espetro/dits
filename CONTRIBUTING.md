@@ -96,8 +96,8 @@ hand-roll request shapes in `apps/server/` or `apps/web/`.
 - Run `mise run test` (vitest across shared, server, worker, web, evals) and
   `mise run check` (adds `tsc --noEmit` in web) before opening a PR. Both must
   pass **offline**.
-- `mise run e2e` runs the Playwright suite against a test-mode server you start
-  yourself (`DI_TEST_MODE=1`); see [AGENTS.md](AGENTS.md#test-mode-driving-recipe).
+- `mise run e2e` runs the Playwright suite against the built SPA (`mise run build` first); it starts its own
+  test-mode stack (see [tests/e2e/AGENTS.md](tests/e2e/AGENTS.md)).
 
 ---
 

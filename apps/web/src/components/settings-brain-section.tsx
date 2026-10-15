@@ -102,7 +102,7 @@ export function BrainSection() {
   const testable = pick !== "in-browser";
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="layer-test-llm">
       <SettingsRow
         title={intl.formatMessage({ id: "settings.layer.llm" })}
         description={intl.formatMessage({ id: "settings.layer.llmDesc" })}

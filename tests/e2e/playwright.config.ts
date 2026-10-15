@@ -1,17 +1,23 @@
 import { defineConfig } from "@playwright/test";
 
-// Requires a running di server in test mode:
-//   cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml --no-supervise
-const baseURL = process.env.DI_URL ?? "http://localhost:3000";
+// Run through `bun harness/up.ts` (mise run e2e): it serves the built SPA
+// behind a test-mode di server on :3100 and sets DI_URL / DI_WEB_URL. The
+// :3100 default makes a bare `playwright test` target the same stack when
+// one is already up.
+const baseURL = process.env.DI_URL ?? "http://localhost:3100";
 
 export default defineConfig({
   testDir: ".",
   testMatch: ["*.spec.ts"],
-  timeout: 15_000,
-  reporter: [["list", { printSteps: false }]],
+  timeout: 30_000,
+  // chromium + wasm mocks starve each other at 4 workers: timers like the 5s
+  // interview kickoff then fire before the test acts. CI has 2 vCPUs anyway.
+  workers: 2,
+  reporter: [["list", { printSteps: false }], ["./harness/summary-reporter.ts"]],
   use: {
     baseURL,
-    trace: "off",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     // wasm-voice spec exercises the real mic path: fake device + autoplay
     // so getUserMedia and AudioContext work headless
     launchOptions: {
