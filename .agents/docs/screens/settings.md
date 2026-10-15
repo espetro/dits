@@ -130,15 +130,20 @@ driver otherwise.
   as Custom; hidden for the demo endpoint and anthropic flavor; same on
   the stt and tts endpoint fields; base url, api key masked inside a <form> with a
   show/hide toggle — the saved-key placeholder is redactKey-masked,
-  never raw — model combobox, free-provider callout) plus an
+  never raw, model combobox, free-provider callout) plus an
   incomplete alert; the test row streams a
-  real one-word completion into a read-only textarea; any failure
-  (http status, relay 502, in-band sse error) shows its upstream detail
-  in the status line, and only a genuinely empty successful stream says
-  "fields invalid". The llm test builds its model through the llm slice
+  real one-word completion into a read-only textarea. Test is never
+  disabled by incomplete fields: it re-probes the di server first, then
+  reports a precise localized reason (missing or invalid base url, missing
+  model id, unreachable endpoint per route, http status with upstream
+  detail, in-band sse error, 30s timeout, empty stream) and always names
+  the route it took ("via di server relay" or "browser direct").
+  A stream that carried reasoning but no visible text counts as working
+  with a note. The anthropic flavor posts native `/v1/messages` with
+  x-api-key straight from the browser (the relay forwards only
+  authorization). The llm test builds its model through the llm slice
   factory (createLlmModel), and the stt and tts endpoint calls use the
-  same relay-or-direct fetch as the llm. Test is enabled for keyless local hosts (loopback,
-  private network) once url and model are set.
+  same relay-or-direct fetch as the llm.
   The base url is authoritative: only trailing slashes are trimmed, then
   `/models` and `/chat/completions` are appended; no `/v1` is stripped
   or injected (zAI `/v4`, google `/v1beta/openai`, openrouter `/api/v1`).

@@ -40,6 +40,9 @@ interface OpenAiStreamToolCallDelta {
 
 interface OpenAiStreamDelta {
   content?: string | null;
+  /** reasoning models: deepseek/bifrost `reasoning_content`, openrouter `reasoning` */
+  reasoning_content?: string | null;
+  reasoning?: string | null;
   tool_calls?: OpenAiStreamToolCallDelta[];
 }
 
@@ -258,6 +261,7 @@ export function createOpenAiCompatibleModel(
         },
       };
       let sawTextStart = false;
+      let sawReasoningStart = false;
       let streamError: DiError | null = null;
 
       const stream = new ReadableStream<LanguageModelV3StreamPart>({
@@ -298,6 +302,14 @@ export function createOpenAiCompatibleModel(
                 }
                 for (const choice of chunk.choices ?? []) {
                   const delta = choice.delta ?? {};
+                  const thought = delta.reasoning_content || delta.reasoning;
+                  if (typeof thought === "string" && thought) {
+                    if (!sawReasoningStart) {
+                      sawReasoningStart = true;
+                      controller.enqueue({ type: "reasoning-start", id: "r0" });
+                    }
+                    controller.enqueue({ type: "reasoning-delta", id: "r0", delta: thought });
+                  }
                   if (typeof delta.content === "string" && delta.content) {
                     if (!sawTextStart) {
                       sawTextStart = true;
@@ -326,6 +338,7 @@ export function createOpenAiCompatibleModel(
             controller.error(streamError);
             return;
           }
+          if (sawReasoningStart) controller.enqueue({ type: "reasoning-end", id: "r0" });
           if (sawTextStart) controller.enqueue({ type: "text-end", id: textId });
           const { calls: finished, hasTools } = tools.finish();
           for (const call of finished) {

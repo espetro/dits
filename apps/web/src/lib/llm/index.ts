@@ -7,10 +7,10 @@ import type { LlmSection } from "@di/shared";
 import { createLlmModel, resolveBrowserLlm } from "./adapters/browser";
 import type { BrowserModelHandles } from "./adapters/browser";
 import { probeModels, runLlmTest } from "./probe";
-import type { ProbeDraft } from "./probe";
+import type { LlmTestResult, ProbeDraft } from "./probe";
 
-export type { ProbeDraft } from "./probe";
-export { probeModels, runLlmTest } from "./probe";
+export type { LlmRoute, LlmTestResult, ProbeDraft } from "./probe";
+export { LlmTestError, probeModels, runLlmTest } from "./probe";
 export {
   BROWSER_LLM_FALLBACK,
   DEFAULT_TRANSFORMERS_MODEL_ID,
@@ -39,8 +39,8 @@ export interface LlmPort {
   ): Promise<{ model: BrowserModelHandles["model"]; browser?: BrowserModelHandles } | null>;
   /** Sorted model ids from the endpoint's /models list. */
   probeModels(draft: ProbeDraft): Promise<string[]>;
-  /** One short real completion; resolves the full text. */
-  runTest(draft: ProbeDraft, onText: (text: string) => void): Promise<string>;
+  /** One short real completion; resolves the text plus the route used. */
+  runTest(draft: ProbeDraft, onText: (text: string) => void): Promise<LlmTestResult>;
 }
 
 export function createLlmPort(): LlmPort {
