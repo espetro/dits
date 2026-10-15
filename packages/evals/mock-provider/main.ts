@@ -16,7 +16,7 @@ export function loadFixture(name = "default"): MockFixture {
 }
 
 /** Minimal valid 16-bit PCM mono WAV, 1 second at 8kHz. */
-export function makeWav(): Uint8Array {
+export function makeWav(): Uint8Array<ArrayBuffer> {
   const sampleRate = 8000;
   const numSamples = sampleRate;
   const dataSize = numSamples * 2;
