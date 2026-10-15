@@ -129,7 +129,9 @@ test.describe("text mode (di server)", () => {
     });
   }
 
-  test("voice ws text turn reaches the agent and persists both sides", async ({ request }) => {
+  test("voice ws text turn reaches the agent and persists both sides @smoke", async ({
+    request,
+  }) => {
     const create = await request.post("/v1/sessions", {
       data: { title: "e2e ws", mode: "interview", duration_min: 15 },
     });
@@ -272,7 +274,7 @@ test.describe("client-only runtime (no di server)", () => {
     expect(record.turns).toEqual([]);
   });
 
-  test("typed turn round-trips through a mocked SSE response and appears in the transcript", async ({
+  test("typed turn round-trips through a mocked SSE response and appears in the transcript @smoke", async ({
     page,
   }) => {
     await page.route("**/v1/chat/completions", async (route) => {

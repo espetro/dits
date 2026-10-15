@@ -133,8 +133,10 @@ files:
     start(["bun", "run", MOCK, "--port", String(PORTS.cors)]);
     start(["bun", "run", MOCK, "--port", String(PORTS.noCors), "--no-cors"]);
     start(["bun", "run", MOCK, "--port", String(PORTS.fail), "--no-cors"]);
+    start(["bun", "run", MOCK, "--port", String(PORTS.mxCors)]);
+    start(["bun", "run", MOCK, "--port", String(PORTS.mxNoCors), "--no-cors"]);
     await Promise.all(
-      [PORTS.cors, PORTS.noCors, PORTS.fail].map((p) =>
+      [PORTS.cors, PORTS.noCors, PORTS.fail, PORTS.mxCors, PORTS.mxNoCors].map((p) =>
         waitFor(`http://localhost:${p}/health`, `mock :${p}`),
       ),
     );
@@ -170,6 +172,8 @@ files:
         MOCK_CORS_PORT: String(PORTS.cors),
         MOCK_NOCORS_PORT: String(PORTS.noCors),
         MOCK_FAIL_PORT: String(PORTS.fail),
+        MOCK_MX_CORS_PORT: String(PORTS.mxCors),
+        MOCK_MX_NOCORS_PORT: String(PORTS.mxNoCors),
         RELAY_FALLBACK_URL: `http://localhost:${PORTS.static}`,
       },
     });

@@ -7,9 +7,7 @@ are rewritten same-origin through the server, so CORS-hostile endpoints
 (no ACAO headers, preflight 403) to reproduce the exact browser-direct
 failure mode the relay exists to fix.
 
-Preconditions (see AGENTS.md): di server in test mode on `DI_URL`, web dev
-server on :5173 with `VITE_DI_API_BASE=$DI_URL`. The no-CORS mock provider
-is spawned by the spec on `MOCK_NOCORS_PORT` (default 9100).
+Preconditions: run through `mise run e2e` (see AGENTS.md). `harness/up.ts` serves the built SPA behind a test-mode di server on :3100 and starts the no-CORS mock on `MOCK_NOCORS_PORT` (3102).
 
 ## dropdown populates via relay, no-CORS upstream, keyless
 
@@ -33,7 +31,7 @@ a short completion and reports ok; the mock recorded the
 
 ## llm test surfaces upstream http 401 detail
 
-A separate failure-injection mock (`MOCK_FAIL_PORT`, default 9102, flipped via `POST /__fail`) answers chat with HTTP 401 and a json error body. The Test button reports `model request failed (401)` with the upstream message `invalid api key (mock 401)`.
+A separate failure-injection mock (`MOCK_FAIL_PORT`, 3103, flipped via `POST /__fail`) answers chat with HTTP 401 and a json error body. The Test button reports `model request failed (401)` with the upstream message `invalid api key (mock 401)`.
 
 ## models html 200 shows not a model list
 
