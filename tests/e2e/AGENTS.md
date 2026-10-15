@@ -1,24 +1,13 @@
 # tests/e2e/AGENTS.md
 
-Readable scenario source of truth is `specs/*.md`; `playwright.spec.ts` must
-stay in sync with those headings (a check enforces this).
+Readable scenario source of truth is `specs/*.md`; each `*.spec.ts` must stay in sync with those headings (a check enforces this).
 
-`mise run e2e:settings` is self-contained: `harness/up.ts` starts the built
-SPA behind a test-mode server on :3100 plus mocks on :3101 (cors), :3102
-(no-cors), :3103 (failure injection), runs `provider-relay.spec.ts` and tears
-down. Needs `mise run build` first. Extra args go to playwright
-(`mise run e2e:settings -- -g "401"`).
+`mise run e2e` is the only entry point and is self-contained: `harness/up.ts` starts the built SPA behind a test-mode di server on :3100, mock providers on :3101 (cors), :3102 (no-cors), :3103 (failure injection), a static no-server copy of the SPA on :3104, runs every spec and tears down. Needs `mise run build` first. Extra args go to playwright (`mise run e2e -- provider-relay.spec.ts -g "401"`).
 
-The other specs require a running test-mode server; target from `DI_URL` (default
-`http://localhost:3000`). `mise run e2e` does not start the server — start it
-yourself first (see `apps/server/AGENTS.md` test-mode recipe).
+`mise run e2e:smoke` runs only specs tagged `@smoke` (the pre-push tier).
 
-Preconditions beyond the di server:
+After any run, `cat tests/e2e/test-results/summary.txt` lists one line per test (`PASS|FAIL|SKIP file:line title first-error artifact-dir`) and the server log path on failure. Traces and screenshots are kept for failures only.
 
-- mock provider on :9000 (`bun run packages/evals/mock-provider/main.ts
---port 9000`) — the test-mode config points every provider at it, and the
-  report-generation spec needs its canned `report` fixture.
-- web dev server on :5173 for the client-only + voice-harness specs:
-  `cd apps/web && VITE_DI_API_BASE=http://localhost:3000 bun run dev`
-  (without `VITE_DI_API_BASE` the harness page never reaches the server
-  driver). Override with `DI_WEB_URL`.
+Browser state comes from `harness/seed.ts` (named seeds, one key map; `bun harness/check-keys.ts` fails when the app renames a key) and screens are driven through `harness/pom.ts`. Never inline localStorage seeds or screen locators in a spec. The client-only specs apply the `noServer()` seed, otherwise the SPA finds the di server and routes the LLM through its relay instead of the page's own `page.route` mocks.
+
+The on-device voice mock in `wasm-voice.spec.ts` speaks the kkrpc wire protocol; if kkrpc changes it, that is the one place to update.

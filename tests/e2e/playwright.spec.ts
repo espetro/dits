@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { DI_URL, WEB_URL } from "./harness/env";
 import { interviewPage } from "./harness/pom";
 import { applySeed, clientOnly, noServer } from "./harness/seed";
 
@@ -88,8 +89,7 @@ test.describe("text mode (di server)", () => {
   // Full-loop coverage (specs/e2e-full-loop.spec.md): exercises the real
   // transport + generator rather than the api-only round-trips above.
 
-  const wsUrl = (id: string) =>
-    `${(process.env.DI_URL ?? "http://localhost:3000").replace(/^http/, "ws")}/v1/sessions/${id}/voice`;
+  const wsUrl = (id: string) => `${DI_URL.replace(/^http/, "ws")}/v1/sessions/${id}/voice`;
 
   interface VoiceMsg {
     t: string;
@@ -250,7 +250,6 @@ test("full-loop spec md scenarios all have executed counterparts", () => {
 // real LLM. Requires the web dev server running: cd apps/web && bun run dev
 // (DI_WEB_URL to override, default http://localhost:5173).
 test.describe("client-only runtime (no di server)", () => {
-  const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
   async function readOpfsSession(page: Page, id: string) {
     return page.evaluate(async (sid) => {
       const opfsRoot = await navigator.storage.getDirectory();

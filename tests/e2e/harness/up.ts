@@ -4,17 +4,30 @@
 // everything down. Fixed high ports keep seeded state and specs stable and
 // clear of a hand-started dev stack on :3000/:9000.
 //
+// This is the only entry point: every spec runs through it (mise run e2e).
+// Results land in test-results/summary.txt (one line per test) and the di
+// server log in test-results/server.log.
+//
 //   bun harness/up.ts [playwright args...]
 //   bun harness/up.ts provider-relay.spec.ts -g "401"
+//   bun harness/up.ts --grep @smoke
 import { spawn, type ChildProcess } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { PORTS } from "./env";
+
 const root = new URL("../../../", import.meta.url).pathname;
 const e2eDir = new URL("../", import.meta.url).pathname;
-
-export const PORTS = { server: 3100, cors: 3101, noCors: 3102, fail: 3103 } as const;
 
 const MOCK = `${root}packages/evals/mock-provider/main.ts`;
 const SERVER = `${root}apps/server/src/cli.ts`;
@@ -71,6 +84,11 @@ async function main(): Promise<number> {
   }
 
   const dir = mkdtempSync(join(tmpdir(), "di-e2e-"));
+  mkdirSync(`${e2eDir}test-results`, { recursive: true });
+  const serverLog = `${e2eDir}test-results/server.log`;
+  const summary = `${e2eDir}test-results/summary.txt`;
+  rmSync(serverLog, { force: true });
+  rmSync(summary, { force: true });
   const cleanup = () => {
     stopAll();
     rmSync(dir, { recursive: true, force: true });
@@ -107,7 +125,7 @@ embeddings:
   model: mock-embed
 files:
   db_path: ${dir}/di.db
-  log_path: ${dir}/di.log
+  log_path: ${serverLog}
   data_dir: ${dir}/data
 `,
     );
@@ -125,6 +143,23 @@ files:
     });
     await waitFor(`http://localhost:${PORTS.server}/api/health`, "di server");
 
+    // the built SPA with NO di server behind it (public-site fallback guard):
+    // unknown paths get index.html, so /api/health is html, not a health json
+    const clientDir = `${root}apps/web/dist/client`;
+    const staticServer = Bun.serve({
+      port: PORTS.static,
+      async fetch(req) {
+        const path = new URL(req.url).pathname;
+        for (const candidate of [path, `${path}/index.html`]) {
+          const file = Bun.file(join(clientDir, candidate));
+          if (candidate.startsWith("/") && !candidate.includes("..") && (await file.exists())) {
+            if (!(await file.stat()).isDirectory()) return new Response(file);
+          }
+        }
+        return new Response(Bun.file(join(clientDir, "index.html")));
+      },
+    });
+
     const pw = spawn("bun", ["x", "playwright", "test", ...process.argv.slice(2)], {
       cwd: e2eDir,
       stdio: "inherit",
@@ -135,9 +170,21 @@ files:
         MOCK_CORS_PORT: String(PORTS.cors),
         MOCK_NOCORS_PORT: String(PORTS.noCors),
         MOCK_FAIL_PORT: String(PORTS.fail),
+        RELAY_FALLBACK_URL: `http://localhost:${PORTS.static}`,
       },
     });
-    return await new Promise<number>((resolve) => pw.on("exit", (code) => resolve(code ?? 1)));
+    const code = await new Promise<number>((resolve) => pw.on("exit", (c) => resolve(c ?? 1)));
+    void staticServer.stop(true);
+    if (existsSync(summary)) {
+      if (code !== 0) appendFileSync(summary, `SERVER-LOG  ${serverLog}\n`);
+      const lines = readFileSync(summary, "utf8").split("\n");
+      const failed = lines.filter((l) => l.startsWith("FAIL"));
+      console.log(`\n== e2e summary (${summary}) ==`);
+      for (const l of [...failed, ...lines.filter((l) => /^(TOTAL|SERVER-LOG)/.test(l))]) {
+        console.log(l);
+      }
+    }
+    return code;
   } finally {
     cleanup();
   }

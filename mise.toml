@@ -108,28 +108,21 @@ curl -sf -m 10 "${DI_URL:-http://localhost:3000}/v1/test/smoke" | jq -e '.ok == 
   && echo "smoke ok" || { echo "smoke FAILED" >&2; exit 1; }
 '''
 
-# Precondition: a DI server must already be running in test mode:
-#   cd apps/server && DI_TEST_MODE=1 bun run src/cli.ts --config config.example.yaml
-# Override the target with DI_URL (default http://localhost:3000).
+# Self-contained: starts the built SPA behind a test-mode server on :3100
+# plus mocks on :3101-3104, runs every spec, tears down. Needs `mise run
+# build` first. Results: tests/e2e/test-results/summary.txt. Extra args go
+# to playwright: mise run e2e -- provider-relay.spec.ts -g "401"
 [tasks.e2e]
-description = "Run Playwright e2e specs in tests/e2e (requires DI server in test mode running; DI_URL to override)"
-run = "bun x playwright test"
+description = "Run every Playwright e2e spec against the built SPA with a self-started stack (ports 3100-3104)"
+run = "bun harness/up.ts"
 dir = "tests/e2e"
 
-# Relay specs: additionally requires the web dev server started with the di
-# server as its API base (cd apps/web && VITE_DI_API_BASE=$DI_URL bun run
-# dev; DI_WEB_URL to override). The no-CORS mock provider is spawned by the
-# spec itself on MOCK_NOCORS_PORT (default 9100).
-# Self-contained: builds nothing, but starts the built SPA behind a test-mode
-# server on :3100 plus mocks on :3101-3103, runs the settings/relay specs,
-# tears down. Needs `mise run build` first. Extra args go to playwright:
-#   mise run e2e:settings -- -g "401"
+[tasks."e2e:smoke"]
+description = "Run the @smoke e2e tier (pre-push gate) against the built SPA"
+run = "bun harness/up.ts --grep @smoke"
+dir = "tests/e2e"
+
 [tasks."e2e:settings"]
-description = "Run the settings/relay e2e tier against the built SPA with a self-started stack (ports 3100-3103)"
-run = "bun harness/up.ts provider-relay.spec.ts"
-dir = "tests/e2e"
-
-[tasks.e2e-relay]
-description = "Run provider-relay Playwright specs (requires DI server in test mode + web dev server with VITE_DI_API_BASE; mock spawned by the spec)"
-run = "bun x playwright test provider-relay.spec.ts"
+description = "e2e restricted to the settings matrix and relay specs"
+run = "bun harness/up.ts provider-relay.spec.ts settings-matrix.spec.ts"
 dir = "tests/e2e"

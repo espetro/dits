@@ -18,8 +18,9 @@ export function settingsPage(page: Page) {
   return {
     layer,
 
-    async open(): Promise<void> {
-      await page.goto("/?settings=1&pane=voice");
+    /** `base` targets another origin (e.g. the no-server fallback build) */
+    async open(base = ""): Promise<void> {
+      await page.goto(`${base}/?settings=1&pane=voice`);
       await expect(layer("llm")).toBeVisible();
     },
 

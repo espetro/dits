@@ -1,22 +1,19 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { DI_URL, MOCK_PORTS } from "./harness/env";
+import { applySeed, staleFalse } from "./harness/seed";
 import { settingsPage } from "./harness/pom";
 import { readFileSync } from "node:fs";
-import { spawn, type ChildProcess } from "node:child_process";
 
 // Scenario source of truth lives in specs/provider-relay.spec.md (readable
-// .md); this spec executes it. Preconditions (see AGENTS.md):
-//   - di server in test mode on DI_URL (default http://localhost:3000)
-//   - web dev server on :5173 started with VITE_DI_API_BASE=$DI_URL
-//     (cd apps/web && VITE_DI_API_BASE=http://localhost:3000 bun run dev)
-// The no-CORS mock provider is spawned by the spec itself (--no-cors flips
-// the browser-direct failure mode of openrouter/bifrost on: no ACAO headers,
-// OPTIONS preflight 403).
+// .md); this spec executes it against the stack harness/up.ts starts. The
+// no-CORS mock (--no-cors flips the browser-direct failure mode of
+// openrouter/bifrost on: no ACAO headers, OPTIONS preflight 403) and the
+// failure-injection mock are provided by up.ts on MOCK_PORTS.
 
-const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
-const NOCOR_MOCK_PORT = Number(process.env.MOCK_NOCORS_PORT ?? 9100);
-const CORS_MOCK_PORT = Number(process.env.MOCK_CORS_PORT ?? 9101);
-const FAIL_MOCK_PORT = Number(process.env.MOCK_FAIL_PORT ?? 9102);
+const NOCOR_MOCK_PORT = MOCK_PORTS.noCors;
+const CORS_MOCK_PORT = MOCK_PORTS.cors;
+const FAIL_MOCK_PORT = MOCK_PORTS.fail;
 
 function repoRoot(): string {
   // tests/e2e/<this file> -> repo root two levels up
@@ -45,49 +42,6 @@ function tapConsoleErrors(page: Page): string[] {
   return errors;
 }
 
-let noCorsMock: ChildProcess | null = null;
-let failMock: ChildProcess | null = null;
-
-async function mockUp(port: number): Promise<boolean> {
-  try {
-    return (await fetch(`http://localhost:${port}/health`)).ok;
-  } catch {
-    return false;
-  }
-}
-
-// null when a mock (e.g. from harness/up.ts) already listens on the port
-async function spawnMock(port: number, extra: string[] = []): Promise<ChildProcess | null> {
-  if (await mockUp(port)) return null;
-  return spawn(
-    "bun",
-    ["run", `${repoRoot()}packages/evals/mock-provider/main.ts`, "--port", String(port), ...extra],
-    { stdio: "ignore", detached: true },
-  );
-}
-
-async function waitMock(port: number): Promise<void> {
-  for (let i = 0; i < 50; i++) {
-    try {
-      if ((await fetch(`http://localhost:${port}/health`)).ok) return;
-    } catch {
-      // not up yet
-    }
-    await new Promise((r) => setTimeout(r, 100));
-  }
-  throw new Error(`mock provider never became ready on :${port}`);
-}
-
-function killMock(child: ChildProcess | null): void {
-  if (!child?.pid) return;
-  try {
-    // detached + negative pid kills the whole process group
-    process.kill(-child.pid, "SIGTERM");
-  } catch {
-    // already gone
-  }
-}
-
 async function setFail(port: number, mode: string | null): Promise<void> {
   await fetch(`http://localhost:${port}/__fail`, {
     method: "POST",
@@ -97,22 +51,8 @@ async function setFail(port: number, mode: string | null): Promise<void> {
 }
 
 test.describe("provider relay (no-CORS upstream via di server)", () => {
-  test.beforeAll(async () => {
-    // CORS-hostile mock; separate failure-injection mock so flipping modes
-    // never races the happy-path specs on the shared no-CORS mock
-    noCorsMock = await spawnMock(NOCOR_MOCK_PORT, ["--no-cors"]);
-    failMock = await spawnMock(FAIL_MOCK_PORT, ["--no-cors"]);
-    await waitMock(NOCOR_MOCK_PORT);
-    await waitMock(FAIL_MOCK_PORT);
-  });
-
   test.afterEach(async () => {
     await setFail(FAIL_MOCK_PORT, null);
-  });
-
-  test.afterAll(() => {
-    killMock(failMock);
-    killMock(noCorsMock);
   });
 
   async function openSettingsLlm(page: Page) {
@@ -232,7 +172,7 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     // in-flight count to zero: the relay forwards c.req.raw.signal upstream
     const ctrl = new AbortController();
     const res = await fetch(
-      `${process.env.DI_URL ?? "http://localhost:3000"}/v1/relay?url=${encodeURIComponent(`http://localhost:${NOCOR_MOCK_PORT}/v1/chat/completions`)}`,
+      `${DI_URL}/v1/relay?url=${encodeURIComponent(`http://localhost:${NOCOR_MOCK_PORT}/v1/chat/completions`)}`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -279,23 +219,14 @@ test.describe("browser-direct fallback (no di server)", () => {
   }) => {
     const errors = tapConsoleErrors(page);
     const base = process.env.RELAY_FALLBACK_URL!;
-    // spawn a CORS-enabled mock if not already running on the fallback origin
-    // is out of scope here; the fixture provider must be reachable under
-    // MOCK_CORS_PORT. The page under test is the fallback SPA.
-    const mockPort = CORS_MOCK_PORT;
-    await page.addInitScript(
-      ([url]) => {
-        localStorage.setItem("di.server-reachable", "false");
-        void url;
-      },
-      [base] as const,
-    );
-    await page.goto(`${base}/?settings=1&pane=voice`);
-    await expect(page.getByLabel("Base URL")).toBeVisible();
-    await page.getByRole("combobox", { name: "interviewer model" }).click();
-    await page.getByRole("option", { name: "cloud endpoint" }).click();
-    await settingsPage(page).baseUrl().fill(`http://localhost:${mockPort}/v1`);
-    await page.getByLabel("API key").fill("fallback-key");
+    // the page under test is the fallback SPA (no di server behind it); the
+    // CORS-enabled mock on MOCK_PORTS.cors is the upstream
+    await applySeed(page, staleFalse());
+    const settings = settingsPage(page);
+    await settings.open(base);
+    await settings.pickLayer("llm", "cloud endpoint");
+    await settings.baseUrl().fill(`http://localhost:${CORS_MOCK_PORT}/v1`);
+    await settings.apiKey().fill("fallback-key");
 
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),

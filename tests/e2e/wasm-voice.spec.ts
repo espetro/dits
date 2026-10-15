@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { WEB_URL } from "./harness/env";
 import type { BrowserContext, Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -13,7 +14,6 @@ import { KEYS, applySeed, clientOnlyUnconsented, noServer, wasmReady } from "./h
 // recording mock that speaks the engine worker protocols. Requires the web
 // dev server (DI_WEB_URL) only — no di server, all LLM traffic is routed.
 
-const WEB_URL = process.env.DI_WEB_URL ?? "http://localhost:5173";
 const MODELS_BASE = "/e2e/voice-models";
 
 // tiny stand-in artifacts; the manifest below pins them by real sha256
