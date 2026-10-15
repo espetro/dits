@@ -130,7 +130,7 @@ driver otherwise.
   as Custom; hidden for the demo endpoint and anthropic flavor; same on
   the stt and tts endpoint fields; base url, api key masked inside a <form> with a
   show/hide toggle — the saved-key placeholder is redactKey-masked,
-  never raw — model datalist, free-provider callout) plus an
+  never raw — model combobox, free-provider callout) plus an
   incomplete alert; the test row streams a
   real one-word completion into a read-only textarea; any failure
   (http status, relay 502, in-band sse error) shows its upstream detail
@@ -142,10 +142,14 @@ driver otherwise.
   The base url is authoritative: only trailing slashes are trimmed, then
   `/models` and `/chat/completions` are appended; no `/v1` is stripped
   or injected (zAI `/v4`, google `/v1beta/openai`, openrouter `/api/v1`).
-  The model datalist probes `${base}/models` once the
+  The model combobox (model-combobox.tsx, used on the llm, stt and tts
+  tabs) probes `${base}/models` once the
   section is enabled and a base url parses (600ms debounce, re-run when
   the server probe settles; the model field always stays free-text).
-  A failed probe renders its reason under the model field (http status,
+  Focus or the chevron opens a positioned listbox with every model
+  (unfiltered until the user types), arrow keys, enter and escape;
+  loading, empty, no-match and error states render inside the list.
+  A failed probe renders its reason in the list and under the model field (http status,
   "not a model list", "network or CORS", unexpected shape) and, for html
   or 404 answers, suggests a base url candidate (`/v1`, `/v4`,
   `/api/v1`) that does serve JSON; the hint is never applied silently.

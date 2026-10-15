@@ -3,6 +3,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Eye, EyeOff } from "lucide-react";
 import { PROVIDER_PRESETS, presetForBaseUrl } from "@di/shared";
 import { Input } from "./vendor/input";
+import { ModelCombobox } from "./model-combobox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
 import { isDemoLlm, logDemoUpsellClick } from "../lib/demo-llm";
 import { redactKey } from "../lib/runtime";
@@ -112,7 +113,7 @@ function FreeProviderLinks() {
 
 /**
  * The shared per-section endpoint fields (base URL, redacted API key,
- * model id with a /models datalist, voice for TTS) plus the per-category
+ * model id combobox over the /models list, voice for TTS) plus the per-category
  * provider hint block. Extracted from settings-dialog to keep that file
  * under the loc ratchet.
  */
@@ -219,29 +220,32 @@ export function EndpointFields(props: {
           </button>
         </span>
       </SettingsField>
-      <SettingsField
-        label={intl.formatMessage({ id: "settings.modelId" })}
-        helper={props.modelOptions.error ?? intl.formatMessage({ id: "settings.modelHelp" })}
-        helperError={props.modelOptions.error !== null}
-      >
-        <>
-          <Input
+      <div>
+        {/* not a <label> wrapper: clicks on list options must not re-target the input */}
+        <label htmlFor={`${tab}-model`} className={fieldClass}>
+          <FormattedMessage id="settings.modelId" />
+        </label>
+        <div className="mt-1">
+          <ModelCombobox
+            id={`${tab}-model`}
             value={draft.model}
-            onChange={(e) => props.onChange({ model: e.target.value })}
-            list={`${tab}-models`}
-            placeholder={
-              props.modelOptions.options.length === 0
-                ? intl.formatMessage({ id: "settings.modelPlaceholder" })
-                : undefined
-            }
+            onChange={(model) => props.onChange({ model })}
+            options={props.modelOptions.options}
+            loading={props.modelOptions.loading}
+            error={props.modelOptions.error}
+            probeable={draft.baseUrl !== "" && URL.canParse(draft.baseUrl)}
+            placeholder={intl.formatMessage({ id: "settings.modelPlaceholder" })}
           />
-          <datalist id={`${tab}-models`}>
-            {props.modelOptions.options.map((id) => (
-              <option key={id} value={id} />
-            ))}
-          </datalist>
-        </>
-      </SettingsField>
+        </div>
+        <span
+          className={
+            props.modelOptions.error !== null ? `${helperClass} text-destructive` : helperClass
+          }
+          role={props.modelOptions.error !== null ? "alert" : undefined}
+        >
+          {props.modelOptions.error ?? intl.formatMessage({ id: "settings.modelHelp" })}
+        </span>
+      </div>
       {tab === "tts" && (
         <SettingsField
           label={intl.formatMessage({ id: "settings.voice" })}

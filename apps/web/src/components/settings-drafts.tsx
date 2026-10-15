@@ -98,10 +98,12 @@ export interface ModelOptions {
   options: string[];
   /** localized reason the list is empty; null when fine or not probed. */
   error: string | null;
+  /** true from the moment a (debounced) probe is pending until it settles */
+  loading: boolean;
 }
 
 /**
- * /models poll for a draft's Model ID datalist (custom endpoint mode).
+ * /models poll for a draft's Model ID combobox (custom endpoint mode).
  * Failures never block: the field stays free-text, but the reason is
  * surfaced next to it. Re-runs when the server probe settles, since the
  * relay choice depends on it.
@@ -109,20 +111,25 @@ export interface ModelOptions {
 export function useModelOptions(draft: SectionDraft): ModelOptions {
   const intl = useIntl();
   const reachable = useSsrStore($serverReachable, null);
-  const [state, setState] = React.useState<ModelOptions>({ options: [], error: null });
+  const [state, setState] = React.useState<ModelOptions>({
+    options: [],
+    error: null,
+    loading: false,
+  });
   React.useEffect(() => {
     if (!draft.enabled || !draft.baseUrl || !URL.canParse(draft.baseUrl)) {
-      setState({ options: [], error: null });
+      setState({ options: [], error: null, loading: false });
       return;
     }
     let cancelled = false;
+    setState((prev) => ({ ...prev, error: null, loading: true }));
     const timer = setTimeout(() => {
       probeModels(draft).then(
         (options) => {
-          if (!cancelled) setState({ options, error: null });
+          if (!cancelled) setState({ options, error: null, loading: false });
         },
         (err: unknown) => {
-          if (!cancelled) setState({ options: [], error: errorDetail(intl, err) });
+          if (!cancelled) setState({ options: [], error: errorDetail(intl, err), loading: false });
         },
       );
     }, 600);
@@ -132,7 +139,7 @@ export function useModelOptions(draft: SectionDraft): ModelOptions {
     };
     // intl identity is stable per locale; draft fields are the real inputs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft.enabled, draft.baseUrl, draft.apiKey, reachable]);
+  }, [draft.enabled, draft.baseUrl, draft.apiKey, draft.flavor, reachable]);
   return state;
 }
 
