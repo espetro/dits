@@ -44,6 +44,17 @@ function tapConsoleErrors(page: Page): string[] {
   return errors;
 }
 
+// The model id field is a combobox whose listbox carries the same accessible
+// name, so role-scoped locators are required (getByLabel is ambiguous).
+// Focusing the input opens the list.
+function modelInput(page: Page) {
+  return page.getByRole("combobox", { name: "Model ID" });
+}
+
+function modelOptions(page: Page) {
+  return page.getByRole("listbox", { name: "Model ID" }).getByRole("option");
+}
+
 let noCorsMock: ChildProcess | null = null;
 let failMock: ChildProcess | null = null;
 
@@ -156,13 +167,9 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect
-      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
-      .toBe(fixture.models.length);
-    const options = await page
-      .locator("#llm-models option")
-      .evaluateAll((els) => els.map((el) => el.getAttribute("value")));
-    expect(options).toEqual(fixture.models);
+    await modelInput(page).focus();
+    await expect(modelOptions(page)).toHaveCount(fixture.models.length, { timeout: 5_000 });
+    expect(await modelOptions(page).allTextContents()).toEqual(fixture.models);
 
     // the request went through the relay: recorded on the mock, no preflight
     // was ever needed. CORS blocks surface as console errors; none allowed.
@@ -181,9 +188,8 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect
-      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
-      .toBe(fixture.models.length);
+    await modelInput(page).focus();
+    await expect(modelOptions(page)).toHaveCount(fixture.models.length, { timeout: 5_000 });
 
     // authorization survives the relay hop (header allowlist forwards it)
     const state = await mockState(NOCOR_MOCK_PORT);
@@ -196,7 +202,7 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     await openSettingsLlm(page);
     await chooseCloud(page);
     await page.getByLabel("Base URL").fill(`http://localhost:${NOCOR_MOCK_PORT}/v1`);
-    await page.getByLabel("Model ID").fill("mock-llm");
+    await modelInput(page).fill("mock-llm");
     // sectionIncomplete marks a keyless non-demo llm incomplete: the Test
     // button stays disabled without an api key, so set one for this spec
     await page.getByRole("textbox", { name: /^API key/ }).fill("relay-test-key");
@@ -215,7 +221,7 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     await openSettingsLlm(page);
     await chooseCloud(page);
     await page.getByLabel("Base URL").fill(baseUrl);
-    await page.getByLabel("Model ID").fill("mock-llm");
+    await modelInput(page).fill("mock-llm");
     await page.getByRole("textbox", { name: /^API key/ }).fill("relay-test-key");
   }
 
@@ -230,14 +236,17 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
   test("models html 200 shows not a model list", async ({ page }) => {
     await setFail(FAIL_MOCK_PORT, "html-models");
     await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}/v1`);
-    await expect(page.getByText(/not a model list/)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole("alert").filter({ hasText: /not a model list/ })).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test("models html 200 on a root base url suggests the working /v1", async ({ page }) => {
     await setFail(FAIL_MOCK_PORT, "html-root");
     await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}`);
-    await expect(page.getByText(/no model list at this base URL/)).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByText(`http://localhost:${FAIL_MOCK_PORT}/v1`).first()).toBeVisible();
+    const alert = page.getByRole("alert").filter({ hasText: /no model list at this base URL/ });
+    await expect(alert).toBeVisible({ timeout: 5_000 });
+    await expect(alert).toContainText(`http://localhost:${FAIL_MOCK_PORT}/v1`);
   });
 
   test("llm test surfaces an in-band sse error", async ({ page }) => {
@@ -322,9 +331,8 @@ test.describe("browser-direct fallback (no di server)", () => {
     const fixture = JSON.parse(
       readFileSync(`${repoRoot()}packages/evals/fixtures/default.json`, "utf8"),
     ) as { models: string[] };
-    await expect
-      .poll(() => page.locator("#llm-models option").count(), { timeout: 5_000 })
-      .toBe(fixture.models.length);
+    await modelInput(page).focus();
+    await expect(modelOptions(page)).toHaveCount(fixture.models.length, { timeout: 5_000 });
     expect(errors.filter((e) => /blocked by CORS/i.test(e))).toEqual([]);
   });
 });

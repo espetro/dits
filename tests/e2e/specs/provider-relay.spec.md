@@ -15,13 +15,13 @@ is spawned by the spec on `MOCK_NOCORS_PORT` (default 9100).
 
 Open settings (voice pane), pick the "cloud endpoint" llm layer, set Base URL
 to the no-CORS mock, leave the API key empty (keyless gateways like bifrost
-are a first-class case). The Model ID datalist fills with the mock's fixture
+are a first-class case). The Model ID combobox list fills with the mock's fixture
 model ids; the mock recorded the `/v1/models` hit; zero `blocked by CORS`
 console errors.
 
 ## dropdown populates via relay with key, no-CORS upstream
 
-Same as above with an API key set. The datalist fills and the mock's recorded
+Same as above with an API key set. The combobox list fills and the mock's recorded
 `/v1/models` request carries the `authorization` header (the relay allowlist
 forwards it).
 
