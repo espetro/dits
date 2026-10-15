@@ -3,9 +3,10 @@ import { Hono } from "hono";
 import type { Config } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
-import type { TtsTestPort } from "./routes";
+import type { SttTestPort, TtsTestPort } from "./routes";
 import { sttProviderOf, ttsProviderOf } from "../voice/providers";
 import { createTtsFromConfig } from "../voice/tts";
+import { createSttFromConfig } from "../voice/stt";
 import { createLlmFromConfig } from "../voice/llm";
 import { embeddingsClientFromConfig } from "../rag/ingest";
 import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
@@ -18,12 +19,16 @@ export interface AppDeps {
   /** Embedded web UI assets; omitted in dev when apps/web/ is served separately. */
   webAssets?: { root: string; path: string };
   /** Test injection for the voice WS loop (stub STT/TTS/LLM). */
-  voiceDeps?: Pick<VoiceDeps, "loopFactory"> & { ttsTest?: () => TtsTestPort };
+  voiceDeps?: Pick<VoiceDeps, "loopFactory"> & {
+    ttsTest?: () => TtsTestPort;
+    sttTest?: () => SttTestPort;
+  };
 }
 
 export async function createApp(deps: AppDeps): Promise<Hono> {
   const app = new Hono();
   let ttsTest: TtsTestPort | undefined;
+  let sttTest: SttTestPort | undefined;
 
   // Dev CORS: when the SPA runs under a vite dev server (different origin
   // from this API), the health probe and driver fetches are cross-origin.
@@ -58,6 +63,7 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
         },
         dataDir: deps.config.files.data_dir,
         tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= createTtsFromConfig(deps.config))),
+        stt: deps.voiceDeps?.sttTest ?? (() => (sttTest ??= createSttFromConfig(deps.config).stt)),
       },
       reportLlm: createLlmFromConfig(deps.config.llm),
     }),

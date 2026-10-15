@@ -4,6 +4,7 @@ import { apiRoutes } from "./routes";
 import { serveApp } from "./app";
 import type { Config } from "@di/shared";
 import { createDatabase, migrate } from "../store/db";
+import { encodeWav } from "../voice/stt";
 
 const servers: ReturnType<typeof Bun.serve>[] = [];
 
@@ -577,5 +578,84 @@ describe("POST /voice/tts-test", () => {
     const res = await post(boom, { text: "hi" });
     expect(res.status).toBe(502);
     expect(((await res.json()) as { error: string }).error).toBe("model missing");
+  });
+});
+
+describe("POST /voice/stt-test", () => {
+  async function makeSttApp(
+    stt?: () => { transcribePcm(pcm: Uint8Array): Promise<string> },
+    provider: "remote" | "builtin" = "remote",
+  ) {
+    const db = createDatabase(":memory:");
+    migrate(db);
+    const app = new Hono();
+    app.route(
+      "/v1",
+      apiRoutes(db, {
+        testMode: false,
+        voiceModels: {
+          providers: { stt: provider, tts: "remote" },
+          dataDir: "/tmp/di-stt-test-unused",
+          stt,
+        },
+      }),
+    );
+    return app;
+  }
+  const wavOf = (samples: number, rate: number) =>
+    new Uint8Array(encodeWav([new Uint8Array(samples * 2)], { sampleRate: rate, channels: 1 }));
+  const post = (app: Hono, body: Uint8Array, type = "audio/wav") =>
+    app.request("/v1/voice/stt-test", {
+      method: "POST",
+      headers: { "content-type": type },
+      body: body as unknown as BodyInit,
+    });
+
+  it("transcribes a wav body (resampled to 16k) and returns text with timing", async () => {
+    let got = 0;
+    const app = await makeSttApp(() => ({
+      transcribePcm: async (pcm) => {
+        got = pcm.byteLength;
+        return " hello there ";
+      },
+    }));
+    const res = await post(app, wavOf(48_000, 48_000));
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { text: string; ms: number };
+    expect(json.text).toBe("hello there");
+    expect(json.ms).toBeGreaterThanOrEqual(0);
+    expect(got).toBe(16_000 * 2);
+  });
+
+  it("accepts raw pcm16le as audio/L16 without touching it", async () => {
+    let got = 0;
+    const app = await makeSttApp(() => ({
+      transcribePcm: async (pcm) => {
+        got = pcm.byteLength;
+        return "raw";
+      },
+    }));
+    const res = await post(app, new Uint8Array(3200), "audio/L16; rate=16000");
+    expect(res.status).toBe(200);
+    expect(got).toBe(3200);
+  });
+
+  it("rejects empty and non-wav bodies, reports adapter failures and a missing model", async () => {
+    const app = await makeSttApp(() => ({
+      transcribePcm: async () => {
+        throw new Error("upstream 401");
+      },
+    }));
+    expect((await post(app, new Uint8Array(0))).status).toBe(400);
+    const bad = await post(app, new Uint8Array(100));
+    expect(bad.status).toBe(400);
+    expect(((await bad.json()) as { code: string }).code).toBe("stt_bad_audio");
+    const boom = await post(app, wavOf(1600, 16_000));
+    expect(boom.status).toBe(502);
+    expect(await boom.json()).toEqual({ error: "upstream 401", code: "stt_failed" });
+    const builtin = await makeSttApp(() => ({ transcribePcm: async () => "x" }), "builtin");
+    const missing = await post(builtin, wavOf(1600, 16_000));
+    expect(missing.status).toBe(409);
+    expect(((await missing.json()) as { code: string }).code).toBe("stt_model_missing");
   });
 });

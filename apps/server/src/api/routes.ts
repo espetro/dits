@@ -30,7 +30,7 @@ import {
   loadVectors,
 } from "../rag/ingest";
 import { retrieve } from "../rag/embeddings";
-import { encodeWav } from "../voice/stt";
+import { decodeWav, encodeWav, resamplePcm16 } from "../voice/stt";
 import {
   builtinModelsStatus,
   builtinPullProgress,
@@ -43,6 +43,15 @@ import {
 export interface TtsTestPort {
   synthesizeToPcm(text: string, opts?: { signal?: AbortSignal }): Promise<Uint8Array>;
 }
+
+/** The slice of a stt adapter the test route needs: pcm16le mono 16k in, text out. */
+export interface SttTestPort {
+  transcribePcm(pcm: Uint8Array, opts?: { signal?: AbortSignal }): Promise<string>;
+}
+
+const STT_TEST_RATE = 16_000;
+/** ~30s of 16k pcm16 mono; the settings test records ~6s. */
+const STT_TEST_MAX_BYTES = STT_TEST_RATE * 2 * 30;
 
 const TTS_TEST_RATE = 24_000;
 const TTS_TEST_MAX_CHARS = 280;
@@ -132,6 +141,8 @@ export function apiRoutes(
       dataDir: string;
       /** lazily builds the configured tts adapter (cached by the caller) for POST /voice/tts-test. */
       tts?: () => TtsTestPort;
+      /** lazily builds the configured stt adapter (cached by the caller) for POST /voice/stt-test. */
+      stt?: () => SttTestPort;
     };
     /** log file truncated by DELETE /data; empty/undefined = logging disabled. */
     logPath?: string;
@@ -567,6 +578,54 @@ export function apiRoutes(
       } catch (err) {
         return c.json(
           { error: err instanceof Error ? err.message : String(err), code: "tts_failed" },
+          502,
+        );
+      }
+    });
+
+    // desktop stt test: transcribes a captured sample through the configured
+    // server layer (builtin sherpa or remote whisper). Body is a wav, or raw
+    // pcm16le mono 16k with content-type audio/L16.
+    api.post("/voice/stt-test", async (c) => {
+      if (!voiceModels.stt)
+        return c.json({ error: "stt test unavailable", code: "stt_test_off" }, 503);
+      const raw = new Uint8Array(await c.req.arrayBuffer().catch(() => new ArrayBuffer(0)));
+      if (raw.byteLength === 0)
+        return c.json({ error: "audio required", code: "stt_bad_audio" }, 400);
+      const type = (c.req.header("content-type") ?? "").toLowerCase();
+      let pcm: Uint8Array;
+      if (type.startsWith("audio/l16")) {
+        pcm = raw;
+      } else {
+        try {
+          const wav = decodeWav(raw);
+          if (wav.bitsPerSample !== 16 || wav.channels !== 1)
+            return c.json({ error: "wav must be 16-bit mono", code: "stt_bad_audio" }, 400);
+          pcm = resamplePcm16(wav.data, wav.sampleRate, STT_TEST_RATE);
+        } catch (err) {
+          return c.json(
+            { error: err instanceof Error ? err.message : String(err), code: "stt_bad_audio" },
+            400,
+          );
+        }
+      }
+      if (pcm.byteLength > STT_TEST_MAX_BYTES)
+        return c.json({ error: "audio too long", code: "stt_bad_audio" }, 413);
+      // never trigger a multi-hundred-MB model pull from a test click
+      if (voiceModels.providers.stt === "builtin") {
+        const models = await builtinModelsStatus(voiceModels.dataDir);
+        if (!models.stt.installed)
+          return c.json({ error: "stt model not downloaded yet", code: "stt_model_missing" }, 409);
+      }
+      const startedAt = performance.now();
+      try {
+        const text = (
+          await voiceModels.stt().transcribePcm(pcm, { signal: c.req.raw.signal })
+        ).trim();
+        return c.json({ text, ms: Math.round(performance.now() - startedAt) });
+      } catch (err) {
+        return c.json(
+          { error: err instanceof Error ? err.message : String(err), code: "stt_failed" },
           502,
         );
       }
