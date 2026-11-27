@@ -2,7 +2,7 @@ import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router
 import { useLocale, withLocale } from "../../lib/locale-href";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@nanostores/react";
-import { useSsrStore } from "../../lib/ssr";
+import { useHydrated, useSsrStore } from "../../lib/ssr";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -39,10 +39,9 @@ import { ToolDock } from "../../components/tool-dock";
 import { ControlBar } from "../../components/control-bar";
 import { TranscriptPane, turnTag } from "../../components/transcript-pane";
 import { codeMessage } from "../../lib/errors";
-import { $voiceModelsConsent, requestVoiceConsent } from "../../stores/voice";
-import { wasmVoiceSupported } from "../../lib/voice/models";
 import { dockSpecs } from "../../lib/tools/registry";
 import { DEFAULT_SESSION_TOOLS } from "@di/shared";
+import { SSR_SERVER_DRIVEN } from "../../lib/public-site";
 import {
   $codeBuffer,
   $editorBuffer,
@@ -89,12 +88,19 @@ const ACTIVE_STATUSES = new Set(["created", "interviewing"]);
 
 function Interview() {
   const { id } = Route.useParams();
-  const serverDriven = useSsrStore($serverDriven, true);
+  const hydrated = useHydrated();
+  const serverDriven = useSsrStore($serverDriven, SSR_SERVER_DRIVEN);
   const clientOnly = !serverDriven;
   const { data: session } = useQuery({
     queryKey: ["session", id, serverDriven],
     queryFn: () => (clientOnly ? getClientSession(id) : getSession(id)),
+    enabled: hydrated,
   });
+
+  // Persisted runtime state is only truthful after hydration. Defer the live
+  // mount until then: otherwise the SSR server default can boot a server
+  // driver (or fire server queries) on a static client-only page.
+  if (!hydrated) return <div className="ambient grain h-[100dvh] bg-cream" />;
 
   // Ended-session re-entry: a finished/reported/discarded session renders a
   // read-only summary instead of booting a dead voice socket (p3-25).
@@ -201,14 +207,6 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
       $clientTurns.set([...persisted, ...$clientTurns.get()]);
     });
   }, [id, clientOnly]);
-  // point-of-need consent: the first browser-mode interview arms the voice
-  // download prompt (unset only — a decline is not re-asked on entry)
-  useEffect(() => {
-    if (clientOnly && $voiceModelsConsent.get() === "" && wasmVoiceSupported()) {
-      requestVoiceConsent();
-    }
-  }, [clientOnly]);
-
   const muted = useStore($muted);
   const [confirmEndOpen, setConfirmEndOpen] = useState(false);
   const [showSlowHint, setShowSlowHint] = useState(false);

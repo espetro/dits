@@ -440,6 +440,41 @@ describe("BrowserVoiceDriver phantom final gating", () => {
   });
 });
 
+describe("BrowserVoiceDriver typed-first fallback", () => {
+  it("connects for typed turns when SpeechRecognition is unsupported", async () => {
+    vi.stubGlobal("SpeechRecognition", undefined);
+    vi.stubGlobal("webkitSpeechRecognition", undefined);
+    try {
+      const driver = new BrowserVoiceDriver("s1", {
+        player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      });
+      driver.onError = vi.fn();
+      await driver.useClientAgent(
+        { llm: LLM },
+        {
+          update_question: async () => "ok",
+          read_editor: async () => "",
+          read_whiteboard: async () => "",
+        },
+        { editor: "", whiteboard: "" },
+        () => ({ mode: "interview" }),
+      );
+      const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+      agent.respond = vi.fn(async () => "typed reply") as unknown as (
+        ...args: any[]
+      ) => Promise<string>;
+
+      await driver.start();
+      expect(driver.status).toBe("connected");
+      driver.sendText("typed hello");
+      await vi.waitFor(() => expect(agent.respond).toHaveBeenCalled());
+      await driver.stop();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe("BrowserVoiceDriver recognition errors", () => {
   async function setupDriver() {
     const rec = fakeRecognitionCtor();

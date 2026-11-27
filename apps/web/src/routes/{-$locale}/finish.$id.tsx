@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { getSession, getTurns, updateSessionStatus } from "../../lib/api";
 import type { TurnDto } from "../../lib/api";
 import { $serverDriven } from "../../lib/runtime";
+import { SSR_SERVER_DRIVEN } from "../../lib/public-site";
 import { ensureReport } from "../../lib/report";
 import { getClientSession, getClientTurns, setClientSessionStatus } from "../../lib/opfs-store";
 import { openSettings } from "../../components/settings-nav";
@@ -44,27 +45,27 @@ function Finish() {
   const locale = useLocale();
   const navigate = useNavigate();
   const hydrated = useHydrated();
-  const serverDriven = useSsrStore($serverDriven, true);
+  const serverDriven = useSsrStore($serverDriven, SSR_SERVER_DRIVEN);
   const clientOnly = !serverDriven;
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
     queryFn: () => getSession(id),
-    enabled: !clientOnly,
+    enabled: hydrated && !clientOnly,
   });
   const { data: serverTurns } = useQuery({
     queryKey: ["turns", id],
     queryFn: () => getTurns(id),
-    enabled: !clientOnly,
+    enabled: hydrated && !clientOnly,
   });
   const { data: clientSession } = useQuery({
     queryKey: ["client-session", id],
     queryFn: () => getClientSession(id),
-    enabled: clientOnly,
+    enabled: hydrated && clientOnly,
   });
   const { data: clientTurns } = useQuery({
     queryKey: ["client-turns", id],
     queryFn: () => getClientTurns(id),
-    enabled: clientOnly,
+    enabled: hydrated && clientOnly,
   });
   const session = clientOnly ? clientSession : serverSession;
   const turns = clientOnly ? clientTurns : serverTurns;

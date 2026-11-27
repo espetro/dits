@@ -3,7 +3,7 @@ import { useLocaleNav, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useStore } from "@nanostores/react";
-import { useSsrStore } from "../../lib/ssr";
+import { useHydrated, useSsrStore } from "../../lib/ssr";
 import { useQuery } from "@tanstack/react-query";
 import { $draft, $interviewLanguage } from "../../stores/session";
 import { $micDeviceId } from "../../stores/devices";
@@ -29,6 +29,7 @@ import { Alert, AlertDescription } from "../../components/vendor/alert";
 import {
   $providerProfile,
   $serverDriven,
+  defaultProviderProfile,
   $serverReachable,
   ensureRuntimeProbe,
   probeServer,
@@ -43,6 +44,7 @@ import type { Scenario } from "../../components/scenario-card";
 import { intlFor } from "../../locales/i18n";
 import { errorDetail } from "../../lib/errors";
 import { DEFAULT_SESSION_TOOLS, DOCUMENT_CAPS } from "@di/shared";
+import { SSR_SERVER_DRIVEN } from "../../lib/public-site";
 
 // Pre-upload mirror of the server-enforced caps (rag/ingest.ts); the
 // operator can raise the server side via documents.max_* config keys.
@@ -104,16 +106,20 @@ function Setup() {
     scenario?.promptKey ? intl.formatMessage({ id: scenario.promptKey }) : "";
   const draft = useStore($draft);
   const micDeviceId = useSsrStore($micDeviceId, "");
-  const serverDriven = useSsrStore($serverDriven, true);
+  const hydrated = useHydrated();
+  const serverDriven = useSsrStore($serverDriven, SSR_SERVER_DRIVEN);
   const clientOnly = !serverDriven;
-  const profile = useSsrStore($providerProfile, null);
+  const profile = useSsrStore($providerProfile, defaultProviderProfile());
   // coach unlock gate (p1): available once any session reached `reported`.
+  // Wait for hydration: before it clientOnly still reflects the SSR default,
+  // and a static client-only load must never fire the server list call.
   const { data: hasReport } = useQuery({
     queryKey: ["has-report", serverDriven],
     queryFn: async () =>
       (clientOnly ? await listClientSessions() : await listSessions()).some(
         (s) => s.status === "reported",
       ),
+    enabled: hydrated,
   });
   React.useEffect(() => {
     ensureRuntimeProbe();
@@ -166,7 +172,12 @@ function Setup() {
   async function start(validate: boolean, scenario?: Scenario) {
     // guard tied to the runtime FSM: custom/in-browser sessions run the
     // agent loop client-side, which is impossible without an LLM endpoint
-    if (clientOnly && !profile?.llm) {
+    // Read the atoms inside the submit path too: useSsrStore deliberately
+    // masks persisted values until hydration, while a fast first click must
+    // already follow the real static/client-only runtime.
+    const runtimeClientOnly = !$serverDriven.get();
+    const runtimeProfile = $providerProfile.get();
+    if (runtimeClientOnly && !runtimeProfile?.llm) {
       toast.error(intl.formatMessage({ id: "setup.needsProviderToast" }), {
         description: intl.formatMessage({ id: "setup.needsProvider" }),
       });
@@ -188,7 +199,7 @@ function Setup() {
         (scenario && scenario.id !== "custom"
           ? intl.formatMessage({ id: `setup.preset.${scenario.id}` })
           : draft.title) || intl.formatMessage({ id: "setup.defaultTitle" });
-      if (clientOnly) {
+      if (runtimeClientOnly) {
         resetClientSession();
         const session = await createClientSession({
           title,

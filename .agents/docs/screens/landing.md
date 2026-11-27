@@ -24,6 +24,7 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
 |              pushes back. then get the receipts.                 |
 |                                                                  |
 |                    (  grill me  (o->)  )   (=> /setup)           |
+|                       download the app  (public only)             |
 |                                                                  |
 |   +----------------------------------------------------------+   |
 |   | di.  system design · mid-level            07:41 / 20:00  |   |
@@ -48,19 +49,20 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
   matches (`useMatch("/{-$locale}/")`), so no top nav renders on the landing.
   Instead a fixed `LocaleSwitcher` pill sits at `bottom-6 end-6` (inline-end,
   so `/ar` mirrors it to bottom-left), level with the peek's bottom edge.
-- CTA **"grill me"** is a persimmon pill with a circular arrow-dot affordance.
-  On the di-served build it navigates to `/setup` (locale-prefixed). On the
-  public-site build (`VITE_PUBLIC_SITE=1`) it opens the install dialog
-  (`InstallDialog`, vendored `Dialog`) instead: option 1 **download the app**
+- CTA **"grill me"** is a persimmon pill with a circular arrow-dot affordance
+  and is always the primary path to `/setup` (locale-prefixed), on both the
+  di-served and public static builds. On the public-site build
+  (`VITE_PUBLIC_SITE=1`) a secondary **download the app** link under the CTA
+  opens the install dialog (`InstallDialog`, vendored `Dialog`): option 1
   links to the latest GitHub release, option 2 shows the
   `MISE_MINIMUM_RELEASE_AGE=0 mise exec github:espetro/dits -- di` command
   (unpinned — env var skips mise's 24h release-age gate so latest always
-  resolves) with a copy button, a
-  `Separator` divides those two from option 3 **run the web demo** — a link
-  to `/setup` carrying an "experimental" badge. The dialog never mounts on
+  resolves) with a copy button. The dialog and secondary link never mount on
   the di-served/desktop build. `VITE_PUBLIC_SITE` defaults to `1` when
   `CF_PAGES=1` (the Cloudflare Pages git-integration build env); an explicit
-  `VITE_PUBLIC_SITE` always wins.
+  `VITE_PUBLIC_SITE` always wins. The `di.public-site` localStorage override
+  marks the same bundle as public at runtime so the static e2e harness can
+  exercise the public path without a second build.
 - The `peek` card is a presentational miniature of the interview screen
   (`role="img"` + localized `landing.peek.aria` label; every inner string is a
   `landing.peek.*` i18n key): 40px callbar (di. logo + scenario + tabular-nums
@@ -91,4 +93,5 @@ Pixel-faithful target: `.agents/mockups/landing-peek.html` (+ the
 ## Notes
 
 - Warm cream bg + orange accents (Variant B tokens from `theme.css`).
-- Screen state is fully static; no URL params, no store reads.
+- No URL params. The only persisted read is the public-site runtime override
+  (`di.public-site`), and only after hydration.

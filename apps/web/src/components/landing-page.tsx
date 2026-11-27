@@ -4,11 +4,12 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { InstallDialog } from "./install-dialog";
+import { Button } from "./vendor/button";
 import { Reveal } from "./reveal";
 import { LocaleSwitcher } from "./locale-switcher";
 import { useLocale, withLocale } from "../lib/locale-href";
-
-const IS_PUBLIC_SITE = import.meta.env.VITE_PUBLIC_SITE === "1";
+import { isPublicSite } from "../lib/public-site";
+import { useHydrated } from "../lib/ssr";
 
 const WAVE_BARS = [11, 18, 13, 20, 9, 16, 19, 11];
 
@@ -49,6 +50,7 @@ export function LandingPage() {
   const locale = useLocale();
   const intl = useIntl();
   const [installOpen, setInstallOpen] = useState(false);
+  const publicSite = useHydrated() && isPublicSite();
   const cta = (
     <>
       <FormattedMessage id="landing.cta" />
@@ -86,18 +88,24 @@ export function LandingPage() {
         </Reveal>
 
         <Reveal delay={360}>
-          {IS_PUBLIC_SITE ? (
-            <button type="button" onClick={() => setInstallOpen(true)} className={ctaClass}>
-              {cta}
-            </button>
-          ) : (
+          <div className="flex flex-col items-center gap-1">
             <Link to={withLocale(locale, "/setup")} className={ctaClass}>
               {cta}
             </Link>
-          )}
+            {publicSite ? (
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => setInstallOpen(true)}
+                className="h-auto min-h-11 px-3 text-sm text-espresso-soft decoration-hairline underline-offset-4 hover:text-persimmon"
+              >
+                <FormattedMessage id="landing.install.download" />
+              </Button>
+            ) : null}
+          </div>
         </Reveal>
 
-        {IS_PUBLIC_SITE ? <InstallDialog open={installOpen} onOpenChange={setInstallOpen} /> : null}
+        {publicSite ? <InstallDialog open={installOpen} onOpenChange={setInstallOpen} /> : null}
 
         <Reveal delay={480} className="mt-14 w-full flex justify-center">
           <div

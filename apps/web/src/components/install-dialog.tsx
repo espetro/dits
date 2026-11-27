@@ -2,8 +2,6 @@ import { Check, Copy, Download } from "lucide-react";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
-import { Link } from "@tanstack/react-router";
-import { Badge } from "./vendor/badge";
 import { Button } from "./vendor/button";
 import {
   Dialog,
@@ -12,8 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./vendor/dialog";
-import { Separator } from "./vendor/separator";
-import { useLocale, withLocale } from "../lib/locale-href";
 
 const RELEASES_URL = "https://github.com/espetro/dits/releases/latest";
 // unpinned so users always get latest; MISE_MINIMUM_RELEASE_AGE=0 bypasses
@@ -26,13 +22,12 @@ interface InstallDialogProps {
 }
 
 /**
- * Public-site install chooser shown behind the landing CTA. Options 1-2 are the
- * durable installs (desktop app, mise); a separator visually demotes option 3,
- * the experimental in-browser demo. Only rendered on the IS_PUBLIC_SITE build —
- * the di-served SPA navigates straight to /setup and never mounts this.
+ * Public-site install chooser behind the secondary landing link. The primary
+ * landing path is the in-browser demo itself; this dialog only carries the
+ * durable installs (desktop app, mise). Only rendered on the public-site
+ * build — the di-served SPA goes straight to /setup and never mounts this.
  */
 export function InstallDialog({ open, onOpenChange }: InstallDialogProps) {
-  const locale = useLocale();
   const [copied, setCopied] = useState(false);
 
   const copyCommand = async () => {
@@ -100,20 +95,6 @@ export function InstallDialog({ open, onOpenChange }: InstallDialogProps) {
             </div>
           </div>
         </div>
-
-        <Separator className="my-1" />
-
-        <Button variant="outline" asChild className="w-full gap-2">
-          <Link to={withLocale(locale, "/setup")} onClick={() => onOpenChange(false)}>
-            <FormattedMessage id="landing.install.demo" />
-            <Badge variant="secondary" className="text-[10px] uppercase">
-              <FormattedMessage id="landing.install.experimental" />
-            </Badge>
-          </Link>
-        </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          <FormattedMessage id="landing.install.demoHint" />
-        </p>
       </DialogContent>
     </Dialog>
   );

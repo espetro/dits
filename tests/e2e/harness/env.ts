@@ -17,6 +17,8 @@ export const PORTS = {
 export const DI_URL = process.env.DI_URL ?? `http://localhost:${PORTS.server}`;
 /** the SPA origin; the same server in the built-SPA harness */
 export const WEB_URL = process.env.DI_WEB_URL ?? DI_URL;
+/** static no-server copy of the built SPA (public-site fallback harness) */
+export const STATIC_URL = process.env.RELAY_FALLBACK_URL ?? `http://localhost:${PORTS.static}`;
 
 export const MOCK_PORTS = {
   cors: Number(process.env.MOCK_CORS_PORT ?? PORTS.cors),

@@ -51,30 +51,40 @@ export function settingsPage(page: Page) {
   };
 }
 
+/** The start button only works after React hydrates and seeded localStorage
+ * makes the first client render differ from SSR, so an early click can be
+ * dropped: keep clicking until the SPA navigates. Returns the session id. */
+async function clickStartUntilInterview(page: Page): Promise<string> {
+  await expect
+    .poll(
+      async () => {
+        if (!/\/interview\//.test(page.url())) {
+          await page.getByRole("button", { name: "start", exact: true }).first().click();
+        }
+        return /\/interview\//.test(page.url());
+      },
+      { timeout: 10_000, intervals: [500] },
+    )
+    .toBe(true);
+  const match = /\/interview\/([^/?#]+)/.exec(page.url());
+  if (!match) throw new Error(`unexpected url: ${page.url()}`);
+  return match[1]!;
+}
+
 export function interviewPage(page: Page) {
   return {
-    /**
-     * Start from /setup. The start button only works after React hydrates and
-     * seeded localStorage makes the first client render differ from SSR, so an
-     * early click can be dropped: keep clicking until the SPA navigates.
-     * Returns the session id.
-     */
-    async start(): Promise<string> {
-      await page.goto("/setup");
-      await expect
-        .poll(
-          async () => {
-            if (!/\/interview\//.test(page.url())) {
-              await page.getByRole("button", { name: "start", exact: true }).first().click();
-            }
-            return /\/interview\//.test(page.url());
-          },
-          { timeout: 10_000, intervals: [500] },
-        )
-        .toBe(true);
-      const match = /\/interview\/([^/?#]+)/.exec(page.url());
-      if (!match) throw new Error(`unexpected url: ${page.url()}`);
-      return match[1]!;
+    /** Start from /setup; `base` targets another origin (e.g. the static copy). */
+    async start(base = ""): Promise<string> {
+      await page.goto(`${base}/setup`);
+      return clickStartUntilInterview(page);
+    },
+
+    /** Public golden path: landing CTA -> /setup -> scenario start. */
+    async startFromLanding(base = ""): Promise<string> {
+      await page.goto(`${base}/`);
+      await page.getByRole("link", { name: "grill me" }).click();
+      await expect(page).toHaveURL(/\/setup\/?$/);
+      return clickStartUntilInterview(page);
     },
 
     async switchToTyping(): Promise<void> {
@@ -85,6 +95,12 @@ export function interviewPage(page: Page) {
       const input = page.getByPlaceholder("talk or type…");
       await input.fill(text);
       await input.press("Enter");
+    },
+
+    /** end through the in-call confirm, landing on /finish/[id] */
+    async endEarly(): Promise<void> {
+      await page.getByRole("button", { name: "end interview" }).first().click();
+      await page.getByRole("button", { name: "end early" }).click();
     },
 
     /** type one turn from the composer */

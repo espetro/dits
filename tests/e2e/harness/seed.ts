@@ -21,6 +21,7 @@ export const KEYS = {
   modelsInstalled: "di.voice.modelsInstalled",
   modelsBase: "di.voice.models-base",
   serverReachable: "di.server-reachable",
+  publicSite: "di.public-site",
 } as const;
 
 export interface Seed {
@@ -87,6 +88,9 @@ export const wasmReady = (base: string): Seed => ({
     [KEYS.modelsInstalled]: JSON.stringify({ stt: true, tts: true }),
   },
 });
+
+/** runtime override marking the static no-server bundle as the public site */
+export const publicSite = (): Seed => ({ storage: { [KEYS.publicSite]: "1" } });
 
 /** reachability cache says "no server" */
 export const staleFalse = (): Seed => ({ storage: { [KEYS.serverReachable]: "false" } });

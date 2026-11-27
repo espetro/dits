@@ -209,7 +209,23 @@ export class BrowserVoiceDriver implements SpeechDriver {
       webkitSpeechRecognition?: RecognitionCtor;
     };
     const Ctor = this.deps.recognitionCtor ?? w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Ctor || (!("speechSynthesis" in globalThis) && !this.agent)) {
+    if (!Ctor) {
+      // Typed input is the first-run baseline, so unsupported speech capture
+      // must not dead-end the interview: when a client agent exists, connect
+      // without a recognizer, keep the kickoff armed, and let the composer
+      // drive the same agent-turn path. The error still surfaces as the
+      // progressive-enhancement voice failure state.
+      if (this.agent) {
+        this.status = "connected";
+        this.onError("voice.sttUnsupported");
+        this.armKickoff();
+      } else {
+        this.status = "error";
+        this.onError("voice.sttUnsupported");
+      }
+      return;
+    }
+    if (!("speechSynthesis" in globalThis) && !this.agent) {
       this.status = "error";
       this.onError("voice.sttUnsupported");
       return;
