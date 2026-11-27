@@ -10,6 +10,10 @@ import { createTtsFromConfig } from "../voice/tts";
 import { createSttFromConfig } from "../voice/stt";
 import { createLlmFromConfig } from "../voice/llm";
 import { embeddingsClientFromConfig } from "../rag/ingest";
+import {
+  configWithResolvedProviders,
+  loadEffectiveProviderConfig,
+} from "../config/resolve-provider-settings";
 import { tryUpgradeVoice, voiceWebSocketHandler, VOICE_WS_PATH_RE } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
 import {
@@ -37,9 +41,6 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
   if (exposureError) throw new Error(exposureError);
 
   const app = new Hono();
-  let ttsTest: TtsTestPort | undefined;
-  let sttTest: SttTestPort | undefined;
-
   // Host/Origin validation is the DNS-rebinding boundary. No-Origin and
   // same-origin requests pass without CORS headers; cross-origin browser dev
   // servers pass only when explicitly listed in server.dev_origins.
@@ -75,15 +76,24 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
       documents: deps.config.documents,
       logPath: deps.config.files.log_path,
       voiceModels: {
-        providers: {
-          stt: sttProviderOf(deps.config.stt),
-          tts: ttsProviderOf(deps.config.tts),
-        },
         dataDir: deps.config.files.data_dir,
-        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= createTtsFromConfig(deps.config))),
-        stt: deps.voiceDeps?.sttTest ?? (() => (sttTest ??= createSttFromConfig(deps.config).stt)),
+        resolve: async () => {
+          const providers = await loadEffectiveProviderConfig(deps.db, deps.config);
+          const effective = configWithResolvedProviders(deps.config, providers);
+          return {
+            providers: {
+              stt: sttProviderOf(effective.stt),
+              tts: ttsProviderOf(effective.tts),
+            },
+            tts: deps.voiceDeps?.ttsTest ?? (() => createTtsFromConfig(effective)),
+            stt: deps.voiceDeps?.sttTest ?? (() => createSttFromConfig(effective).stt),
+          };
+        },
       },
-      reportLlm: createLlmFromConfig(deps.config.llm),
+      reportLlmFactory: async () => {
+        const providers = await loadEffectiveProviderConfig(deps.db, deps.config);
+        return createLlmFromConfig(providers.llm);
+      },
     }),
   );
 

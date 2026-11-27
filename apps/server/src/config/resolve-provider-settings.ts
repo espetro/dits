@@ -1,4 +1,6 @@
 import type { Config, ServerProviderSettings } from "@di/shared";
+import type { Db } from "../store/db";
+import { loadProviderSettingsForResolution } from "../store/provider-settings";
 
 /** Effective provider config consumed by server-hosted voice, checks and report generation. */
 export interface ResolvedProviderConfig {
@@ -46,4 +48,21 @@ function mergeSection<T extends object>(base: T, override: object | undefined): 
     else out[key] = value;
   }
   return out as T;
+}
+
+/** Load raw stored overrides and apply them to the yaml/env base config sections. */
+export async function loadEffectiveProviderConfig(
+  db: Db,
+  base: Config,
+): Promise<ResolvedProviderConfig> {
+  const stored = await loadProviderSettingsForResolution(db);
+  return resolveProviderConfig(base, stored?.settings);
+}
+
+/** Spread resolved sections back into a full Config, preserving files/server/etc. */
+export function configWithResolvedProviders(
+  base: Config,
+  providers: ResolvedProviderConfig,
+): Config {
+  return { ...base, llm: providers.llm, stt: providers.stt, tts: providers.tts };
 }

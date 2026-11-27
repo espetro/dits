@@ -540,9 +540,11 @@ describe("POST /voice/tts-test", () => {
       apiRoutes(db, {
         testMode: false,
         voiceModels: {
-          providers: { stt: "builtin", tts: "builtin" },
           dataDir: "/tmp/di-tts-test-unused",
-          tts,
+          resolve: async () => ({
+            providers: { stt: "builtin", tts: "builtin" },
+            tts,
+          }),
         },
       }),
     );
@@ -594,9 +596,11 @@ describe("POST /voice/stt-test", () => {
       apiRoutes(db, {
         testMode: false,
         voiceModels: {
-          providers: { stt: provider, tts: "remote" },
           dataDir: "/tmp/di-stt-test-unused",
-          stt,
+          resolve: async () => ({
+            providers: { stt: provider, tts: "remote" },
+            stt,
+          }),
         },
       }),
     );
