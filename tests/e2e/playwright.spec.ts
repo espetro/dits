@@ -210,6 +210,32 @@ test.describe("text mode (di server)", () => {
     expect((await again.json()).generated_at).toBe(report.generated_at);
   });
 
+  test("server-hosted browser completes a typed interview and report @smoke", async ({
+    page,
+    request,
+  }) => {
+    const interview = interviewPage(page);
+    const id = await interview.start();
+    // Typing before the ws driver reaches connected falls back to a REST-only
+    // durable write that never reaches the agent. Wait for the live status so
+    // the golden path exercises the real ws turn pipeline.
+    await expect(page.getByText("listening").first()).toBeVisible({ timeout: 10_000 });
+    await interview.say("hello server golden path");
+
+    // The server voice loop consumes the typed turn over WS, calls the mock
+    // llm and persists both sides before the SPA polls/renders them.
+    await expect(page.getByText("Hello! I am the interview agent").first()).toBeVisible();
+    const turns = await (await request.get(`/v1/sessions/${id}/turns`)).json();
+    expect(turns).toContainEqual(
+      expect.objectContaining({ speaker: "user", text: "hello server golden path" }),
+    );
+    expect(turns).toContainEqual(expect.objectContaining({ speaker: "agent" }));
+
+    await page.goto(`/finish/${id}`);
+    await expect(page).toHaveURL(/\/report\//);
+    await expect(page.getByText("distributed systems").first()).toBeVisible();
+  });
+
   test("tool state round-trips through the api", async ({ request }) => {
     const put = await request.put(`/v1/sessions/${sessionId}/tools`, {
       data: { editor: "def solve(): pass", whiteboard: '{"shapeCount":1}' },
