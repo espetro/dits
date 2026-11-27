@@ -288,9 +288,15 @@ export class OpenAiChatClient implements LlmPort {
           }[];
         };
         try {
-          delta = JSON.parse(data).choices?.[0]?.delta ?? {};
-        } catch {
-          return;
+          const parsed = JSON.parse(data) as {
+            choices?: { delta?: typeof delta }[];
+            error?: { message?: string };
+          };
+          if (parsed.error) throw new Error(parsed.error.message ?? "upstream stream error");
+          delta = parsed.choices?.[0]?.delta ?? {};
+        } catch (err) {
+          if (err instanceof SyntaxError) return;
+          throw err;
         }
         if (typeof delta.content === "string" && delta.content !== "") {
           if (firstTokenAt === undefined) {

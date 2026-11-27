@@ -238,6 +238,19 @@ describe("OpenAiChatClient.streamChat", () => {
     expect(firstTokens).toHaveLength(1);
   });
 
+  it("throws the upstream message carried by an in-band SSE error", async () => {
+    const llm = new OpenAiChatClient({
+      baseUrl: "http://fake.local",
+      model: "m",
+      fetchImpl: fetchStub(() =>
+        sseResponse(['data: {"error":{"message":"upstream exploded (mock in-band error)"}}\n\n']),
+      ),
+    });
+    await expect(llm.streamChat([{ role: "user", content: "hi" }])).rejects.toThrow(
+      "upstream exploded (mock in-band error)",
+    );
+  });
+
   it("sends reasoning/thinking suppression flags on the stream body", async () => {
     let captured: Record<string, unknown> | undefined;
     const llm = new OpenAiChatClient({
