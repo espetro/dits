@@ -3,7 +3,7 @@ import { WEB_URL } from "./harness/env";
 import type { BrowserContext, Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { interviewPage } from "./harness/pom";
+import { interviewPage, settingsPage } from "./harness/pom";
 import { KEYS, applySeed, clientOnlyUnconsented, noServer, wasmReady } from "./harness/seed";
 
 // Scenario source of truth lives in specs/e2e-wasm-voice.spec.md.
@@ -214,7 +214,7 @@ async function cachedModelCount(page: Page): Promise<number> {
 }
 
 test.describe("wasm voice (mocked models + workers)", () => {
-  test("consent dialog opens on first browser-mode entry and accept downloads the models", async ({
+  test("consent dialog opens when picking on-device voice and accept downloads the models", async ({
     page,
   }) => {
     const requested: string[] = [];
@@ -225,13 +225,13 @@ test.describe("wasm voice (mocked models + workers)", () => {
       noServer(),
     );
     await routeModelFiles(page, requested);
-    await interviewPage(page).start();
+    await settingsPage(page).open();
+    await settingsPage(page).pickLayer("stt", "on-device wasm");
 
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "better voice, on your device" });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText("better voice, on your device");
 
-    await page.getByRole("button", { name: "download & enable" }).click();
+    await dialog.getByRole("button", { name: "download & enable" }).click();
     await expect(dialog).not.toBeVisible();
 
     // manifest + all four model files fetched and verified into the cache
@@ -259,11 +259,12 @@ test.describe("wasm voice (mocked models + workers)", () => {
       noServer(),
     );
     await routeModelFiles(page, requested);
-    await interviewPage(page).start();
+    await settingsPage(page).open();
+    await settingsPage(page).pickLayer("stt", "on-device wasm");
 
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "better voice, on your device" });
     await expect(dialog).toBeVisible();
-    await page.getByRole("button", { name: "keep built-in" }).click();
+    await dialog.getByRole("button", { name: "keep built-in" }).click();
     await expect(dialog).not.toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem("di.voice.modelsConsent"))).toBe(
       "declined",

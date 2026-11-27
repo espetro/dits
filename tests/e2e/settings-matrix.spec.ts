@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { MOCK_PORTS } from "./harness/env";
 import { settingsPage } from "./harness/pom";
+import { resetServerProviderSettings } from "./harness/server-settings";
 import {
   KEYS,
   applySeed,
@@ -55,6 +56,7 @@ test.describe("settings matrix", () => {
   test.afterEach(async () => {
     await setFail(MOCK_PORTS.mxCors, null);
     await setFail(MOCK_PORTS.mxNoCors, null);
+    await resetServerProviderSettings();
   });
 
   test("S1 fresh visitor, cors-off endpoint: list populates and Test works @smoke", async ({

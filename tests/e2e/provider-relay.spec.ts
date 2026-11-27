@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { DI_URL, MOCK_PORTS } from "./harness/env";
 import { applySeed, staleFalse } from "./harness/seed";
 import { settingsPage } from "./harness/pom";
+import { resetServerProviderSettings } from "./harness/server-settings";
 import { readFileSync } from "node:fs";
 
 // Scenario source of truth lives in specs/provider-relay.spec.md (readable
@@ -53,6 +54,7 @@ async function setFail(port: number, mode: string | null): Promise<void> {
 test.describe("provider relay (no-CORS upstream via di server)", () => {
   test.afterEach(async () => {
     await setFail(FAIL_MOCK_PORT, null);
+    await resetServerProviderSettings();
   });
 
   async function openSettingsLlm(page: Page) {
@@ -140,7 +142,7 @@ test.describe("provider relay (no-CORS upstream via di server)", () => {
     await setFail(FAIL_MOCK_PORT, "401");
     await fillLlm(page, `http://localhost:${FAIL_MOCK_PORT}/v1`);
     await settingsPage(page).testButton("llm").click();
-    await settingsPage(page).expectStatus("llm", /model request failed \(401\)/);
+    await settingsPage(page).expectStatus("llm", /401/);
     await settingsPage(page).expectStatus("llm", /invalid api key \(mock 401\)/);
   });
 

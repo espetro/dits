@@ -31,7 +31,7 @@ a short completion and reports ok; the mock recorded the
 
 ## llm test surfaces upstream http 401 detail
 
-A separate failure-injection mock (`MOCK_FAIL_PORT`, 3103, flipped via `POST /__fail`) answers chat with HTTP 401 and a json error body. The Test button reports `model request failed (401)` with the upstream message `invalid api key (mock 401)`.
+A separate failure-injection mock (`MOCK_FAIL_PORT`, 3103, flipped via `POST /__fail`) answers chat with HTTP 401 and a json error body. The Test button reports the 401 with the upstream message `invalid api key (mock 401)` (browser-relay and server-owned test wording differ slightly).
 
 ## models html 200 shows not a model list
 

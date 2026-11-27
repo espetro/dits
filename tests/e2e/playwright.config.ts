@@ -10,9 +10,10 @@ export default defineConfig({
   testDir: ".",
   testMatch: ["*.spec.ts"],
   timeout: 30_000,
-  // chromium + wasm mocks starve each other at 4 workers: timers like the 5s
-  // interview kickoff then fire before the test acts. CI has 2 vCPUs anyway.
-  workers: 2,
+  // The shared test-mode server has a singleton provider-settings control plane.
+  // Settings specs intentionally mutate it, so browser specs run one worker at a
+  // time and those specs clear the overrides in afterEach.
+  workers: 1,
   reporter: [["list", { printSteps: false }], ["./harness/summary-reporter.ts"]],
   use: {
     baseURL,
