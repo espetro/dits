@@ -142,7 +142,7 @@ function hasValidToken(req: Request, config: Config, allowQueryToken: boolean): 
   if (!expected) return false;
 
   const authorization = req.headers.get("authorization");
-  const bearer = authorization ? /^Bearer[ \t]+(\S+)$/.exec(authorization) : null;
+  const bearer = authorization ? /^Bearer[ \t]+(\S+)$/i.exec(authorization) : null;
   if (bearer && tokenEquals(bearer[1]!, expected)) return true;
 
   if (allowQueryToken) {
