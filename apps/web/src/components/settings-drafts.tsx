@@ -9,6 +9,16 @@ import { isDemoLlm } from "../lib/demo-llm";
 import { errorDetail } from "../lib/errors";
 import { probeModels } from "../lib/llm";
 import { useSsrStore } from "../lib/ssr";
+import {
+  llmDraftFromServer,
+  patchServerProviderSettings,
+  refreshServerProviderSettings,
+  serverPatchFromDraft,
+  serverSectionKeyIsSet,
+  sttDraftFromServer,
+  ttsDraftFromServer,
+  $serverProviderSettings,
+} from "../lib/server-provider-settings";
 
 /**
  * Shared editable state for the settings panes. Each of the three provider
@@ -84,6 +94,8 @@ function draftFromEndpoint(endpoint: ProviderEndpoint | TtsEndpoint | undefined)
 export interface SettingsDrafts {
   drafts: Record<SectionKey, SectionDraft>;
   update(key: SectionKey, patch: Partial<SectionDraft>): void;
+  /** true when the loopback di server owns provider settings. */
+  serverOwned: boolean;
 }
 
 const DraftsContext = React.createContext<SettingsDrafts | null>(null);
@@ -171,6 +183,8 @@ export function sectionIncomplete(key: SectionKey, draft: SectionDraft): boolean
 
 export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
   const profile = useSsrStore($providerProfile, null);
+  const reachable = useSsrStore($serverReachable, null);
+  const serverOwned = reachable === true;
   const [drafts, setDrafts] = React.useState<Record<SectionKey, SectionDraft>>(() => ({
     stt: draftFromEndpoint(profile?.stt),
     tts: draftFromEndpoint(profile?.tts),
@@ -190,8 +204,33 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
       llm: draftFromLlm(profile.llm),
     });
   }, [profile]);
+  // In server-hosted mode the server is the control plane. Load its redacted
+  // settings into the same endpoint drafts; raw keys intentionally stay
+  // server-side, so key fields hydrate blank and blank means "keep stored key".
+  const serverHydrated = React.useRef(false);
+  React.useEffect(() => {
+    if (!serverOwned || serverHydrated.current) return;
+    let cancelled = false;
+    void refreshServerProviderSettings()
+      .then((model) => {
+        if (cancelled || serverHydrated.current) return;
+        serverHydrated.current = true;
+        if (!model) return;
+        setDrafts((prev) => ({
+          stt: { ...prev.stt, ...sttDraftFromServer(model.settings.stt) },
+          tts: { ...prev.tts, ...ttsDraftFromServer(model.settings.tts) },
+          llm: { ...prev.llm, ...llmDraftFromServer(model.settings.llm) },
+        }));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [serverOwned]);
+
   function update(key: SectionKey, patch: Partial<SectionDraft>) {
     hydrated.current = true;
+    if (serverOwned) serverHydrated.current = true;
     setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
   }
 
@@ -199,20 +238,45 @@ export function SettingsDraftsProvider(props: { children: React.ReactNode }) {
   // so there is no Save button to forget. An incomplete llm draft never
   // overwrites the last valid persisted profile (the stale one keeps the
   // session startable while the user is mid-edit).
+  const previousDrafts = React.useRef(drafts);
   React.useEffect(() => {
     const timer = setTimeout(() => {
       const next = buildProfile(drafts);
-      if (!next.llm) return;
-      const parsed = v.safeParse(ProviderSectionsSchema, next);
-      if (parsed.success) $providerProfile.set(parsed.output);
+      if (next.llm) {
+        const parsed = v.safeParse(ProviderSectionsSchema, next);
+        if (parsed.success) $providerProfile.set(parsed.output);
+      }
+      if (serverOwned) {
+        const changed = (Object.keys(drafts) as SectionKey[]).filter(
+          (key) => drafts[key] !== previousDrafts.current[key],
+        );
+        void (async () => {
+          try {
+            let model = $serverProviderSettings.get();
+            if (model === undefined) model = await refreshServerProviderSettings();
+            for (const key of changed) {
+              const patch = serverPatchFromDraft(
+                key,
+                drafts[key],
+                serverSectionKeyIsSet(model, key),
+              );
+              if (patch) model = await patchServerProviderSettings(key, patch);
+            }
+          } catch (err) {
+            console.error("[settings] server provider settings save failed", err);
+          }
+        })();
+      }
+      previousDrafts.current = drafts;
     }, 600);
     return () => clearTimeout(timer);
-  }, [drafts]);
+  }, [drafts, serverOwned]);
   // (per-section test flows live in the section components; the old shared
   // runTest here was dead code since the two-pane settings rework)
   const value: SettingsDrafts = {
     drafts,
     update,
+    serverOwned,
   };
   return <DraftsContext.Provider value={value}>{props.children}</DraftsContext.Provider>;
 }

@@ -3,6 +3,7 @@ import * as v from "valibot";
 import { ServerProviderSettingsSchema, ServerProviderSettingsSectionSchema } from "@di/shared";
 import type { ServerProviderSettings, ServerProviderSettingsSection } from "@di/shared";
 import type { Db } from "../store/db";
+import type { ReportLlm } from "../report/generate";
 import {
   clearProviderSettings,
   clearProviderSettingsSection,
@@ -36,8 +37,39 @@ function mergeSection(
  * section: omitted fields preserve existing stored overrides, `null` applies
  * the contract's explicit clear semantics, and raw api keys are never read back.
  */
-export function providerSettingsRoutes(db: Db): Hono {
+export interface ProviderSettingsRoutesOptions {
+  /** Resolve the effective server-owned llm for the settings test route. */
+  llmTest?: () => Promise<ReportLlm | undefined>;
+}
+
+const LLM_TEST_PROMPT = "Reply with the single word: ok";
+
+export function providerSettingsRoutes(db: Db, opts: ProviderSettingsRoutesOptions = {}): Hono {
   const api = new Hono();
+
+  api.post("/test/llm", async (c) => {
+    if (!opts.llmTest) {
+      return c.json({ error: "llm test unavailable", code: "llm_test_off" }, 503);
+    }
+    const llm = await opts.llmTest();
+    if (!llm) {
+      return c.json({ error: "llm is not configured", code: "llm_unconfigured" }, 503);
+    }
+    const startedAt = performance.now();
+    try {
+      const messages = [{ role: "user" as const, content: LLM_TEST_PROMPT }];
+      const result = llm.streamChat ? await llm.streamChat(messages) : await llm.chat(messages);
+      return c.json({
+        text: result.content,
+        ms: Math.round(performance.now() - startedAt),
+      });
+    } catch (err) {
+      return c.json(
+        { error: err instanceof Error ? err.message : String(err), code: "llm_test_failed" },
+        502,
+      );
+    }
+  });
 
   api.get("/", async (c) => {
     const stored = await loadProviderSettingsReadModel(db);

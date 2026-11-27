@@ -16,6 +16,14 @@ import { LlmTestError, TRANSFORMERS_CATALOG, runLlmTest } from "../lib/llm";
 import type { LlmRoute } from "../lib/llm";
 import { errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
+import {
+  $serverProviderSettings,
+  patchServerProviderSettings,
+  refreshServerProviderSettings,
+  serverPatchFromDraft,
+  serverSectionKeyIsSet,
+  testServerLlm,
+} from "../lib/server-provider-settings";
 
 type LlmPick = "in-browser" | "demo" | "cloud";
 
@@ -37,7 +45,7 @@ interface TestState {
 export function BrainSection() {
   const intl = useIntl();
   const profile = useSsrStore($providerProfile, null);
-  const { drafts, update } = useSettingsDrafts();
+  const { drafts, update, serverOwned } = useSettingsDrafts();
   const draft = drafts.llm;
   const modelOptions = useModelOptions(draft);
 
@@ -87,8 +95,21 @@ export function BrainSection() {
     setTest({ status: "running" });
     setOutput("");
     try {
-      const res = await runLlmTest(draft, setOutput);
-      setTest({ status: "ok", route: res.route, reasoningOnly: res.reasoningOnly });
+      if (serverOwned) {
+        // Autosave is debounced, but a test must exercise the endpoint the
+        // user is looking at. Persist this section synchronously first, then
+        // let the server resolve its stored key and yaml/env defaults.
+        let model = $serverProviderSettings.get();
+        if (model === undefined) model = await refreshServerProviderSettings();
+        const patch = serverPatchFromDraft("llm", draft, serverSectionKeyIsSet(model, "llm"));
+        if (patch) await patchServerProviderSettings("llm", patch);
+        const res = await testServerLlm();
+        setOutput(res.text);
+        setTest({ status: "ok", route: null });
+      } else {
+        const res = await runLlmTest(draft, setOutput);
+        setTest({ status: "ok", route: res.route, reasoningOnly: res.reasoningOnly });
+      }
       markSeamOp("llm", true);
     } catch (err) {
       const route = err instanceof LlmTestError ? err.route : null;

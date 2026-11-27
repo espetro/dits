@@ -4,11 +4,11 @@ import { createDatabase, migrate } from "../store/db";
 import { loadProviderSettingsForResolution } from "../store/provider-settings";
 import { apiRoutes } from "./routes";
 
-async function makeApp() {
+async function makeApp(reportLlmFactory?: () => Promise<never>) {
   const db = createDatabase(":memory:");
   await migrate(db);
   const app = new Hono();
-  app.route("/v1", apiRoutes(db, { testMode: false }));
+  app.route("/v1", apiRoutes(db, { testMode: false, reportLlmFactory }));
   return { app, db };
 }
 
@@ -97,6 +97,34 @@ describe("/v1/provider-settings", () => {
     expect((await del.json()) as { deleted: boolean }).toEqual({ deleted: true });
     stored = await loadProviderSettingsForResolution(db);
     expect(stored?.settings.tts).toBeUndefined();
+  });
+
+  it("tests the effective llm through the server-side route", async () => {
+    const { app } = await makeApp(
+      async () =>
+        ({
+          chat: async () => ({ content: "ok", toolCalls: [] }),
+        }) as never,
+    );
+    const res = await app.request("/v1/provider-settings/test/llm", { method: "POST" });
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { text: string; ms: number };
+    expect(json.text).toBe("ok");
+    expect(json.ms).toBeGreaterThanOrEqual(0);
+  });
+
+  it("reports llm test failures without hiding them as success", async () => {
+    const { app } = await makeApp(
+      async () =>
+        ({
+          chat: async () => {
+            throw new Error("upstream 401");
+          },
+        }) as never,
+    );
+    const res = await app.request("/v1/provider-settings/test/llm", { method: "POST" });
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as { error: string }).error).toBe("upstream 401");
   });
 
   it("rejects invalid sections, bodies, and field shapes", async () => {

@@ -156,7 +156,7 @@ export function apiRoutes(
 ): Hono {
   const api = new Hono();
 
-  api.route("/provider-settings", providerSettingsRoutes(db));
+  api.route("/provider-settings", providerSettingsRoutes(db, { llmTest: opts.reportLlmFactory }));
 
   api.post("/sessions", vValidator("json", CreateSessionRequestSchema), async (c) => {
     const body = c.req.valid("json");
