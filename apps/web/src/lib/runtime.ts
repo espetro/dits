@@ -4,6 +4,8 @@ import { envNum } from "./env";
 import { PROVIDER_PROFILE_STORAGE_KEY, decodeProviderProfile } from "@di/shared";
 import type { ProviderSections } from "@di/shared";
 import { $voiceSttEngine, $voiceTtsEngine } from "../stores/voice";
+import { DEMO_LLM, DEMO_LLM_ENABLED } from "./demo-llm";
+import { isPublicSite } from "./public-site";
 
 /**
  * Deployment reachability: whether the di server hosts this app. The voice
@@ -12,10 +14,24 @@ import { $voiceSttEngine, $voiceTtsEngine } from "../stores/voice";
  * browser driver runs the resolved per-layer engines.
  */
 
+/** Zero-conf llm preselected on the public static build when the deployment carries one. */
+export function defaultProviderProfile(): ProviderSections | null {
+  if (!isPublicSite() || !DEMO_LLM_ENABLED) return null;
+  return {
+    llm: {
+      mode: "remote",
+      baseUrl: DEMO_LLM.baseUrl,
+      apiKey: DEMO_LLM.apiKey,
+      model: DEMO_LLM.model,
+      flavor: "openai",
+    },
+  };
+}
+
 /** null = no BYO provider configured. */
 export const $providerProfile = persistentAtom<ProviderSections | null>(
   PROVIDER_PROFILE_STORAGE_KEY,
-  null,
+  defaultProviderProfile(),
   {
     encode: (value) => JSON.stringify(value),
     decode: (raw) => decodeProviderProfile(raw),
@@ -55,9 +71,30 @@ export async function isHealthResponse(res: Response): Promise<boolean> {
   }
 }
 
-export async function probeServer(): Promise<boolean> {
+let inflightProbe: Promise<boolean> | null = null;
+
+/**
+ * Resolves once the health probe in flight (if any) has settled. Provider
+ * calls await this before choosing relay vs browser-direct, so a call made
+ * while the probe is pending (stale cache, slow server) is not sent
+ * browser-direct to a CORS-walled endpoint. Bounded by the probe timeout.
+ */
+export async function settleServerProbe(): Promise<void> {
+  await inflightProbe;
+}
+
+export function probeServer(): Promise<boolean> {
+  inflightProbe ??= runProbe().finally(() => {
+    inflightProbe = null;
+  });
+  return inflightProbe;
+}
+
+async function runProbe(): Promise<boolean> {
   const pinned = import.meta.env.VITE_VOICE_DEFAULT;
-  if (pinned === "browser") {
+  // The public static deployment is client-only by construction: probing
+  // would itself be a di server API call against the static origin.
+  if (isPublicSite() || pinned === "browser") {
     $serverReachable.set(false);
     return false;
   }
@@ -95,7 +132,7 @@ export function pickWantsServer(pick: string): boolean {
 export const $serverDriven = computed(
   [$voiceSttEngine, $voiceTtsEngine, $serverReachable],
   (stt, tts, reachable): boolean =>
-    pickWantsServer(stt) && pickWantsServer(tts) && reachable !== false,
+    !isPublicSite() && pickWantsServer(stt) && pickWantsServer(tts) && reachable !== false,
 );
 
 /** Kick off the probe once per app; safe to call repeatedly. */

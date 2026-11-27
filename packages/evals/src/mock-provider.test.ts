@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest";
-import { loadFixture, startServer } from "../mock-provider/main";
+import { SLOW_REASONING_DELAY_MS, loadFixture, startServer } from "../mock-provider/main";
 
 const fixture = loadFixture();
 const server = startServer(0, fixture);
@@ -233,4 +233,22 @@ describe("mock provider failure injection", () => {
     expect(state.inflight).toBe(0);
     await setFail(null);
   });
+
+  it("empty-models mode answers a valid empty list", async () => {
+    await setFail("empty-models");
+    const body = (await (await fetch(`${fb}/v1/models`)).json()) as { data: unknown[] };
+    expect(body.data).toEqual([]);
+    await setFail(null);
+  });
+
+  it("slow-reasoning mode delays the first chunk and streams reasoning before content", async () => {
+    await setFail("slow-reasoning");
+    const started = Date.now();
+    const res = await chat(true);
+    const text = await res.text();
+    expect(Date.now() - started).toBeGreaterThanOrEqual(SLOW_REASONING_DELAY_MS - 100);
+    expect(text.indexOf("reasoning_content")).toBeGreaterThan(-1);
+    expect(text.indexOf("reasoning_content")).toBeLessThan(text.indexOf('"content"'));
+    await setFail(null);
+  }, 15_000);
 });

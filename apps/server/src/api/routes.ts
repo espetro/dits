@@ -21,6 +21,7 @@ import { writeFile } from "node:fs/promises";
 import type { ReportLlm } from "../report/generate";
 import { generateReport } from "../report/generate";
 import { testRoutes } from "./test-mode";
+import { providerSettingsRoutes } from "./provider-settings";
 import { deleteAllData, deleteSession } from "../store/reset";
 import {
   CapError,
@@ -133,22 +134,29 @@ export function apiRoutes(
     embeddings?: ReturnType<typeof import("../rag/ingest").embeddingsClientFromConfig>;
     /** LLM port for POST /sessions/:id/report; without it the route is 503. */
     reportLlm?: ReportLlm;
+    /** Dynamic alternative to reportLlm, resolved per request so settings edits apply. */
+    reportLlmFactory?: () => Promise<ReportLlm | undefined>;
     /** config.documents overrides for ingest caps/chunking/retrieval depth. */
     documents?: Config["documents"];
     /** builtin-voice model management (GET/POST/DELETE /voice/models). */
     voiceModels?: {
-      providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
       dataDir: string;
-      /** lazily builds the configured tts adapter (cached by the caller) for POST /voice/tts-test. */
-      tts?: () => TtsTestPort;
-      /** lazily builds the configured stt adapter (cached by the caller) for POST /voice/stt-test. */
-      stt?: () => SttTestPort;
+      /** Resolve effective voice providers per request so settings edits apply. */
+      resolve: () => Promise<{
+        providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
+        /** lazily builds the configured tts adapter for POST /voice/tts-test. */
+        tts?: () => TtsTestPort;
+        /** lazily builds the configured stt adapter for POST /voice/stt-test. */
+        stt?: () => SttTestPort;
+      }>;
     };
     /** log file truncated by DELETE /data; empty/undefined = logging disabled. */
     logPath?: string;
   },
 ): Hono {
   const api = new Hono();
+
+  api.route("/provider-settings", providerSettingsRoutes(db, { llmTest: opts.reportLlmFactory }));
 
   api.post("/sessions", vValidator("json", CreateSessionRequestSchema), async (c) => {
     const body = c.req.valid("json");
@@ -348,7 +356,8 @@ export function apiRoutes(
       .where("session_id", "=", id)
       .executeTakeFirst();
     if (existing) return c.json(JSON.parse(existing.data));
-    if (!opts.reportLlm)
+    const reportLlm = opts.reportLlm ?? (await opts.reportLlmFactory?.());
+    if (!reportLlm)
       return c.json(
         { error: "report generation is not configured", code: "report_unconfigured" },
         503,
@@ -361,7 +370,7 @@ export function apiRoutes(
       .execute();
     let report;
     try {
-      report = await generateReport(opts.reportLlm, {
+      report = await generateReport(reportLlm, {
         sessionId: id,
         title: session.title,
         mode: session.mode,
@@ -535,17 +544,21 @@ export function apiRoutes(
 
   const voiceModels = opts.voiceModels;
   if (voiceModels) {
-    const status = async () => ({
-      providers: voiceModels.providers,
-      models: await builtinModelsStatus(voiceModels.dataDir),
-      dir: builtinModelsDir(voiceModels.dataDir),
-      download: builtinPullProgress(),
-    });
+    const status = async () => {
+      const resolved = await voiceModels.resolve();
+      return {
+        providers: resolved.providers,
+        models: await builtinModelsStatus(voiceModels.dataDir),
+        dir: builtinModelsDir(voiceModels.dataDir),
+        download: builtinPullProgress(),
+      };
+    };
 
     api.get("/voice/models", async (c) => c.json(await status()));
 
     api.post("/voice/models/pull", async (c) => {
-      const ids = (["stt", "tts"] as const).filter((k) => voiceModels.providers[k] === "builtin");
+      const resolved = await voiceModels.resolve();
+      const ids = (["stt", "tts"] as const).filter((k) => resolved.providers[k] === "builtin");
       if (ids.length === 0) return c.json({ error: "no builtin providers" }, 400);
       // idempotent: shares the inflight run with the boot warm / lazy boot
       await ensureBuiltinModels(voiceModels.dataDir, { modelIds: ids });
@@ -556,7 +569,8 @@ export function apiRoutes(
     // layer (builtin kitten or remote endpoint) so the settings Test button
     // measures the same path an interview uses
     api.post("/voice/tts-test", async (c) => {
-      if (!voiceModels.tts)
+      const resolved = await voiceModels.resolve();
+      if (!resolved.tts)
         return c.json({ error: "tts test unavailable", code: "tts_test_off" }, 503);
       const body = (await c.req.json().catch(() => ({}))) as { text?: unknown };
       const text =
@@ -564,7 +578,7 @@ export function apiRoutes(
       if (!text) return c.json({ error: "text required", code: "tts_test_bad_text" }, 400);
       const startedAt = performance.now();
       try {
-        const pcm = await voiceModels.tts().synthesizeToPcm(text, { signal: c.req.raw.signal });
+        const pcm = await resolved.tts().synthesizeToPcm(text, { signal: c.req.raw.signal });
         if (pcm.byteLength === 0)
           return c.json({ error: "tts returned no audio", code: "tts_empty" }, 502);
         const wav = encodeWav([pcm], { sampleRate: TTS_TEST_RATE, channels: 1 });
@@ -587,7 +601,8 @@ export function apiRoutes(
     // server layer (builtin sherpa or remote whisper). Body is a wav, or raw
     // pcm16le mono 16k with content-type audio/L16.
     api.post("/voice/stt-test", async (c) => {
-      if (!voiceModels.stt)
+      const resolved = await voiceModels.resolve();
+      if (!resolved.stt)
         return c.json({ error: "stt test unavailable", code: "stt_test_off" }, 503);
       const raw = new Uint8Array(await c.req.arrayBuffer().catch(() => new ArrayBuffer(0)));
       if (raw.byteLength === 0)
@@ -612,16 +627,14 @@ export function apiRoutes(
       if (pcm.byteLength > STT_TEST_MAX_BYTES)
         return c.json({ error: "audio too long", code: "stt_bad_audio" }, 413);
       // never trigger a multi-hundred-MB model pull from a test click
-      if (voiceModels.providers.stt === "builtin") {
+      if (resolved.providers.stt === "builtin") {
         const models = await builtinModelsStatus(voiceModels.dataDir);
         if (!models.stt.installed)
           return c.json({ error: "stt model not downloaded yet", code: "stt_model_missing" }, 409);
       }
       const startedAt = performance.now();
       try {
-        const text = (
-          await voiceModels.stt().transcribePcm(pcm, { signal: c.req.raw.signal })
-        ).trim();
+        const text = (await resolved.stt().transcribePcm(pcm, { signal: c.req.raw.signal })).trim();
         return c.json({ text, ms: Math.round(performance.now() - startedAt) });
       } catch (err) {
         return c.json(

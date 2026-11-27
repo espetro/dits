@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:e2e": "DI_NO_PRERENDER=1 vite build && bun scripts/render-shell.ts",
     "test": "bunx vitest run",
     "typecheck": "tsc --noEmit --checkers 1"
   },

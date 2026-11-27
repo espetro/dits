@@ -3,7 +3,7 @@ import { Utils } from "electrobun/bun";
 import { startControlServer } from "./control";
 import { appendLog, installConsoleTap } from "./logbuffer";
 import { setupApplicationMenu } from "./menu";
-import { setConfigPath, startServer } from "./server";
+import { serverState, setConfigPath, startServer } from "./server";
 import { dataDir, ensureConfigFile } from "./storage";
 import { createWindow } from "./window";
 
@@ -27,9 +27,24 @@ async function main(): Promise<void> {
     appendLog(`[desktop] autostart failed: ${e instanceof Error ? e.message : String(e)}`);
   });
 
+  const headlessSmoke = process.env.DI_DESKTOP_HEADLESS_SMOKE === "1";
   const { port } = startControlServer({
-    openExternal: (url) => Utils.openExternal(url),
+    openExternal: (url) => {
+      if (headlessSmoke) {
+        appendLog(`[desktop] headless smoke suppressed openExternal ${url}`);
+        return;
+      }
+      Utils.openExternal(url);
+    },
   });
+
+  if (headlessSmoke) {
+    const state = serverState();
+    console.log(
+      `[desktop-smoke] ${JSON.stringify({ controlPort: port, serverPort: state.port, configPath })}`,
+    );
+    return;
+  }
 
   setupApplicationMenu();
   createWindow(`http://localhost:${port}/`);

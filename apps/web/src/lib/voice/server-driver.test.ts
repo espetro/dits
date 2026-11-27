@@ -239,6 +239,7 @@ describe("reconnect loop", () => {
 
   function reconnectHarness() {
     const sockets: TestSocket[] = [];
+    const sent: string[] = [];
     const errs: string[] = [];
     const reconnects: number[] = [];
     const capture = fakeCapture();
@@ -257,7 +258,7 @@ describe("reconnect loop", () => {
         const ws = {
           readyState: 0,
           OPEN: 1,
-          send: () => undefined,
+          send: (data: unknown) => sent.push(String(data)),
           close: () => undefined,
           set onopen(cb: () => void) {
             this.readyState = 1;
@@ -286,7 +287,7 @@ describe("reconnect loop", () => {
     });
     driver.onError = (m) => errs.push(m);
     driver.onReconnecting = (attempt) => reconnects.push(attempt);
-    return { driver, sockets, errs, reconnects };
+    return { driver, sockets, sent, errs, reconnects };
   }
 
   it("reconnects with exp backoff after an unexpected close", async () => {
@@ -305,6 +306,22 @@ describe("reconnect loop", () => {
       await vi.advanceTimersByTimeAsync(0);
       expect(driver.status).toBe("connected");
       expect(reconnects).toEqual([1]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("queues typed text while connecting and flushes it once connected", async () => {
+    vi.useFakeTimers();
+    try {
+      const { driver, sockets, sent } = reconnectHarness();
+      const started = driver.start();
+      await vi.advanceTimersByTimeAsync(0);
+      driver.sendText("typed early");
+      expect(sent).toEqual([]);
+      sockets[0]!.open();
+      await started;
+      expect(sent.map((m) => JSON.parse(m))).toEqual([{ t: "text", text: "typed early" }]);
     } finally {
       vi.useRealTimers();
     }

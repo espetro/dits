@@ -84,9 +84,13 @@
   re-probe.
 - **Custom runtime**: sessions via `createClientSession`, `FILES` section
   inside advanced renders the setup.filesServerOnly hint, and
-  `resetClientSession()` runs before a new session. When no llm profile
-  exists the setup.needsProvider notice with the settings-dialog button
-  still renders above the cards.
+  `resetClientSession()` runs before a new session. The public static runtime
+  is client-only by construction: it never probes the static origin for a di
+  server, and when the build carries the managed demo endpoint that demo llm
+  is the preselected zero-conf profile. When no llm profile exists the
+  setup.needsProvider notice with the settings-dialog button still renders
+  above the cards. Runtime-sensitive session lists wait for hydration so the
+  SSR server default cannot fire a server API call on a static deployment.
 
 ## Responsive
 

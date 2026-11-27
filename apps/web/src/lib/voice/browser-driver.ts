@@ -24,6 +24,11 @@ import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 import { envNum } from "../env";
 
+interface BrowserAgentTurnOptions {
+  /** Synthetic prompts guide the llm but are not user-visible transcript rows. */
+  persistUser?: boolean;
+}
+
 /**
  * Browser driver, multi-mode. Engine resolution (lib/voice/engines.ts) picks
  * per-side: stt = sherpa zipformer worker + silero vad (wasm) or Web Speech
@@ -204,7 +209,23 @@ export class BrowserVoiceDriver implements SpeechDriver {
       webkitSpeechRecognition?: RecognitionCtor;
     };
     const Ctor = this.deps.recognitionCtor ?? w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Ctor || (!("speechSynthesis" in globalThis) && !this.agent)) {
+    if (!Ctor) {
+      // Typed input is the first-run baseline, so unsupported speech capture
+      // must not dead-end the interview: when a client agent exists, connect
+      // without a recognizer, keep the kickoff armed, and let the composer
+      // drive the same agent-turn path. The error still surfaces as the
+      // progressive-enhancement voice failure state.
+      if (this.agent) {
+        this.status = "connected";
+        this.onError("voice.sttUnsupported");
+        this.armKickoff();
+      } else {
+        this.status = "error";
+        this.onError("voice.sttUnsupported");
+      }
+      return;
+    }
+    if (!("speechSynthesis" in globalThis) && !this.agent) {
       this.status = "error";
       this.onError("voice.sttUnsupported");
       return;
@@ -452,7 +473,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       // "error" included: mic denial still fires the opening turn so the
       // user lands in a text-first interview instead of a dead page.
       if (this.status === "idle" || this.status === "connecting" || this.abort) return;
-      void this.runAgentTurn(KICKOFF_UTTERANCE, "text");
+      void this.runAgentTurn(KICKOFF_UTTERANCE, "text", { persistUser: false });
     }, KICKOFF_DELAY_MS);
   }
 
@@ -509,7 +530,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   /** Stream the agent reply through sentence cutting into pipelined TTS. */
-  private async runAgentTurn(text: string, source: Turn["source"]): Promise<void> {
+  private async runAgentTurn(
+    text: string,
+    source: Turn["source"],
+    options: BrowserAgentTurnOptions = {},
+  ): Promise<void> {
     const agent = this.agent;
     const tts = this.deps.tts ?? synthesizeSpeech;
     if (!agent) return;
@@ -536,7 +561,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       created_at: new Date().toISOString(),
       source,
     };
-    this.events.onUserTurn?.(userTurn);
+    if (options.persistUser !== false) this.events.onUserTurn?.(userTurn);
 
     this.pending = "";
     let spoke = false;

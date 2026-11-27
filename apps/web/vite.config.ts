@@ -58,7 +58,10 @@ export default defineConfig({
     },
     tanstackStart({
       // static SPA: prerender all routes, no server runtime needed in the di binary
-      prerender: { enabled: true, crawlLinks: true },
+      // DI_NO_PRERENDER=1 skips it: the crawl boots a preview server on a random
+      // port and intermittently loses it (ECONNREFUSED), which the e2e gate
+      // must not depend on
+      prerender: { enabled: !process.env.DI_NO_PRERENDER, crawlLinks: true },
       // belt-and-suspenders: explicit locale landing pages, in case crawl
       // discovery via LandingLocaleSwitcher links ever misses one.
       pages: [

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useStore } from "@nanostores/react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 
 import { SettingsRow } from "./settings-row";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./vendor/select";
@@ -27,9 +27,11 @@ import { toast } from "sonner";
 import { markSeamOp } from "../lib/seam-health";
 
 interface TestState {
-  status: "idle" | "synth" | "ready";
+  status: "idle" | "synth" | "ready" | "err";
   /** measured synthesis time of the last test, when the layer reports it */
   ms?: number;
+  /** failure detail when status is "err" */
+  message?: string;
 }
 
 /**
@@ -78,6 +80,7 @@ export function VoiceSection() {
   function reportTestError(err: unknown) {
     const msg = errorDetail(intl, err);
     markSeamOp("tts", false, msg);
+    setTest({ status: "err", message: msg });
     toast.error(msg);
   }
 
@@ -118,13 +121,12 @@ export function VoiceSection() {
       setTest({ status: "ready", ms });
       markSeamOp("tts", true);
     } catch (err) {
-      setTest({ status: "idle" });
       reportTestError(err);
     }
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="layer-test-tts">
       <SettingsRow
         title={intl.formatMessage({ id: "settings.layer.tts" })}
         description={intl.formatMessage({ id: "settings.layer.ttsDesc" })}
@@ -231,6 +233,26 @@ export function VoiceSection() {
           )}
         </span>
       </SettingsRow>
+      {test.status === "ready" || test.status === "err" ? (
+        <span
+          role="status"
+          className={
+            "flex items-center gap-1 pb-2 pl-1 text-xs " +
+            (test.status === "ready" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600")
+          }
+        >
+          {test.status === "ready" ? (
+            <Check className="size-3.5" aria-hidden="true" />
+          ) : (
+            <X className="size-3.5" aria-hidden="true" />
+          )}
+          {test.status === "ready" ? (
+            <FormattedMessage id="settings.testOk" />
+          ) : (
+            <FormattedMessage id="settings.testFailed" values={{ message: test.message ?? "" }} />
+          )}
+        </span>
+      ) : null}
     </div>
   );
 }

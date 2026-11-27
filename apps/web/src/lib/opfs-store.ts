@@ -6,9 +6,9 @@ import type { Report } from "@di/shared/report";
 /**
  * Client-only persistence: no di server means no sqlite, so a session's
  * session/turns/report live in one OPFS file each, keyed by session id under
- * `sessions/<id>.json`. Read-modify-write (no concurrent writers per session
- * in this app), mirroring the server's store/db.ts responsibilities without a
- * database.
+ * `sessions/<id>.json`. Read-modify-write operations are serialized per
+ * session (a user turn and the agent's answer can land in the same tick),
+ * mirroring the server's store/db.ts responsibilities without a database.
  */
 
 interface SessionRecord {
@@ -55,6 +55,32 @@ async function writeRecord(id: string, record: SessionRecord): Promise<void> {
   await writable.close();
 }
 
+// OPFS files have no transactional append: without this queue two async turns
+// can both read the pre-write record and the later close() silently drops the
+// first turn. Keep one read-modify-write chain per session id.
+const recordQueues = new Map<string, Promise<void>>();
+
+async function mutateRecord(
+  id: string,
+  mutate: (record: SessionRecord) => void | Promise<void>,
+): Promise<void> {
+  const previous = recordQueues.get(id) ?? Promise.resolve();
+  const next = previous
+    .catch(() => undefined)
+    .then(async () => {
+      const record = await readRecord(id);
+      if (!record) return;
+      await mutate(record);
+      await writeRecord(id, record);
+    });
+  recordQueues.set(id, next);
+  try {
+    await next;
+  } finally {
+    if (recordQueues.get(id) === next) recordQueues.delete(id);
+  }
+}
+
 export async function createClientSession(input: {
   title: string;
   mode: Session["mode"];
@@ -81,10 +107,9 @@ export async function getClientSession(id: string): Promise<Session | undefined>
 }
 
 export async function setClientSessionStatus(id: string, status: Session["status"]): Promise<void> {
-  const record = await readRecord(id);
-  if (!record) return;
-  record.session.status = status;
-  await writeRecord(id, record);
+  await mutateRecord(id, (record) => {
+    record.session.status = status;
+  });
 }
 
 export async function listClientSessions(): Promise<Session[]> {
@@ -121,10 +146,9 @@ export async function getClientTurns(id: string): Promise<Turn[]> {
 }
 
 export async function appendClientTurn(id: string, turn: Turn): Promise<void> {
-  const record = await readRecord(id);
-  if (!record) return;
-  record.turns.push(turn);
-  await writeRecord(id, record);
+  await mutateRecord(id, (record) => {
+    record.turns.push(turn);
+  });
 }
 
 export async function getClientReport(id: string): Promise<Report | undefined> {
@@ -132,10 +156,9 @@ export async function getClientReport(id: string): Promise<Report | undefined> {
 }
 
 export async function saveClientReport(id: string, report: Report): Promise<void> {
-  const record = await readRecord(id);
-  if (!record) return;
-  record.report = report;
-  await writeRecord(id, record);
+  await mutateRecord(id, (record) => {
+    record.report = report;
+  });
 }
 
 interface QueueRecord {

@@ -8,7 +8,7 @@
  * browser-side).
  */
 import { relayUrlPath } from "@di/shared";
-import { $serverReachable, API_BASE } from "./runtime";
+import { $serverReachable, API_BASE, settleServerProbe } from "./runtime";
 import { isDemoLlm } from "./demo-llm";
 
 /** Headers the relay forwards upstream; everything else is dropped. */
@@ -74,9 +74,13 @@ export interface RelayFetch {
 
 /**
  * A fetch implementation for one endpoint: relay when active for its base
- * url, plain browser-direct fetch otherwise. Shared by createLlmModel,
+ * url, plain browser-direct fetch otherwise. Waits for a pending health
+ * probe first so the choice is never made on a stale cache. Shared by createLlmModel,
  * report-generator and the settings probes so the seam is consistent.
  */
 export function relayOrDirectFetch(baseUrl: string): RelayFetch {
-  return (input, init) => (relayActive(baseUrl) ? relayFetch(input, init) : fetch(input, init));
+  return async (input, init) => {
+    await settleServerProbe();
+    return relayActive(baseUrl) ? relayFetch(input, init) : fetch(input, init);
+  };
 }

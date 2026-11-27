@@ -113,6 +113,7 @@ export class ServerVoiceDriver implements SpeechDriver {
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private stopped = false;
+  private pendingText: string[] = [];
 
   constructor(
     private readonly sessionId: string,
@@ -242,6 +243,7 @@ export class ServerVoiceDriver implements SpeechDriver {
     }
     this.status = "connected";
     this.reconnectAttempt = 0;
+    for (const text of this.pendingText.splice(0)) this.sendJson({ t: "text", text });
     this.capture.onLevel?.((rms) => pushMicLevel(rms));
     this.capture.onFrame((pcm16) => {
       this.vad?.processFrame(pcm16);
@@ -288,7 +290,13 @@ export class ServerVoiceDriver implements SpeechDriver {
   }
 
   sendText(text: string): void {
-    this.sendJson({ t: "text", text });
+    // The composer accepts input while the socket/capture pipeline is still
+    // starting or reconnecting; hold those turns instead of dropping them.
+    if (this.ws?.readyState === WebSocket.OPEN && this.status === "connected") {
+      this.sendJson({ t: "text", text });
+    } else {
+      this.pendingText.push(text);
+    }
   }
 
   setMuted(muted: boolean): void {
@@ -299,6 +307,7 @@ export class ServerVoiceDriver implements SpeechDriver {
 
   async stop(): Promise<void> {
     this.stopped = true;
+    this.pendingText = [];
     this.clearReconnectTimer();
     this.capture?.onFrame(() => undefined);
     await this.capture?.stop();

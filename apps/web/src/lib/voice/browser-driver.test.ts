@@ -332,16 +332,19 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
     return { driver, respond, emit: rec.emit };
   }
 
-  it("auto-fires the opening agent turn after the silence window", async () => {
+  it("auto-fires the opening agent turn without emitting the synthetic user prompt", async () => {
     vi.useFakeTimers();
     try {
       const { driver, respond } = await setupDriver();
+      const onUserTurn = vi.fn();
+      driver.events.onUserTurn = onUserTurn;
       await driver.start();
       await vi.advanceTimersByTimeAsync(5_000);
       expect(respond).toHaveBeenCalledTimes(1);
       const kickoffText = (respond.mock.calls as unknown[][])[0]![0] as string;
       expect(kickoffText).toMatch(/candidate has joined/);
       expect(kickoffText).toMatch(/ask your first question/);
+      expect(onUserTurn).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }
@@ -434,6 +437,41 @@ describe("BrowserVoiceDriver phantom final gating", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(respond).toHaveBeenCalledTimes(1);
     expect((respond.mock.calls as unknown[][])[0]![0]).toBe("real words");
+  });
+});
+
+describe("BrowserVoiceDriver typed-first fallback", () => {
+  it("connects for typed turns when SpeechRecognition is unsupported", async () => {
+    vi.stubGlobal("SpeechRecognition", undefined);
+    vi.stubGlobal("webkitSpeechRecognition", undefined);
+    try {
+      const driver = new BrowserVoiceDriver("s1", {
+        player: createPcmPlayer({ createContext: () => fakeCtx() }),
+      });
+      driver.onError = vi.fn();
+      await driver.useClientAgent(
+        { llm: LLM },
+        {
+          update_question: async () => "ok",
+          read_editor: async () => "",
+          read_whiteboard: async () => "",
+        },
+        { editor: "", whiteboard: "" },
+        () => ({ mode: "interview" }),
+      );
+      const agent = (driver as any).agent as { respond: (...args: any[]) => Promise<string> };
+      agent.respond = vi.fn(async () => "typed reply") as unknown as (
+        ...args: any[]
+      ) => Promise<string>;
+
+      await driver.start();
+      expect(driver.status).toBe("connected");
+      driver.sendText("typed hello");
+      await vi.waitFor(() => expect(agent.respond).toHaveBeenCalled());
+      await driver.stop();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

@@ -21,6 +21,15 @@ Open the voice WS and send nothing. After `KICKOFF_DELAY_MS` (5s) the loop
 fires the synthetic kickoff turn itself — an `agent_transcript` greeting
 arrives unprompted and the turn is persisted.
 
+## server-hosted browser completes a typed interview and report
+
+Start from `/setup` in the built SPA served by the di server, type one turn,
+see the agent answer, then finish. The browser lands on `/report/[id]` after
+the server-side generator stores the mock report. This is the smoke-sized
+server-hosted golden path: it proves the user-facing compose of session,
+voice WS text transport, persistence and report generation without relying
+on a microphone.
+
 ## report is generated, not just stored
 
 `POST /v1/sessions/:id/report` runs the real `generateReport` against the

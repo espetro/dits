@@ -8,6 +8,11 @@ import type { TtsPort } from "./tts/index.ts";
 /** Max llm round-trips per reply (tool hops included). */
 const MAX_HOPS = 4;
 
+export interface AgentReplyOptions {
+  /** Synthetic prompts guide the llm but are not user-visible transcript rows. */
+  persistUser?: boolean;
+}
+
 export interface TurnRunnerDeps {
   llm: LlmPort;
   tts: TtsPort;
@@ -39,10 +44,13 @@ export class TurnRunner {
     source: "voice" | "text",
     signal: AbortSignal,
     metrics: TurnMetrics,
+    options: AgentReplyOptions = {},
   ): Promise<void> {
     const { llm, send, persistTurn } = this.deps;
-    const userTurn = await persistTurn("user", text, source);
-    send({ t: "user_transcript", turn: userTurn });
+    if (options.persistUser !== false) {
+      const userTurn = await persistTurn("user", text, source);
+      send({ t: "user_transcript", turn: userTurn });
+    }
     this.history.push({ role: "user", content: text });
 
     if (llm.streamChat) {

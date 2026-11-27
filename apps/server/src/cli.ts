@@ -1,11 +1,17 @@
 import { parseArgs } from "node:util";
 import { existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { DEFAULT_SERVER_HOST } from "@di/shared";
 import { createDatabase, migrate, ping } from "./store/db";
 import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
 import { createApp, serveApp } from "./api/app";
+import { serverExposureError } from "./security";
 import { sttProviderOf, ttsProviderOf } from "./voice/providers";
+import {
+  configWithResolvedProviders,
+  loadEffectiveProviderConfig,
+} from "./config/resolve-provider-settings";
 import {
   builtinModelsStatus,
   builtinModelsDir,
@@ -37,6 +43,12 @@ export async function main(argv: string[]): Promise<number> {
   }
   console.log(`[di] config ok (${configPath})`);
 
+  const exposureError = serverExposureError(config);
+  if (exposureError) {
+    console.error(exposureError);
+    return 1;
+  }
+
   if (values.check) {
     return check(config, configPath);
   }
@@ -60,12 +72,17 @@ export async function main(argv: string[]): Promise<number> {
   const app = await createApp({ config, db, testMode, webAssets });
   const server = serveApp(app, config.server.port, { config, db });
   // builtin voice engines: pull models in the background so the first
-  // session doesn't wait on the download
-  if (sttProviderOf(config.stt) === "builtin" || ttsProviderOf(config.tts) === "builtin") {
-    warmBuiltinModels(config);
+  // session doesn't wait on the download. Resolve stored settings once for
+  // this boot-time warm; runtime construction resolves again per use.
+  const bootProviders = await loadEffectiveProviderConfig(db, config);
+  const bootConfig = configWithResolvedProviders(config, bootProviders);
+  if (sttProviderOf(bootConfig.stt) === "builtin" || ttsProviderOf(bootConfig.tts) === "builtin") {
+    warmBuiltinModels(bootConfig);
   }
+  const bindHost = config.server.host ?? DEFAULT_SERVER_HOST;
+  const displayHost = bindHost.includes(":") ? `[${bindHost}]` : bindHost;
   console.log(
-    `[di] listening on http://localhost:${config.server.port}${testMode ? " (test mode)" : ""}`,
+    `[di] listening on http://${displayHost}:${config.server.port}${testMode ? " (test mode)" : ""}`,
   );
 
   const shutdown = async () => {
@@ -126,28 +143,32 @@ async function check(
   // SQLite database: create/open and ping it (also proves the directory is writable).
   let dbOk = false;
   let dbMsg: string;
+  let effective = config;
   try {
     const db = createDatabase(config.files.db_path);
+    await migrate(db);
     dbOk = await ping(db);
     dbMsg = config.files.db_path;
+    const providers = await loadEffectiveProviderConfig(db, config);
+    effective = configWithResolvedProviders(config, providers);
   } catch (e) {
     dbMsg = e instanceof Error ? e.message : String(e);
   }
   results.push(["sqlite db", dbOk, dbMsg]);
 
-  const providers = await probeProviders(config);
+  const providers = await probeProviders(effective);
   for (const [name, ok] of Object.entries(providers)) {
     const endpoint =
       name === "stt"
-        ? sttProviderOf(config.stt) === "builtin"
+        ? sttProviderOf(effective.stt) === "builtin"
           ? "builtin wasm"
-          : config.stt.base_url
+          : effective.stt.base_url
         : name === "tts"
-          ? ttsProviderOf(config.tts) === "builtin"
+          ? ttsProviderOf(effective.tts) === "builtin"
             ? "builtin wasm"
-            : config.tts.base_url
+            : effective.tts.base_url
           : name === "llm"
-            ? config.llm.base_url
+            ? effective.llm.base_url
             : undefined;
     results.push([`${name} provider`, ok, endpoint ?? ""]);
   }

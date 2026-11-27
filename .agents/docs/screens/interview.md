@@ -123,9 +123,15 @@ mobile) stacks, top to bottom:
 - **Nothing scrolls at page level** on any viewport — only the transcript and
   tool panes scroll internally (`document.scrollHeight <= innerHeight` at
   1440x900 and 390x844).
-- Typed turns are unchanged: `PromptInput` submit -> `voice.sendText` (ws
-  `{t:"text"}`, same pipeline as speech) when connected or client-only, else
-  `POST /v1/sessions/:id/turns` as the degraded-path write.
+- Typed input is the deterministic first-run baseline: `PromptInput` submit
+  -> `voice.sendText` (ws `{t:"text"}`, same pipeline as speech) when
+  client-only, connected, connecting or reconnecting. The server driver
+  queues input submitted before the socket pipeline finishes connecting and
+  flushes it on connect. When voice is idle or errored, submit uses
+  `POST /v1/sessions/:id/turns` as the degraded-path write. Neither mic
+  permission nor the wasm voice-model download gates interview entry or
+  completion; voice capture is progressive enhancement on top of the
+  composer.
 - **Back-guard**: while the interview is in progress, browser back/close
   fires a confirm (`beforeunload` + router blocker). Inert once ended.
 - Voice wiring is unchanged: WebSocket + Web Audio, 16k PCM16 capture, Silero
@@ -162,14 +168,13 @@ mobile) stacks, top to bottom:
     after, plus every high-prob/earned frame, so the ring keeps the prob
     profile without evicting boot events)
     mirrored to `window.voiceHealth` in dev for pipeline observability.
-- **On-device voice (client-only)**: first browser-mode entry arms the
-  root-mounted `VoiceConsentDialog` via `requestVoiceConsent()`
-  (`di.voice.modelsConsent` unset): accept downloads the pinned wasm models
-  (sha256-verified into CacheStorage, progress on `$voiceDownload`), decline
-  keeps the Web Speech engines and is not re-asked on entry — picking
-  on-device in settings -> voice re-arms the prompt instead of silently
-  granting. The waveform's own capture stream is separate from `MicCapture`
-  and closes when muted/inactive.
+- **On-device voice (client-only)** is opt-in rather than an entry gate:
+  interview entry no longer arms the root-mounted `VoiceConsentDialog`.
+  Picking on-device in settings -> voice still re-arms the prompt; accepting
+  downloads the pinned wasm models (sha256-verified into CacheStorage,
+  progress on `$voiceDownload`), while decline keeps the Web Speech engines
+  and is not re-asked on entry. The waveform's own capture stream is separate
+  from `MicCapture` and closes when muted/inactive.
 - Kickoff on silence, error toast + retry, no-speech hint: unchanged.
   Turn-pipeline errors (voice.llm/tts/stt/noResponse) latch the error
   status only until the next landed reply — the first successful agent
@@ -180,7 +185,12 @@ mobile) stacks, top to bottom:
   `turnTag`/`transcript.*` keys; the error toast description maps `errors.*`
   codes via `codeMessage`, never raw driver text.
 - **Client-only runtime** (ADR-0003): OPFS-backed session/turns,
-  `$clientTurns` rehydration, browser driver agent loop — all unchanged.
+  `$clientTurns` rehydration, browser driver agent loop. The live interview
+  mounts only after hydration so the SSR server default cannot boot a server
+  driver or fire server queries on the static deployment. When browser speech
+  recognition is unsupported but the client agent exists, the driver still
+  connects for typed turns and the silence kickoff; mic denial likewise keeps
+  the interview usable as text-first.
 - **Ended-session re-entry**: a `finished`/`reported`/`discarded` session
   renders the read-only summary (transcript + view report / new session)
   instead of booting a dead voice socket.

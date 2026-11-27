@@ -171,7 +171,7 @@ export function HearingSection() {
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="layer-test-stt">
       <SettingsRow
         title={intl.formatMessage({ id: "settings.stt.micLabel" })}
         description={intl.formatMessage({ id: "settings.stt.micHelp" })}

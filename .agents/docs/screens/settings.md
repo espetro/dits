@@ -19,6 +19,12 @@ driver selection derives from the resolved stt+tts layers
 for it (server pick or auto + reachable /api/health), the browser
 driver otherwise.
 
+Each layer section (stt, llm, tts) is one `data-testid="layer-test-{stt|llm|tts}"`
+container holding the layer picker, its config and its Test row. After a test
+runs, the container shows a single `role="status"` line: "Working" (plus timing
+or route) on success, "Failed: <detail>" on failure. The tts test also toasts
+failures. e2e specs scope by that testid and assert the status text.
+
 ## ASCII mockup (desktop, default)
 
 ```
@@ -204,7 +210,13 @@ driver otherwise.
   write to $providerProfile after a 600ms debounce, an
   enabled-but-incomplete llm draft never overwrites the last valid
   profile, and a save rebuilds the browser voice driver so the new
-  endpoint takes effect live.
+  endpoint takes effect live. When the di server is reachable it is
+  the provider-settings control plane instead: endpoint drafts hydrate
+  from `GET /v1/provider-settings` (redacted, so a blank key means
+  keep the stored key), complete drafts PATCH their server section on
+  the same debounce, and the llm Test first persists the visible llm
+  draft synchronously then posts `POST /v1/provider-settings/test/llm`
+  so the server resolves stored settings plus yaml/env defaults.
 - Pane failures render keyed `errors.*` copy, not raw exception text:
   driver and api errors carry a `code` that maps to a locale key
   (`errorDetail`/`codeMessage` in `lib/errors.ts`).

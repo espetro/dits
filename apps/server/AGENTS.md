@@ -44,6 +44,6 @@ shim (:9005). Then `source scripts/dev-env.sh` (Bifrost LLM via keychain key,
 never on disk) and start the server. See `scripts/pocket-shim.ts` for why the
 shim exists.
 
-`mise run e2e` does not start a server — start one in test mode first, or
-point `DI_URL` at it. `mise run smoke` hits `$DI_URL/v1/test/smoke`
+`mise run e2e` starts its own test-mode stack (needs `mise run build`).
+`mise run smoke` hits `$DI_URL/v1/test/smoke`
 (test-mode only).

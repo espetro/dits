@@ -6,7 +6,6 @@ import { dashboardHtml } from "./dashboard";
 import { resetDesktopData, type Supervisor } from "./reset";
 import { tailLog } from "./logbuffer";
 import {
-  appUrl,
   configuredLogPath,
   getConfigPath,
   serverState,
@@ -31,14 +30,22 @@ interface StateBody {
   logs: string[];
 }
 
-function stateBody(sup?: Supervisor): StateBody {
-  const { running, port } = (sup?.serverState ?? serverState)();
+const defaultControlSupervisor: Supervisor = {
+  getConfigPath,
+  configuredLogPath,
+  serverState,
+  startServer,
+  stopServer,
+};
+
+function stateBody(sup: Supervisor = defaultControlSupervisor): StateBody {
+  const { running, port } = sup.serverState();
   return {
     running,
     port,
-    url: appUrl(),
-    configPath: getConfigPath(),
-    logPath: configuredLogPath(),
+    url: running && port ? `http://localhost:${port}` : null,
+    configPath: sup.getConfigPath(),
+    logPath: sup.configuredLogPath?.() ?? null,
     logs: tailLog(120),
   };
 }
@@ -58,6 +65,7 @@ const html = (body: string) =>
  * dashboard is a plain fetch() client, which keeps it debuggable with curl.
  */
 export function startControlServer(deps: ControlDeps): { port: number; stop: () => void } {
+  const supervisor = deps.supervisor ?? defaultControlSupervisor;
   const server = Bun.serve({
     port: parseInt(process.env.DI_DESKTOP_CONTROL_PORT ?? "0", 10),
     hostname: "127.0.0.1",
@@ -78,35 +86,35 @@ export function startControlServer(deps: ControlDeps): { port: number; stop: () 
           headers: { "content-type": "font/woff2", "cache-control": "max-age=3600" },
         });
       }
-      if (req.method === "GET" && pathname === "/api/state") return json(stateBody());
+      if (req.method === "GET" && pathname === "/api/state") return json(stateBody(supervisor));
       if (req.method === "GET" && pathname === "/api/logs") return json({ logs: tailLog(300) });
 
       if (req.method === "POST" && pathname === "/api/start") {
         try {
-          await startServer();
+          await supervisor.startServer();
         } catch (e) {
           return json({ error: e instanceof Error ? e.message : String(e) }, 500);
         }
-        return json(stateBody());
+        return json(stateBody(supervisor));
       }
       if (req.method === "POST" && pathname === "/api/stop") {
-        await stopServer();
-        return json(stateBody());
+        await supervisor.stopServer();
+        return json(stateBody(supervisor));
       }
       // destructive factory reset (db, models, log, config + keys); the
       // dashboard asks for confirmation before it ever calls this
       if (req.method === "POST" && pathname === "/api/reset") {
         try {
-          await resetDesktopData(deps.supervisor);
+          await resetDesktopData(supervisor);
         } catch (e) {
           return json({ error: e instanceof Error ? e.message : String(e) }, 500);
         }
-        return json(stateBody(deps.supervisor));
+        return json(stateBody(supervisor));
       }
       if (req.method === "POST" && pathname === "/api/open") {
-        const target = appUrl();
-        if (!target) return json({ error: "server is not running" }, 409);
-        deps.openExternal(target);
+        const state = supervisor.serverState();
+        if (!state.running || !state.port) return json({ error: "server is not running" }, 409);
+        deps.openExternal(`http://localhost:${state.port}`);
         return json({ ok: true });
       }
 

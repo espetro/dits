@@ -133,3 +133,30 @@ describe("POST /api/reset", () => {
     expect(((await res.json()) as { error: string }).error).toContain("config path");
   });
 });
+
+describe("control server supervisor routes", () => {
+  it("starts and stops the injected supervisor", async () => {
+    seed();
+    const { sup, events } = fakeSupervisor(false);
+    control = startControlServer({ openExternal: () => {}, supervisor: sup });
+
+    const started = await fetch(`http://127.0.0.1:${control.port}/api/start`, { method: "POST" });
+    expect(started.status).toBe(200);
+    expect(((await started.json()) as { running: boolean; port: number }).running).toBe(true);
+
+    const stopped = await fetch(`http://127.0.0.1:${control.port}/api/stop`, { method: "POST" });
+    expect(stopped.status).toBe(200);
+    expect(((await stopped.json()) as { running: boolean }).running).toBe(false);
+    expect(events).toEqual(["start", "stop"]);
+  });
+
+  it("opens the injected supervisor url", async () => {
+    seed();
+    const { sup } = fakeSupervisor(true);
+    const opened: string[] = [];
+    control = startControlServer({ openExternal: (url) => opened.push(url), supervisor: sup });
+    const res = await fetch(`http://127.0.0.1:${control.port}/api/open`, { method: "POST" });
+    expect(res.status).toBe(200);
+    expect(opened).toEqual(["http://localhost:4321"]);
+  });
+});

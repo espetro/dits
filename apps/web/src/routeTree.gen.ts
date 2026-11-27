@@ -8,221 +8,227 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as Char123LocaleChar125RouteImport } from "./routes/{-$locale}";
-import { Route as Char123LocaleChar125IndexRouteImport } from "./routes/{-$locale}/index";
-import { Route as Char123LocaleChar125SetupRouteImport } from "./routes/{-$locale}/setup";
-import { Route as Char123LocaleChar125DevVoiceHarnessRouteImport } from "./routes/{-$locale}/dev.voice-harness";
-import { Route as Char123LocaleChar125FinishIdRouteImport } from "./routes/{-$locale}/finish.$id";
-import { Route as Char123LocaleChar125InterviewIdRouteImport } from "./routes/{-$locale}/interview.$id";
-import { Route as Char123LocaleChar125ReportIdRouteImport } from "./routes/{-$locale}/report.$id";
-import { Route as Char123LocaleChar125ValidateIdRouteImport } from "./routes/{-$locale}/validate.$id";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as Char123LocaleChar125RouteImport } from './routes/{-$locale}'
+import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
+import { Route as Char123LocaleChar125SetupRouteImport } from './routes/{-$locale}/setup'
+import { Route as Char123LocaleChar125DevVoiceHarnessRouteImport } from './routes/{-$locale}/dev.voice-harness'
+import { Route as Char123LocaleChar125FinishIdRouteImport } from './routes/{-$locale}/finish.$id'
+import { Route as Char123LocaleChar125InterviewIdRouteImport } from './routes/{-$locale}/interview.$id'
+import { Route as Char123LocaleChar125ReportIdRouteImport } from './routes/{-$locale}/report.$id'
+import { Route as Char123LocaleChar125ValidateIdRouteImport } from './routes/{-$locale}/validate.$id'
 
 const Char123LocaleChar125Route = Char123LocaleChar125RouteImport.update({
-  id: "/{-$locale}",
-  path: "/{-$locale}",
+  id: '/{-$locale}',
+  path: '/{-$locale}',
   getParentRoute: () => rootRouteImport,
-} as any);
-const Char123LocaleChar125IndexRoute = Char123LocaleChar125IndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
-const Char123LocaleChar125SetupRoute = Char123LocaleChar125SetupRouteImport.update({
-  id: "/setup",
-  path: "/setup",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
+} as any)
+const Char123LocaleChar125IndexRoute =
+  Char123LocaleChar125IndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125SetupRoute =
+  Char123LocaleChar125SetupRouteImport.update({
+    id: '/setup',
+    path: '/setup',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
 const Char123LocaleChar125DevVoiceHarnessRoute =
   Char123LocaleChar125DevVoiceHarnessRouteImport.update({
-    id: "/dev/voice-harness",
-    path: "/dev/voice-harness",
+    id: '/dev/voice-harness',
+    path: '/dev/voice-harness',
     getParentRoute: () => Char123LocaleChar125Route,
-  } as any);
-const Char123LocaleChar125FinishIdRoute = Char123LocaleChar125FinishIdRouteImport.update({
-  id: "/finish/$id",
-  path: "/finish/$id",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
-const Char123LocaleChar125InterviewIdRoute = Char123LocaleChar125InterviewIdRouteImport.update({
-  id: "/interview/$id",
-  path: "/interview/$id",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
-const Char123LocaleChar125ReportIdRoute = Char123LocaleChar125ReportIdRouteImport.update({
-  id: "/report/$id",
-  path: "/report/$id",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
-const Char123LocaleChar125ValidateIdRoute = Char123LocaleChar125ValidateIdRouteImport.update({
-  id: "/validate/$id",
-  path: "/validate/$id",
-  getParentRoute: () => Char123LocaleChar125Route,
-} as any);
+  } as any)
+const Char123LocaleChar125FinishIdRoute =
+  Char123LocaleChar125FinishIdRouteImport.update({
+    id: '/finish/$id',
+    path: '/finish/$id',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125InterviewIdRoute =
+  Char123LocaleChar125InterviewIdRouteImport.update({
+    id: '/interview/$id',
+    path: '/interview/$id',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125ReportIdRoute =
+  Char123LocaleChar125ReportIdRouteImport.update({
+    id: '/report/$id',
+    path: '/report/$id',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
+const Char123LocaleChar125ValidateIdRoute =
+  Char123LocaleChar125ValidateIdRouteImport.update({
+    id: '/validate/$id',
+    path: '/validate/$id',
+    getParentRoute: () => Char123LocaleChar125Route,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/{-$locale}": typeof Char123LocaleChar125RouteWithChildren;
-  "/{-$locale}/setup": typeof Char123LocaleChar125SetupRoute;
-  "/{-$locale}/": typeof Char123LocaleChar125IndexRoute;
-  "/{-$locale}/dev/voice-harness": typeof Char123LocaleChar125DevVoiceHarnessRoute;
-  "/{-$locale}/finish/$id": typeof Char123LocaleChar125FinishIdRoute;
-  "/{-$locale}/interview/$id": typeof Char123LocaleChar125InterviewIdRoute;
-  "/{-$locale}/report/$id": typeof Char123LocaleChar125ReportIdRoute;
-  "/{-$locale}/validate/$id": typeof Char123LocaleChar125ValidateIdRoute;
+  '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
+  '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
+  '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
+  '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
+  '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
+  '/{-$locale}/validate/$id': typeof Char123LocaleChar125ValidateIdRoute
 }
 export interface FileRoutesByTo {
-  "/{-$locale}/setup": typeof Char123LocaleChar125SetupRoute;
-  "/{-$locale}": typeof Char123LocaleChar125IndexRoute;
-  "/{-$locale}/dev/voice-harness": typeof Char123LocaleChar125DevVoiceHarnessRoute;
-  "/{-$locale}/finish/$id": typeof Char123LocaleChar125FinishIdRoute;
-  "/{-$locale}/interview/$id": typeof Char123LocaleChar125InterviewIdRoute;
-  "/{-$locale}/report/$id": typeof Char123LocaleChar125ReportIdRoute;
-  "/{-$locale}/validate/$id": typeof Char123LocaleChar125ValidateIdRoute;
+  '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
+  '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
+  '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
+  '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
+  '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
+  '/{-$locale}/validate/$id': typeof Char123LocaleChar125ValidateIdRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/{-$locale}": typeof Char123LocaleChar125RouteWithChildren;
-  "/{-$locale}/setup": typeof Char123LocaleChar125SetupRoute;
-  "/{-$locale}/": typeof Char123LocaleChar125IndexRoute;
-  "/{-$locale}/dev/voice-harness": typeof Char123LocaleChar125DevVoiceHarnessRoute;
-  "/{-$locale}/finish/$id": typeof Char123LocaleChar125FinishIdRoute;
-  "/{-$locale}/interview/$id": typeof Char123LocaleChar125InterviewIdRoute;
-  "/{-$locale}/report/$id": typeof Char123LocaleChar125ReportIdRoute;
-  "/{-$locale}/validate/$id": typeof Char123LocaleChar125ValidateIdRoute;
+  __root__: typeof rootRouteImport
+  '/{-$locale}': typeof Char123LocaleChar125RouteWithChildren
+  '/{-$locale}/setup': typeof Char123LocaleChar125SetupRoute
+  '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/{-$locale}/dev/voice-harness': typeof Char123LocaleChar125DevVoiceHarnessRoute
+  '/{-$locale}/finish/$id': typeof Char123LocaleChar125FinishIdRoute
+  '/{-$locale}/interview/$id': typeof Char123LocaleChar125InterviewIdRoute
+  '/{-$locale}/report/$id': typeof Char123LocaleChar125ReportIdRoute
+  '/{-$locale}/validate/$id': typeof Char123LocaleChar125ValidateIdRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/{-$locale}"
-    | "/{-$locale}/setup"
-    | "/{-$locale}/"
-    | "/{-$locale}/dev/voice-harness"
-    | "/{-$locale}/finish/$id"
-    | "/{-$locale}/interview/$id"
-    | "/{-$locale}/report/$id"
-    | "/{-$locale}/validate/$id";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/{-$locale}'
+    | '/{-$locale}/setup'
+    | '/{-$locale}/'
+    | '/{-$locale}/dev/voice-harness'
+    | '/{-$locale}/finish/$id'
+    | '/{-$locale}/interview/$id'
+    | '/{-$locale}/report/$id'
+    | '/{-$locale}/validate/$id'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/{-$locale}/setup"
-    | "/{-$locale}"
-    | "/{-$locale}/dev/voice-harness"
-    | "/{-$locale}/finish/$id"
-    | "/{-$locale}/interview/$id"
-    | "/{-$locale}/report/$id"
-    | "/{-$locale}/validate/$id";
+    | '/{-$locale}/setup'
+    | '/{-$locale}'
+    | '/{-$locale}/dev/voice-harness'
+    | '/{-$locale}/finish/$id'
+    | '/{-$locale}/interview/$id'
+    | '/{-$locale}/report/$id'
+    | '/{-$locale}/validate/$id'
   id:
-    | "__root__"
-    | "/{-$locale}"
-    | "/{-$locale}/setup"
-    | "/{-$locale}/"
-    | "/{-$locale}/dev/voice-harness"
-    | "/{-$locale}/finish/$id"
-    | "/{-$locale}/interview/$id"
-    | "/{-$locale}/report/$id"
-    | "/{-$locale}/validate/$id";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/{-$locale}'
+    | '/{-$locale}/setup'
+    | '/{-$locale}/'
+    | '/{-$locale}/dev/voice-harness'
+    | '/{-$locale}/finish/$id'
+    | '/{-$locale}/interview/$id'
+    | '/{-$locale}/report/$id'
+    | '/{-$locale}/validate/$id'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  Char123LocaleChar125Route: typeof Char123LocaleChar125RouteWithChildren;
+  Char123LocaleChar125Route: typeof Char123LocaleChar125RouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/{-$locale}": {
-      id: "/{-$locale}";
-      path: "/{-$locale}";
-      fullPath: "/{-$locale}";
-      preLoaderRoute: typeof Char123LocaleChar125RouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/{-$locale}/": {
-      id: "/{-$locale}/";
-      path: "/";
-      fullPath: "/{-$locale}/";
-      preLoaderRoute: typeof Char123LocaleChar125IndexRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/setup": {
-      id: "/{-$locale}/setup";
-      path: "/setup";
-      fullPath: "/{-$locale}/setup";
-      preLoaderRoute: typeof Char123LocaleChar125SetupRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/dev/voice-harness": {
-      id: "/{-$locale}/dev/voice-harness";
-      path: "/dev/voice-harness";
-      fullPath: "/{-$locale}/dev/voice-harness";
-      preLoaderRoute: typeof Char123LocaleChar125DevVoiceHarnessRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/finish/$id": {
-      id: "/{-$locale}/finish/$id";
-      path: "/finish/$id";
-      fullPath: "/{-$locale}/finish/$id";
-      preLoaderRoute: typeof Char123LocaleChar125FinishIdRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/interview/$id": {
-      id: "/{-$locale}/interview/$id";
-      path: "/interview/$id";
-      fullPath: "/{-$locale}/interview/$id";
-      preLoaderRoute: typeof Char123LocaleChar125InterviewIdRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/report/$id": {
-      id: "/{-$locale}/report/$id";
-      path: "/report/$id";
-      fullPath: "/{-$locale}/report/$id";
-      preLoaderRoute: typeof Char123LocaleChar125ReportIdRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
-    "/{-$locale}/validate/$id": {
-      id: "/{-$locale}/validate/$id";
-      path: "/validate/$id";
-      fullPath: "/{-$locale}/validate/$id";
-      preLoaderRoute: typeof Char123LocaleChar125ValidateIdRouteImport;
-      parentRoute: typeof Char123LocaleChar125Route;
-    };
+    '/{-$locale}': {
+      id: '/{-$locale}'
+      path: '/{-$locale}'
+      fullPath: '/{-$locale}'
+      preLoaderRoute: typeof Char123LocaleChar125RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/{-$locale}/': {
+      id: '/{-$locale}/'
+      path: '/'
+      fullPath: '/{-$locale}/'
+      preLoaderRoute: typeof Char123LocaleChar125IndexRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/setup': {
+      id: '/{-$locale}/setup'
+      path: '/setup'
+      fullPath: '/{-$locale}/setup'
+      preLoaderRoute: typeof Char123LocaleChar125SetupRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/dev/voice-harness': {
+      id: '/{-$locale}/dev/voice-harness'
+      path: '/dev/voice-harness'
+      fullPath: '/{-$locale}/dev/voice-harness'
+      preLoaderRoute: typeof Char123LocaleChar125DevVoiceHarnessRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/finish/$id': {
+      id: '/{-$locale}/finish/$id'
+      path: '/finish/$id'
+      fullPath: '/{-$locale}/finish/$id'
+      preLoaderRoute: typeof Char123LocaleChar125FinishIdRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/interview/$id': {
+      id: '/{-$locale}/interview/$id'
+      path: '/interview/$id'
+      fullPath: '/{-$locale}/interview/$id'
+      preLoaderRoute: typeof Char123LocaleChar125InterviewIdRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/report/$id': {
+      id: '/{-$locale}/report/$id'
+      path: '/report/$id'
+      fullPath: '/{-$locale}/report/$id'
+      preLoaderRoute: typeof Char123LocaleChar125ReportIdRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
+    '/{-$locale}/validate/$id': {
+      id: '/{-$locale}/validate/$id'
+      path: '/validate/$id'
+      fullPath: '/{-$locale}/validate/$id'
+      preLoaderRoute: typeof Char123LocaleChar125ValidateIdRouteImport
+      parentRoute: typeof Char123LocaleChar125Route
+    }
   }
 }
 
 interface Char123LocaleChar125RouteChildren {
-  Char123LocaleChar125SetupRoute: typeof Char123LocaleChar125SetupRoute;
-  Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute;
-  Char123LocaleChar125DevVoiceHarnessRoute: typeof Char123LocaleChar125DevVoiceHarnessRoute;
-  Char123LocaleChar125FinishIdRoute: typeof Char123LocaleChar125FinishIdRoute;
-  Char123LocaleChar125InterviewIdRoute: typeof Char123LocaleChar125InterviewIdRoute;
-  Char123LocaleChar125ReportIdRoute: typeof Char123LocaleChar125ReportIdRoute;
-  Char123LocaleChar125ValidateIdRoute: typeof Char123LocaleChar125ValidateIdRoute;
+  Char123LocaleChar125SetupRoute: typeof Char123LocaleChar125SetupRoute
+  Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
+  Char123LocaleChar125DevVoiceHarnessRoute: typeof Char123LocaleChar125DevVoiceHarnessRoute
+  Char123LocaleChar125FinishIdRoute: typeof Char123LocaleChar125FinishIdRoute
+  Char123LocaleChar125InterviewIdRoute: typeof Char123LocaleChar125InterviewIdRoute
+  Char123LocaleChar125ReportIdRoute: typeof Char123LocaleChar125ReportIdRoute
+  Char123LocaleChar125ValidateIdRoute: typeof Char123LocaleChar125ValidateIdRoute
 }
 
 const Char123LocaleChar125RouteChildren: Char123LocaleChar125RouteChildren = {
   Char123LocaleChar125SetupRoute: Char123LocaleChar125SetupRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
-  Char123LocaleChar125DevVoiceHarnessRoute: Char123LocaleChar125DevVoiceHarnessRoute,
+  Char123LocaleChar125DevVoiceHarnessRoute:
+    Char123LocaleChar125DevVoiceHarnessRoute,
   Char123LocaleChar125FinishIdRoute: Char123LocaleChar125FinishIdRoute,
   Char123LocaleChar125InterviewIdRoute: Char123LocaleChar125InterviewIdRoute,
   Char123LocaleChar125ReportIdRoute: Char123LocaleChar125ReportIdRoute,
   Char123LocaleChar125ValidateIdRoute: Char123LocaleChar125ValidateIdRoute,
-};
+}
 
-const Char123LocaleChar125RouteWithChildren = Char123LocaleChar125Route._addFileChildren(
-  Char123LocaleChar125RouteChildren,
-);
+const Char123LocaleChar125RouteWithChildren =
+  Char123LocaleChar125Route._addFileChildren(Char123LocaleChar125RouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   Char123LocaleChar125Route: Char123LocaleChar125RouteWithChildren,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { createStart } from "@tanstack/react-start";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
   }
 }

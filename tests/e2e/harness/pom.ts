@@ -1,0 +1,114 @@
+// Page objects: the only place that knows how the settings dialog and the
+// interview screen are laid out. Specs talk in user terms; a copy or layout
+// change is fixed here once.
+import { expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+
+export type Layer = "stt" | "llm" | "tts";
+
+const LAYER_LABEL: Record<Layer, string> = {
+  stt: "stt layer",
+  llm: "interviewer model",
+  tts: "tts layer",
+};
+
+export function settingsPage(page: Page) {
+  const layer = (name: Layer): Locator => page.getByTestId(`layer-test-${name}`);
+
+  return {
+    layer,
+
+    /** `base` targets another origin (e.g. the no-server fallback build) */
+    async open(base = ""): Promise<void> {
+      await page.goto(`${base}/?settings=1&pane=voice`);
+      await expect(layer("llm")).toBeVisible();
+    },
+
+    /** pick a layer option by its visible label, e.g. ("llm", "cloud endpoint") */
+    async pickLayer(name: Layer, option: string): Promise<void> {
+      await layer(name).getByRole("combobox", { name: LAYER_LABEL[name] }).click();
+      await page.getByRole("option", { name: option }).click();
+    },
+
+    modelInput: (): Locator => page.getByRole("combobox", { name: "Model ID" }),
+    modelOptions: (): Locator =>
+      page.getByRole("listbox", { name: "Model ID" }).getByRole("option"),
+    baseUrl: (): Locator => page.getByLabel("Base URL"),
+    apiKey: (): Locator => page.getByRole("textbox", { name: /^API key/ }),
+
+    /** the llm Test button; stt/tts rows use their own cta labels */
+    testButton(name: Layer): Locator {
+      const label = { llm: "test it", stt: "run test", tts: "play sample" }[name];
+      return layer(name).getByRole("button", { name: label, exact: true });
+    },
+
+    /** the single status line a finished test leaves in the layer container */
+    status: (name: Layer): Locator => layer(name).getByRole("status"),
+
+    async expectStatus(name: Layer, text: string | RegExp, timeout = 10_000): Promise<void> {
+      await expect(layer(name).getByRole("status")).toContainText(text, { timeout });
+    },
+  };
+}
+
+/** The start button only works after React hydrates and seeded localStorage
+ * makes the first client render differ from SSR, so an early click can be
+ * dropped: keep clicking until the SPA navigates. Returns the session id. */
+async function clickStartUntilInterview(page: Page): Promise<string> {
+  await expect
+    .poll(
+      async () => {
+        if (!/\/interview\//.test(page.url())) {
+          await page.getByRole("button", { name: "start", exact: true }).first().click();
+        }
+        return /\/interview\//.test(page.url());
+      },
+      { timeout: 10_000, intervals: [500] },
+    )
+    .toBe(true);
+  const match = /\/interview\/([^/?#]+)/.exec(page.url());
+  if (!match) throw new Error(`unexpected url: ${page.url()}`);
+  return match[1]!;
+}
+
+export function interviewPage(page: Page) {
+  return {
+    /** Start from /setup; `base` targets another origin (e.g. the static copy). */
+    async start(base = ""): Promise<string> {
+      await page.goto(`${base}/setup`);
+      return clickStartUntilInterview(page);
+    },
+
+    /** Public golden path: landing CTA -> /setup -> scenario start. */
+    async startFromLanding(base = ""): Promise<string> {
+      await page.goto(`${base}/`);
+      await page.getByRole("link", { name: "grill me" }).click();
+      await expect(page).toHaveURL(/\/setup\/?$/);
+      return clickStartUntilInterview(page);
+    },
+
+    async switchToTyping(): Promise<void> {
+      await page.getByRole("button", { name: "switch to typing" }).click();
+    },
+
+    async send(text: string): Promise<void> {
+      const input = page.getByPlaceholder("talk or type…");
+      await input.fill(text);
+      await input.press("Enter");
+    },
+
+    /** end through the in-call confirm, landing on /finish/[id] */
+    async endEarly(): Promise<void> {
+      await page.getByRole("button", { name: "end interview" }).first().click();
+      await page.getByRole("button", { name: "end early" }).click();
+    },
+
+    /** type one turn from the composer */
+    async say(text: string): Promise<void> {
+      await this.switchToTyping();
+      await this.send(text);
+    },
+
+    transcript: (): Locator => page.getByRole("log"),
+  };
+}

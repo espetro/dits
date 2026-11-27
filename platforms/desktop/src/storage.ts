@@ -4,9 +4,9 @@ import { dirname, join } from "node:path";
 import { defaultFilesDir } from "@di/server/config/load";
 
 /**
- * Seeded first-run config. Based on config.example.yaml with `files.*`
- * omitted — loadConfig defaults those to the platform app-support dir,
- * which is where this file lives too (db/log/data sit next to the config).
+ * Seeded first-run config. Based on config.example.yaml; `files.*` is
+ * written explicitly for the app-support dir so verification can use an
+ * isolated support directory without touching the real user profile.
  */
 const SEED_CONFIG = `# di. desktop config (seeded on first run).
 # Point llm at your provider — any OpenAI-compatible endpoint works
@@ -59,12 +59,22 @@ export function ensureDataDir(dir: string): void {
   mkdirSync(dir, { recursive: true });
 }
 
+const yamlString = (value: string): string => JSON.stringify(value);
+
+const seedConfigFor = (dir: string): string =>
+  `${SEED_CONFIG}
+files:
+  db_path: ${yamlString(join(dir, "di.db"))}
+  log_path: ${yamlString(join(dir, "di.log"))}
+  data_dir: ${yamlString(join(dir, "data"))}
+`;
+
 /** Write the seeded config on first run; returns the config.yaml path. */
 export function ensureConfigFile(dir: string): string {
   ensureDataDir(dir);
   const configPath = join(dir, "config.yaml");
   if (!existsSync(configPath)) {
-    writeFileSync(configPath, SEED_CONFIG);
+    writeFileSync(configPath, seedConfigFor(dir));
   }
   return configPath;
 }

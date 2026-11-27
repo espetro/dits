@@ -8,7 +8,7 @@ the sherpa/kitten worker protocols. Requires the web dev server
 (DI_WEB_URL) plus chromium fake-media launch flags — no di server, the LLM
 endpoint is routed like the client-only suite.
 
-## consent dialog opens on first browser-mode entry and accept downloads the models
+## consent dialog opens when picking on-device voice and accept downloads the models
 
 Seed client-only localStorage with consent unset, land on `/interview/[id]`:
 the consent dialog appears. Accept fetches `manifest.json` and all four

@@ -3,10 +3,11 @@ import { useLocale, withLocale } from "../../lib/locale-href";
 import { FormattedMessage, useIntl } from "react-intl";
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSsrStore } from "../../lib/ssr";
+import { useHydrated, useSsrStore } from "../../lib/ssr";
 import { getSession, requestReport } from "../../lib/api";
 import type { ReportDto } from "../../lib/api";
 import { $serverDriven } from "../../lib/runtime";
+import { SSR_SERVER_DRIVEN } from "../../lib/public-site";
 import { ensureClientReport } from "../../lib/report";
 import { getClientSession } from "../../lib/opfs-store";
 import { $draft } from "../../stores/session";
@@ -28,17 +29,18 @@ function Report() {
   const intl = useIntl();
   const { id } = Route.useParams();
   const locale = useLocale();
-  const serverDriven = useSsrStore($serverDriven, true);
+  const hydrated = useHydrated();
+  const serverDriven = useSsrStore($serverDriven, SSR_SERVER_DRIVEN);
   const clientOnly = !serverDriven;
   const { data: serverSession } = useQuery({
     queryKey: ["session", id],
     queryFn: () => getSession(id),
-    enabled: !clientOnly,
+    enabled: hydrated && !clientOnly,
   });
   const { data: clientSession } = useQuery({
     queryKey: ["client-session", id],
     queryFn: () => getClientSession(id),
-    enabled: clientOnly,
+    enabled: hydrated && clientOnly,
   });
   const session = clientOnly ? clientSession : serverSession;
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ function Report() {
   } = useQuery<ReportDto>({
     queryKey: ["report", id, clientOnly],
     queryFn: () => (clientOnly ? ensureClientReport(id) : requestReport(id)),
+    enabled: hydrated,
     retry: 2,
     retryDelay: 1500,
   });

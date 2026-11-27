@@ -3,6 +3,10 @@ import type { Config } from "@di/shared";
 import { VoiceClientMessageSchema } from "@di/shared/voice";
 import type { Db } from "../store/db";
 import { VoiceLoop } from "./loop";
+import {
+  configWithResolvedProviders,
+  loadEffectiveProviderConfig,
+} from "../config/resolve-provider-settings";
 
 /** GET /v1/sessions/:id/voice — WebSocket upgrade path. */
 export const VOICE_WS_PATH_RE = /^\/v1\/sessions\/([0-9a-f-]{36})\/voice$/;
@@ -43,11 +47,13 @@ export function voiceWebSocketHandler(deps: VoiceDeps) {
         "sendBinary" in ws
           ? (ws as { sendBinary: (d: Uint8Array) => void }).sendBinary(d)
           : undefined;
+      const providers = await loadEffectiveProviderConfig(deps.db, deps.config);
+      const effectiveConfig = configWithResolvedProviders(deps.config, providers);
       const loop =
         deps.loopFactory?.(sessionId, send, sendBinary) ??
         new VoiceLoop({
           sessionId,
-          config: deps.config,
+          config: effectiveConfig,
           db: deps.db,
           send: send as never,
           sendBinary,

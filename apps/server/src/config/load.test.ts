@@ -118,6 +118,59 @@ documents:
     }
   });
 
+  it("accepts the optional server security keys", () => {
+    const body = minimal.replace(
+      "server:\n  port: 8080",
+      `server:
+  port: 8080
+  host: 127.0.0.1
+  auth: token
+  token: test-token-123456
+  dev_origins:
+    - http://localhost:5173`,
+    );
+    const cfg = loadConfig(writeConfig(body));
+    expect(cfg.server.host).toBe("127.0.0.1");
+    expect(cfg.server.auth).toBe("token");
+    expect(cfg.server.token).toBe("test-token-123456");
+    expect(cfg.server.dev_origins).toEqual(["http://localhost:5173"]);
+  });
+
+  it("accepts comma-separated dev origins from the env override", () => {
+    process.env.DI_SERVER__DEV_ORIGINS = "http://localhost:5173, https://127.0.0.1:5174";
+    try {
+      const cfg = loadConfig(writeConfig(minimal));
+      expect(cfg.server.dev_origins).toEqual(["http://localhost:5173", "https://127.0.0.1:5174"]);
+    } finally {
+      delete process.env.DI_SERVER__DEV_ORIGINS;
+    }
+  });
+
+  it("rejects server.host values with a scheme or port", () => {
+    for (const host of ["http://localhost", "localhost:3000", "[::1]"]) {
+      const bad = minimal.replace(
+        "server:\n  port: 8080",
+        `server:
+  port: 8080
+  host: ${host}`,
+      );
+      expect(() => loadConfig(writeConfig(bad))).toThrow(ConfigError);
+    }
+  });
+
+  it("rejects empty or whitespace-bearing auth tokens", () => {
+    for (const token of ["", "has whitespace0000"]) {
+      const bad = minimal.replace(
+        "server:\n  port: 8080",
+        `server:
+  port: 8080
+  auth: token
+  token: ${token}`,
+      );
+      expect(() => loadConfig(writeConfig(bad))).toThrow(ConfigError);
+    }
+  });
+
   it("rejects a missing file", () => {
     expect(() => loadConfig("/nonexistent/config.yaml")).toThrow(ConfigError);
   });

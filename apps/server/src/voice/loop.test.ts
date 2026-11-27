@@ -318,7 +318,7 @@ describe("VoiceLoop", () => {
     );
   });
 
-  it("kickoff: silent connect fires the synthetic opening turn", async () => {
+  it("kickoff: silent connect fires the opening agent turn without persisting the synthetic user prompt", async () => {
     const { db, messages } = await makeLoop({
       kickoffMs: 1,
       stt: stubStt("x"),
@@ -327,12 +327,12 @@ describe("VoiceLoop", () => {
     });
     await vi.waitFor(async () => {
       const turns = await db.selectFrom("turns").selectAll().execute();
-      expect(turns).toHaveLength(2);
+      expect(turns).toHaveLength(1);
     });
-    const userMsg = messages.find((m) => m.t === "user_transcript");
-    expect(userMsg).toMatchObject({ turn: { text: KICKOFF_UTTERANCE, source: "text" } });
+    expect(messages.some((m) => m.t === "user_transcript")).toBe(false);
     const turns = await db.selectFrom("turns").selectAll().orderBy("seq").execute();
-    expect(turns[1]).toMatchObject({ speaker: "agent", text: "welcome aboard" });
+    expect(turns[0]).toMatchObject({ speaker: "agent", text: "welcome aboard" });
+    expect(turns.every((t) => t.text !== KICKOFF_UTTERANCE)).toBe(true);
   });
 
   it("kickoff is cancelled once a real typed turn arrives", async () => {

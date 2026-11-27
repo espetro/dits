@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { Hono } from "hono";
 import type { Config } from "@di/shared";
+import { DEFAULT_SERVER_HOST } from "@di/shared";
 import type { Db } from "../store/db";
 import { apiRoutes } from "./routes";
 import type { SttTestPort, TtsTestPort } from "./routes";
@@ -9,8 +10,18 @@ import { createTtsFromConfig } from "../voice/tts";
 import { createSttFromConfig } from "../voice/stt";
 import { createLlmFromConfig } from "../voice/llm";
 import { embeddingsClientFromConfig } from "../rag/ingest";
-import { tryUpgradeVoice, voiceWebSocketHandler } from "../voice/ws";
+import {
+  configWithResolvedProviders,
+  loadEffectiveProviderConfig,
+} from "../config/resolve-provider-settings";
+import { tryUpgradeVoice, voiceWebSocketHandler, VOICE_WS_PATH_RE } from "../voice/ws";
 import type { VoiceDeps } from "../voice/ws";
+import {
+  inspectRequestSecurity,
+  pathRequiresAuth,
+  securityResponse,
+  serverExposureError,
+} from "../security";
 
 export interface AppDeps {
   config: Config;
@@ -26,27 +37,35 @@ export interface AppDeps {
 }
 
 export async function createApp(deps: AppDeps): Promise<Hono> {
-  const app = new Hono();
-  let ttsTest: TtsTestPort | undefined;
-  let sttTest: SttTestPort | undefined;
+  const exposureError = serverExposureError(deps.config);
+  if (exposureError) throw new Error(exposureError);
 
-  // Dev CORS: when the SPA runs under a vite dev server (different origin
-  // from this API), the health probe and driver fetches are cross-origin.
-  // The production binary serves the SPA itself, same origin, so the browser
-  // never sees these headers there.
+  const app = new Hono();
+  // Host/Origin validation is the DNS-rebinding boundary. No-Origin and
+  // same-origin requests pass without CORS headers; cross-origin browser dev
+  // servers pass only when explicitly listed in server.dev_origins.
   app.use("*", async (c, next) => {
-    if (c.req.method === "OPTIONS") {
-      c.header("access-control-allow-origin", c.req.header("origin") ?? "*");
+    const pathname = new URL(c.req.url).pathname;
+    const inspection = inspectRequestSecurity(c.req.raw, deps.config, {
+      requireAuth: c.req.method !== "OPTIONS" && pathRequiresAuth(pathname),
+      allowQueryToken: VOICE_WS_PATH_RE.test(pathname),
+    });
+    if (!inspection.ok) return securityResponse(inspection);
+
+    const corsHeaders = () => {
+      if (!inspection.corsOrigin) return;
+      c.header("access-control-allow-origin", inspection.corsOrigin);
       c.header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
       c.header("access-control-allow-headers", "content-type, authorization");
+      c.header("vary", "origin");
+    };
+
+    if (c.req.method === "OPTIONS") {
+      corsHeaders();
       return c.body(null, 204);
     }
     await next();
-    if (c.req.header("origin")) {
-      c.header("access-control-allow-origin", c.req.header("origin")!);
-      c.header("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-      c.header("access-control-allow-headers", "content-type, authorization");
-    }
+    corsHeaders();
   });
 
   app.route(
@@ -57,15 +76,24 @@ export async function createApp(deps: AppDeps): Promise<Hono> {
       documents: deps.config.documents,
       logPath: deps.config.files.log_path,
       voiceModels: {
-        providers: {
-          stt: sttProviderOf(deps.config.stt),
-          tts: ttsProviderOf(deps.config.tts),
-        },
         dataDir: deps.config.files.data_dir,
-        tts: deps.voiceDeps?.ttsTest ?? (() => (ttsTest ??= createTtsFromConfig(deps.config))),
-        stt: deps.voiceDeps?.sttTest ?? (() => (sttTest ??= createSttFromConfig(deps.config).stt)),
+        resolve: async () => {
+          const providers = await loadEffectiveProviderConfig(deps.db, deps.config);
+          const effective = configWithResolvedProviders(deps.config, providers);
+          return {
+            providers: {
+              stt: sttProviderOf(effective.stt),
+              tts: ttsProviderOf(effective.tts),
+            },
+            tts: deps.voiceDeps?.ttsTest ?? (() => createTtsFromConfig(effective)),
+            stt: deps.voiceDeps?.sttTest ?? (() => createSttFromConfig(effective).stt),
+          };
+        },
       },
-      reportLlm: createLlmFromConfig(deps.config.llm),
+      reportLlmFactory: async () => {
+        const providers = await loadEffectiveProviderConfig(deps.db, deps.config);
+        return createLlmFromConfig(providers.llm);
+      },
     }),
   );
 
@@ -210,6 +238,9 @@ export function serveApp(
   port: number,
   deps: { config: Config; db: Db; voiceDeps?: Pick<VoiceDeps, "loopFactory"> },
 ): ReturnType<typeof Bun.serve> {
+  const exposureError = serverExposureError(deps.config);
+  if (exposureError) throw new Error(exposureError);
+
   const ws = voiceWebSocketHandler({
     config: deps.config,
     db: deps.db,
@@ -217,11 +248,18 @@ export function serveApp(
   });
   return Bun.serve({
     port,
+    hostname: deps.config.server.host ?? DEFAULT_SERVER_HOST,
     // LLM-backed routes (e.g. report generation) can take minutes against
     // reasoning models; the default 10s idle kills them mid-request.
     idleTimeout: 255,
     websocket: ws as never,
     fetch: async (req, server) => {
+      const pathname = new URL(req.url).pathname;
+      const inspection = inspectRequestSecurity(req, deps.config, {
+        requireAuth: req.method !== "OPTIONS" && pathRequiresAuth(pathname),
+        allowQueryToken: VOICE_WS_PATH_RE.test(pathname),
+      });
+      if (!inspection.ok) return securityResponse(inspection);
       const upgraded = await tryUpgradeVoice(req, server as UpgradeServer, deps.db);
       return upgraded ?? app.fetch(req);
     },

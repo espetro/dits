@@ -16,6 +16,7 @@ import type { LlmMessage, LlmPort } from "./llm/index.ts";
 import { finishTurnMetrics, startTurnMetrics } from "./metrics.ts";
 import { MAX_TOOL_OUTPUT, ToolExecutor, parseToolsColumn } from "./tools.ts";
 import { TurnRunner } from "./turn-runner.ts";
+import type { AgentReplyOptions } from "./turn-runner.ts";
 
 /** Injectable voice pipeline pieces (tests stub these); aliases of the slice ports. */
 export type VoiceStt = SttPort;
@@ -159,7 +160,7 @@ export class VoiceLoop {
             .executeTakeFirstOrThrow();
           if (Number(turns) > 0) return;
           await this.postEvent(this.sessionId, "agent.kickoff");
-          return this.runTextTurn(KICKOFF_UTTERANCE, "text");
+          return this.runTextTurn(KICKOFF_UTTERANCE, "text", { persistUser: false });
         })
         .catch((err) => {
           console.error(`[voice] kickoff turn failed: ${err}`);
@@ -303,14 +304,18 @@ export class VoiceLoop {
    * synthetic kickoff): same persist -> LLM -> speak path as a voice turn,
    * minus STT.
    */
-  private async runTextTurn(text: string, source: "voice" | "text"): Promise<void> {
+  private async runTextTurn(
+    text: string,
+    source: "voice" | "text",
+    options: AgentReplyOptions = {},
+  ): Promise<void> {
     if (this.closed || text === "") return;
     this.abort = new AbortController();
     const { signal } = this.abort;
     const t0 = Date.now();
     const metrics = startTurnMetrics(t0, 0);
     try {
-      await this.runner.runAgentReply(text, source, signal, metrics);
+      await this.runner.runAgentReply(text, source, signal, metrics, options);
     } catch (err) {
       if (err instanceof Error && (err.name === "AbortError" || String(err).includes("abort")))
         return;

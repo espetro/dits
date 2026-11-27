@@ -28,3 +28,9 @@ Point the mocked endpoint at a 500 response for one turn. The user turn is
 still recorded, but no empty-text agent turn is persisted or rendered —
 regression coverage for the `runAgentTurn` fix that stopped treating
 `ClientAgent.respond`'s swallowed-error empty string as a successful turn.
+
+## finish builds the report and lands on /report/:id
+
+With the same mocked SSE provider, finish auto-builds the report through the
+client-only generator and advances to `/report/[id]`; the mocked competency
+renders from the OPFS-backed report path.

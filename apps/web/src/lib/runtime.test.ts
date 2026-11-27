@@ -8,6 +8,7 @@ import {
   pickWantsServer,
   probeServer,
   redactKey,
+  settleServerProbe,
 } from "./runtime";
 import { $voiceSttEngine, $voiceTtsEngine } from "../stores/voice";
 
@@ -142,6 +143,23 @@ describe("runtime stores", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthResponse("<html></html>", "text/html")));
     expect(await probeServer()).toBe(false);
     expect($serverReachable.get()).toBe(false);
+    vi.unstubAllGlobals();
+  });
+
+  it("settleServerProbe waits for a pending probe, and is a no-op when none runs", async () => {
+    await settleServerProbe();
+    let release: (r: unknown) => void = () => undefined;
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise((resolve) => (release = resolve))));
+    const probe = probeServer();
+    let settled = false;
+    void settleServerProbe().then(() => (settled = true));
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    release(healthResponse({ ok: true }));
+    await probe;
+    await settleServerProbe();
+    expect(settled).toBe(true);
+    expect($serverReachable.get()).toBe(true);
     vi.unstubAllGlobals();
   });
 
