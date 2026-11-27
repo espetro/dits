@@ -1,6 +1,7 @@
 import type { ElectrobunConfig } from "electrobun";
 
-import { version } from "./package.json";
+import { version as fallbackVersion } from "./package.json";
+import { desktopVersion } from "./src/version";
 
 // CEF is only needed in dev mode for debugging; release builds stay lean.
 const isBuild = process.argv.some((arg) => arg === "build");
@@ -14,7 +15,7 @@ const config: ElectrobunConfig = {
   app: {
     name: "di",
     identifier: "com.di.app",
-    version,
+    version: desktopVersion(fallbackVersion),
   },
   build: {
     buildFolder: "build",

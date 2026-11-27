@@ -10,6 +10,7 @@ import { getConfigPath, serverState, startServer, stopServer } from "./server";
 /** The slice of server.ts the reset needs; injectable for tests. */
 export interface Supervisor {
   getConfigPath: () => string | null;
+  configuredLogPath?: () => string | null;
   serverState: () => { running: boolean; port: number | null };
   startServer: () => Promise<number>;
   stopServer: () => Promise<void>;
