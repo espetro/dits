@@ -24,6 +24,11 @@ import type { SpeechDriver } from "./server-driver";
 import { LLM_TURN_TIMEOUT_MS, TTS_SENTENCE_TIMEOUT_MS } from "../timeouts";
 import { envNum } from "../env";
 
+interface BrowserAgentTurnOptions {
+  /** Synthetic prompts guide the llm but are not user-visible transcript rows. */
+  persistUser?: boolean;
+}
+
 /**
  * Browser driver, multi-mode. Engine resolution (lib/voice/engines.ts) picks
  * per-side: stt = sherpa zipformer worker + silero vad (wasm) or Web Speech
@@ -452,7 +457,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       // "error" included: mic denial still fires the opening turn so the
       // user lands in a text-first interview instead of a dead page.
       if (this.status === "idle" || this.status === "connecting" || this.abort) return;
-      void this.runAgentTurn(KICKOFF_UTTERANCE, "text");
+      void this.runAgentTurn(KICKOFF_UTTERANCE, "text", { persistUser: false });
     }, KICKOFF_DELAY_MS);
   }
 
@@ -509,7 +514,11 @@ export class BrowserVoiceDriver implements SpeechDriver {
   }
 
   /** Stream the agent reply through sentence cutting into pipelined TTS. */
-  private async runAgentTurn(text: string, source: Turn["source"]): Promise<void> {
+  private async runAgentTurn(
+    text: string,
+    source: Turn["source"],
+    options: BrowserAgentTurnOptions = {},
+  ): Promise<void> {
     const agent = this.agent;
     const tts = this.deps.tts ?? synthesizeSpeech;
     if (!agent) return;
@@ -536,7 +545,7 @@ export class BrowserVoiceDriver implements SpeechDriver {
       created_at: new Date().toISOString(),
       source,
     };
-    this.events.onUserTurn?.(userTurn);
+    if (options.persistUser !== false) this.events.onUserTurn?.(userTurn);
 
     this.pending = "";
     let spoke = false;

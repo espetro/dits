@@ -332,16 +332,19 @@ describe("BrowserVoiceDriver kickoff on silence", () => {
     return { driver, respond, emit: rec.emit };
   }
 
-  it("auto-fires the opening agent turn after the silence window", async () => {
+  it("auto-fires the opening agent turn without emitting the synthetic user prompt", async () => {
     vi.useFakeTimers();
     try {
       const { driver, respond } = await setupDriver();
+      const onUserTurn = vi.fn();
+      driver.events.onUserTurn = onUserTurn;
       await driver.start();
       await vi.advanceTimersByTimeAsync(5_000);
       expect(respond).toHaveBeenCalledTimes(1);
       const kickoffText = (respond.mock.calls as unknown[][])[0]![0] as string;
       expect(kickoffText).toMatch(/candidate has joined/);
       expect(kickoffText).toMatch(/ask your first question/);
+      expect(onUserTurn).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }
