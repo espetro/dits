@@ -14,12 +14,13 @@ import * as v from "valibot";
  * agents and deep links.
  */
 
-export type SettingsPane = "history" | "preferences" | "voice" | "status";
+export type SettingsPane = "history" | "preferences" | "voice" | "data" | "status";
 
 export const SETTINGS_PANES: readonly SettingsPane[] = [
   "history",
   "preferences",
   "voice",
+  "data",
   "status",
 ];
 

@@ -48,7 +48,58 @@ export function makeWav(): Uint8Array {
   return new Uint8Array(buf);
 }
 
-type Handler = (req: Request, fixture: MockFixture) => Response | Promise<Response>;
+type Handler = (
+  req: Request,
+  fixture: MockFixture,
+  state: MockServerState,
+) => Response | Promise<Response>;
+
+/** Test-tooling state: last request headers per path + live chat stream count. */
+export type FailMode =
+  /** chat and models answer HTTP 401 with an openai-style json error */
+  | "401"
+  /** GET /models and /v1/models answer 200 text/html (a login or landing page) */
+  | "html-models"
+  /** only GET /models (no version path) answers html: /v1/models stays valid, so a root base url gets a suggestion */
+  | "html-root"
+  /** streamed chat answers 200 with an in-band sse error chunk */
+  | "sse-error";
+
+export const FAIL_MODES: readonly FailMode[] = ["401", "html-models", "html-root", "sse-error"];
+
+export interface MockServerState {
+  /** active failure injection; set via POST /__fail {mode} or --fail. null = healthy. */
+  fail: FailMode | null;
+  /** lowercased header snapshot of the most recent request per path */
+  lastHeaders: Map<string, Record<string, string>>;
+  /** in-flight POST /v1/chat/completions requests (streams not yet closed) */
+  inflight: number;
+}
+
+const HTML_PAGE = "<!doctype html><html><body><h1>Sign in</h1></body></html>";
+
+function htmlPage(): Response {
+  return new Response(HTML_PAGE, { headers: { "content-type": "text/html; charset=utf-8" } });
+}
+
+function recordHeaders(state: MockServerState, req: Request): void {
+  const headers: Record<string, string> = {};
+  req.headers.forEach((value, key) => {
+    headers[key.toLowerCase()] = value;
+  });
+  state.lastHeaders.set(new URL(req.url).pathname, headers);
+}
+
+/** Snapshot helper for /__state responses. */
+export function stateSnapshot(state: MockServerState): {
+  lastHeaders: Record<string, Record<string, string>>;
+  inflight: number;
+} {
+  return {
+    lastHeaders: Object.fromEntries(state.lastHeaders),
+    inflight: state.inflight,
+  };
+}
 
 /** Deterministic embedding: 64-dim token-hash bag-of-words, L2-normalized. */
 export function mockEmbed(text: string, dims = 64): number[] {
@@ -87,7 +138,14 @@ const routes: [string, string, Handler][] = [
   [
     "POST",
     "/v1/chat/completions",
-    async (req, fx) => {
+    async (req, fx, state) => {
+      if (state.fail === "401") {
+        return Response.json(
+          { error: { message: "invalid api key (mock 401)", type: "invalid_request_error" } },
+          { status: 401 },
+        );
+      }
+      state.inflight++;
       const body = (await req.json().catch(() => ({}))) as {
         stream?: boolean;
         messages?: { content?: string }[];
@@ -108,6 +166,7 @@ const routes: [string, string, Handler][] = [
         });
       }
       if (!body.stream) {
+        state.inflight--;
         return Response.json({
           id: "chatcmpl-mock",
           object: "chat.completion",
@@ -124,9 +183,13 @@ const routes: [string, string, Handler][] = [
         });
       }
       // real sse: the browser llm client always requests stream:true, so
-      // evals/e2e exercise the same parse path as a live provider.
+      // evals/e2e exercise the same parse path as a live provider. inflight
+      // drains when the stream finishes, errors or the client cancels.
       const encoder = new TextEncoder();
       const stream = new ReadableStream<Uint8Array>({
+        cancel() {
+          state.inflight--;
+        },
         start(controller) {
           const send = (obj: unknown) =>
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
@@ -136,6 +199,13 @@ const routes: [string, string, Handler][] = [
             created,
             model: "mock-llm",
           };
+          if (state.fail === "sse-error") {
+            send({ error: { message: "upstream exploded (mock in-band error)" } });
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+            state.inflight--;
+            return;
+          }
           send({
             ...base,
             choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
@@ -149,6 +219,7 @@ const routes: [string, string, Handler][] = [
           send({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] });
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
+          state.inflight--;
         },
       });
       return new Response(stream, {
@@ -177,7 +248,11 @@ const routes: [string, string, Handler][] = [
   [
     "GET",
     "/v1/models",
-    (_req, fx) => {
+    (_req, fx, state) => {
+      if (state.fail === "401") {
+        return Response.json({ error: { message: "invalid api key (mock 401)" } }, { status: 401 });
+      }
+      if (state.fail === "html-models") return htmlPage();
       return Response.json({
         object: "list",
         data: fx.models.map((id) => ({
@@ -188,16 +263,55 @@ const routes: [string, string, Handler][] = [
       });
     },
   ],
+  [
+    "GET",
+    "/models",
+    (_req, _fx, state) =>
+      state.fail === "html-models" || state.fail === "html-root"
+        ? htmlPage()
+        : Response.json({ error: { message: "no route: GET /models" } }, { status: 404 }),
+  ],
   ["GET", "/health", () => Response.json({ ok: true })],
+  // test tooling: e2e specs assert on the recorded request headers and the
+  // in-flight chat count (abort propagation) via this snapshot
+  [
+    "GET",
+    "/__state",
+    (_req, _fx, state) => {
+      return Response.json(stateSnapshot(state));
+    },
+  ],
+  // test tooling: flip failure injection at runtime ({"mode": null} clears)
+  [
+    "POST",
+    "/__fail",
+    async (req, _fx, state) => {
+      const body = (await req.json().catch(() => ({}))) as { mode?: unknown };
+      const mode = body.mode ?? null;
+      if (mode !== null && !FAIL_MODES.includes(mode as FailMode)) {
+        return Response.json({ error: `unknown fail mode: ${String(mode)}` }, { status: 400 });
+      }
+      state.fail = mode as FailMode | null;
+      return Response.json({ fail: state.fail });
+    },
+  ],
 ];
 
-export function createApp(fixture: MockFixture = loadFixture()) {
+export function createApp(
+  fixture: MockFixture = loadFixture(),
+  state: MockServerState = {
+    fail: null,
+    lastHeaders: new Map(),
+    inflight: 0,
+  },
+) {
   return {
     fetch(req: Request): Response | Promise<Response> {
+      recordHeaders(state, req);
       const url = new URL(req.url);
       for (const [method, path, handler] of routes) {
         if (req.method === method && url.pathname === path) {
-          return handler(req, fixture);
+          return handler(req, fixture, state);
         }
       }
       return Response.json(
@@ -221,20 +335,45 @@ function withCors(res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
-export function startServer(port: number, fixture?: MockFixture) {
-  const app = createApp(fixture);
+export interface MockServerOptions {
+  /** Emulate CORS-hostile providers (openrouter, bifrost): no access-control-*
+   * headers and OPTIONS preflight rejected with 403. Default stays CORS `*`. */
+  noCors?: boolean;
+  /** start with a failure mode already active (see FailMode) */
+  fail?: FailMode;
+}
+
+export function startServer(port: number, fixture?: MockFixture, opts: MockServerOptions = {}) {
+  const state: MockServerState = { fail: opts.fail ?? null, lastHeaders: new Map(), inflight: 0 };
+  const app = createApp(fixture, state);
   return Bun.serve({
     port,
     async fetch(req) {
       if (req.method === "OPTIONS")
-        return new Response(null, { status: 204, headers: CORS_HEADERS });
-      return withCors(await app.fetch(req));
+        return opts.noCors
+          ? new Response(null, { status: 403 })
+          : new Response(null, { status: 204, headers: CORS_HEADERS });
+      const res = await app.fetch(req);
+      return opts.noCors ? res : withCors(res);
     },
   });
 }
 
 if (import.meta.main) {
-  const port = Number(new URLSearchParams(process.argv.slice(2).join("&")).get("port") ?? 9000);
-  const server = startServer(port);
+  // accept `--port 9000`, `--port=9000` and bare flags like `--no-cors`
+  const params = new URLSearchParams();
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]!.replace(/^-+/, "");
+    const next = argv[i + 1];
+    if (arg.includes("=")) params.set(...(arg.split("=", 2) as [string, string]));
+    else if (next !== undefined && !next.startsWith("-")) params.set(arg, argv[++i]!);
+    else params.set(arg, "");
+  }
+  const port = Number(params.get("port") ?? 9000);
+  const server = startServer(port, undefined, {
+    noCors: params.has("no-cors"),
+    ...(params.get("fail") ? { fail: params.get("fail") as FailMode } : {}),
+  });
   console.log(`mock provider listening on http://localhost:${server.port}`);
 }

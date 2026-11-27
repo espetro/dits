@@ -81,6 +81,16 @@ description = "Run evals vitest suite"
 run = "bun run --bun vitest run"
 dir = "packages/evals"
 
+[tasks.bench]
+description = "Time stt, tts, llm and a chained turn (mock provider, or BENCH_BASE_URL)"
+run = "bun run bench/voice.ts"
+dir = "packages/evals"
+
+[tasks."bench:browser"]
+description = "Time cloud stt/tts/llm and the ClientAgent turn in the headless app via playwright-cli (BENCH_WASM=1 builds web, adds wasm engines + tts->stt round trip)"
+run = "bun run bench/browser.ts"
+dir = "packages/evals"
+
 [tasks.logs]
 description = "Tail .di/logs/*.log, pretty-printing JSON lines via jq (no logger dependency — the server just writes ndjson)"
 run = '''
@@ -104,4 +114,13 @@ curl -sf -m 10 "${DI_URL:-http://localhost:3000}/v1/test/smoke" | jq -e '.ok == 
 [tasks.e2e]
 description = "Run Playwright e2e specs in tests/e2e (requires DI server in test mode running; DI_URL to override)"
 run = "bun x playwright test"
+dir = "tests/e2e"
+
+# Relay specs: additionally requires the web dev server started with the di
+# server as its API base (cd apps/web && VITE_DI_API_BASE=$DI_URL bun run
+# dev; DI_WEB_URL to override). The no-CORS mock provider is spawned by the
+# spec itself on MOCK_NOCORS_PORT (default 9100).
+[tasks.e2e-relay]
+description = "Run provider-relay Playwright specs (requires DI server in test mode + web dev server with VITE_DI_API_BASE; mock spawned by the spec)"
+run = "bun x playwright test provider-relay.spec.ts"
 dir = "tests/e2e"

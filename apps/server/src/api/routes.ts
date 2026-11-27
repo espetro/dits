@@ -1,9 +1,11 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import * as v from "valibot";
 import {
   CreateSessionRequestSchema,
   DEFAULT_SESSION_TOOLS,
   DocumentSchema,
+  RelayQuerySchema,
   ReportSchema,
   SessionContextResponseSchema,
   SessionEventSchema,
@@ -14,10 +16,12 @@ import {
 } from "@di/shared";
 import { vValidator } from "@hono/valibot-validator";
 import type { Db } from "../store/db";
-import type { Config } from "@di/shared";
+import type { Config, DataResetResponse } from "@di/shared";
+import { writeFile } from "node:fs/promises";
 import type { ReportLlm } from "../report/generate";
 import { generateReport } from "../report/generate";
 import { testRoutes } from "./test-mode";
+import { deleteAllData, deleteSession } from "../store/reset";
 import {
   CapError,
   deleteDocument,
@@ -26,6 +30,7 @@ import {
   loadVectors,
 } from "../rag/ingest";
 import { retrieve } from "../rag/embeddings";
+import { decodeWav, encodeWav, resamplePcm16 } from "../voice/stt";
 import {
   builtinModelsStatus,
   builtinPullProgress,
@@ -34,7 +39,75 @@ import {
   ensureBuiltinModels,
 } from "../voice/builtin/models.ts";
 
+/** The slice of a tts adapter the test route needs: text in, pcm16 mono 24k out. */
+export interface TtsTestPort {
+  synthesizeToPcm(text: string, opts?: { signal?: AbortSignal }): Promise<Uint8Array>;
+}
+
+/** The slice of a stt adapter the test route needs: pcm16le mono 16k in, text out. */
+export interface SttTestPort {
+  transcribePcm(pcm: Uint8Array, opts?: { signal?: AbortSignal }): Promise<string>;
+}
+
+const STT_TEST_RATE = 16_000;
+/** ~30s of 16k pcm16 mono; the settings test records ~6s. */
+const STT_TEST_MAX_BYTES = STT_TEST_RATE * 2 * 30;
+
+const TTS_TEST_RATE = 24_000;
+const TTS_TEST_MAX_CHARS = 280;
+
 const TurnInputSchema = v.omit(TurnSchema, ["session_id"]);
+
+/** Request headers the relay forwards upstream; everything else (cookies, origin, ...) is dropped. */
+const RELAY_FORWARD_HEADERS = ["authorization", "content-type", "cf-turnstile-response"] as const;
+
+interface RelayUpstreamInit {
+  method: string;
+  headers: Record<string, string>;
+  body: ReadableStream<unknown> | null;
+  signal: AbortSignal | null;
+  redirect: RequestRedirect;
+}
+
+function relayForwardHeaders(req: Request): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const name of RELAY_FORWARD_HEADERS) {
+    const value = req.headers.get(name);
+    if (value !== null) headers[name] = value;
+  }
+  return headers;
+}
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === "AbortError";
+}
+
+class RelayUpstreamError extends Error {
+  constructor(cause: unknown) {
+    super(`upstream fetch failed: ${cause}`);
+    this.cause = cause;
+  }
+}
+
+/** Streams a relayed Response with content-type only; null body degrades to empty. */
+function relayResponse(c: Context, upstream: Response): Response {
+  const contentType = upstream.headers.get("content-type");
+  const headers: Record<string, string> = {};
+  if (contentType) headers["content-type"] = contentType;
+  // upstream.body is null only for empty upstream responses (204/304, HEAD),
+  // where an empty body is already the correct response. Hono's c.body
+  // overloads reject mixed shapes, so build the Response directly.
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
+
+async function relayFetchUpstream(upstream: string, init: RelayUpstreamInit): Promise<Response> {
+  try {
+    return await fetch(upstream, init);
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new RelayUpstreamError(err);
+  }
+}
 
 /** sessions.tools is stored as JSON text; absent pre-p3 rows mean the default toolset. */
 function parseSessionTools(raw: string | null | undefined): Record<string, string> {
@@ -66,7 +139,13 @@ export function apiRoutes(
     voiceModels?: {
       providers: { stt: "remote" | "builtin"; tts: "remote" | "builtin" };
       dataDir: string;
+      /** lazily builds the configured tts adapter (cached by the caller) for POST /voice/tts-test. */
+      tts?: () => TtsTestPort;
+      /** lazily builds the configured stt adapter (cached by the caller) for POST /voice/stt-test. */
+      stt?: () => SttTestPort;
     };
+    /** log file truncated by DELETE /data; empty/undefined = logging disabled. */
+    logPath?: string;
   },
 ): Hono {
   const api = new Hono();
@@ -153,6 +232,23 @@ export function apiRoutes(
         tools: parseSessionTools(row.tools),
       }),
     );
+  });
+
+  api.delete("/sessions/:id", async (c) => {
+    const ok = await deleteSession(db, c.req.param("id"));
+    return ok ? c.body(null, 204) : c.json({ error: "not found", code: "not_found" }, 404);
+  });
+
+  /**
+   * Full server-side reset: every interview row, the builtin voice model
+   * cache and the log file. Destructive; the web Settings "Data" pane is the
+   * only caller and gates it behind a typed confirmation.
+   */
+  api.delete("/data", async (c) => {
+    const sessions = await deleteAllData(db);
+    if (opts.voiceModels) await clearBuiltinModels(opts.voiceModels.dataDir);
+    if (opts.logPath) await writeFile(opts.logPath, "").catch(() => undefined);
+    return c.json({ ok: true as const, sessions } satisfies DataResetResponse);
   });
 
   api.post("/sessions/:id/turns", vValidator("json", TurnInputSchema), async (c) => {
@@ -320,6 +416,44 @@ export function apiRoutes(
     return c.json(JSON.parse(row.data));
   });
 
+  /**
+   * Streaming passthrough relay for browser-mode provider calls (the SPA
+   * cannot fetch openrouter/bifrost/... cross-origin). Method and body stream
+   * through untouched so the client-side SSE parsing is reused verbatim;
+   * only the allowlisted headers cross the boundary. Keys are never logged.
+   */
+  api.all(
+    "/relay",
+    vValidator("query", RelayQuerySchema, (result, c) => {
+      if (!result.success) {
+        return c.json({ error: "invalid url query parameter", code: "relay_bad_url" }, 400);
+      }
+    }),
+    async (c) => {
+      const { url: upstream } = c.req.valid("query");
+      const init: RelayUpstreamInit = {
+        method: c.req.method,
+        headers: relayForwardHeaders(c.req.raw),
+        body: c.req.raw.body,
+        signal: c.req.raw.signal,
+        redirect: "manual",
+      };
+      let upstreamRes: Response;
+      try {
+        upstreamRes = await relayFetchUpstream(upstream, init);
+      } catch (err) {
+        if (err instanceof RelayUpstreamError) {
+          // network-level failure (dns, refused, tls), not a client abort
+          return c.json({ error: "upstream fetch failed", code: "relay_upstream" }, 502);
+        }
+        // client abort: rethrow so Bun tears down the socket alongside the
+        // already-aborted upstream request (fetch shares c.req.raw.signal).
+        throw err;
+      }
+      return relayResponse(c, upstreamRes);
+    },
+  );
+
   // Voice WebSocket endpoint. Bun upgrades this in serveApp before the Hono
   // app sees it; this route only handles non-upgrade requests (documented
   // in .agents/docs, not openapi.json).
@@ -416,6 +550,85 @@ export function apiRoutes(
       // idempotent: shares the inflight run with the boot warm / lazy boot
       await ensureBuiltinModels(voiceModels.dataDir, { modelIds: ids });
       return c.json(await status());
+    });
+
+    // desktop tts test: really synthesizes through the configured server
+    // layer (builtin kitten or remote endpoint) so the settings Test button
+    // measures the same path an interview uses
+    api.post("/voice/tts-test", async (c) => {
+      if (!voiceModels.tts)
+        return c.json({ error: "tts test unavailable", code: "tts_test_off" }, 503);
+      const body = (await c.req.json().catch(() => ({}))) as { text?: unknown };
+      const text =
+        typeof body.text === "string" ? body.text.trim().slice(0, TTS_TEST_MAX_CHARS) : "";
+      if (!text) return c.json({ error: "text required", code: "tts_test_bad_text" }, 400);
+      const startedAt = performance.now();
+      try {
+        const pcm = await voiceModels.tts().synthesizeToPcm(text, { signal: c.req.raw.signal });
+        if (pcm.byteLength === 0)
+          return c.json({ error: "tts returned no audio", code: "tts_empty" }, 502);
+        const wav = encodeWav([pcm], { sampleRate: TTS_TEST_RATE, channels: 1 });
+        return new Response(new Uint8Array(wav), {
+          headers: {
+            "content-type": "audio/wav",
+            "x-synth-ms": String(Math.round(performance.now() - startedAt)),
+            "access-control-expose-headers": "x-synth-ms",
+          },
+        });
+      } catch (err) {
+        return c.json(
+          { error: err instanceof Error ? err.message : String(err), code: "tts_failed" },
+          502,
+        );
+      }
+    });
+
+    // desktop stt test: transcribes a captured sample through the configured
+    // server layer (builtin sherpa or remote whisper). Body is a wav, or raw
+    // pcm16le mono 16k with content-type audio/L16.
+    api.post("/voice/stt-test", async (c) => {
+      if (!voiceModels.stt)
+        return c.json({ error: "stt test unavailable", code: "stt_test_off" }, 503);
+      const raw = new Uint8Array(await c.req.arrayBuffer().catch(() => new ArrayBuffer(0)));
+      if (raw.byteLength === 0)
+        return c.json({ error: "audio required", code: "stt_bad_audio" }, 400);
+      const type = (c.req.header("content-type") ?? "").toLowerCase();
+      let pcm: Uint8Array;
+      if (type.startsWith("audio/l16")) {
+        pcm = raw;
+      } else {
+        try {
+          const wav = decodeWav(raw);
+          if (wav.bitsPerSample !== 16 || wav.channels !== 1)
+            return c.json({ error: "wav must be 16-bit mono", code: "stt_bad_audio" }, 400);
+          pcm = resamplePcm16(wav.data, wav.sampleRate, STT_TEST_RATE);
+        } catch (err) {
+          return c.json(
+            { error: err instanceof Error ? err.message : String(err), code: "stt_bad_audio" },
+            400,
+          );
+        }
+      }
+      if (pcm.byteLength > STT_TEST_MAX_BYTES)
+        return c.json({ error: "audio too long", code: "stt_bad_audio" }, 413);
+      // never trigger a multi-hundred-MB model pull from a test click
+      if (voiceModels.providers.stt === "builtin") {
+        const models = await builtinModelsStatus(voiceModels.dataDir);
+        if (!models.stt.installed)
+          return c.json({ error: "stt model not downloaded yet", code: "stt_model_missing" }, 409);
+      }
+      const startedAt = performance.now();
+      try {
+        const text = (
+          await voiceModels.stt().transcribePcm(pcm, { signal: c.req.raw.signal })
+        ).trim();
+        return c.json({ text, ms: Math.round(performance.now() - startedAt) });
+      } catch (err) {
+        return c.json(
+          { error: err instanceof Error ? err.message : String(err), code: "stt_failed" },
+          502,
+        );
+      }
     });
 
     api.delete("/voice/models", async (c) => {

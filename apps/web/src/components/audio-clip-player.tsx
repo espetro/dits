@@ -12,6 +12,8 @@ export interface AudioClipPlayerProps {
   onBuiltinStop?(): void;
   /** estimated duration for the builtin fallback's progress bar */
   estimatedMs?: number;
+  /** playback rejected (autoplay policy, undecodable clip) */
+  onError?(err: unknown): void;
 }
 
 /**
@@ -62,8 +64,11 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
 
   function start() {
     if (url && audioRef.current) {
-      void audioRef.current.play();
       setPlaying(true);
+      audioRef.current.play().catch((err: unknown) => {
+        setPlaying(false);
+        props.onError?.(err);
+      });
       return;
     }
     props.onBuiltinStart?.();
@@ -79,7 +84,7 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
 
   const ready = Boolean(url) || Boolean(props.onBuiltinStart);
   return (
-    <span className="flex min-w-40 items-center gap-2">
+    <span className="flex w-40 shrink-0 items-center gap-2">
       <Button
         type="button"
         variant="outline"

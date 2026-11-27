@@ -12,8 +12,8 @@ import { sectionIncomplete, useModelOptions, useSettingsDrafts } from "./setting
 import { $providerProfile } from "../lib/runtime";
 import { useSsrStore } from "../lib/ssr";
 import { DEMO_LLM, DEMO_LLM_ENABLED, isDemoLlm } from "../lib/demo-llm";
-import { createOpenAiCompatibleModel } from "../lib/agent/openai-compatible-provider";
-import { TRANSFORMERS_CATALOG } from "../lib/agent/browser-provider";
+import { LlmTestError, TRANSFORMERS_CATALOG, runLlmTest } from "../lib/llm";
+import type { LlmRoute } from "../lib/llm";
 import { errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
 
@@ -22,6 +22,10 @@ type LlmPick = "in-browser" | "demo" | "cloud";
 interface TestState {
   status: "idle" | "running" | "ok" | "err";
   message?: string;
+  /** transport the test used: di server relay or browser direct (null: none yet) */
+  route?: LlmRoute | null;
+  /** ok, but the model returned only reasoning tokens */
+  reasoningOnly?: boolean;
 }
 
 /**
@@ -74,36 +78,22 @@ export function BrainSection() {
     }
   };
 
-  /** fire one real short completion through the configured llm, streamed */
+  /**
+   * fire one real short completion through the configured llm, streamed.
+   * Never blocked by missing optional fields: a precise reason (and the
+   * route taken) is reported instead of a disabled button.
+   */
   async function runTest() {
     setTest({ status: "running" });
     setOutput("");
     try {
-      const model = createOpenAiCompatibleModel(
-        { baseUrl: draft.baseUrl, apiKey: draft.apiKey, model: draft.model },
-        {},
-      );
-      const { streamText } = await import("ai");
-      const { textStream } = streamText({
-        model,
-        prompt: "Reply with the single word: ok",
-        maxOutputTokens: 5,
-      });
-      let text = "";
-      for await (const delta of textStream) {
-        text += delta;
-        setOutput(text);
-      }
-      if (text.trim()) {
-        setTest({ status: "ok" });
-        markSeamOp("llm", true);
-      } else {
-        setTest({ status: "err", message: intl.formatMessage({ id: "settings.invalid" }) });
-        markSeamOp("llm", false, "settings.invalid");
-      }
+      const res = await runLlmTest(draft, setOutput);
+      setTest({ status: "ok", route: res.route, reasoningOnly: res.reasoningOnly });
+      markSeamOp("llm", true);
     } catch (err) {
-      const msg = errorDetail(intl, err);
-      setTest({ status: "err", message: msg });
+      const route = err instanceof LlmTestError ? err.route : null;
+      const msg = errorDetail(intl, err instanceof LlmTestError ? err.cause : err);
+      setTest({ status: "err", message: msg, route });
       markSeamOp("llm", false, msg);
     }
   }
@@ -206,7 +196,7 @@ export function BrainSection() {
           variant="outline"
           size="sm"
           onClick={() => void runTest()}
-          disabled={!testable || test.status === "running" || incomplete}
+          disabled={!testable || test.status === "running"}
           aria-busy={test.status === "running"}
         >
           {test.status === "running" ? (
@@ -245,9 +235,17 @@ export function BrainSection() {
             <X className="size-3.5" aria-hidden="true" />
           )}
           {test.status === "ok" ? (
-            <FormattedMessage id="settings.testOk" />
+            <FormattedMessage
+              id={test.reasoningOnly ? "settings.testOkReasoning" : "settings.testOk"}
+            />
           ) : (
             <FormattedMessage id="settings.testFailed" values={{ message: test.message ?? "" }} />
+          )}
+          {test.route && (
+            <span className="text-muted-foreground">
+              {" · "}
+              <FormattedMessage id={`settings.testRoute.${test.route}`} />
+            </span>
           )}
         </span>
       ) : null}

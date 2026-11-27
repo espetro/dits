@@ -68,7 +68,7 @@ function maxFileLoc(): number {
   let max = 0;
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir)) {
-      if (entry === "node_modules" || entry.startsWith(".")) continue;
+      if (entry === "node_modules" || entry === "vendor" || entry.startsWith(".")) continue;
       const full = join(dir, entry);
       const st = statSync(full);
       if (st.isDirectory()) walk(full);

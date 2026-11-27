@@ -4,5 +4,5 @@
     "types": ["bun", "node"],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "mock-provider/**/*.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "mock-provider/**/*.ts", "bench/**/*.ts", "vitest.config.ts"]
 }

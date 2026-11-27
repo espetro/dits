@@ -9,11 +9,10 @@ import type {
 import type { Turn } from "@di/shared/session";
 import { ClientAgent } from "../agent/client-agent";
 import type { AgentToolExecutors } from "../agent/client-agent";
-import { synthesizeSpeech } from "../agent/tts";
+import { WasmTts, synthesizeSpeech } from "../tts";
 import { resolveInstalledVoiceEngines } from "./engines";
 import type { ResolvedVoiceEngines, SttEngine, TtsEngine } from "./engines";
-import { WasmStt, WasmTts } from "./wasm-engines";
-import { EndpointStt } from "./endpoint-stt";
+import { EndpointStt, WasmStt } from "../stt";
 import { startCapture } from "./capture";
 import type { MicCapture } from "./capture";
 import { createVadGate } from "./vad";

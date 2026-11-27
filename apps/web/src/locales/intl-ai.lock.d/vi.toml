@@ -409,12 +409,54 @@ model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
 [entries."errors.llm.chat"]
-value = "yêu cầu mô hình thất bại ({status})"
-source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+value = "Yêu cầu tới mô hình thất bại ({status}): {detail}"
+source_hash = "81ebbfefcc618641c8990861a0af6b8775350c03"
 origin = "ai"
 reviewed = false
-model = "openrouter/free"
-updated_at = "2026-10-12T20:13:39Z"
+model = "zai-coding-plan/glm-5.3-flash"
+updated_at = "2026-10-15T23:04:14Z"
+
+[entries."errors.llm.empty"]
+value = "điểm cuối đã phản hồi nhưng không trả về văn bản; có thể mô hình đã dùng hết token cho suy luận ẩn, hãy thử mô hình khác"
+source_hash = "29a95f5565aa88963979adc1620d648889164bec"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.llm.invalidBaseUrl"]
+value = "URL gốc không phải là URL hợp lệ"
+source_hash = "cf9d95e4fcfe543fd9c21fae03be9d051019890c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.llm.missingBaseUrl"]
+value = "hãy nhập URL gốc trước"
+source_hash = "a02108e299c1932a896aefc73ff0a17e73529c38"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.llm.missingModel"]
+value = "hãy nhập id mô hình trước"
+source_hash = "ffe149ceb9a6162b1f8519db54ebb52300fc5d86"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.llm.network.direct"]
+value = "trình duyệt không thể kết nối tới điểm cuối (lỗi mạng hoặc bị CORS chặn); hãy khởi động máy chủ di để chuyển tiếp cuộc gọi"
+source_hash = "08b6fe3f21788aa96cbc8548701d2a4058eaeee4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.llm.network.relay"]
+value = "máy chủ di không thể kết nối tới điểm cuối"
+source_hash = "4699956240178557582070ed1d0580debca92c1d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."errors.llm.notLoaded"]
 value = "mô hình trong trình duyệt chưa được tải"
@@ -423,6 +465,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."errors.llm.testTimeout"]
+value = "không có phản hồi trong {seconds} giây"
+source_hash = "1ab7c5b0afb12e3bf9dbe180366869fe580074eb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."errors.llm.timeout"]
 value = "tải mô hình hết thời gian ({seconds}s)"
@@ -464,6 +513,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."errors.models.network"]
+value = "không thể kết nối tới endpoint (lỗi mạng hoặc bị CORS chặn; hãy chạy di server hoặc ứng dụng desktop để chuyển tiếp)"
+source_hash = "5cac0197e41e7e59722f81d1d9dbccc777d27ee8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."errors.models.noStorage"]
 value = "không có bộ nhớ lưu trữ vĩnh viễn cho mô hình giọng nói"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
@@ -472,6 +528,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."errors.models.notJson"]
+value = "endpoint trả về nội dung không phải danh sách mô hình (kiểm tra URL gốc)"
+source_hash = "48e8fb4e83c66e88a6591067915ab12fd1d47851"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."errors.models.sha256"]
 value = "tải mô hình thất bại xác minh"
 source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
@@ -479,6 +542,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."errors.models.shape"]
+value = "endpoint phản hồi không có danh sách mô hình (định dạng phản hồi không như mong đợi)"
+source_hash = "d4411f30b99f920b845dc6d9c8748f990b083dd5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."errors.models.size"]
 value = "tải mô hình bị cắt ngắn"
@@ -503,6 +573,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."errors.models.suggest"]
+value = "không có danh sách mô hình tại URL gốc này; URL này hoạt động: {url}"
+source_hash = "538193be3dda96f22bd7998767fa98647c27dbb8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."errors.models.ttsEngine"]
 value = "mô hình giọng nói trên thiết bị chưa được cài đặt"
@@ -576,6 +653,20 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."errors.stt.server"]
+value = "di server không thể chuyển giọng nói thành văn bản: {detail}"
+source_hash = "e11aecd004893d55bf6f95ddf9c53c4da3e02a4d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."errors.stt.serverModelMissing"]
+value = "mô hình giọng nói của di server chưa được tải xuống, hãy tải xuống ở phía trên"
+source_hash = "64522cf01d10a3e5d54dd71549383895ab2fc39f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."errors.stt.unknown"]
 value = "nhận diện giọng nói thất bại"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
@@ -623,6 +714,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."errors.tts.server"]
+value = "di server không thể tổng hợp giọng nói ({status})"
+source_hash = "1f75fec7882f9f72516e3cf51a278830e1fc0d21"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."errors.tts.wav"]
 value = "định dạng âm thanh không mong muốn"
@@ -2200,6 +2298,62 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."settings.data.confirmDesc"]
+value = "thao tác này xóa mọi buổi phỏng vấn đã lưu, mô hình giọng nói đã tải, cài đặt và khóa API, trên thiết bị này và trên di server. gõ {word} để xác nhận."
+source_hash = "041b9b72db8d13916157c477257cfd02d976a079"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.confirmLabel"]
+value = "từ xác nhận"
+source_hash = "60dfd5d472986cb796a3235a73310f241a254273"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.confirmTitle"]
+value = "đặt lại mọi thứ?"
+source_hash = "847d66c2fdef644b3f4401233639c6b7d7acf6aa"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.confirmWord"]
+value = "đặt lại"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.reset"]
+value = "đặt lại mọi thứ"
+source_hash = "2f51eae0fa732f647ac64d429bcebadb7c595dd6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.resetButton"]
+value = "đặt lại"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.resetDesc"]
+value = "xóa mọi buổi phỏng vấn, mô hình giọng nói, cài đặt và khóa, rồi bắt đầu lại. không thể hoàn tác."
+source_hash = "f5132198a1cd9432ff8ffe1d2205893e6b4efeb6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.data.resetDo"]
+value = "xóa tất cả"
+source_hash = "b8f9c64b1250fd8ac3a4b4af0a3b37e179a46ec4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."settings.demoLlm.badge"]
 value = "demo"
 source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
@@ -2464,14 +2618,6 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
-[entries."settings.layer.serverOwned"]
-value = "được xử lý bởi ứng dụng máy tính để bàn — lớp này chạy ở đó"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "ai"
-reviewed = false
-model = "openrouter/free"
-updated_at = "2026-10-12T20:13:39Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "ứng dụng máy tính để bàn không thể truy cập — lớp này chuyển sang trong trình duyệt"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
@@ -2720,6 +2866,41 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."settings.modelsEmpty"]
+value = "điểm cuối này không trả về mô hình nào"
+source_hash = "78dae7a488e2b144cfaeb76298706083371c7615"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.modelsIdle"]
+value = "nhập URL gốc để liệt kê các mô hình"
+source_hash = "1ee05682fedc1dd3e158212c5bb2bb211806db15"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.modelsLoading"]
+value = "đang tải mô hình..."
+source_hash = "f14087ac89d4bbe95da0cd76b671e31adfa50146"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.modelsNoMatch"]
+value = "không có mô hình nào trong danh sách khớp; văn bản của bạn được dùng nguyên văn"
+source_hash = "83777eca4e6029b3465010f9572e0fd62b8e946c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.modelsToggle"]
+value = "hiện các mô hình"
+source_hash = "cd3000ff3c2cf4b2232315bd8bbfe83f5ee341a3"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."settings.nav.advanced"]
 value = "nâng cao"
 source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
@@ -2735,6 +2916,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."settings.nav.data"]
+value = "dữ liệu"
+source_hash = "a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."settings.nav.downloads"]
 value = "tải xuống"
@@ -2783,6 +2971,27 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."settings.preset"]
+value = "Nhà cung cấp"
+source_hash = "7ceee3f3615a2bbe4ce0ac5a269a311e4821daf4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.presetCustom"]
+value = "Tùy chỉnh"
+source_hash = "081ae3fdc403609cf6e760849ebb14117b7a50cb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.presetHelp"]
+value = "Chọn nhà cung cấp để điền URL gốc, hoặc giữ URL tùy chỉnh."
+source_hash = "5128e275bedcd02e367f704b1781debde054607e"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."settings.section.brain"]
 value = "não"
@@ -3176,6 +3385,27 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
 
+[entries."settings.testOkReasoning"]
+value = "Hoạt động (mô hình đã dùng hết token cho suy luận và không trả về văn bản hiển thị)"
+source_hash = "864b453481a7c55b3492384bc73a0c7c26829887"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.testRoute.direct"]
+value = "trực tiếp từ trình duyệt"
+source_hash = "5cb5aa715a6f7975d605a2de827850d270e83105"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
+[entries."settings.testRoute.relay"]
+value = "qua relay của máy chủ di"
+source_hash = "654ae06a03b04d934050ce4a68d336c13e5a7a20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
+
 [entries."settings.testing"]
 value = "Đang thử…"
 source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
@@ -3303,6 +3533,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-10-12T20:13:39Z"
+
+[entries."settings.voice.sampleMs"]
+value = "{ms} ms"
+source_hash = "c965f5d6d35d31a721ce12466cf058663f5beecf"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:04:11Z"
 
 [entries."settings.voice.stt"]
 value = "hiểu bạn với"

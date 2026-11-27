@@ -2,11 +2,11 @@
 
 One centered dialog is the single settings surface, opened from the
 account dropdown, the navbar status chip, or any `openSettings(pane)`
-call site. Three nav panes — past interviews, user preferences, voice &
-personality — plus a hidden system-status view the chip opens
+call site. Four nav panes — past interviews, user preferences, voice &
+personality, data (danger zone, separated by a rule) — plus a hidden system-status view the chip opens
 (pane=status). Desktop: borderless left sidebar nav + inset rounded
 content card. Mobile: full-screen with a top pane select. URL-driven:
-`?settings=1&pane=…` (pane ∈ history | preferences | voice | status;
+`?settings=1&pane=…` (pane ∈ history | preferences | voice | data | status;
 legacy ids — `ai`, `downloads`, `advanced`, `aiProvider` → voice;
 `language` → preferences).
 
@@ -89,7 +89,19 @@ driver otherwise.
 - Past interviews pane: client-only OPFS list via listClientSessions
   (Empty block when none), rows link to /interview/$id, /finish/$id or
   /report/$id by status, plus a two-step "clear all" footer that wipes
-  every saved session via clearClientSessions.
+  every saved session via clearClientSessions and, when the di server is
+  reachable, DELETE /v1/sessions/:id for each server session (the
+  sidecar sqlite is not left behind).
+- Data pane: one destructive "reset everything" row inside a
+  destructive-bordered block. Opens a dialog with a typed confirmation
+  word (locale `settings.data.confirmWord`); on confirm it calls
+  DELETE /v1/data when the server is reachable (db rows, builtin model
+  cache, log), then clears OPFS sessions, voice model cache, transformers
+  cache and every `di.*` / `di:*` localStorage key, and hard-reloads into
+  first-run state. Failures render in a destructive alert inside the
+  dialog. The desktop shell has a separate control route
+  (`POST /api/reset`) that also removes db files, data dir, log and
+  config.yaml (keys) and restarts the sidecar.
 - User preferences pane: app language select (drives the url locale
   prefix via a full navigation) and the interview language (new
   sessions start with `di.interview-language`, kept in sync with
@@ -112,16 +124,56 @@ driver otherwise.
   demo is the default and fills the managed VITE_DEMO_LLM_* endpoint;
   in-browser renders the future options — gemini nano + transformers
   catalog — marked unavailable, no fake engine), cloud reveals the
-  endpoint fields (base url, api key masked inside a <form> with a
+  endpoint fields (a provider preset select above the base url, fed by
+  PROVIDER_PRESETS from @di/shared: picking a preset fills its
+  authoritative version path, "Custom" clears it, an unmatched url reads
+  as Custom; hidden for the demo endpoint and anthropic flavor; same on
+  the stt and tts endpoint fields; base url, api key masked inside a <form> with a
   show/hide toggle — the saved-key placeholder is redactKey-masked,
-  never raw — model datalist, free-provider callout) plus an
+  never raw, model combobox, free-provider callout) plus an
   incomplete alert; the test row streams a
-  real one-word completion into a read-only textarea. Voice: tts
+  real one-word completion into a read-only textarea. Test is never
+  disabled by incomplete fields: it re-probes the di server first, then
+  reports a precise localized reason (missing or invalid base url, missing
+  model id, unreachable endpoint per route, http status with upstream
+  detail, in-band sse error, 30s timeout, empty stream) and always names
+  the route it took ("via di server relay" or "browser direct").
+  A stream that carried reasoning but no visible text counts as working
+  with a note. The anthropic flavor posts native `/v1/messages` with
+  x-api-key straight from the browser (the relay forwards only
+  authorization). The llm test builds its model through the llm slice
+  factory (createLlmModel), and the stt and tts endpoint calls use the
+  same relay-or-direct fetch as the llm.
+  The base url is authoritative: only trailing slashes are trimmed, then
+  `/models` and `/chat/completions` are appended; no `/v1` is stripped
+  or injected (zAI `/v4`, google `/v1beta/openai`, openrouter `/api/v1`).
+  The model combobox (model-combobox.tsx, used on the llm, stt and tts
+  tabs) probes `${base}/models` once the
+  section is enabled and a base url parses (600ms debounce, re-run when
+  the server probe settles; the model field always stays free-text).
+  Focus or the chevron opens a positioned listbox with every model
+  (unfiltered until the user types), arrow keys, enter and escape;
+  loading, empty, no-match and error states render inside the list.
+  A failed probe renders its reason in the list and under the model field (http status,
+  "not a model list", "network or CORS", unexpected shape) and, for html
+  or 404 answers, suggests a base url candidate (`/v1`, `/v4`,
+  `/api/v1`) that does serve JSON; the hint is never applied silently.
+  Probes go through the server relay (`/v1/relay`) when the di server is
+  reachable, so keyless gateways (bifrost) and CORS-hostile
+  endpoints (openrouter) still populate; browser-direct on the
+  public site build, which requires a CORS-enabled endpoint. Voice: tts
   layer select mirroring Hearing (same ModelPackFiles block —
   wasm → device pack row, server → di-server pack row — cloud → tts
   endpoint fields) and the test row that synthesizes the localized
   test phrase into a minimal audio player (play/stop + linear
-  progress; speechSynthesis gets an estimated bar). Picks persist to
+  progress; speechSynthesis gets an estimated bar) with the measured
+  synth time ("{ms} ms") beside it. When the server drives tts the test
+  posts `POST /v1/voice/tts-test` so the configured server layer
+  (builtin kitten or remote endpoint) is the one measured; the in-browser
+  layer fails loudly when speechSynthesis or its voices are missing, and
+  a rejected `play()` surfaces as an error toast instead of silence.
+  Setting rows wrap their control under the text below ~48 rem of
+  content width rather than squeezing the player. Picks persist to
   `di.voice.sttEngine`/`di.voice.ttsEngine`; a stored `di.runtime-mode`
   migrates once ("server" → both layers "server").
 - Consent is point-of-need, never silent: `requestVoiceConsent()` arms
@@ -165,9 +217,17 @@ driver otherwise.
   reads `di.voice.modelsInstalled`) + last-op outcomes (voice health
   events, driver onError codes, llm turn results), cleared on next
   success.
-- Tests (per layer): stt test runs the resolved engine on a ~12s mic
-  window (builtin read-aloud or capture→flush for wasm/endpoint);
-  llm test streams a short completion; tts test really synthesizes
+- Tests (per layer): the test row is always rendered for stt, tts and
+  llm, whatever layer is picked. stt test runs the resolved engine on a
+  ~12s mic window (builtin read-aloud or capture→flush for
+  wasm/endpoint); when the di server drives stt (auto or "server") it
+  records ~6s from the selected mic, converts it to a 16k mono pcm16
+  wav and posts `POST /v1/voice/stt-test` (wav, or raw `audio/L16`), so
+  the configured server layer (builtin sherpa or remote whisper)
+  transcribes it; the recognized text, the server-measured "{ms} ms"
+  and the ok/failed status render like the other paths, with typed
+  errors (`stt_model_missing` 409, `stt_failed` 502 carrying the
+  upstream detail). llm test streams a short completion; tts test really synthesizes
   and plays — never a file-presence check.
 - Demo LLM (p2 zero-conf): demo is the default interviewer pick and
   fills the managed endpoint (VITE_DEMO_LLM_* at build time, url never

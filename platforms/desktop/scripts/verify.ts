@@ -3,6 +3,10 @@ import { join, resolve } from "node:path";
 
 import { startControlServer } from "../src/control";
 import { setConfigPath, startServer, stopServer } from "../src/server";
+import {
+  loadFixture,
+  startServer as startMockServer,
+} from "../../../packages/evals/mock-provider/main.ts";
 
 /**
  * Smoke test for the desktop sidecar without the native runtime: seeds a
@@ -57,6 +61,62 @@ const index = await fetch(`http://localhost:${port}/`);
 const indexHtml = await index.text();
 failures += ok("GET / serves SPA index.html", index.ok && indexHtml.includes("<")) ? 0 : 1;
 
+// Relay legs: /v1/relay passthrough against the evals mock provider. The
+// seeded config above points providers at dead endpoints on purpose; the
+// relay takes its upstream from the query, so this leg brings its own mock
+// (in-process, no-cors) when nothing answers on MOCK_PORT (default 9000),
+// and reuses an already-running one (e.g. started by verify-relay.sh).
+const mockPort = Number(process.env.MOCK_PORT ?? 9000);
+const mockBase = `http://localhost:${mockPort}`;
+const mockUp = await fetch(`${mockBase}/v1/models`, { signal: AbortSignal.timeout(1000) })
+  .then((res) => res.ok)
+  .catch(() => false);
+let mockServer: ReturnType<typeof startMockServer> | null = null;
+if (!mockUp) {
+  mockServer = startMockServer(mockPort, undefined, { noCors: true });
+  console.log(`[verify] mock provider on :${mockServer.port}`);
+}
+
+const relayUrl = (upstream: string) =>
+  `http://localhost:${port}/v1/relay?url=${encodeURIComponent(upstream)}`;
+
+const modelsRes = await fetch(relayUrl(`${mockBase}/v1/models`));
+const modelsJson = (await modelsRes.json()) as { data?: { id?: string }[] };
+const expectedModels = [...loadFixture().models].sort();
+const relayedModels = (modelsJson.data ?? []).map((m) => m.id ?? "").sort();
+failures += ok(
+  "relay GET /v1/models matches mock fixture",
+  modelsRes.status === 200 &&
+    relayedModels.length > 0 &&
+    relayedModels.join() === expectedModels.join(),
+)
+  ? 0
+  : 1;
+
+const chatRes = await fetch(relayUrl(`${mockBase}/v1/chat/completions`), {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    model: "mock-llm",
+    messages: [{ role: "user", content: "hi" }],
+    stream: true,
+  }),
+});
+const chatReader = chatRes.body?.getReader();
+const firstChunk = chatReader ? (await chatReader.read()).value : undefined;
+await chatReader?.cancel();
+failures += ok(
+  "relay POST /v1/chat/completions streams first chunk",
+  chatRes.status === 200 && firstChunk !== undefined && firstChunk.length > 0,
+)
+  ? 0
+  : 1;
+
+const ssrfRes = await fetch(relayUrl("file:///etc/passwd"));
+failures += ok("relay rejects file:// url with 400", ssrfRes.status === 400) ? 0 : 1;
+// No authorization-forwarding leg: the mock provider does not echo request
+// headers; that behavior is covered by apps/server routes.test.ts instead.
+
 const { port: controlPort } = startControlServer({
   openExternal: (url) => console.log(`[verify] openExternal ${url}`),
 });
@@ -75,6 +135,8 @@ const stopped = (await (await fetch(`http://localhost:${controlPort}/api/state`)
   running?: boolean;
 };
 failures += ok("stop flips state", stopped.running === false) ? 0 : 1;
+
+mockServer?.stop(true);
 
 console.log(failures === 0 ? "[verify] PASS" : `[verify] ${failures} failure(s)`);
 process.exit(failures === 0 ? 0 : 1);

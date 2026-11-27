@@ -390,12 +390,54 @@ model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
 
 [entries."errors.llm.chat"]
-value = "모델 요청 실패 ({status})"
-source_hash = "ada8036c798d47a2f166adb32a743ba1a1880171"
+value = "모델 요청 실패 ({status}): {detail}"
+source_hash = "81ebbfefcc618641c8990861a0af6b8775350c03"
 origin = "ai"
 reviewed = false
-model = "openrouter/free"
-updated_at = "2026-09-27T20:07:27Z"
+model = "zai-coding-plan/glm-5.3-flash"
+updated_at = "2026-10-15T23:03:57Z"
+
+[entries."errors.llm.empty"]
+value = "엔드포인트가 응답했지만 텍스트를 반환하지 않았습니다. 모델이 토큰을 숨겨진 추론에 모두 사용했을 수 있으니 다른 모델을 시도하세요"
+source_hash = "29a95f5565aa88963979adc1620d648889164bec"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.invalidBaseUrl"]
+value = "기본 URL이 올바른 URL이 아닙니다"
+source_hash = "cf9d95e4fcfe543fd9c21fae03be9d051019890c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.missingBaseUrl"]
+value = "먼저 기본 URL을 입력하세요"
+source_hash = "a02108e299c1932a896aefc73ff0a17e73529c38"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.missingModel"]
+value = "먼저 모델 ID를 입력하세요"
+source_hash = "ffe149ceb9a6162b1f8519db54ebb52300fc5d86"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.network.direct"]
+value = "브라우저가 엔드포인트에 연결하지 못했습니다(네트워크 오류 또는 CORS 차단). 호출을 중계하려면 di 서버를 시작하세요"
+source_hash = "08b6fe3f21788aa96cbc8548701d2a4058eaeee4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.llm.network.relay"]
+value = "di 서버가 엔드포인트에 연결하지 못했습니다"
+source_hash = "4699956240178557582070ed1d0580debca92c1d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."errors.llm.notLoaded"]
 value = "브라우저 내 모델이 아직 로드되지 않았습니다"
@@ -404,6 +446,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
+
+[entries."errors.llm.testTimeout"]
+value = "{seconds}초 안에 응답이 없습니다"
+source_hash = "1ab7c5b0afb12e3bf9dbe180366869fe580074eb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."errors.llm.timeout"]
 value = "모델 로드 시간 초과 ({seconds}s)"
@@ -445,6 +494,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
 
+[entries."errors.models.network"]
+value = "엔드포인트에 연결할 수 없습니다 (네트워크 오류 또는 CORS 차단; di server 또는 데스크톱 앱을 실행해 중계하세요)"
+source_hash = "5cac0197e41e7e59722f81d1d9dbccc777d27ee8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."errors.models.noStorage"]
 value = "음성 모델에 대한 영구 저장 공간이 없습니다"
 source_hash = "89be9ef7b9c66ed29935f0a8d93ab9ce9ea34743"
@@ -453,6 +509,13 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
 
+[entries."errors.models.notJson"]
+value = "엔드포인트가 모델 목록이 아닌 응답을 반환했습니다 (기본 URL을 확인하세요)"
+source_hash = "48e8fb4e83c66e88a6591067915ab12fd1d47851"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."errors.models.sha256"]
 value = "모델 다운로드 검증에 실패했습니다"
 source_hash = "b011b3409272ff04c0bc3d8f8f0d57f9ee965ef6"
@@ -460,6 +523,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
+
+[entries."errors.models.shape"]
+value = "엔드포인트가 모델 목록 없이 응답했습니다 (예상치 못한 응답 형식)"
+source_hash = "d4411f30b99f920b845dc6d9c8748f990b083dd5"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."errors.models.size"]
 value = "모델 다운로드가 잘리었습니다"
@@ -484,6 +554,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
+
+[entries."errors.models.suggest"]
+value = "이 기본 URL에는 모델 목록이 없습니다. 이 주소는 작동합니다: {url}"
+source_hash = "538193be3dda96f22bd7998767fa98647c27dbb8"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."errors.models.ttsEngine"]
 value = "장치 내 음성 모델이 설치되지 않았습니다"
@@ -557,6 +634,20 @@ reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
 
+[entries."errors.stt.server"]
+value = "di server가 음성을 텍스트로 변환하지 못했습니다: {detail}"
+source_hash = "e11aecd004893d55bf6f95ddf9c53c4da3e02a4d"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."errors.stt.serverModelMissing"]
+value = "di server의 음성 인식 모델이 아직 다운로드되지 않았습니다. 위에서 다운로드하세요"
+source_hash = "64522cf01d10a3e5d54dd71549383895ab2fc39f"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."errors.stt.unknown"]
 value = "음성 인식에 실패했습니다"
 source_hash = "347afde221f748a1117e6202ad45931f0f7aa1c9"
@@ -604,6 +695,13 @@ origin = "ai"
 reviewed = false
 model = "openrouter/free"
 updated_at = "2026-09-27T20:07:27Z"
+
+[entries."errors.tts.server"]
+value = "di server가 음성을 합성하지 못했습니다 ({status})"
+source_hash = "1f75fec7882f9f72516e3cf51a278830e1fc0d21"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."errors.tts.wav"]
 value = "예상치 못한 오디오 형식"
@@ -2037,6 +2135,62 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."settings.data.confirmDesc"]
+value = "저장된 모든 면접, 내려받은 음성 모델, 설정, API 키를 이 기기와 di server에서 삭제합니다. 확인하려면 {word}를 입력하세요."
+source_hash = "041b9b72db8d13916157c477257cfd02d976a079"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.confirmLabel"]
+value = "확인 단어"
+source_hash = "60dfd5d472986cb796a3235a73310f241a254273"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.confirmTitle"]
+value = "모두 초기화할까요?"
+source_hash = "847d66c2fdef644b3f4401233639c6b7d7acf6aa"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.confirmWord"]
+value = "초기화"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.reset"]
+value = "모두 초기화"
+source_hash = "2f51eae0fa732f647ac64d429bcebadb7c595dd6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.resetButton"]
+value = "초기화"
+source_hash = "91ef0c1608b20c9c5bd9e003bbb600229c0dfeb1"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.resetDesc"]
+value = "모든 면접, 음성 모델, 설정, 키를 삭제하고 처음부터 시작합니다. 되돌릴 수 없습니다."
+source_hash = "f5132198a1cd9432ff8ffe1d2205893e6b4efeb6"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.data.resetDo"]
+value = "모두 삭제"
+source_hash = "b8f9c64b1250fd8ac3a4b4af0a3b37e179a46ec4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."settings.demoLlm.badge"]
 value = "데모"
 source_hash = "89e495e7941cf9e40e6980d14a16bf023ccd4c91"
@@ -2268,13 +2422,6 @@ origin = "human"
 reviewed = false
 updated_at = "2026-10-08T11:17:56Z"
 
-[entries."settings.layer.serverOwned"]
-value = "데스크톱 앱에서 처리 — 이 레이어는 거기서 실행"
-source_hash = "4212c88be5d521fc218576da0749196d382dd480"
-origin = "human"
-reviewed = false
-updated_at = "2026-10-08T11:17:56Z"
-
 [entries."settings.layer.serverUnreachable"]
 value = "데스크톱 앱에 연결할 수 없음 — 이 레이어는 브라우저로 대체"
 source_hash = "46b170e879b1cdbbd5dbaa2a3e8be8b164444cea"
@@ -2492,6 +2639,41 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."settings.modelsEmpty"]
+value = "이 엔드포인트가 모델을 반환하지 않았습니다"
+source_hash = "78dae7a488e2b144cfaeb76298706083371c7615"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.modelsIdle"]
+value = "기본 URL을 입력하면 모델 목록을 볼 수 있습니다"
+source_hash = "1ee05682fedc1dd3e158212c5bb2bb211806db15"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.modelsLoading"]
+value = "모델을 불러오는 중..."
+source_hash = "f14087ac89d4bbe95da0cd76b671e31adfa50146"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.modelsNoMatch"]
+value = "목록에 일치하는 모델이 없습니다. 입력한 텍스트가 그대로 사용됩니다"
+source_hash = "83777eca4e6029b3465010f9572e0fd62b8e946c"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.modelsToggle"]
+value = "모델 보기"
+source_hash = "cd3000ff3c2cf4b2232315bd8bbfe83f5ee341a3"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."settings.nav.advanced"]
 value = "고급"
 source_hash = "e62854369199d65b6a66cd90fe8203ac4d5be26c"
@@ -2505,6 +2687,13 @@ source_hash = "e924e62211be65b4dcbb861f68cca3a1eb2ccadc"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
+
+[entries."settings.nav.data"]
+value = "데이터"
+source_hash = "a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."settings.nav.downloads"]
 value = "다운로드"
@@ -2547,6 +2736,27 @@ source_hash = "abcded012f75a418e86f9cd2d2b53aeeff13d972"
 origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
+
+[entries."settings.preset"]
+value = "제공자"
+source_hash = "7ceee3f3615a2bbe4ce0ac5a269a311e4821daf4"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.presetCustom"]
+value = "사용자 지정"
+source_hash = "081ae3fdc403609cf6e760849ebb14117b7a50cb"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.presetHelp"]
+value = "제공자를 선택하면 기본 URL이 채워집니다. 직접 입력한 URL을 유지해도 됩니다."
+source_hash = "5128e275bedcd02e367f704b1781debde054607e"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."settings.section.brain"]
 value = "브레인"
@@ -2892,6 +3102,27 @@ origin = "human"
 reviewed = false
 updated_at = "2026-09-27T19:24:55Z"
 
+[entries."settings.testOkReasoning"]
+value = "정상 작동 (모델이 토큰을 추론에 모두 사용해 표시할 텍스트를 반환하지 않았습니다)"
+source_hash = "864b453481a7c55b3492384bc73a0c7c26829887"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.testRoute.direct"]
+value = "브라우저 직접 연결"
+source_hash = "5cb5aa715a6f7975d605a2de827850d270e83105"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
+[entries."settings.testRoute.relay"]
+value = "di 서버 릴레이 경유"
+source_hash = "654ae06a03b04d934050ce4a68d336c13e5a7a20"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
+
 [entries."settings.testing"]
 value = "Testing…"
 source_hash = "95c4564a945f8629effca0f3e8ea4ecfcc4e035f"
@@ -3003,6 +3234,13 @@ source_hash = "ddca427f636757e6408878b87bed044e23130b17"
 origin = "human"
 reviewed = false
 updated_at = "2026-10-08T13:35:00Z"
+
+[entries."settings.voice.sampleMs"]
+value = "{ms} ms"
+source_hash = "c965f5d6d35d31a721ce12466cf058663f5beecf"
+origin = "human"
+reviewed = false
+updated_at = "2026-10-15T23:03:53Z"
 
 [entries."settings.voice.stt"]
 value = "말을 알아듣는 방식"

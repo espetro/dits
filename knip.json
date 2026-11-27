@@ -10,6 +10,8 @@
     "apps/server/src/voice/builtin/tts-worker.ts",
     "build/release.ts",
     "build/vendor-voice.ts",
+    "packages/evals/bench/browser.ts",
+    "packages/evals/bench/voice.ts",
     "packages/evals/src/spike-sqlite-vec.ts",
     "platforms/desktop/electrobun.config.ts",
     "scripts/check-agents-md-length.ts",

@@ -18,24 +18,22 @@ import { $micDeviceId } from "../stores/devices";
 import { $voiceModelsConsent, $voiceSttEngine, requestVoiceConsent } from "../stores/voice";
 import type { SttLayerPick } from "../stores/voice";
 import { resolveInstalledVoiceEngines } from "../lib/voice/engines";
-import { WasmStt } from "../lib/voice/wasm-engines";
-import { EndpointStt } from "../lib/voice/endpoint-stt";
-import { hasBrowserStt, startEngineSttTest, startLiveStt } from "../lib/settings-tests";
+import {
+  EndpointStt,
+  WasmStt,
+  hasBrowserStt,
+  startEngineSttTest,
+  startLiveStt,
+  startServerSttTest,
+} from "../lib/stt";
 import { codeMessage, errorDetail } from "../lib/errors";
 import { markSeamOp } from "../lib/seam-health";
 
 interface TestState {
   status: "idle" | "running" | "ok" | "err";
   message?: string;
-}
-
-/** the di server's .cpp pipeline owns the seam — nothing to test here */
-function ServerOwnedNote() {
-  return (
-    <p className="pb-2 pl-1 text-xs text-muted-foreground">
-      <FormattedMessage id="settings.layer.serverOwned" />
-    </p>
-  );
+  /** server-measured transcribe time (server layer only) */
+  ms?: number;
 }
 
 /**
@@ -91,8 +89,32 @@ export function HearingSection() {
     setTest({ status: "running" });
     setOutput("");
     void liveTest.current?.stop();
-    const engines = await resolveInstalledVoiceEngines();
     try {
+      if (serverTest) {
+        // the di server owns stt: record a sample and have it transcribe
+        liveTest.current = await startServerSttTest({
+          deviceId: micDeviceId || undefined,
+          onResult: ({ text, ms }) => {
+            liveTest.current = null;
+            setOutput(text);
+            markResult(
+              text.trim()
+                ? { status: "ok", ms }
+                : {
+                    status: "err",
+                    message: intl.formatMessage({ id: "settings.stt.noSpeech" }),
+                    ms,
+                  },
+            );
+          },
+          onError: (err) => {
+            liveTest.current = null;
+            markResult({ status: "err", message: errorDetail(intl, err) });
+          },
+        });
+        return;
+      }
+      const engines = await resolveInstalledVoiceEngines();
       if (engines.stt === "builtin") {
         if (!hasBrowserStt())
           throw new Error(intl.formatMessage({ id: "settings.test.unsupported" }));
@@ -222,78 +244,76 @@ export function HearingSection() {
         </p>
       )}
 
-      {serverTest ? (
-        <ServerOwnedNote />
-      ) : (
-        <>
-          <SettingsRow
-            title={intl.formatMessage({ id: "settings.test" })}
-            description={intl.formatMessage({ id: "settings.stt.readHelp" })}
+      <>
+        <SettingsRow
+          title={intl.formatMessage({ id: "settings.test" })}
+          description={intl.formatMessage({ id: "settings.stt.readHelp" })}
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void runTest()}
+            disabled={test.status === "running"}
+            aria-busy={test.status === "running"}
           >
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void runTest()}
-              disabled={test.status === "running"}
-              aria-busy={test.status === "running"}
-            >
-              {test.status === "running" ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                  <FormattedMessage id="settings.stt.listening" />
-                </>
-              ) : (
-                <FormattedMessage id="settings.voice.testCta" />
-              )}
-            </Button>
-          </SettingsRow>
-          {(test.status === "running" || output) && (
-            <div className="space-y-2 pb-2 pl-1">
-              <LiveWaveform
-                active={test.status === "running"}
-                deviceId={micDeviceId || undefined}
-                mode="static"
-                height={20}
-                barWidth={3}
-                barGap={1}
-                className="w-40 overflow-hidden rounded-md bg-accent p-1.5"
-              />
-              <Textarea
-                readOnly
-                value={output}
-                placeholder={intl.formatMessage({ id: "settings.stt.readPlaceholder" })}
-                rows={2}
-                className="resize-none bg-white text-sm"
-                aria-label={intl.formatMessage({ id: "settings.stt.readTitle" })}
-              />
-            </div>
-          )}
-          {test.status === "ok" || test.status === "err" ? (
-            <span
-              role="status"
-              className={
-                "flex items-center gap-1 pb-2 pl-1 text-xs " +
-                (test.status === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600")
-              }
-            >
-              {test.status === "ok" ? (
-                <Check className="size-3.5" aria-hidden="true" />
-              ) : (
-                <X className="size-3.5" aria-hidden="true" />
-              )}
-              {test.status === "ok" ? (
-                <FormattedMessage id="settings.testOk" />
-              ) : (
-                <FormattedMessage
-                  id="settings.testFailed"
-                  values={{ message: test.message ?? "" }}
-                />
-              )}
-            </span>
-          ) : null}
-        </>
-      )}
+            {test.status === "running" ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                <FormattedMessage id="settings.stt.listening" />
+              </>
+            ) : (
+              <FormattedMessage id="settings.voice.testCta" />
+            )}
+          </Button>
+        </SettingsRow>
+        {(test.status === "running" || output) && (
+          <div className="space-y-2 pb-2 pl-1">
+            <LiveWaveform
+              active={test.status === "running"}
+              deviceId={micDeviceId || undefined}
+              mode="static"
+              height={20}
+              barWidth={3}
+              barGap={1}
+              className="w-40 overflow-hidden rounded-md bg-accent p-1.5"
+            />
+            <Textarea
+              readOnly
+              value={output}
+              placeholder={intl.formatMessage({ id: "settings.stt.readPlaceholder" })}
+              rows={2}
+              className="resize-none bg-white text-sm"
+              aria-label={intl.formatMessage({ id: "settings.stt.readTitle" })}
+            />
+          </div>
+        )}
+        {test.status === "ok" || test.status === "err" ? (
+          <span
+            role="status"
+            className={
+              "flex items-center gap-1 pb-2 pl-1 text-xs " +
+              (test.status === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600")
+            }
+          >
+            {test.status === "ok" ? (
+              <Check className="size-3.5" aria-hidden="true" />
+            ) : (
+              <X className="size-3.5" aria-hidden="true" />
+            )}
+            {test.status === "ok" ? (
+              <FormattedMessage id="settings.testOk" />
+            ) : (
+              <FormattedMessage id="settings.testFailed" values={{ message: test.message ?? "" }} />
+            )}
+            {test.ms !== undefined && (
+              <span className="tabular-nums text-muted-foreground">
+                <FormattedMessage id="settings.voice.sampleMs" values={{ ms: test.ms }} />
+              </span>
+            )}
+          </span>
+        ) : null}
+      </>
     </div>
   );
 }

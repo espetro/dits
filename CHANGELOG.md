@@ -24,6 +24,12 @@ former Python/LiveKit codebase and are kept as upstream history.
   agent kickoff, question tracking, transcript hydration on reload, and a
   finish screen that auto-builds the report. The health probe requires the
   API's real payload so static deploys resolve to browser mode.
+- **Server relay for provider calls.** A generic `ANY /v1/relay?url=` streaming
+  passthrough on the di server carries browser provider traffic (model probes,
+  chat completions) same-origin, so CORS-hostile or keyless endpoints
+  (openrouter, bifrost) now populate the Settings Model ID dropdown and stream
+  chat wherever the di server is reachable. The public site build keeps
+  browser-direct fetching for CORS-enabled endpoints.
 - **Restructured UI.** Scenario-card setup (narrative + goals + toolset),
   optional validate step, AgentStage/ControlBar/ToolDock interview layout,
   transcript demoted to rail, history as a settings pane, coach unlocked by

@@ -9,6 +9,8 @@ message: >
 files:
   - "apps/web/src/lib/agent/**/*.ts"
   - "apps/web/src/lib/voice/**/*.ts"
+  - "apps/web/src/lib/tts/**/*.ts"
+  - "apps/web/src/lib/stt/**/*.ts"
 rule:
   pattern: "() => undefined"
   inside:

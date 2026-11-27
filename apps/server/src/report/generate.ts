@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { ReportSchema, buildReportPrompt } from "@di/shared/report";
 import type { Report, ReportPromptContext } from "@di/shared";
-import type { LlmMessage, LlmResult } from "../voice/llm";
+import type { LlmMessage, LlmResult } from "../voice/llm/port";
 
 /**
  * Narrow port for report generation. `streamChat` is preferred: some

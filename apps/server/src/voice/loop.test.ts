@@ -165,7 +165,9 @@ describe("VoiceLoop", () => {
     expect(m.total_ms).toBeGreaterThanOrEqual(0);
     expect(m.stt_ms).toBeGreaterThanOrEqual(0);
     expect(m.llm_ttft_ms).toBeGreaterThanOrEqual(0);
+    // a duration, never an absolute Date.now() stamp
     expect(m.first_audio_ms).toBeGreaterThanOrEqual(0);
+    expect(m.first_audio_ms).toBeLessThanOrEqual(m.total_ms);
     expect(m.vad_ms).toBeGreaterThanOrEqual(0);
     const events = await db.selectFrom("events").selectAll().execute();
     const ev = events.find((e) => e.type === "turn.metrics");

@@ -9,7 +9,7 @@ import { defaultFilesDir } from "@di/server/config/load";
  * which is where this file lives too (db/log/data sit next to the config).
  */
 const SEED_CONFIG = `# di. desktop config (seeded on first run).
-# Point llm/stt/tts at your providers — any OpenAI-compatible endpoint works
+# Point llm at your provider — any OpenAI-compatible endpoint works
 # (llm also accepts provider: anthropic for the native /v1/messages wire).
 # Env overrides follow DI_<SECTION>__<KEY>, e.g. DI_LLM__API_KEY.
 # See config.example.yaml in the repo for the full option set.
@@ -24,17 +24,25 @@ llm:
   # api_key: sk-...
   model: gpt-5-mini
 
+# voice runs on the bundled wasm engines (no keys, models download on first
+# use). To use a hosted provider instead, swap in e.g.:
+#   stt:
+#     provider: remote
+#     base_url: https://api.openai.com/v1
+#     # api_key: sk-...
+#     model: whisper-1
+#     mode: buffered
+#   tts:
+#     provider: remote
+#     base_url: https://api.openai.com/v1
+#     # api_key: sk-...
+#     model: tts-1
+#     voice: alloy
 stt:
-  base_url: https://api.openai.com/v1
-  # api_key: sk-...
-  model: whisper-1
-  mode: buffered
+  provider: builtin
 
 tts:
-  base_url: https://api.openai.com/v1
-  # api_key: sk-...
-  model: tts-1
-  voice: alloy
+  provider: builtin
 
 # optional: enables document ingestion (RAG). omit to disable file uploads.
 # embeddings:

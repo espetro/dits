@@ -1,3 +1,5 @@
+import { createResetFlow } from "./resetflow";
+
 /**
  * Dashboard markup for the control shell. Uses the app's design system
  * (theme.css tokens: cream ground, espresso ink, persimmon accent, Fraunces
@@ -214,6 +216,15 @@ export function dashboardHtml(): string {
     word-break: break-all;
     user-select: text;
   }
+  button.danger {
+    background: #c0392b;
+    color: var(--cream);
+    border-color: #c0392b;
+  }
+  button.danger:hover:not(:disabled) { background: #a02e22; border-color: #a02e22; }
+  .reset { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+  .reset .actions { margin: 8px 0 4px; }
+  #resetmsg { font-size: 12.5px; color: var(--espresso-soft); min-height: 20px; }
   button.copy {
     padding: 3px 10px;
     font-size: 11px;
@@ -232,6 +243,14 @@ export function dashboardHtml(): string {
       <button id="open" class="primary">open di →</button>
     </div>
     <div id="err"></div>
+    <div class="reset">
+      <span class="microlabel">danger zone</span>
+      <div class="actions">
+        <button id="reset" class="danger">reset all data…</button>
+        <button id="resetcancel" hidden>cancel</button>
+      </div>
+      <div id="resetmsg"></div>
+    </div>
     <details id="logpanel">
       <summary><span class="chev">▸</span><span class="microlabel">server log (<span id="logcount">0</span>)</span></summary>
       <div class="logpath"><span class="microlabel">saved to</span><code id="logpath">–</code><button id="copylog" class="copy">copy</button></div>
@@ -276,6 +295,21 @@ export function dashboardHtml(): string {
   }
 
   $("open").onclick = () => post("open");
+
+  // two-step destructive reset; state machine lives in resetflow.ts
+  const createResetFlow = ${createResetFlow.toString()};
+  const resetFlow = createResetFlow({
+    fetch: (path, init) => fetch(path, init),
+    render: (v) => {
+      $("reset").textContent = v.label;
+      $("reset").disabled = v.disabled;
+      $("resetcancel").hidden = v.cancelHidden;
+      $("resetmsg").textContent = v.message;
+    },
+    afterReset: refresh,
+  });
+  $("resetcancel").onclick = () => resetFlow.cancel();
+  $("reset").onclick = () => resetFlow.click();
   $("copylog").onclick = async () => {
     if (!lastLogPath) return;
     try {
