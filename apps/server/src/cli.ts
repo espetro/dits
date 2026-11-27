@@ -1,10 +1,12 @@
 import { parseArgs } from "node:util";
 import { existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { DEFAULT_SERVER_HOST } from "@di/shared";
 import { createDatabase, migrate, ping } from "./store/db";
 import { ConfigError, loadConfig } from "./config/load";
 import { probeProviders } from "./check/probe";
 import { createApp, serveApp } from "./api/app";
+import { serverExposureError } from "./security";
 import { sttProviderOf, ttsProviderOf } from "./voice/providers";
 import {
   builtinModelsStatus,
@@ -37,6 +39,12 @@ export async function main(argv: string[]): Promise<number> {
   }
   console.log(`[di] config ok (${configPath})`);
 
+  const exposureError = serverExposureError(config);
+  if (exposureError) {
+    console.error(exposureError);
+    return 1;
+  }
+
   if (values.check) {
     return check(config, configPath);
   }
@@ -64,8 +72,10 @@ export async function main(argv: string[]): Promise<number> {
   if (sttProviderOf(config.stt) === "builtin" || ttsProviderOf(config.tts) === "builtin") {
     warmBuiltinModels(config);
   }
+  const bindHost = config.server.host ?? DEFAULT_SERVER_HOST;
+  const displayHost = bindHost.includes(":") ? `[${bindHost}]` : bindHost;
   console.log(
-    `[di] listening on http://localhost:${config.server.port}${testMode ? " (test mode)" : ""}`,
+    `[di] listening on http://${displayHost}:${config.server.port}${testMode ? " (test mode)" : ""}`,
   );
 
   const shutdown = async () => {

@@ -68,11 +68,111 @@ export const TtsSchema = v.object({
 });
 export type Tts = v.InferOutput<typeof TtsSchema>;
 
+/** Loopback bind used when server.host is omitted. */
+export const DEFAULT_SERVER_HOST = "127.0.0.1";
+
+const HOSTNAME_RE =
+  /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.?$/i;
+
+function isValidIpv4(value: string): boolean {
+  const parts = value.split(".");
+  if (parts.length !== 4) return false;
+  return parts.every((part) => {
+    if (!/^\d{1,3}$/.test(part) || (part.length > 1 && part.startsWith("0"))) return false;
+    return Number(part) <= 255;
+  });
+}
+
+function isValidIpv6(value: string): boolean {
+  if (!/^[0-9a-f:.]+$/i.test(value)) return false;
+  if ((value.match(/::/g) ?? []).length > 1) return false;
+  const hasIpv4Tail = value.includes(".");
+  const compressed = value.split("::");
+  if (compressed.length > 2) return false;
+
+  const validateHexParts = (parts: string[]): boolean =>
+    parts.every((part) => /^[0-9a-f]{1,4}$/i.test(part));
+
+  if (compressed.length === 2) {
+    const left = compressed[0] ? compressed[0]!.split(":") : [];
+    const rightWithTail = compressed[1] ? compressed[1]!.split(":") : [];
+    const right = hasIpv4Tail ? rightWithTail.slice(0, -1) : rightWithTail;
+    if (hasIpv4Tail && !isValidIpv4(rightWithTail[rightWithTail.length - 1] ?? "")) {
+      return false;
+    }
+    if (!validateHexParts(left) || !validateHexParts(right)) return false;
+    return left.length + right.length + (hasIpv4Tail ? 2 : 0) < 8;
+  }
+
+  const parts = value.split(":");
+  const hexParts = hasIpv4Tail ? parts.slice(0, -1) : parts;
+  if (hasIpv4Tail && !isValidIpv4(parts[parts.length - 1] ?? "")) return false;
+  if (!validateHexParts(hexParts)) return false;
+  return hexParts.length + (hasIpv4Tail ? 2 : 0) === 8;
+}
+
+/** Bind hosts are bare hostnames or IPs: no scheme, port, userinfo, or IPv6 brackets. */
+function isValidServerHost(host: string): boolean {
+  if (host.length === 0 || host.length > 253 || host !== host.trim() || /\s/.test(host)) {
+    return false;
+  }
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return isValidIpv4(host);
+  if (host.includes(":")) return isValidIpv6(host);
+  return HOSTNAME_RE.test(host);
+}
+
+function isHttpOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      !url.username &&
+      !url.password &&
+      url.pathname === "/" &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Explicit cross-origin dev servers trusted by this di server. yaml uses an
+ * array; env overrides can use the comma-separated string form.
+ */
+const DevOriginsSchema = v.pipe(
+  v.union([v.array(v.string()), v.string()]),
+  v.transform((value) =>
+    typeof value === "string"
+      ? value
+          .split(",")
+          .map((origin) => origin.trim())
+          .filter(Boolean)
+      : value,
+  ),
+  v.array(v.pipe(v.string(), v.url(), v.check(isHttpOrigin, "must be an http(s) origin"))),
+);
+
 export const ConfigSchema = v.object({
   server: v.object({
     port: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(65535)),
-    /** auth middleware stub; inert in v1 */
+    /** Bind host. Omitted means loopback-only (127.0.0.1). */
+    host: v.optional(
+      v.pipe(
+        v.string(),
+        v.check(
+          isValidServerHost,
+          "server.host must be a hostname or IP address, without scheme, port, or IPv6 brackets",
+        ),
+      ),
+    ),
+    /** Bearer-token auth for /v1 REST and the voice websocket when enabled. */
     auth: v.optional(v.picklist(["none", "token"]), "none"),
+    /** High-entropy shared secret used when server.auth is token. Never logged. */
+    token: v.optional(v.pipe(v.string(), v.regex(/^\S{16,}$/))),
+    /** Extra browser origins allowed for local development; empty by default. */
+    dev_origins: v.optional(DevOriginsSchema),
   }),
   llm: ProviderSchema,
   /** Voice engines. Omitted sections resolve to the bundled wasm engines. */
