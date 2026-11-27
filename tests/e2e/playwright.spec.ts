@@ -216,10 +216,8 @@ test.describe("text mode (di server)", () => {
   }) => {
     const interview = interviewPage(page);
     const id = await interview.start();
-    // Typing before the ws driver reaches connected falls back to a REST-only
-    // durable write that never reaches the agent. Wait for the live status so
-    // the golden path exercises the real ws turn pipeline.
-    await expect(page.getByText("listening").first()).toBeVisible({ timeout: 10_000 });
+    // Type immediately after navigation: the driver queues the input while
+    // the voice ws/capture pipeline is still connecting, then flushes it.
     await interview.say("hello server golden path");
 
     // The server voice loop consumes the typed turn over WS, calls the mock

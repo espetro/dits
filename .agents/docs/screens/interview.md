@@ -123,9 +123,12 @@ mobile) stacks, top to bottom:
 - **Nothing scrolls at page level** on any viewport — only the transcript and
   tool panes scroll internally (`document.scrollHeight <= innerHeight` at
   1440x900 and 390x844).
-- Typed turns are unchanged: `PromptInput` submit -> `voice.sendText` (ws
-  `{t:"text"}`, same pipeline as speech) when connected or client-only, else
-  `POST /v1/sessions/:id/turns` as the degraded-path write.
+- Typed turns: `PromptInput` submit -> `voice.sendText` (ws `{t:"text"}`,
+  same pipeline as speech) when client-only, connected, connecting or
+  reconnecting. The server driver queues input submitted before the socket
+  pipeline finishes connecting and flushes it on connect. When voice is idle
+  or errored, submit uses `POST /v1/sessions/:id/turns` as the degraded-path
+  write.
 - **Back-guard**: while the interview is in progress, browser back/close
   fires a confirm (`beforeunload` + router blocker). Inert once ended.
 - Voice wiring is unchanged: WebSocket + Web Audio, 16k PCM16 capture, Silero

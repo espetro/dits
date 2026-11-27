@@ -348,7 +348,12 @@ function InterviewLive({ id, clientOnly }: { id: string; clientOnly: boolean }) 
     if (!t) return;
     // typed turns reach the agent: ws message when voice is up (both modes),
     // durable REST write only as a degraded-path fallback in server mode.
-    if (clientOnly || voice.status === "connected") {
+    if (
+      clientOnly ||
+      voice.status === "connected" ||
+      voice.status === "connecting" ||
+      voice.status === "reconnecting"
+    ) {
       voice.sendText(t);
     } else {
       await postTextTurn(id, t);
