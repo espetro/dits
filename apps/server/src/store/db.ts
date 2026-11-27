@@ -47,6 +47,14 @@ export interface DbSchema {
     state: string;
     updated_at: string;
   };
+  provider_settings: {
+    /** singleton row; always 1 */
+    id: number;
+    /** JSON ServerProviderSettings (internal write-only secrets shape). */
+    settings: string;
+    created_at: string;
+    updated_at: string;
+  };
   documents: {
     id: string;
     session_id: string;
@@ -104,6 +112,12 @@ const MIGRATIONS = [
     state TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL,
     PRIMARY KEY (session_id, tool)
+  )`,
+  `CREATE TABLE IF NOT EXISTS provider_settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    settings TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
   )`,
   `CREATE TABLE IF NOT EXISTS reports (
     session_id TEXT PRIMARY KEY REFERENCES sessions(id),
